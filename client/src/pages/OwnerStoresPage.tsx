@@ -105,12 +105,20 @@ export function OwnerStoresPage() {
           <Typography variant="h4" component="h1">
             내 매장 목록
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            매장 추가
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/owner/terminal')}
+            >
+              승인 터미널
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              매장 추가
+            </Button>
+          </Box>
         </Box>
 
         {stores && stores.length === 0 ? (

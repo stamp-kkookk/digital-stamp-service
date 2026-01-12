@@ -149,6 +149,7 @@ export function CustomerLandingPage() {
             fullWidth
             sx={{ py: 1.5 }}
             disabled={!stampCard}
+            onClick={() => navigate(`/s/${storeId}/request`)}
           >
             스탬프 적립하기
           </Button>
@@ -167,10 +168,6 @@ export function CustomerLandingPage() {
           </Button>
         </Box>
 
-        {/* 안내 메시지 */}
-        <Alert severity="info" sx={{ mt: 3 }}>
-          스탬프 적립 기능은 추후 구현 예정입니다.
-        </Alert>
       </Box>
     </Container>
   );
