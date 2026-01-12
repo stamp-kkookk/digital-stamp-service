@@ -12,6 +12,7 @@ import { OwnerRegisterPage } from './pages/OwnerRegisterPage';
 import { OwnerStoresPage } from './pages/OwnerStoresPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import { StoreQRPage } from './pages/StoreQRPage';
+import { CustomerLandingPage } from './pages/CustomerLandingPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,11 @@ function AppContent() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
+
+          {/* Customer Routes */}
+          <Route path="/s/:storeId" element={<CustomerLandingPage />} />
+
+          {/* Owner Routes */}
           <Route path="/owner/login" element={<OwnerLoginPage />} />
           <Route path="/owner/register" element={<OwnerRegisterPage />} />
           <Route path="/owner/stores" element={<OwnerStoresPage />} />
