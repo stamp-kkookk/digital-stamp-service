@@ -1,0 +1,13 @@
+# Temporary files
+tmpclaude-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
