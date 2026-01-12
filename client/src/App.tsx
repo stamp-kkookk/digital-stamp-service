@@ -13,6 +13,9 @@ import { OwnerStoresPage } from './pages/OwnerStoresPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
 import { StoreQRPage } from './pages/StoreQRPage';
 import { CustomerLandingPage } from './pages/CustomerLandingPage';
+import WalletRegisterPage from './pages/WalletRegisterPage';
+import WalletAccessPage from './pages/WalletAccessPage';
+import WalletHomePage from './pages/WalletHomePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +41,9 @@ function AppContent() {
 
           {/* Customer Routes */}
           <Route path="/s/:storeId" element={<CustomerLandingPage />} />
+          <Route path="/wallet/register" element={<WalletRegisterPage />} />
+          <Route path="/wallet/access" element={<WalletAccessPage />} />
+          <Route path="/wallet/home" element={<WalletHomePage />} />
 
           {/* Owner Routes */}
           <Route path="/owner/login" element={<OwnerLoginPage />} />

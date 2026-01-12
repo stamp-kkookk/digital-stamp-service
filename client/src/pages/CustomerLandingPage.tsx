@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Container,
@@ -16,6 +16,7 @@ import { publicApi } from '../api/public';
 
 export function CustomerLandingPage() {
   const { storeId } = useParams<{ storeId: string }>();
+  const navigate = useNavigate();
 
   const { data: store, isLoading: storeLoading, error: storeError } = useQuery({
     queryKey: ['public', 'store', storeId],
@@ -157,7 +158,10 @@ export function CustomerLandingPage() {
             size="large"
             fullWidth
             sx={{ py: 1.5 }}
-            disabled
+            onClick={() => {
+              const hasWallet = localStorage.getItem('walletSessionToken');
+              navigate(hasWallet ? '/wallet/home' : '/wallet/register');
+            }}
           >
             내 스탬프 확인하기
           </Button>
@@ -165,7 +169,7 @@ export function CustomerLandingPage() {
 
         {/* 안내 메시지 */}
         <Alert severity="info" sx={{ mt: 3 }}>
-          스탬프 적립 및 확인 기능은 추후 구현 예정입니다.
+          스탬프 적립 기능은 추후 구현 예정입니다.
         </Alert>
       </Box>
     </Container>
