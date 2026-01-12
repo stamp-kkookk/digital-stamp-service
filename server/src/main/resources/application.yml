@@ -21,6 +21,12 @@ spring:
       hibernate:
         format_sql: true
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 server:
   port: 8080
 
@@ -28,3 +34,5 @@ app:
   jwt:
     secret: kkookk-jwt-secret-key-change-this-in-production-environment-to-a-secure-value
     expiration: 86400000  # 24 hours in milliseconds
+  upload:
+    dir: uploads
