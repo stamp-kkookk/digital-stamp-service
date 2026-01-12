@@ -11,6 +11,7 @@ import { OwnerLoginPage } from './pages/OwnerLoginPage';
 import { OwnerRegisterPage } from './pages/OwnerRegisterPage';
 import { OwnerStoresPage } from './pages/OwnerStoresPage';
 import { StoreDetailPage } from './pages/StoreDetailPage';
+import { StoreQRPage } from './pages/StoreQRPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ function AppContent() {
           <Route path="/owner/register" element={<OwnerRegisterPage />} />
           <Route path="/owner/stores" element={<OwnerStoresPage />} />
           <Route path="/owner/stores/:storeId" element={<StoreDetailPage />} />
+          <Route path="/owner/stores/:storeId/qr" element={<StoreQRPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>

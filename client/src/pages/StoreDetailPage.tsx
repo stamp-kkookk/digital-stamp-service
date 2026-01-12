@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +38,7 @@ type CreateStampCardFormData = z.infer<typeof createStampCardSchema>;
 
 export function StoreDetailPage() {
   const { storeId } = useParams<{ storeId: string }>();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -118,9 +119,17 @@ export function StoreDetailPage() {
         </Typography>
 
         <Paper sx={{ p: 3, mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            매장 정보
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">
+              매장 정보
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/owner/stores/${storeId}/qr`)}
+            >
+              QR 코드 출력
+            </Button>
+          </Box>
           <Divider sx={{ mb: 2 }} />
 
           {store.description && (
