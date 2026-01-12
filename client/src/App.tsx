@@ -8,6 +8,8 @@ import { setupErrorInterceptor } from './api/client';
 import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { OwnerLoginPage } from './pages/OwnerLoginPage';
+import { OwnerRegisterPage } from './pages/OwnerRegisterPage';
+import { OwnerStoresPage } from './pages/OwnerStoresPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +33,8 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/owner/login" element={<OwnerLoginPage />} />
+          <Route path="/owner/register" element={<OwnerRegisterPage />} />
+          <Route path="/owner/stores" element={<OwnerStoresPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
