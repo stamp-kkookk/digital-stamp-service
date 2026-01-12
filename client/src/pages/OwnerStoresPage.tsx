@@ -113,6 +113,12 @@ export function OwnerStoresPage() {
               승인 터미널
             </Button>
             <Button
+              variant="outlined"
+              onClick={() => navigate('/owner/migration')}
+            >
+              마이그레이션 관리
+            </Button>
+            <Button
               variant="contained"
               onClick={() => setCreateDialogOpen(true)}
             >

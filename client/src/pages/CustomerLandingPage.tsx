@@ -166,6 +166,16 @@ export function CustomerLandingPage() {
           >
             내 스탬프 확인하기
           </Button>
+
+          <Button
+            variant="text"
+            size="large"
+            fullWidth
+            sx={{ py: 1.5 }}
+            onClick={() => navigate(`/migration/${storeId}`)}
+          >
+            종이 스탬프 이전하기
+          </Button>
         </Box>
 
       </Box>

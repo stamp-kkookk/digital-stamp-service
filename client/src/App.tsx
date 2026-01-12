@@ -21,6 +21,8 @@ import IssuanceWaitPage from './pages/IssuanceWaitPage';
 import OwnerTerminalPage from './pages/OwnerTerminalPage';
 import MyRewardsPage from './pages/MyRewardsPage';
 import RedemptionPage from './pages/RedemptionPage';
+import StampMigrationPage from './pages/StampMigrationPage';
+import OwnerMigrationPage from './pages/OwnerMigrationPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +55,7 @@ function AppContent() {
           <Route path="/wallet/home" element={<WalletHomePage />} />
           <Route path="/wallet/rewards" element={<MyRewardsPage />} />
           <Route path="/redemption/:rewardId" element={<RedemptionPage />} />
+          <Route path="/migration/:storeId" element={<StampMigrationPage />} />
 
           {/* Owner Routes */}
           <Route path="/owner/login" element={<OwnerLoginPage />} />
@@ -61,6 +64,7 @@ function AppContent() {
           <Route path="/owner/stores/:storeId" element={<StoreDetailPage />} />
           <Route path="/owner/stores/:storeId/qr" element={<StoreQRPage />} />
           <Route path="/owner/terminal" element={<OwnerTerminalPage />} />
+          <Route path="/owner/migration" element={<OwnerMigrationPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
