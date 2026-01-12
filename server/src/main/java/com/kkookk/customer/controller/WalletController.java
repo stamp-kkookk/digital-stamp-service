@@ -48,4 +48,17 @@ public class WalletController {
         WalletResponse response = walletService.accessWallet(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/otp/step-up")
+    public ResponseEntity<OtpResponse> verifyStepUpOtp(
+            @RequestHeader("X-Wallet-Session") String sessionToken,
+            @Valid @RequestBody StepUpOtpRequest request) {
+
+        otpService.verifyOtpForStepUp(sessionToken, request.getOtpCode());
+
+        return ResponseEntity.ok(OtpResponse.builder()
+                .success(true)
+                .message("Step-up 인증이 완료되었습니다.")
+                .build());
+    }
 }

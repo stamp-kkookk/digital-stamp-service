@@ -1,7 +1,9 @@
 package com.kkookk.customer.service;
 
 import com.kkookk.common.exception.BusinessException;
+import com.kkookk.customer.entity.CustomerSession;
 import com.kkookk.customer.entity.OtpChallenge;
+import com.kkookk.customer.repository.CustomerSessionRepository;
 import com.kkookk.customer.repository.OtpChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +20,10 @@ public class OtpService {
 
     private static final String DEV_OTP_CODE = "123456";
     private static final int OTP_EXPIRATION_MINUTES = 3;
+    private static final int STEP_UP_VALIDITY_MINUTES = 10;
 
     private final OtpChallengeRepository otpChallengeRepository;
+    private final CustomerSessionRepository sessionRepository;
 
     @Transactional
     public String sendOtp(String phoneNumber) {
@@ -74,5 +78,35 @@ public class OtpService {
                         phoneNumber, LocalDateTime.now())
                 .map(OtpChallenge::isVerified)
                 .orElse(false);
+    }
+
+    @Transactional
+    public void verifyOtpForStepUp(String sessionToken, String otpCode) {
+        // 세션 조회
+        CustomerSession session = sessionRepository.findBySessionToken(sessionToken)
+                .orElseThrow(() -> new BusinessException(
+                        "S001",
+                        "유효하지 않은 세션입니다.",
+                        HttpStatus.UNAUTHORIZED
+                ));
+
+        if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(
+                    "S002",
+                    "세션이 만료되었습니다. 다시 로그인해주세요.",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        String phoneNumber = session.getWallet().getPhoneNumber();
+
+        // OTP 검증
+        verifyOtp(phoneNumber, otpCode);
+
+        // Step-up 세션 업데이트
+        session.setOtpVerifiedUntil(LocalDateTime.now().plusMinutes(STEP_UP_VALIDITY_MINUTES));
+        sessionRepository.save(session);
+
+        log.info("OTP step-up verified for wallet: {}", session.getWallet().getId());
     }
 }

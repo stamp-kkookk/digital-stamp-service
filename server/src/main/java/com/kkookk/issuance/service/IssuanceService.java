@@ -15,6 +15,9 @@ import com.kkookk.issuance.entity.StampEvent;
 import com.kkookk.issuance.entity.StampEventType;
 import com.kkookk.issuance.repository.IssuanceRequestRepository;
 import com.kkookk.issuance.repository.StampEventRepository;
+import com.kkookk.redemption.entity.RewardInstance;
+import com.kkookk.redemption.entity.RewardStatus;
+import com.kkookk.redemption.repository.RewardInstanceRepository;
 import com.kkookk.stampcard.entity.StampCard;
 import com.kkookk.stampcard.entity.StampCardStatus;
 import com.kkookk.stampcard.repository.StampCardRepository;
@@ -43,6 +46,7 @@ public class IssuanceService {
     private final WalletStampCardRepository walletStampCardRepository;
     private final StoreRepository storeRepository;
     private final StampCardRepository stampCardRepository;
+    private final RewardInstanceRepository rewardInstanceRepository;
 
     @Transactional
     public IssuanceRequestResponse createIssuanceRequest(
@@ -175,7 +179,8 @@ public class IssuanceService {
                 });
 
         // 스탬프 적립
-        walletStampCard.setStampCount(walletStampCard.getStampCount() + 1);
+        int previousCount = walletStampCard.getStampCount();
+        walletStampCard.setStampCount(previousCount + 1);
         walletStampCardRepository.save(walletStampCard);
 
         // 이벤트 로그
@@ -189,6 +194,12 @@ public class IssuanceService {
                 .requestId(request.getClientRequestId())
                 .build();
         stampEventRepository.save(event);
+
+        // 리워드 자동 발급 (목표 달성 시)
+        if (walletStampCard.getStampCount() >= request.getStampCard().getStampGoal()
+                && previousCount < request.getStampCard().getStampGoal()) {
+            issueReward(walletStampCard);
+        }
 
         // 요청 상태 업데이트
         request.setStatus(IssuanceRequestStatus.APPROVED);
@@ -226,6 +237,30 @@ public class IssuanceService {
         log.info("Issuance request rejected: id={}, reason={}", requestId, reason);
 
         return toResponse(request);
+    }
+
+    private void issueReward(WalletStampCard walletStampCard) {
+        StampCard stampCard = walletStampCard.getStampCard();
+
+        LocalDateTime expiresAt = null;
+        if (stampCard.getRewardExpiresInDays() != null) {
+            expiresAt = LocalDateTime.now().plusDays(stampCard.getRewardExpiresInDays());
+        }
+
+        RewardInstance reward = RewardInstance.builder()
+                .wallet(walletStampCard.getWallet())
+                .store(stampCard.getStore())
+                .stampCard(stampCard)
+                .walletStampCard(walletStampCard)
+                .rewardName(stampCard.getRewardName())
+                .status(RewardStatus.AVAILABLE)
+                .expiresAt(expiresAt)
+                .build();
+
+        rewardInstanceRepository.save(reward);
+
+        log.info("Reward issued: walletStampCard={}, reward={}, rewardName={}",
+                walletStampCard.getId(), reward.getId(), reward.getRewardName());
     }
 
     private IssuanceRequestResponse toResponse(IssuanceRequest request) {
