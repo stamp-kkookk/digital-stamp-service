@@ -11,7 +11,8 @@
       "Bash(npm run build:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nReact 기본 설정 완료\n\n- React Router, TanStack Query, MUI 설정\n- 홈페이지와 Owner 로그인 페이지 라우트 추가\n- Axios 클라이언트 및 인터셉터 구성\n- ping API 호출 테스트\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nPWA 미적용 확정 및 문서화\n\n- client README에 PWA 미지원 명시\n- 프로젝트 구조 및 개발 가이드 추가\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\n공통 에러 처리 시스템 구현\n\n- Backend: GlobalExceptionHandler 및 ErrorResponse DTO 추가\n- Frontend: Toast 시스템 및 Axios 에러 인터셉터 구현\n- 표준 에러 포맷 {code, message, details} 통일\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\n공통 에러 처리 시스템 구현\n\n- Backend: GlobalExceptionHandler 및 ErrorResponse DTO 추가\n- Frontend: Toast 시스템 및 Axios 에러 인터셉터 구현\n- 표준 에러 포맷 {code, message, details} 통일\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
     ]
   }
 }
