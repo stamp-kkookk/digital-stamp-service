@@ -23,3 +23,8 @@ spring:
 
 server:
   port: 8080
+
+app:
+  jwt:
+    secret: kkookk-jwt-secret-key-change-this-in-production-environment-to-a-secure-value
+    expiration: 86400000  # 24 hours in milliseconds
