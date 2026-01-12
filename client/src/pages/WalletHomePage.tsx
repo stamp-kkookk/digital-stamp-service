@@ -68,12 +68,21 @@ export default function WalletHomePage() {
       <Box sx={{ mt: 4, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" fontWeight="bold">
-            내 스탬프 카드
+            내 지갑
           </Typography>
-          <Button variant="outlined" size="small" onClick={handleLogout}>
-            로그아웃
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button variant="outlined" size="small" onClick={() => navigate('/wallet/rewards')}>
+              리워드
+            </Button>
+            <Button variant="outlined" size="small" onClick={handleLogout}>
+              로그아웃
+            </Button>
+          </Box>
         </Box>
+
+        <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+          스탬프 카드
+        </Typography>
 
         {!stampCards || stampCards.length === 0 ? (
           <Paper sx={{ p: 4, textAlign: 'center' }}>

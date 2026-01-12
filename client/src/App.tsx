@@ -19,6 +19,8 @@ import WalletHomePage from './pages/WalletHomePage';
 import IssuanceRequestPage from './pages/IssuanceRequestPage';
 import IssuanceWaitPage from './pages/IssuanceWaitPage';
 import OwnerTerminalPage from './pages/OwnerTerminalPage';
+import MyRewardsPage from './pages/MyRewardsPage';
+import RedemptionPage from './pages/RedemptionPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +51,8 @@ function AppContent() {
           <Route path="/wallet/register" element={<WalletRegisterPage />} />
           <Route path="/wallet/access" element={<WalletAccessPage />} />
           <Route path="/wallet/home" element={<WalletHomePage />} />
+          <Route path="/wallet/rewards" element={<MyRewardsPage />} />
+          <Route path="/redemption/:rewardId" element={<RedemptionPage />} />
 
           {/* Owner Routes */}
           <Route path="/owner/login" element={<OwnerLoginPage />} />
