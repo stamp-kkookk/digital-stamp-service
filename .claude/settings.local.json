@@ -9,7 +9,8 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\n모노레포 초기 구조 구성\n\n- Spring Boot 서버 프로젝트 생성 \\(Java 17, Gradle\\)\n- React 클라이언트 프로젝트 생성 \\(TypeScript, Vite\\)\n- 기본 의존성 설정 및 ping 엔드포인트 추가\n- README 업데이트\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(npm install)",
       "Bash(npm run build:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nReact 기본 설정 완료\n\n- React Router, TanStack Query, MUI 설정\n- 홈페이지와 Owner 로그인 페이지 라우트 추가\n- Axios 클라이언트 및 인터셉터 구성\n- ping API 호출 테스트\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nReact 기본 설정 완료\n\n- React Router, TanStack Query, MUI 설정\n- 홈페이지와 Owner 로그인 페이지 라우트 추가\n- Axios 클라이언트 및 인터셉터 구성\n- ping API 호출 테스트\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPWA 미적용 확정 및 문서화\n\n- client README에 PWA 미지원 명시\n- 프로젝트 구조 및 개발 가이드 추가\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# KKOOKK Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+KKOOKK 디지털 스탬프 서비스의 프론트엔드 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 기술 스택
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- React 18 + TypeScript
+- Vite (빌드 도구)
+- React Router (라우팅)
+- TanStack Query (데이터 페칭)
+- Axios (HTTP 클라이언트)
+- MUI (Material-UI) (UI 컴포넌트)
+- React Hook Form + Zod (폼 관리 및 검증)
 
-## React Compiler
+## 개발 환경 설정
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 의존성 설치
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 환경 변수 설정
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`.env.example`을 복사하여 `.env` 파일을 생성하고 필요한 값을 설정하세요:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
+```
+
+### 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+개발 서버는 `http://localhost:5173`에서 실행됩니다.
+
+### 빌드
+
+```bash
+npm run build
+```
+
+### 테스트
+
+```bash
+npm run test
+```
+
+## 중요 사항
+
+### PWA 미지원
+
+**이 프로젝트는 MVP 단계에서 PWA를 지원하지 않습니다.**
+
+- Service Worker 없음
+- manifest.json 없음
+- 오프라인 캐싱 없음
+- 앱 설치 기능 없음
+
+모바일 반응형 웹으로만 제공됩니다.
+
+### 실시간 통신
+
+WebSocket이나 SSE 대신 **폴링(Polling)** 방식을 사용합니다.
+
+## 프로젝트 구조
+
+```
+src/
+├── api/          # API 클라이언트 및 엔드포인트
+├── components/   # 재사용 가능한 컴포넌트
+├── layouts/      # 레이아웃 컴포넌트
+├── pages/        # 페이지 컴포넌트
+├── theme/        # MUI 테마 설정
+└── types/        # TypeScript 타입 정의
 ```
