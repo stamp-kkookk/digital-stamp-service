@@ -10,6 +10,7 @@ import { HomePage } from './pages/HomePage';
 import { OwnerLoginPage } from './pages/OwnerLoginPage';
 import { OwnerRegisterPage } from './pages/OwnerRegisterPage';
 import { OwnerStoresPage } from './pages/OwnerStoresPage';
+import { StoreDetailPage } from './pages/StoreDetailPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ function AppContent() {
           <Route path="/owner/login" element={<OwnerLoginPage />} />
           <Route path="/owner/register" element={<OwnerRegisterPage />} />
           <Route path="/owner/stores" element={<OwnerStoresPage />} />
+          <Route path="/owner/stores/:storeId" element={<StoreDetailPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
