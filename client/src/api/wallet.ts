@@ -36,6 +36,22 @@ export interface WalletResponse {
   sessionScope: string;
 }
 
+export interface WalletStampCardResponse {
+  id: number;
+  storeId: number;
+  storeName: string;
+  storeAddress?: string;
+  stampCardId: number;
+  stampCardTitle: string;
+  stampCardDescription?: string;
+  stampGoal: number;
+  rewardName?: string;
+  rewardExpiresInDays?: number;
+  themeColor?: string;
+  stampCount: number;
+  updatedAt: string;
+}
+
 export const walletApi = {
   sendOtp: async (data: SendOtpRequest): Promise<SendOtpResponse> => {
     const response = await apiClient.post('/api/wallet/otp/send', data);
@@ -54,6 +70,11 @@ export const walletApi = {
 
   access: async (data: AccessWalletRequest): Promise<WalletResponse> => {
     const response = await apiClient.post('/api/wallet/access', data);
+    return response.data;
+  },
+
+  getMyStampCards: async (): Promise<WalletStampCardResponse[]> => {
+    const response = await apiClient.get('/api/wallet/stamp-cards');
     return response.data;
   },
 };
