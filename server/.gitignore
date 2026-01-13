@@ -38,3 +38,6 @@ out/
 
 ### Upload files ###
 /uploads/
+
+### Client build artifacts ###
+/src/main/resources/static/

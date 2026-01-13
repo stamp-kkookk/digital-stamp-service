@@ -9,26 +9,68 @@
 - `/server` - Spring Boot 백엔드 (Java 17+)
 - `/client` - React 프론트엔드 (TypeScript + Vite)
 
-## 로컬 실행 방법
+## 실행 방법
 
-### 서버 (Backend)
+### 개발 환경 (Development)
 
+서버와 클라이언트를 별도로 실행합니다.
+
+**서버 (Backend)**
 ```bash
 cd server
 ./gradlew bootRun
 ```
-
 서버는 `http://localhost:8080`에서 실행됩니다.
 
-### 클라이언트 (Frontend)
-
+**클라이언트 (Frontend)**
 ```bash
 cd client
 npm install
 npm run dev
 ```
-
 클라이언트는 `http://localhost:5173`에서 실행됩니다.
+
+### 프로덕션 배포 (Production)
+
+단일 JAR 파일로 빌드하여 실행합니다. 프론트엔드 빌드 산출물이 서버 JAR에 포함됩니다.
+
+**빌드**
+
+Windows:
+```bash
+build.bat
+```
+
+Linux/Mac:
+```bash
+chmod +x build.sh
+./build.sh
+```
+
+**실행**
+
+Windows:
+```bash
+run.bat
+```
+
+Linux/Mac:
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+또는 직접 실행:
+```bash
+java -jar server/build/libs/kkookk-server-0.0.1-SNAPSHOT.jar
+```
+
+애플리케이션은 `http://localhost:8080`에서 실행됩니다.
+
+### 빌드 산출물
+
+- JAR 파일: `server/build/libs/kkookk-server-0.0.1-SNAPSHOT.jar`
+- 클라이언트 정적 파일: `server/src/main/resources/static/` (JAR에 포함됨)
 
 ## 기술 스택
 
