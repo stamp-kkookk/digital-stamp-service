@@ -116,7 +116,13 @@ export function OwnerStoresPage() {
               variant="outlined"
               onClick={() => navigate('/owner/migration')}
             >
-              마이그레이션 관리
+              마이그레이션
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/owner/logs')}
+            >
+              로그
             </Button>
             <Button
               variant="contained"

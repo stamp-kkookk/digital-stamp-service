@@ -65,6 +65,7 @@ function AppContent() {
           <Route path="/owner/stores/:storeId/qr" element={<StoreQRPage />} />
           <Route path="/owner/terminal" element={<OwnerTerminalPage />} />
           <Route path="/owner/migration" element={<OwnerMigrationPage />} />
+          <Route path="/owner/logs" element={<OwnerLogsPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
