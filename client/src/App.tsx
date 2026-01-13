@@ -23,6 +23,7 @@ import MyRewardsPage from './pages/MyRewardsPage';
 import RedemptionPage from './pages/RedemptionPage';
 import StampMigrationPage from './pages/StampMigrationPage';
 import OwnerMigrationPage from './pages/OwnerMigrationPage';
+import OwnerLogsPage from './pages/OwnerLogsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {

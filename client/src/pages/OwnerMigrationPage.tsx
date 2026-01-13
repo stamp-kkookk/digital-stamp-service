@@ -22,6 +22,7 @@ import {
   CircularProgress,
   Tabs,
   Tab,
+  Paper,
 } from '@mui/material';
 import { migrationApi } from '../api/migration';
 import { storeApi } from '../api/store';
@@ -253,7 +254,7 @@ export default function OwnerMigrationPage() {
               fullWidth
               value={approvedCount}
               onChange={(e) => setApprovedCount(Number(e.target.value))}
-              inputProps={{ min: 0, max: selectedRequest?.stampCardGoal || 100 }}
+              inputProps={{ min: 0, max: 100 }}
               sx={{ mt: 2 }}
             />
           </DialogContent>

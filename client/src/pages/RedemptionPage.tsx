@@ -8,7 +8,6 @@ import {
   Paper,
   Typography,
   Alert,
-  CircularProgress,
   Dialog,
   DialogTitle,
   DialogContent,

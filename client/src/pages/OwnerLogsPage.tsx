@@ -25,7 +25,6 @@ import {
 } from '@mui/material';
 import { logsApi } from '../api/logs';
 import { storeApi } from '../api/store';
-import type { EventLogResponse } from '../api/logs';
 
 export default function OwnerLogsPage() {
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);

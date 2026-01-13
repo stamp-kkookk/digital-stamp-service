@@ -22,9 +22,9 @@ export default function IssuanceWaitPage() {
     queryKey: ['issuance', requestId],
     queryFn: () => issuanceApi.getRequest(Number(requestId)),
     enabled: !!requestId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // PENDING 상태일 때만 2초마다 폴링
-      if (data?.status === 'PENDING') {
+      if (query.state.data?.status === 'PENDING') {
         return 2000;
       }
       return false;
