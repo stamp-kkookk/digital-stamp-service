@@ -23,8 +23,11 @@ public class WebConfig implements WebMvcConfigurer {
                     protected Resource getResource(String resourcePath, Resource location) throws IOException {
                         Resource requestedResource = location.createRelative(resourcePath);
 
-                        // API 요청은 제외
-                        if (resourcePath.startsWith("api/")) {
+                        // API 요청과 Swagger UI는 제외
+                        if (resourcePath.startsWith("api/") ||
+                            resourcePath.startsWith("swagger-ui") ||
+                            resourcePath.startsWith("v3/api-docs") ||
+                            resourcePath.startsWith("h2-console")) {
                             return null;
                         }
 

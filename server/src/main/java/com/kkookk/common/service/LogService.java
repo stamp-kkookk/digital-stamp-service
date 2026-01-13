@@ -92,7 +92,7 @@ public class LogService {
                 .storeName(event.getStore().getName())
                 .stampCardId(event.getStampCard().getId())
                 .stampCardTitle(event.getStampCard().getTitle())
-                .rewardName(event.getRewardName())
+                .rewardName(event.getRewardInstance().getRewardName())
                 .sessionToken(event.getSessionToken())
                 .createdAt(event.getCreatedAt())
                 .build();
