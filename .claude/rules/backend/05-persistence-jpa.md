@@ -6,13 +6,6 @@
 - Use `@Transactional` on service layer.
 - Read-only queries: `@Transactional(readOnly = true)`.
 
-## TTL-like entities
-
-For `IssuanceRequest` / `RedeemSession` (TTL-based), store:
-- `expiresAt`
-- `status`
-- idempotency key (if needed)
-
 ## Index hint
 
 - Index wallet/store IDs for fast lookups.
