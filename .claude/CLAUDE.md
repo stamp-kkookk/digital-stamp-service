@@ -10,17 +10,16 @@ This repository contains:
 - `server/`: Spring Boot API (Java 17, MySQL)
 
 Product: **KKOOKK** (digital stamp / reward SaaS).
+- **No POS integration**: approval-based system (owner terminal confirms)
+- **3 User Types**: Customer (wallet), Owner (backoffice), Terminal (approval screen)
+- **Key Flows**:
+  - Issuance: Customer request → Terminal approval → Polling completion
+  - Redeem: OTP step-up → 2-step confirm modal → TTL expiry
+  - Migration: Paper stamp photo → Manual approval → Stamp reflection
 
-## 2) Single source of truth
 
-- PRD: `docs/prd.md`
-- Conventions:
-  - `docs/conventions/git-convention.md`
-  - `docs/conventions/commit-convention.md`
-  - `docs/conventions/ai-convention.md`
-  - `docs/conventions/be-code-convention.md`
 
-## 3) Repo layout
+## 2) Repo layout
 
 ```
 repo-root/
@@ -35,14 +34,11 @@ repo-root/
 │  └─ CLAUDE.md
 ├─ server/
 │  └─ CLAUDE.md
-├─ docs/
-│  ├─ prd.md
-│  └─ conventions/
 └─ .github/
    └─ pull_request_template.md
 ```
 
-## 4) Mandatory AI workflow (Design → Review → Implement → Test)
+## 3) Mandatory AI workflow (Design → Review → Implement → Test)
 
 **Never jump straight into code.**
 
@@ -54,19 +50,18 @@ repo-root/
 
 Tip: split big tasks into phases and reset context between phases (e.g., `/clear`).
 
-## 5) Rule updates
 
-- Rule changes must go through a PR on the `docs` branch.
-- PR must include: **summary**, **impact**, and **example**.
+## 4) Definition of Done (Checklist)
 
-## 6) Definition of Done
+- [ ] lint passes
+- [ ] test passes
+- [ ] No TODO in changed files
+- [ ] Error handling for expected failures exists
+- [ ] API contracts documented (DTO + status codes)
+- [ ] No breaking changes in existing APIs (unless explicitly stated)
+- [ ] Update related docs when behavior changes (docs/ or README)
 
-A task is done when:
-- `lint` and `test` pass
-- no TODO left in changed files
-- error handling exists for expected failures
-- API contracts are documented (DTO + status codes)
 
-## 7) Useful command prompts
+## 5) Useful command prompts
 
 See `.claude/commands/*` for reusable prompt templates.

@@ -22,6 +22,11 @@ Before implementing an API, always output this structure:
 - success
 - failure
 
+7) **API Design Checklist (MVP)**
+
+ - Swagger/OpenAPI disabled (MVP)
+-  API contracts documented (DTO + status codes + error format)
+
 ## MVP constraints
 
 - Prefer polling over websockets
