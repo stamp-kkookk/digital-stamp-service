@@ -1,6 +1,6 @@
 # Backend Scope
 
-This folder defines **backend-only** rules for the `server/` app.
+This folder defines **backend-only** rules for the `backend/` app.
 
 ## MVP focus
 
