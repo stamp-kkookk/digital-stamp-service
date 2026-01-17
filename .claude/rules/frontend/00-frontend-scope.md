@@ -1,6 +1,6 @@
 # Frontend Scope
 
-This folder defines **frontend-only** rules for the `client/` app.
+This folder defines **frontend-only** rules for the `frontend/` app.
 
 ## Must support
 

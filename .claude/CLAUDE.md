@@ -6,7 +6,7 @@
 ## 1) Project scope
 
 This repository contains:
-- `client/`: React + Tailwind web app (customer + owner/backoffice views)
+- `frontend/`: React + Tailwind web app (customer + owner/backoffice views)
 - `server/`: Spring Boot API (Java 17, MySQL)
 
 Product: **KKOOKK** (digital stamp / reward SaaS).
@@ -30,7 +30,7 @@ repo-root/
 │  │  ├─ frontend/
 │  │  └─ backend/
 │  └─ commands/
-├─ client/
+├─ frontend/
 │  └─ CLAUDE.md
 ├─ server/
 │  └─ CLAUDE.md
