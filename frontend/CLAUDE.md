@@ -15,6 +15,7 @@
 ## 2) Product contexts (KKOOKK)
 
 Client UI targets 3 modes:
+
 1. **Customer**: Wallet → stamp progress → request issuance (polling) → redeem (OTP + confirm + TTL)
 2. **Owner Backoffice**: manage stores, stamp cards, rules, logs, migration requests
 3. **Store Terminal**: issuance approval list (polling) + redeem verification support
@@ -22,12 +23,14 @@ Client UI targets 3 modes:
 ## 3) Do / Don't
 
 ✅ Do
+
 - Implement **loading / empty / error** states for every page.
 - Keep components small: `Page` → `Container` → `Presentational` split.
 - Use accessible markup (labels, aria attributes, focus rings).
 - Prefer Tailwind utilities; extract repeated patterns into small components.
 
 ❌ Don't
+
 - Don't introduce new libraries without explaining why.
 - Don't build a global state store unless required.
 - Don't do complex animation unless requested.
@@ -35,7 +38,7 @@ Client UI targets 3 modes:
 ## 4) Folder structure (recommended)
 
 ```
-client/src/
+frontend/src/
   app/                # app entry / router
   pages/              # route pages
   features/           # feature modules (wallet, issuance, redeem, ...)
@@ -63,6 +66,7 @@ pnpm lint
 ## 7) Prompting guide for Claude
 
 When asking for a page or component, always provide:
+
 - purpose (what user should do)
 - data flow (fetch/mutate, success/failure)
 - states (loading/empty/error)
