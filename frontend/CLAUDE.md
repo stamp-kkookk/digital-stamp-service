@@ -72,5 +72,3 @@ When asking for a page or component, always provide:
 - states (loading/empty/error)
 - constraints (mobile-first, a11y)
 - expected files (page + components split)
-
-See `.claude/commands/fe-page.md` and `.claude/commands/fe-component.md`.
