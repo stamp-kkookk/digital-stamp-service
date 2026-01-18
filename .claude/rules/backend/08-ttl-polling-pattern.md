@@ -13,4 +13,4 @@
 
 ### Anti-pattern:
 - ❌ Never trust client-side "otpVerified" flag
-- ❌ Always validate server-side session
+- ❌ Always validate backend-side session
