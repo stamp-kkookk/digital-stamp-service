@@ -37,11 +37,14 @@ logs/
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Spring profiles (local/dev only)
 application-local.yml
+application-local.yaml
 application-local.properties
 application-dev.yml
+application-dev.yaml
 application-dev.properties
 
 ################################
