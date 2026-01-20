@@ -108,10 +108,11 @@ com.yourteam.kkoookk
 
 ### Layer Responsibilities
 - **Controller:** HTTP + DTO mapping + validation
-- **Service:** business logic + transactions
+- **Service:** use case orchestration + transactions
+- **Domain:** entities, value objects, domain logic (invariants, rules)
 - **Repository:** persistence & queries
 
-Keep controllers thin and logic inside services.
+Keep controllers thin. Put orchestration in services, business rules in domain.
 
 ---
 
