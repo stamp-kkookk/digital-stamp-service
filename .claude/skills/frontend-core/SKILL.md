@@ -1,6 +1,17 @@
+---
+name: frontend-core
+description: Build React components, pages, forms, and state management with TypeScript and TanStack Query. Use for frontend development, component creation, routing, and data fetching.
+---
+
 # Frontend Core Skill
 
-> Always load this skill for frontend work (React/TypeScript)
+## When to Use
+
+- Creating React components or pages
+- Implementing forms with validation
+- Setting up data fetching or state management
+- Working with routing (/c, /o, /t)
+- Working with files under `frontend/`
 
 ---
 

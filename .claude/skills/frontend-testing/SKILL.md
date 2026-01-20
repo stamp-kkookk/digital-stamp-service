@@ -1,6 +1,16 @@
+---
+name: frontend-testing
+description: Write and review frontend tests with Vitest and React Testing Library. Use for component tests, user interaction tests, and testing best practices.
+---
+
 # Frontend Testing Skill
 
-> Load when writing or reviewing frontend tests
+## When to Use
+
+- Writing component render tests
+- Writing user interaction tests
+- Testing forms, loading states, or error handling
+- Reviewing frontend test quality
 
 ---
 

@@ -1,6 +1,16 @@
+---
+name: backend-testing
+description: Write and review backend tests with JUnit5, MockMvc, and Spring Boot Test. Use for writing controller tests, service tests, and integration tests.
+---
+
 # Backend Testing Skill
 
-> Load when writing or reviewing backend tests
+## When to Use
+
+- Writing unit tests for services or repositories
+- Writing controller tests with MockMvc
+- Writing integration tests
+- Reviewing test coverage or test quality
 
 ---
 

@@ -1,6 +1,16 @@
+---
+name: design-system
+description: Apply Tailwind CSS styling, accessibility patterns, and UI/UX best practices. Use for styling components, implementing responsive design, and ensuring accessibility.
+---
+
 # Design System Skill
 
-> Load for UI/UX work, styling, and accessibility
+## When to Use
+
+- Styling components with Tailwind CSS
+- Implementing responsive/mobile-first layouts
+- Adding accessibility (a11y) features
+- Organizing CSS classes or extracting patterns
 
 ---
 

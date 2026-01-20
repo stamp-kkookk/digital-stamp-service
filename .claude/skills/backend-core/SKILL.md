@@ -1,6 +1,17 @@
+---
+name: backend-core
+description: Design and implement backend APIs, services, JPA entities, and security with Java/Spring Boot. Use for API design, controller/service implementation, database modeling, and security patterns.
+---
+
 # Backend Core Skill
 
-> Always load this skill for backend work (Java/Spring Boot)
+## When to Use
+
+- Creating or modifying REST API endpoints
+- Designing DTOs, entities, or database schema
+- Implementing service layer business logic
+- Adding security (OTP, rate limiting, audit logging)
+- Working with files under `server/`
 
 ---
 
