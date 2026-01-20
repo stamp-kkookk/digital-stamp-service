@@ -1,68 +1,59 @@
-:root {
-    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    font-weight: 400;
+@import "tailwindcss";
 
-    color-scheme: light dark;
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+@theme {
+  /* KKOOKK Orange Scale */
+  --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-200: #fed7aa;
+  --color-kkookk-orange-500: #ff4d00;
+  --color-kkookk-orange-600: #ea580c;
+  --color-kkookk-orange-900: #7c2d12;
 
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  /* Status */
+  --color-kkookk-red: #dc2626;
+  --color-kkookk-amber: #f59e0b;
+
+  /* Global */
+  --color-kkookk-paper: #faf9f6;
+  --color-kkookk-navy: #1a1c1e;
+
+  /* Owner Persona */
+  --color-kkookk-indigo: #2e58ff;
+  --color-kkookk-steel: #64748b;
+
+  /* Customer Persona */
+  --color-kkookk-sand: #f5f5f0;
+  --color-kkookk-yellow: #ffd600;
+
+  /* Typography */
+  --font-family-pretendard: "Pretendard Variable", -apple-system, sans-serif;
 }
 
-a {
-    font-weight: 500;
-    color: #646cff;
-    text-decoration: inherit;
-}
-a:hover {
-    color: #535bf2;
-}
-
+/* Base styles */
 body {
-    margin: 0;
-    display: flex;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh;
+  font-family: var(--font-family-pretendard);
+  background-color: var(--color-kkookk-paper);
+  color: var(--color-kkookk-navy);
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1 {
-    font-size: 3.2em;
-    line-height: 1.1;
-}
+/* Common utilities */
+@layer utilities {
+  .btn-primary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 
-button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    padding: 0.6em 1.2em;
-    font-size: 1em;
-    font-weight: 500;
-    font-family: inherit;
-    background-color: #1a1a1a;
-    cursor: pointer;
-    transition: border-color 0.25s;
-}
-button:hover {
-    border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
-}
+  .btn-secondary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 
-@media (prefers-color-scheme: light) {
-    :root {
-        color: #213547;
-        background-color: #ffffff;
-    }
-    a:hover {
-        color: #747bff;
-    }
-    button {
-        background-color: #f9f9f9;
-    }
+  .btn-outline {
+    @apply h-14 px-6 rounded-2xl border-2 border-kkookk-orange-500 text-kkookk-orange-600 font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply h-14 px-6 rounded-2xl text-kkookk-orange-600 font-semibold hover:bg-kkookk-orange-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
 }
