@@ -1,7 +1,7 @@
 # Claude Project Guide (Root)
 
 > This is the **thin** project-level Claude guide.
-> Keep this file short. Put detailed rules into `.claude/rules/**`.
+> Keep this file short. Put detailed skills into `.claude/skills/**`.
 
 ## 1) Project scope
 
@@ -25,10 +25,12 @@ Product: **KKOOKK** (digital stamp / reward SaaS).
 repo-root/
 ├─ .claude/
 │  ├─ CLAUDE.md
-│  ├─ rules/
-│  │  ├─ general/
-│  │  ├─ frontend/
-│  │  └─ backend/
+│  ├─ skills/
+│  │  ├─ backend-core/SKILL.md       # Always needed for backend
+│  │  ├─ backend-testing/SKILL.md    # Optional: tests
+│  │  ├─ frontend-core/SKILL.md      # Always needed for frontend
+│  │  ├─ frontend-testing/SKILL.md   # Optional: tests
+│  │  └─ design-system/SKILL.md      # Optional: UI/UX
 │  └─ commands/
 ├─ frontend/
 │  └─ CLAUDE.md
