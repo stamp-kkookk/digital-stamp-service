@@ -34,6 +34,13 @@ interface {ComponentName}Props {
 - 단일 책임 원칙 준수
 - forwardRef 적용 기준: DOM 접근 필요 시 (input focus, scroll 등)
 
+### 3. 스타일링 적용 (Design System 준수)
+- `design-system/SKILL.md`에 명시된 Tailwind CSS 클래스 정렬 규칙, KKOOKK 컬러 시스템, `twMerge` 활용 등을 준수
+- Mobile-first 접근 방식 적용
+
+### 4. 컴포넌트 내부 구성 순서 준수 (Frontend Core Skill 참조)
+- `frontend-core/SKILL.md`에 명시된 State, Memoization, Side effects, Event handlers, JSX Rendering 순서 준수
+
 ---
 
 ## 컴포넌트 배치 규칙
@@ -84,3 +91,5 @@ src/components/
 
 - [ ] Props 타입 명시적 정의
 - [ ] `any` 타입 사용 금지
+- [ ] 접근성(A11y) 가이드라인 준수 (Design System 참조)
+- [ ] 변수 및 Props명에 약어 사용 금지 (Frontend Core Skill 참조)
