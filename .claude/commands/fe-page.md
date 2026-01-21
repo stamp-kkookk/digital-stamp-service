@@ -45,15 +45,13 @@ $ARGUMENTS
 - 컴포넌트 구현
 - API 호출 함수
 
----
+### 5. 라우팅 설정에 페이지 등록
+- `React Router` 설정 파일에 페이지 컴포넌트와 경로를 등록
+- `frontend-core/SKILL.md`의 `Route Grouping` 규칙 준수
 
-## 라우트 그룹 규칙
-
-| Prefix | 용도 | Layout |
-|--------|------|--------|
-| `/c/*` | Customer (고객) | Mobile-first |
-| `/o/*` | Owner (점주 백오피스) | Desktop-first |
-| `/t/*` | Terminal (매장 단말) | Always-on |
+### 6. 페이지 단위 접근성 및 SEO 고려
+- 페이지 `title` 동적 설정 (예: `react-helmet-async` 사용)
+- 필요한 경우 `meta description`, `og:title` 등 SEO 관련 메타 태그 설정 고려
 
 ---
 
@@ -88,12 +86,3 @@ src/features/stampcard/
     └── stampCardApi.ts
 ```
 
----
-
-## 체크리스트
-
-- [ ] Loading 상태 UI 구현
-- [ ] Empty 상태 UI 구현
-- [ ] Error 상태 + 재시도 CTA 구현
-- [ ] 키보드 네비게이션 가능
-- [ ] 모바일/데스크톱 반응형 확인

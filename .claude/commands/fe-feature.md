@@ -81,7 +81,4 @@ UI 목 디자인: ./mocks/backoffice-stampcard-list.png
 
 ## 주의사항
 
-1. **Mobile-first**: Customer 화면은 모바일 우선, Owner 화면은 데스크톱 우선
-2. **상태 분기**: 모든 페이지에서 Loading/Empty/Error 상태 처리 필수
-3. **API 미확정 시**: 백엔드 병행 개발이면 인터페이스 초안을 먼저 정의
-4. **컴포넌트 재사용**: 공통 컴포넌트는 `src/components/`에 배치
+- **API 미확정 시**: 백엔드 병행 개발이면 인터페이스 초안을 먼저 정의
