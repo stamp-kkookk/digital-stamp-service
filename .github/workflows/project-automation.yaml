@@ -1,0 +1,341 @@
+name: Project Automation
+
+on:
+  pull_request:
+    types: [opened, reopened, closed]
+
+env:
+  ORGANIZATION: stamp-kkookk
+  PROJECT_NUMBER: 2
+
+jobs:
+  move-to-review:
+    name: Move issue to In review
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened' || github.event.action == 'reopened'
+    steps:
+      - name: Get linked issues
+        id: linked-issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+
+            // PR body에서 연결된 이슈 번호 추출 (Closes #123, Fixes #123, Resolves #123 등)
+            const issuePattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*#(\d+)/gi;
+            const body = pr.body || '';
+            const matches = [...body.matchAll(issuePattern)];
+            const issueNumbers = matches.map(m => parseInt(m[1]));
+
+            console.log(`Found linked issues: ${issueNumbers.join(', ')}`);
+            return issueNumbers;
+
+      - name: Move issues to On Review
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const issueNumbers = ${{ steps.linked-issues.outputs.result }};
+
+            if (!issueNumbers || issueNumbers.length === 0) {
+              console.log('No linked issues found');
+              return;
+            }
+
+            for (const issueNumber of issueNumbers) {
+              try {
+                // 1. 이슈의 node_id 가져오기
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+                const issueNodeId = issue.data.node_id;
+                console.log(`Issue #${issueNumber} node_id: ${issueNodeId}`);
+
+                // 2. Project 정보 가져오기
+                const projectQuery = `
+                  query($org: String!, $number: Int!) {
+                    organization(login: $org) {
+                      projectV2(number: $number) {
+                        id
+                        field(name: "Status") {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            options {
+                              id
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                `;
+
+                const projectResult = await github.graphql(projectQuery, {
+                  org: '${{ env.ORGANIZATION }}',
+                  number: ${{ env.PROJECT_NUMBER }}
+                });
+
+                const project = projectResult.organization.projectV2;
+                const statusField = project.field;
+                const onReviewOption = statusField.options.find(o => o.name === 'In review');
+
+                if (!onReviewOption) {
+                  console.log('In review status not found');
+                  continue;
+                }
+
+                // 3. Project에서 해당 이슈 item 찾기
+                const itemQuery = `
+                  query($projectId: ID!, $cursor: String) {
+                    node(id: $projectId) {
+                      ... on ProjectV2 {
+                        items(first: 100, after: $cursor) {
+                          nodes {
+                            id
+                            content {
+                              ... on Issue {
+                                number
+                              }
+                            }
+                          }
+                          pageInfo {
+                            hasNextPage
+                            endCursor
+                          }
+                        }
+                      }
+                    }
+                  }
+                `;
+
+                let cursor = null;
+                let itemId = null;
+
+                do {
+                  const itemResult = await github.graphql(itemQuery, {
+                    projectId: project.id,
+                    cursor: cursor
+                  });
+
+                  const items = itemResult.node.items;
+                  const found = items.nodes.find(item =>
+                    item.content && item.content.number === issueNumber
+                  );
+
+                  if (found) {
+                    itemId = found.id;
+                    break;
+                  }
+
+                  if (items.pageInfo.hasNextPage) {
+                    cursor = items.pageInfo.endCursor;
+                  } else {
+                    break;
+                  }
+                } while (true);
+
+                if (!itemId) {
+                  console.log(`Issue #${issueNumber} not found in project`);
+                  continue;
+                }
+
+                // 4. Status를 On Review로 변경
+                const updateMutation = `
+                  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                    updateProjectV2ItemFieldValue(
+                      input: {
+                        projectId: $projectId
+                        itemId: $itemId
+                        fieldId: $fieldId
+                        value: { singleSelectOptionId: $optionId }
+                      }
+                    ) {
+                      projectV2Item {
+                        id
+                      }
+                    }
+                  }
+                `;
+
+                await github.graphql(updateMutation, {
+                  projectId: project.id,
+                  itemId: itemId,
+                  fieldId: statusField.id,
+                  optionId: onReviewOption.id
+                });
+
+                console.log(`Issue #${issueNumber} moved to In review`);
+
+              } catch (error) {
+                console.error(`Error processing issue #${issueNumber}:`, error.message);
+              }
+            }
+
+  move-to-done:
+    name: Move issue to Done on merge
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    steps:
+      - name: Get linked issues
+        id: linked-issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+
+            // PR body에서 연결된 이슈 번호 추출
+            const issuePattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*#(\d+)/gi;
+            const body = pr.body || '';
+            const matches = [...body.matchAll(issuePattern)];
+            const issueNumbers = matches.map(m => parseInt(m[1]));
+
+            console.log(`Found linked issues: ${issueNumbers.join(', ')}`);
+            return issueNumbers;
+
+      - name: Move issues to Done
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const issueNumbers = ${{ steps.linked-issues.outputs.result }};
+
+            if (!issueNumbers || issueNumbers.length === 0) {
+              console.log('No linked issues found');
+              return;
+            }
+
+            for (const issueNumber of issueNumbers) {
+              try {
+                // 1. 이슈의 node_id 가져오기
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+                const issueNodeId = issue.data.node_id;
+
+                // 2. Project 정보 가져오기
+                const projectQuery = `
+                  query($org: String!, $number: Int!) {
+                    organization(login: $org) {
+                      projectV2(number: $number) {
+                        id
+                        field(name: "Status") {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            options {
+                              id
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                `;
+
+                const projectResult = await github.graphql(projectQuery, {
+                  org: '${{ env.ORGANIZATION }}',
+                  number: ${{ env.PROJECT_NUMBER }}
+                });
+
+                const project = projectResult.organization.projectV2;
+                const statusField = project.field;
+                const doneOption = statusField.options.find(o => o.name === 'Done');
+
+                if (!doneOption) {
+                  console.log('Done status not found');
+                  continue;
+                }
+
+                // 3. Project에서 해당 이슈 item 찾기
+                const itemQuery = `
+                  query($projectId: ID!, $cursor: String) {
+                    node(id: $projectId) {
+                      ... on ProjectV2 {
+                        items(first: 100, after: $cursor) {
+                          nodes {
+                            id
+                            content {
+                              ... on Issue {
+                                number
+                              }
+                            }
+                          }
+                          pageInfo {
+                            hasNextPage
+                            endCursor
+                          }
+                        }
+                      }
+                    }
+                  }
+                `;
+
+                let cursor = null;
+                let itemId = null;
+
+                do {
+                  const itemResult = await github.graphql(itemQuery, {
+                    projectId: project.id,
+                    cursor: cursor
+                  });
+
+                  const items = itemResult.node.items;
+                  const found = items.nodes.find(item =>
+                    item.content && item.content.number === issueNumber
+                  );
+
+                  if (found) {
+                    itemId = found.id;
+                    break;
+                  }
+
+                  if (items.pageInfo.hasNextPage) {
+                    cursor = items.pageInfo.endCursor;
+                  } else {
+                    break;
+                  }
+                } while (true);
+
+                if (!itemId) {
+                  console.log(`Issue #${issueNumber} not found in project`);
+                  continue;
+                }
+
+                // 4. Status를 Done으로 변경
+                const updateMutation = `
+                  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                    updateProjectV2ItemFieldValue(
+                      input: {
+                        projectId: $projectId
+                        itemId: $itemId
+                        fieldId: $fieldId
+                        value: { singleSelectOptionId: $optionId }
+                      }
+                    ) {
+                      projectV2Item {
+                        id
+                      }
+                    }
+                  }
+                `;
+
+                await github.graphql(updateMutation, {
+                  projectId: project.id,
+                  itemId: itemId,
+                  fieldId: statusField.id,
+                  optionId: doneOption.id
+                });
+
+                console.log(`Issue #${issueNumber} moved to Done`);
+
+              } catch (error) {
+                console.error(`Error processing issue #${issueNumber}:`, error.message);
+              }
+            }
