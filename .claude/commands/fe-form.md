@@ -118,8 +118,6 @@ const stampCardSchema = z.object({
 
 - [ ] 모든 필드에 label + htmlFor 연결
 - [ ] 필드별 에러 메시지 표시
-- [ ] 제출 중 버튼 disabled 처리
-- [ ] 중복 제출 방지 로직
 - [ ] 키보드 제출 (Enter) 지원
 - [ ] 폼 리셋 기능 (필요시)
 - [ ] 성공/실패 피드백 표시

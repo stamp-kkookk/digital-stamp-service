@@ -47,16 +47,6 @@ $ARGUMENTS
 
 ---
 
-## 라우트 그룹 규칙
-
-| Prefix | 용도 | Layout |
-|--------|------|--------|
-| `/c/*` | Customer (고객) | Mobile-first |
-| `/o/*` | Owner (점주 백오피스) | Desktop-first |
-| `/t/*` | Terminal (매장 단말) | Always-on |
-
----
-
 ## 사용 예시
 
 ```
@@ -88,12 +78,3 @@ src/features/stampcard/
     └── stampCardApi.ts
 ```
 
----
-
-## 체크리스트
-
-- [ ] Loading 상태 UI 구현
-- [ ] Empty 상태 UI 구현
-- [ ] Error 상태 + 재시도 CTA 구현
-- [ ] 키보드 네비게이션 가능
-- [ ] 모바일/데스크톱 반응형 확인

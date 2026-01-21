@@ -1,7 +1,6 @@
 # Component Creation Prompt
 
 > 재사용 가능한 컴포넌트를 생성할 때 사용하는 command입니다.
-> Props 인터페이스, Tailwind 스타일링, 접근성을 고려하여 구현합니다.
 
 ---
 
@@ -33,26 +32,16 @@ interface {ComponentName}Props {
 ### 2. 컴포넌트 구현
 - 함수형 컴포넌트 + TypeScript
 - 단일 책임 원칙 준수
-- 필요시 forwardRef 적용
-
-### 3. Tailwind 스타일링
-- Mobile-first 접근
-- 클래스 순서: layout → spacing → size → typography → colors → effects → states
-- 3회 이상 반복되는 패턴은 추출
-
-### 4. 접근성 고려사항
-- 적절한 `aria-*` 속성
-- 키보드 포커스 가시성 (`focus:ring`)
-- 스크린 리더 지원
+- forwardRef 적용 기준: DOM 접근 필요 시 (input focus, scroll 등)
 
 ---
 
 ## 컴포넌트 배치 규칙
 
-| 위치 | 용도 |
-|------|------|
-| `src/components/` | 공통 재사용 컴포넌트 |
-| `src/features/{feature}/components/` | 피처 전용 컴포넌트 |
+| 위치 | 용도 | 판단 기준 |
+|------|------|----------|
+| `src/components/` | 공통 재사용 컴포넌트 | 2개 이상 피처에서 사용 |
+| `src/features/{feature}/components/` | 피처 전용 컴포넌트 | 해당 피처에서만 사용 |
 
 ---
 
@@ -95,7 +84,3 @@ src/components/
 
 - [ ] Props 타입 명시적 정의
 - [ ] `any` 타입 사용 금지
-- [ ] 키보드 포커스 가시적
-- [ ] 적절한 aria 속성 적용
-- [ ] Tailwind 클래스 순서 정리
-- [ ] 불필요한 인라인 style 없음
