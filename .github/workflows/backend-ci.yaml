@@ -1,0 +1,360 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yaml'
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  JAVA_VERSION: '17'
+  WORKING_DIRECTORY: backend
+
+jobs:
+  # ============================================
+  # Job 1: Build & Test
+  # ============================================
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build -x test --no-daemon
+
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
+
+      - name: Generate Jacoco Report
+        run: ./gradlew jacocoTestReport --no-daemon
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ${{ env.WORKING_DIRECTORY }}/build/reports/tests/test/
+          retention-days: 7
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ${{ env.WORKING_DIRECTORY }}/build/reports/jacoco/test/html/
+          retention-days: 7
+
+      - name: Jacoco Coverage Report to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ env.WORKING_DIRECTORY }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 60
+          min-coverage-changed-files: 60
+          title: "📊 Coverage Report"
+          update-comment: true
+
+  # ============================================
+  # Job 2: Code Quality (Checkstyle + Spotless)
+  # ============================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Spotless Check
+        id: spotless
+        run: ./gradlew spotlessCheck --no-daemon
+        continue-on-error: true
+
+      - name: Checkstyle
+        id: checkstyle
+        run: ./gradlew checkstyleMain checkstyleTest --no-daemon
+        continue-on-error: true
+
+      - name: Upload Checkstyle Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkstyle-report
+          path: ${{ env.WORKING_DIRECTORY }}/build/reports/checkstyle/
+          retention-days: 7
+
+      - name: Check Results
+        run: |
+          if [ "${{ steps.spotless.outcome }}" == "failure" ] || [ "${{ steps.checkstyle.outcome }}" == "failure" ]; then
+            echo "::error::Code quality checks failed"
+            exit 1
+          fi
+
+  # ============================================
+  # Job 3: Coverage Gate
+  # ============================================
+  coverage-gate:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Verify Coverage Threshold
+        run: ./gradlew test jacocoTestCoverageVerification --no-daemon
+
+  # ============================================
+  # Job 4: Summary Comment
+  # ============================================
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality, coverage-gate]
+    if: always()
+
+    steps:
+      - name: Create Summary Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const buildResult = '${{ needs.build-and-test.result }}';
+            const qualityResult = '${{ needs.code-quality.result }}';
+            const coverageResult = '${{ needs.coverage-gate.result }}';
+
+            const getEmoji = (result) => {
+              switch(result) {
+                case 'success': return '✅';
+                case 'failure': return '❌';
+                case 'skipped': return '⏭️';
+                default: return '⚠️';
+              }
+            };
+
+            const getStatus = (result) => {
+              switch(result) {
+                case 'success': return 'Passed';
+                case 'failure': return 'Failed';
+                case 'skipped': return 'Skipped';
+                default: return 'Unknown';
+              }
+            };
+
+            const allPassed = buildResult === 'success' &&
+                              qualityResult === 'success' &&
+                              coverageResult === 'success';
+
+            const header = allPassed
+              ? '## ✅ Backend CI Passed'
+              : '## ❌ Backend CI Failed';
+
+            const body = `${header}
+
+            | Check | Status |
+            |-------|--------|
+            | ${getEmoji(buildResult)} Build & Test | ${getStatus(buildResult)} |
+            | ${getEmoji(qualityResult)} Code Quality | ${getStatus(qualityResult)} |
+            | ${getEmoji(coverageResult)} Coverage Gate | ${getStatus(coverageResult)} |
+
+            <details>
+            <summary>📋 CI Gates 상세</summary>
+
+            ### Build & Test
+            - Gradle 빌드
+            - JUnit5 테스트 실행
+            - Jacoco 커버리지 리포트 생성
+
+            ### Code Quality
+            - **Spotless**: 코드 포맷팅 검사
+            - **Checkstyle**: 코딩 컨벤션 검사
+
+            ### Coverage Gate
+            - Line Coverage ≥ 60%
+            - Branch Coverage ≥ 50%
+
+            </details>
+
+            ${!allPassed ? `
+            > 💡 **Tip**: 로컬에서 \`./gradlew check\`를 실행하여 CI와 동일한 검사를 수행할 수 있습니다.
+            ` : ''}
+
+            ---
+            *Workflow: [${context.workflow}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})*
+            `;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Backend CI')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      # ------------------------------------------
+      # Slack 알림 (CI 실패 시에만)
+      # ------------------------------------------
+      - name: Notify Slack on Failure
+        if: needs.build-and-test.result == 'failure' || needs.code-quality.result == 'failure' || needs.coverage-gate.result == 'failure'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-type: application/json' \
+            --data '{
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Backend CI Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.head_ref }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*PR:* <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}> ${{ github.event.pull_request.title }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Build & Test:* ${{ needs.build-and-test.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Code Quality:* ${{ needs.code-quality.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Coverage Gate:* ${{ needs.coverage-gate.result }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Details",
+                        "emoji": true
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }'

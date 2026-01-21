@@ -1,0 +1,132 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.9'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+	id 'checkstyle'
+	id 'com.diffplug.spotless' version '6.25.0'
+}
+
+group = 'com.project'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'com.h2database:h2'
+}
+
+// ============================================
+// Jacoco - Test Coverage
+// ============================================
+jacoco {
+	toolVersion = "0.8.12"
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/KkookkApplication.class',
+				'**/config/**',
+				'**/dto/**',
+				'**/exception/**'
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/KkookkApplication.class',
+				'**/config/**',
+				'**/dto/**',
+				'**/exception/**'
+			])
+		}))
+	}
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				minimum = 0.60
+			}
+		}
+		rule {
+			limit {
+				counter = 'BRANCH'
+				minimum = 0.50
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
+// ============================================
+// Checkstyle - Code Style Enforcement
+// ============================================
+checkstyle {
+	toolVersion = '10.20.1'
+	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+	maxWarnings = 0
+	maxErrors = 0
+}
+
+tasks.withType(Checkstyle).configureEach {
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+// ============================================
+// Spotless - Auto Code Formatting
+// ============================================
+spotless {
+	java {
+		target 'src/**/*.java'
+		importOrder()
+		removeUnusedImports()
+		googleJavaFormat('1.23.0').aosp()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}

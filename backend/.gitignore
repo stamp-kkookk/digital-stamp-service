@@ -1,0 +1,80 @@
+################################
+# IntelliJ IDEA
+################################
+.idea/
+*.iml
+*.ipr
+*.iws
+/out/
+.shelf/
+
+################################
+# OS
+################################
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+################################
+# Java / Build Tools
+################################
+# Gradle
+/build/
+.gradle/
+
+# Maven
+/target/
+
+################################
+# Logs
+################################
+*.log
+logs/
+
+################################
+# Spring Boot / Environment
+################################
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Spring profiles (local/dev only)
+application-local.yml
+application-local.yaml
+application-local.properties
+application-dev.yml
+application-dev.yaml
+application-dev.properties
+
+################################
+# Test / Coverage
+################################
+coverage/
+jacoco.exec
+*.hprof
+
+################################
+# Temporary / Backup files
+################################
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+
+################################
+# HTTP Client (IntelliJ)
+################################
+/httpRequests/
+
+################################
+# DataSources (IntelliJ DB)
+################################
+/dataSources/
+/dataSources.local.xml
+
+################################
+# Custom / Project-specific
+################################
+/queries/

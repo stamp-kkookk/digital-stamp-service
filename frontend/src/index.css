@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  /* KKOOKK Orange Scale */
+  --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-200: #fed7aa;
+  --color-kkookk-orange-500: #ff4d00;
+  --color-kkookk-orange-600: #ea580c;
+  --color-kkookk-orange-900: #7c2d12;
+
+  /* Status */
+  --color-kkookk-red: #dc2626;
+  --color-kkookk-amber: #f59e0b;
+
+  /* Global */
+  --color-kkookk-paper: #faf9f6;
+  --color-kkookk-navy: #1a1c1e;
+
+  /* Owner Persona */
+  --color-kkookk-indigo: #2e58ff;
+  --color-kkookk-steel: #64748b;
+
+  /* Customer Persona */
+  --color-kkookk-sand: #f5f5f0;
+  --color-kkookk-yellow: #ffd600;
+
+  /* Typography */
+  --font-family-pretendard: "Pretendard Variable", -apple-system, sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-family-pretendard);
+  background-color: var(--color-kkookk-paper);
+  color: var(--color-kkookk-navy);
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Common utilities */
+@layer utilities {
+  .btn-primary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply h-14 px-6 rounded-2xl border-2 border-kkookk-orange-500 text-kkookk-orange-600 font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply h-14 px-6 rounded-2xl text-kkookk-orange-600 font-semibold hover:bg-kkookk-orange-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+}
