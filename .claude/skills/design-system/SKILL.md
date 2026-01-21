@@ -10,7 +10,7 @@ description: design system with Tailwind v4.0, accessibility patterns, and proje
 - Styling KKOOKK components with Tailwind CSS v4.0
 - Implementing KKOOKK-specific layouts and interactions
 - Adding accessibility (a11y) features
-- Building PWA-optimized mobile UI
+- Building mobile-optimized web UI
 
 ---
 
@@ -64,7 +64,7 @@ description: design system with Tailwind v4.0, accessibility patterns, and proje
 
 - Start with mobile styles (default)
 - Use responsive prefixes for larger screens: `md:`, `lg:`, `xl:`
-- KKOOKK is PWA-first: optimize for mobile viewport
+- KKOOKK is mobile-web-first: optimize for mobile viewport
 
 ### Class Organization Order (Critical for Consistency)
 
@@ -438,7 +438,7 @@ Toast.show({
 
 ---
 
-## PWA Optimization
+## Mobile Web Optimization
 
 ### Outdoor Visibility
 
