@@ -284,3 +284,77 @@ jobs:
                 body: body
               });
             }
+
+      # ------------------------------------------
+      # Slack 알림 (CI 실패 시에만)
+      # ------------------------------------------
+      - name: Notify Slack on Failure
+        if: needs.build-and-test.result == 'failure' || needs.code-quality.result == 'failure' || needs.coverage-gate.result == 'failure'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-type: application/json' \
+            --data '{
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "❌ Backend CI Failed",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Repository:*\n${{ github.repository }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${{ github.head_ref }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*PR:* <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}> ${{ github.event.pull_request.title }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Build & Test:* ${{ needs.build-and-test.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Code Quality:* ${{ needs.code-quality.result }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Coverage Gate:* ${{ needs.coverage-gate.result }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🔍 View Details",
+                        "emoji": true
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }'
