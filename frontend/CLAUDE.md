@@ -24,6 +24,7 @@ Client UI targets 3 modes:
 
 ✅ Do
 
+- **Always refer to the `frontend-core` and `design-system` skills in `.claude/skills`**
 - Implement **loading / empty / error** states for every page.
 - Keep components small: `Page` → `Container` → `Presentational` split.
 - Use accessible markup (labels, aria attributes, focus rings).
