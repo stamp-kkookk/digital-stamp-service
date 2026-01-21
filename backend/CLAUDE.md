@@ -58,15 +58,15 @@ Follow team conventions:
 
 ## 5) API design guardrails
 
-* Always output **API list → DTOs → DB tables → errors → implementation steps → tests** before writing code.
-* Use consistent error responses and `@RestControllerAdvice`.
-* Use `@Valid` and Bean Validation on request DTOs.
+* Workflow: Always output API list → DTOs → DB tables → errors → implementation steps → tests before writing code.
+* Controller Cleanliness: To prevent controllers from becoming bloated, separate Swagger annotations into an Interface. The Controller should only contain business logic mapping.
+* Validation: Use @Valid and Bean Validation on request DTOs.
+* Global Handling: Use consistent error responses via @RestControllerAdvice.
 * Swagger/OpenAPI rules:
 
-  * Add `@Tag(name = "...")` per controller group
-  * Document endpoints using `@Operation(summary = "...", description = "...")`
-  * For request/response examples: use `@Schema(example = "...")` on DTO fields
-  * If auth is required: mark with `@SecurityRequirement(name = "bearerAuth")`
+  * Abstraction: Define @Tag, @Operation, and @ApiResponses in the API interface.
+  * Schema Documentation: Use @Schema(example = "...") on DTO fields for frontend clarity.
+  * Security: Mark authenticated endpoints with @SecurityRequirement(name = "bearerAuth").
 
 ✅ Swagger UI location (default):
 
