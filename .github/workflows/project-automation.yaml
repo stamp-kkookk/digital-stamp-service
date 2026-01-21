@@ -335,6 +335,16 @@ jobs:
 
                 console.log(`Issue #${issueNumber} moved to Done`);
 
+                // 5. Issue를 close 처리
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  state: 'closed'
+                });
+
+                console.log(`Issue #${issueNumber} closed`);
+
               } catch (error) {
                 console.error(`Error processing issue #${issueNumber}:`, error.message);
               }
