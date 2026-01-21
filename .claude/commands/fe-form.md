@@ -51,6 +51,10 @@ type {FormName}FormData = z.infer<typeof {formName}Schema>;
 - 로딩 인디케이터 표시
 - useMutation + onSuccess/onError 처리
 
+### 6. 서버 에러 필드 연동
+- API 응답에서 오는 필드별 에러를 `react-hook-form`의 `setError`를 사용하여 해당 필드에 연결
+- 사용자에게 친화적인 한글 에러 메시지로 변환하여 표시
+
 ---
 
 ## 필드 타입 가이드
