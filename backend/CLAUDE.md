@@ -1,4 +1,4 @@
-1# Claude Guide (Server)
+# Claude Guide (Server)
 
 ## 1) Stack
 
