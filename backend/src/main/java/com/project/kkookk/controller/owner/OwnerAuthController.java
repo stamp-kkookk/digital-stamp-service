@@ -1,5 +1,7 @@
 package com.project.kkookk.controller.owner;
 
+import com.project.kkookk.controller.owner.dto.OwnerLoginRequest;
+import com.project.kkookk.controller.owner.dto.OwnerLoginResponse;
 import com.project.kkookk.controller.owner.dto.OwnerSignupRequest;
 import com.project.kkookk.controller.owner.dto.OwnerSignupResponse;
 import com.project.kkookk.service.owner.OwnerAuthService;
@@ -25,5 +27,12 @@ public class OwnerAuthController implements OwnerAuthApi {
             @Valid @RequestBody OwnerSignupRequest request) {
         OwnerSignupResponse response = ownerAuthService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    @PostMapping("/login")
+    public ResponseEntity<OwnerLoginResponse> login(@Valid @RequestBody OwnerLoginRequest request) {
+        OwnerLoginResponse response = ownerAuthService.login(request);
+        return ResponseEntity.ok(response);
     }
 }

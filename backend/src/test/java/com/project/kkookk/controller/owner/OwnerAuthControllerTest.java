@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.kkookk.controller.owner.dto.OwnerLoginRequest;
+import com.project.kkookk.controller.owner.dto.OwnerLoginResponse;
 import com.project.kkookk.controller.owner.dto.OwnerSignupRequest;
 import com.project.kkookk.controller.owner.dto.OwnerSignupResponse;
 import com.project.kkookk.global.exception.BusinessException;
@@ -180,5 +182,139 @@ class OwnerAuthControllerTest {
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("OWNER_LOGIN_ID_DUPLICATED"));
+    }
+
+    @Test
+    @DisplayName("로그인 성공 - 이메일 사용 (200)")
+    @WithMockUser
+    void login_Success_WithEmail() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("owner@example.com", "Password1!");
+
+        OwnerLoginResponse response =
+                new OwnerLoginResponse(
+                        "mock.jwt.token",
+                        1L,
+                        "owner@example.com",
+                        "owner123",
+                        "홍길동",
+                        "010-1234-5678");
+
+        given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("mock.jwt.token"))
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.email").value("owner@example.com"))
+                .andExpect(jsonPath("$.loginId").value("owner123"))
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"));
+    }
+
+    @Test
+    @DisplayName("로그인 성공 - 로그인 ID 사용 (200)")
+    @WithMockUser
+    void login_Success_WithLoginId() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("owner123", "Password1!");
+
+        OwnerLoginResponse response =
+                new OwnerLoginResponse(
+                        "mock.jwt.token",
+                        1L,
+                        "owner@example.com",
+                        "owner123",
+                        "홍길동",
+                        "010-1234-5678");
+
+        given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("mock.jwt.token"))
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - identifier 누락 (400)")
+    @WithMockUser
+    void login_Fail_IdentifierRequired() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("", "Password1!");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 비밀번호 누락 (400)")
+    @WithMockUser
+    void login_Fail_PasswordRequired() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("owner@example.com", "");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 비밀번호 길이 부족 (400)")
+    @WithMockUser
+    void login_Fail_PasswordTooShort() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("owner@example.com", "short");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 이메일 또는 비밀번호 불일치 (401)")
+    @WithMockUser
+    void login_Fail_InvalidCredentials() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("owner@example.com", "WrongPassword!");
+
+        given(ownerAuthService.login(any(OwnerLoginRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("OWNER_LOGIN_FAILED"))
+                .andExpect(jsonPath("$.message").value("이메일 또는 비밀번호가 올바르지 않습니다"));
     }
 }
