@@ -2,26 +2,21 @@
 -- KKOOKK Database Initialization Script
 -- ============================================
 -- This script runs automatically when the MySQL container is first created.
--- It grants necessary permissions to the application user.
-
--- Grant all privileges on kkookkdb to the application user
--- Note: MYSQL_USER is automatically created by MySQL Docker image
--- with access to MYSQL_DATABASE, but we ensure explicit grants here.
-
-GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'%';
-GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'localhost';
-
-FLUSH PRIVILEGES;
-
+-- It creates the database and grants necessary permissions to the application user.
 -- ============================================
 -- Schema Definition
 -- ============================================
--- Add your domain table definitions below.
--- Example:
---
--- CREATE TABLE IF NOT EXISTS example_table (
---     id BIGINT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Owner Account Table
+CREATE TABLE IF NOT EXISTS owner_account (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    login_id VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(100),
+    phone_number VARCHAR(255) NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    updated_at DATETIME(6) NOT NULL,
+    INDEX idx_login_id (login_id),
+    INDEX idx_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
