@@ -24,3 +24,7 @@ logging:
   level:
     root: INFO
     com.project.kkookk: DEBUG
+
+jwt:
+  secret: kkookk-super-secret-key-for-jwt-token-generation-minimum-256-bits-required
+  access-token-expiration: 3600000
