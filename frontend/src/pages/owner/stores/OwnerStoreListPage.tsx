@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import OwnerLayout from '../../../components/layout/OwnerLayout'
 import DashboardCards from './components/DashboardCards'
 import SearchFilterBar from './components/SearchFilterBar'
@@ -7,6 +8,8 @@ import { mockDashboardMetrics, mockStores } from '../../../mocks/ownerStores'
 import type { SortOption, ViewMode } from '../../../types/store'
 
 export default function OwnerStoreListPage() {
+    const navigate = useNavigate()
+
     // State management
     const [searchQuery, setSearchQuery] = useState('')
     const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
@@ -57,7 +60,7 @@ export default function OwnerStoreListPage() {
     }
 
     const handleNewStore = () => {
-        console.log('새 매장 등록 (준비 중)')
+        navigate('/o/stores/new')
     }
 
     return (
