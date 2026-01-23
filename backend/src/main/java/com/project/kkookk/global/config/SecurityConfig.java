@@ -12,11 +12,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Spring Security Configuration
- * - CORS 허용
- * - 개발 환경에서는 모든 요청 허용 (MVP)
- */
+/** Spring Security Configuration - CORS 허용 - 개발 환경에서는 모든 요청 허용 (MVP) */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -29,9 +25,7 @@ public class SecurityConfig {
                 // CSRF 비활성화 (REST API용)
                 .csrf(AbstractHttpConfigurer::disable)
                 // 모든 요청 허용 (개발 환경)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-            );
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
         return http.build();
     }
@@ -41,17 +35,16 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 허용할 Origin (프론트엔드 개발 서버)
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:5173",
-                "http://127.0.0.1:3000"
-        ));
+        configuration.setAllowedOrigins(
+                Arrays.asList(
+                        "http://localhost:5173",
+                        "http://localhost:3000",
+                        "http://127.0.0.1:5173",
+                        "http://127.0.0.1:3000"));
 
         // 허용할 HTTP 메서드
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
-        ));
+        configuration.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         // 허용할 헤더
         configuration.setAllowedHeaders(List.of("*"));
