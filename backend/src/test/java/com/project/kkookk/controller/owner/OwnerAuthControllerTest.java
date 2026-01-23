@@ -234,6 +234,23 @@ class OwnerAuthControllerTest {
     }
 
     @Test
+    @DisplayName("로그인 실패 - 잘못된 이메일 형식 (400)")
+    @WithMockUser
+    void login_Fail_InvalidEmailFormat() throws Exception {
+        // given
+        OwnerLoginRequest request = new OwnerLoginRequest("invalid-email", "Password1!");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/owner/auth/login")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
     @DisplayName("로그인 실패 - 비밀번호 길이 부족 (400)")
     @WithMockUser
     void login_Fail_PasswordTooShort() throws Exception {
