@@ -1,5 +1,7 @@
 package com.project.kkookk.global.config;
 
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,9 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Spring Security Configuration
@@ -32,7 +31,7 @@ public class SecurityConfig {
                 // 모든 요청 허용 (개발 환경)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
-                );
+            );
 
         return http.build();
     }
