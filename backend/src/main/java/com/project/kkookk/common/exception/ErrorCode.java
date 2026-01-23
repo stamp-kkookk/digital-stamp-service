@@ -1,0 +1,20 @@
+package com.project.kkookk.common.exception;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@RequiredArgsConstructor
+public enum ErrorCode {
+
+    // 404 NOT_FOUND
+    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장을 찾을 수 없습니다."),
+    STORE_INACTIVE(HttpStatus.NOT_FOUND, "현재 운영 중인 매장이 아닙니다."),
+
+    // 500 INTERNAL_SERVER_ERROR
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 오류가 발생했습니다.");
+
+    private final HttpStatus httpStatus;
+    private final String message;
+}
