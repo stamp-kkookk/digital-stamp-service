@@ -56,4 +56,35 @@ body {
   .btn-ghost {
     @apply h-14 px-6 rounded-2xl text-kkookk-orange-600 font-semibold hover:bg-kkookk-orange-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
   }
+
+  /* Toast animations */
+  @keyframes enter {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes leave {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+  }
+
+  .animate-enter {
+    animation: enter 0.3s ease-out;
+  }
+
+  .animate-leave {
+    animation: leave 0.2s ease-in forwards;
+  }
 }
