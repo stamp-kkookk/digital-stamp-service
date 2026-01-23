@@ -36,12 +36,12 @@ public interface OwnerAuthApi {
                         content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
                 @ApiResponse(
                         responseCode = "409",
-                        description = "이메일 또는 로그인 ID 중복",
+                        description = "이메일 중복",
                         content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     ResponseEntity<OwnerSignupResponse> signup(@Valid @RequestBody OwnerSignupRequest request);
 
-    @Operation(summary = "점주 로그인", description = "이메일 또는 로그인 ID와 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
+    @Operation(summary = "점주 로그인", description = "이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.")
     @ApiResponses(
             value = {
                 @ApiResponse(
