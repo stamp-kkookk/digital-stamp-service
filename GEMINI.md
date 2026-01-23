@@ -24,6 +24,9 @@ KKOOKK 디지털 스탬프/리워드 SaaS (POS 연동 없음)
 3) 필요한 skills/commands를 요청 유형에 맞게 선택 적용:
    - `.claude/skills/**/SKILL.md`
    - `.claude/commands/*.md`
+4) 3번과 무관하게 작업 영역별 반드시 적용해야하는 SKILL:
+   - 백엔드 작업 시: /.claude/skills/backend-core/SKILL.md 지침을 반드시 로드하고 준수한다.
+   - 프론트엔드 작업 시: /.claude/skills/frontend-core/SKILL.md와 /.claude/skills/design-system/SKILL.md 지침을 반드시 로드하고 병행 적용한다.
 
 응답에는 항상 아래를 포함한다:
 - 이번 작업에 적용한 `.claude` 파일 목록
