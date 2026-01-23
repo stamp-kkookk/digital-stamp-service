@@ -1,4 +1,5 @@
 # GEMINI Project Guide: Kkookk Digital Stamp Service
+아래 모든 지침을 빠짐없이 확인하고 준수한다.
 
 ## 1) Project scope
 KKOOKK 디지털 스탬프/리워드 SaaS (POS 연동 없음)
