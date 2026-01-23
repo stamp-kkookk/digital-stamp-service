@@ -8,9 +8,5 @@ public interface OwnerAccountRepository extends JpaRepository<OwnerAccount, Long
 
     boolean existsByEmail(String email);
 
-    boolean existsByLoginId(String loginId);
-
     Optional<OwnerAccount> findByEmail(String email);
-
-    Optional<OwnerAccount> findByLoginId(String loginId);
 }

@@ -11,15 +11,20 @@ import com.project.kkookk.controller.owner.dto.OwnerLoginRequest;
 import com.project.kkookk.controller.owner.dto.OwnerLoginResponse;
 import com.project.kkookk.controller.owner.dto.OwnerSignupRequest;
 import com.project.kkookk.controller.owner.dto.OwnerSignupResponse;
+import com.project.kkookk.controller.owner.config.TestSecurityConfig;
+import com.project.kkookk.global.config.SecurityConfig;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.exception.GlobalExceptionHandler;
+import com.project.kkookk.global.security.JwtAuthenticationFilter;
 import com.project.kkookk.service.owner.OwnerAuthService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -27,8 +32,14 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(OwnerAuthController.class)
-@Import(GlobalExceptionHandler.class)
+@WebMvcTest(
+        controllers = OwnerAuthController.class,
+        excludeFilters = {
+            @ComponentScan.Filter(
+                    type = FilterType.ASSIGNABLE_TYPE,
+                    classes = {SecurityConfig.class, JwtAuthenticationFilter.class})
+        })
+@Import({GlobalExceptionHandler.class, TestSecurityConfig.class})
 class OwnerAuthControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -44,13 +55,12 @@ class OwnerAuthControllerTest {
         // given
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
-                        "owner@example.com", "owner123", "Password1!", "홍길동", "010-1234-5678");
+                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         OwnerSignupResponse response =
                 new OwnerSignupResponse(
                         1L,
                         "owner@example.com",
-                        "owner123",
                         "홍길동",
                         "010-1234-5678",
                         LocalDateTime.now());
@@ -66,7 +76,6 @@ class OwnerAuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.email").value("owner@example.com"))
-                .andExpect(jsonPath("$.loginId").value("owner123"))
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"));
     }
@@ -79,7 +88,6 @@ class OwnerAuthControllerTest {
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
                         "", // 이메일 누락
-                        "owner123",
                         "Password1!",
                         "홍길동",
                         "010-1234-5678");
@@ -102,7 +110,6 @@ class OwnerAuthControllerTest {
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
                         "owner@example.com",
-                        "owner123",
                         "password", // 특수문자, 숫자 없음
                         "홍길동",
                         "010-1234-5678");
@@ -125,7 +132,6 @@ class OwnerAuthControllerTest {
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
                         "owner@example.com",
-                        "owner123",
                         "Password1!",
                         "홍길동",
                         "1234567890"); // 잘못된 형식
@@ -147,7 +153,7 @@ class OwnerAuthControllerTest {
         // given
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
-                        "owner@example.com", "owner123", "Password1!", "홍길동", "010-1234-5678");
+                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         given(ownerAuthService.signup(any(OwnerSignupRequest.class)))
                 .willThrow(new BusinessException(ErrorCode.OWNER_EMAIL_DUPLICATED));
@@ -163,28 +169,6 @@ class OwnerAuthControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입 실패 - 로그인 ID 중복 (409)")
-    @WithMockUser
-    void signup_Fail_LoginIdDuplicated() throws Exception {
-        // given
-        OwnerSignupRequest request =
-                new OwnerSignupRequest(
-                        "owner@example.com", "owner123", "Password1!", "홍길동", "010-1234-5678");
-
-        given(ownerAuthService.signup(any(OwnerSignupRequest.class)))
-                .willThrow(new BusinessException(ErrorCode.OWNER_LOGIN_ID_DUPLICATED));
-
-        // when & then
-        mockMvc.perform(
-                        post("/api/owner/auth/signup")
-                                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("OWNER_LOGIN_ID_DUPLICATED"));
-    }
-
-    @Test
     @DisplayName("로그인 성공 - 이메일 사용 (200)")
     @WithMockUser
     void login_Success_WithEmail() throws Exception {
@@ -196,7 +180,6 @@ class OwnerAuthControllerTest {
                         "mock.jwt.token",
                         1L,
                         "owner@example.com",
-                        "owner123",
                         "홍길동",
                         "010-1234-5678");
 
@@ -212,44 +195,14 @@ class OwnerAuthControllerTest {
                 .andExpect(jsonPath("$.accessToken").value("mock.jwt.token"))
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.email").value("owner@example.com"))
-                .andExpect(jsonPath("$.loginId").value("owner123"))
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.phoneNumber").value("010-1234-5678"));
     }
 
     @Test
-    @DisplayName("로그인 성공 - 로그인 ID 사용 (200)")
+    @DisplayName("로그인 실패 - 이메일 누락 (400)")
     @WithMockUser
-    void login_Success_WithLoginId() throws Exception {
-        // given
-        OwnerLoginRequest request = new OwnerLoginRequest("owner123", "Password1!");
-
-        OwnerLoginResponse response =
-                new OwnerLoginResponse(
-                        "mock.jwt.token",
-                        1L,
-                        "owner@example.com",
-                        "owner123",
-                        "홍길동",
-                        "010-1234-5678");
-
-        given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
-
-        // when & then
-        mockMvc.perform(
-                        post("/api/owner/auth/login")
-                                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").value("mock.jwt.token"))
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    @DisplayName("로그인 실패 - identifier 누락 (400)")
-    @WithMockUser
-    void login_Fail_IdentifierRequired() throws Exception {
+    void login_Fail_EmailRequired() throws Exception {
         // given
         OwnerLoginRequest request = new OwnerLoginRequest("", "Password1!");
 

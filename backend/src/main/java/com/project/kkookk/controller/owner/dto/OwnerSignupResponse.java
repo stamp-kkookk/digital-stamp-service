@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 public record OwnerSignupResponse(
         @Schema(description = "점주 계정 ID", example = "1") Long id,
         @Schema(description = "이메일", example = "owner@example.com") String email,
-        @Schema(description = "로그인 ID", example = "owner123") String loginId,
         @Schema(description = "이름", example = "홍길동") String name,
         @Schema(description = "전화번호", example = "010-1234-5678") String phoneNumber,
         @Schema(description = "생성 시각", example = "2024-01-15T10:30:00") LocalDateTime createdAt) {
@@ -17,7 +16,6 @@ public record OwnerSignupResponse(
         return new OwnerSignupResponse(
                 ownerAccount.getId(),
                 ownerAccount.getEmail(),
-                ownerAccount.getLoginId(),
                 ownerAccount.getName(),
                 ownerAccount.getPhoneNumber(),
                 ownerAccount.getCreatedAt());

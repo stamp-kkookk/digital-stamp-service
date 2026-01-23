@@ -26,12 +26,10 @@ public class OwnerAuthService {
     @Transactional
     public OwnerSignupResponse signup(OwnerSignupRequest request) {
         validateEmailNotDuplicated(request.email());
-        validateLoginIdNotDuplicated(request.loginId());
 
         OwnerAccount ownerAccount =
                 OwnerAccount.builder()
                         .email(request.email())
-                        .loginId(request.loginId())
                         .passwordHash(passwordEncoder.encode(request.password()))
                         .name(request.name())
                         .phoneNumber(request.phoneNumber())
@@ -43,7 +41,10 @@ public class OwnerAuthService {
     }
 
     public OwnerLoginResponse login(OwnerLoginRequest request) {
-        OwnerAccount ownerAccount = findOwnerAccountByIdentifier(request.identifier());
+        OwnerAccount ownerAccount =
+                ownerAccountRepository
+                        .findByEmail(request.email())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
 
         if (!passwordEncoder.matches(request.password(), ownerAccount.getPasswordHash())) {
             throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
@@ -55,27 +56,9 @@ public class OwnerAuthService {
         return OwnerLoginResponse.of(accessToken, ownerAccount);
     }
 
-    private OwnerAccount findOwnerAccountByIdentifier(String identifier) {
-        if (identifier.contains("@")) {
-            return ownerAccountRepository
-                    .findByEmail(identifier)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
-        } else {
-            return ownerAccountRepository
-                    .findByLoginId(identifier)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
-        }
-    }
-
     private void validateEmailNotDuplicated(String email) {
         if (ownerAccountRepository.existsByEmail(email)) {
             throw new BusinessException(ErrorCode.OWNER_EMAIL_DUPLICATED);
-        }
-    }
-
-    private void validateLoginIdNotDuplicated(String loginId) {
-        if (loginId != null && ownerAccountRepository.existsByLoginId(loginId)) {
-            throw new BusinessException(ErrorCode.OWNER_LOGIN_ID_DUPLICATED);
         }
     }
 }
