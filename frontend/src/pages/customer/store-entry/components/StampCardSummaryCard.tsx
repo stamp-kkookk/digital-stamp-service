@@ -1,11 +1,21 @@
 import React from 'react';
-import { ActiveStampCardSummary } from '../types';
+import type { ActiveStampCardSummary } from '../types';
 
-// Heroicon: gift
-const GiftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H4.5A1.5 1.5 0 013 19.5v-8.25a1.5 1.5 0 011.5-1.5h15a1.5 1.5 0 011.5 1.5z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9.75a1.5 1.5 0 011.5-1.5h.01a1.5 1.5 0 011.5 1.5v.01a1.5 1.5 0 01-1.5 1.5h-.01a1.5 1.5 0 01-1.5-1.5v-.01zM8.25 9.75a1.5 1.5 0 011.5-1.5h.01a1.5 1.5 0 011.5 1.5v.01a1.5 1.5 0 01-1.5 1.5h-.01a1.5 1.5 0 01-1.5-1.5v-.01zM12 4.5c.621 0 1.125.504 1.125 1.125V9.75c0 .621-.504 1.125-1.125 1.125S10.875 10.371 10.875 9.75V5.625c0-.621.504-1.125 1.125-1.125z" />
+// White coffee icon for card
+const CoffeeIconWhite = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-8 w-8 text-white opacity-90"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
   </svg>
 );
 
@@ -15,24 +25,37 @@ interface StampCardSummaryCardProps {
 
 const StampCardSummaryCard: React.FC<StampCardSummaryCardProps> = ({ stampCardInfo }) => {
   return (
-    <div className="w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-        <div className="p-6">
-            <div className="text-center mb-6">
-                <p className="text-base text-gray-500 font-medium">모두 모으면</p>
-                <p className="text-2xl font-bold text-indigo-600 flex items-center justify-center mt-1">
-                    <GiftIcon />
-                    {stampCardInfo.reward}
-                </p>
-            </div>
-            <div className="grid grid-cols-5 gap-3 p-2 bg-slate-100/50 rounded-xl">
-                {Array.from({ length: stampCardInfo.totalStampCount }).map((_, index) => (
-                <div key={index} className="aspect-square flex items-center justify-center bg-white rounded-lg p-1 shadow-sm">
-                    {/* Assuming stampImageUrl is valid. Add a placeholder if it can be empty. */}
-                    <img src={stampCardInfo.stampImageUrl} alt={`Stamp ${index + 1}`} className="w-full h-full object-contain" />
-                </div>
-                ))}
-            </div>
-        </div>
+    <div className="relative w-full bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 rounded-3xl shadow-2xl p-6">
+      {/* ACTIVE Badge */}
+      <span className="absolute top-4 right-4 px-3 py-1 text-xs font-bold text-white bg-white/20 backdrop-blur-sm rounded-full">
+        ACTIVE
+      </span>
+
+      {/* Coffee Icon */}
+      <div className="mb-4">
+        <CoffeeIconWhite />
+      </div>
+
+      {/* Reward Info */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-white mb-2">{stampCardInfo.reward}</h2>
+        <p className="text-sm text-white/90">스탬프 10개를 모으시면 무료로 발행됩니다.</p>
+      </div>
+
+      {/* Stamp Progress - Empty circles */}
+      <div className="flex gap-2 mb-3">
+        {Array.from({ length: 10 }).map((_, index) => (
+          <div
+            key={index}
+            className="w-8 h-8 rounded-full border-2 border-white/60 bg-white/10"
+          />
+        ))}
+      </div>
+
+      {/* Counter */}
+      <div className="text-right">
+        <span className="text-sm font-bold text-white">0/10</span>
+      </div>
     </div>
   );
 };
