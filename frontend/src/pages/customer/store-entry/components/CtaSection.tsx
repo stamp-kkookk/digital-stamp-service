@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { UserStatus } from '../types';
 
 // Heroicon: arrow-right
@@ -17,23 +18,25 @@ const ArrowRightIcon = () => (
 
 interface CtaSectionProps {
   userStatus: UserStatus;
+  storeId: string;
 }
 
-const CtaSection: React.FC<CtaSectionProps> = ({ userStatus }) => {
+const CtaSection: React.FC<CtaSectionProps> = ({ userStatus, storeId }) => {
+  const navigate = useNavigate();
   const getCtaContent = () => {
     switch (userStatus) {
       case 'GUEST':
         return {
           text: '로그인하고 적립 시작하기',
           action: () => {
-            console.log('TODO: 로그인 페이지로 이동');
+            navigate(`/c/store/${storeId}/auth?type=register`);
           },
         };
       case 'LOGGED_IN_NO_WALLET':
         return {
           text: '스탬프 지갑 만들고 적립 시작',
           action: () => {
-            console.log('TODO: 지갑 생성 API 호출');
+            navigate(`/c/store/${storeId}/auth?type=register`);
           },
         };
       case 'LOGGED_IN_WITH_WALLET':

@@ -14,7 +14,7 @@ interface StoreStampCardSummaryContainerProps {
 const checkUserStatus = (): UserStatus => {
   const token = localStorage.getItem('authToken');
   if (!token) return 'GUEST';
-  const hasWallet = false;
+  const hasWallet = localStorage.getItem('hasWallet') === 'true';
   return hasWallet ? 'LOGGED_IN_WITH_WALLET' : 'LOGGED_IN_NO_WALLET';
 };
 

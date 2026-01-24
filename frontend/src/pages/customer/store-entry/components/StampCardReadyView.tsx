@@ -57,7 +57,7 @@ const StampCardReadyView: React.FC<StampCardReadyViewProps> = ({ data, userStatu
                 </div>
 
                 {/* CTA Section */}
-                <CtaSection userStatus={userStatus} />
+                <CtaSection userStatus={userStatus} storeId={String(data.storeInfo.storeId)} />
 
                 {/* Bottom Links */}
                 <div className="flex items-center justify-center gap-3 text-sm text-gray-500">
