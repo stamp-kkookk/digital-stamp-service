@@ -45,8 +45,7 @@ class OwnerAuthServiceTest {
     void signup_Success() {
         // given
         OwnerSignupRequest request =
-                new OwnerSignupRequest(
-                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
+                new OwnerSignupRequest("owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         given(ownerAccountRepository.existsByEmail(anyString())).willReturn(false);
         given(passwordEncoder.encode(anyString())).willReturn("encodedPassword");
@@ -82,8 +81,7 @@ class OwnerAuthServiceTest {
     void signup_Fail_EmailDuplicated() {
         // given
         OwnerSignupRequest request =
-                new OwnerSignupRequest(
-                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
+                new OwnerSignupRequest("owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         given(ownerAccountRepository.existsByEmail(anyString())).willReturn(true);
 
@@ -119,8 +117,7 @@ class OwnerAuthServiceTest {
         given(ownerAccountRepository.findByEmail("owner@example.com"))
                 .willReturn(Optional.of(ownerAccount));
         given(passwordEncoder.matches("Password1!", "encodedPassword")).willReturn(true);
-        given(jwtUtil.generateAccessToken(anyLong(), anyString()))
-                .willReturn("mock.jwt.token");
+        given(jwtUtil.generateAccessToken(anyLong(), anyString())).willReturn("mock.jwt.token");
 
         // when
         OwnerLoginResponse response = ownerAuthService.login(request);

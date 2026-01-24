@@ -7,11 +7,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.kkookk.controller.owner.config.TestSecurityConfig;
 import com.project.kkookk.controller.owner.dto.OwnerLoginRequest;
 import com.project.kkookk.controller.owner.dto.OwnerLoginResponse;
 import com.project.kkookk.controller.owner.dto.OwnerSignupRequest;
 import com.project.kkookk.controller.owner.dto.OwnerSignupResponse;
-import com.project.kkookk.controller.owner.config.TestSecurityConfig;
 import com.project.kkookk.global.config.SecurityConfig;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
@@ -54,16 +54,11 @@ class OwnerAuthControllerTest {
     void signup_Success() throws Exception {
         // given
         OwnerSignupRequest request =
-                new OwnerSignupRequest(
-                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
+                new OwnerSignupRequest("owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         OwnerSignupResponse response =
                 new OwnerSignupResponse(
-                        1L,
-                        "owner@example.com",
-                        "홍길동",
-                        "010-1234-5678",
-                        LocalDateTime.now());
+                        1L, "owner@example.com", "홍길동", "010-1234-5678", LocalDateTime.now());
 
         given(ownerAuthService.signup(any(OwnerSignupRequest.class))).willReturn(response);
 
@@ -131,10 +126,7 @@ class OwnerAuthControllerTest {
         // given
         OwnerSignupRequest request =
                 new OwnerSignupRequest(
-                        "owner@example.com",
-                        "Password1!",
-                        "홍길동",
-                        "1234567890"); // 잘못된 형식
+                        "owner@example.com", "Password1!", "홍길동", "1234567890"); // 잘못된 형식
 
         // when & then
         mockMvc.perform(
@@ -152,8 +144,7 @@ class OwnerAuthControllerTest {
     void signup_Fail_EmailDuplicated() throws Exception {
         // given
         OwnerSignupRequest request =
-                new OwnerSignupRequest(
-                        "owner@example.com", "Password1!", "홍길동", "010-1234-5678");
+                new OwnerSignupRequest("owner@example.com", "Password1!", "홍길동", "010-1234-5678");
 
         given(ownerAuthService.signup(any(OwnerSignupRequest.class)))
                 .willThrow(new BusinessException(ErrorCode.OWNER_EMAIL_DUPLICATED));
@@ -177,11 +168,7 @@ class OwnerAuthControllerTest {
 
         OwnerLoginResponse response =
                 new OwnerLoginResponse(
-                        "mock.jwt.token",
-                        1L,
-                        "owner@example.com",
-                        "홍길동",
-                        "010-1234-5678");
+                        "mock.jwt.token", 1L, "owner@example.com", "홍길동", "010-1234-5678");
 
         given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
 

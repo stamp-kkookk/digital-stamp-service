@@ -13,8 +13,7 @@ public class WithMockOwnerSecurityContextFactory
     public SecurityContext createSecurityContext(WithMockOwner annotation) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        OwnerPrincipal principal =
-                OwnerPrincipal.of(annotation.ownerId(), annotation.email());
+        OwnerPrincipal principal = OwnerPrincipal.of(annotation.ownerId(), annotation.email());
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(

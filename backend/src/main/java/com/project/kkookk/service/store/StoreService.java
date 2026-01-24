@@ -11,9 +11,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 매장 서비스.
- */
+/** 매장 서비스. */
 @Service
 @Transactional(readOnly = true)
 public class StoreService {
@@ -33,13 +31,13 @@ public class StoreService {
      */
     @Transactional
     public StoreResponse createStore(final Long ownerId, final StoreCreateRequest request) {
-        final Store store = new Store(
-                request.name(),
-                request.address(),
-                request.phone(),
-                request.status(),
-                ownerId
-        );
+        final Store store =
+                new Store(
+                        request.name(),
+                        request.address(),
+                        request.phone(),
+                        request.status(),
+                        ownerId);
 
         final Store savedStore = storeRepository.save(store);
         return StoreResponse.from(savedStore);
@@ -79,10 +77,7 @@ public class StoreService {
      */
     @Transactional
     public StoreResponse updateStore(
-            final Long ownerId,
-            final Long storeId,
-            final StoreUpdateRequest request
-    ) {
+            final Long ownerId, final Long storeId, final StoreUpdateRequest request) {
         final Store store = findStoreByIdAndOwnerId(storeId, ownerId);
         store.update(request.name(), request.address(), request.phone(), request.status());
         return StoreResponse.from(store);
@@ -109,7 +104,8 @@ public class StoreService {
      * @throws BusinessException 매장을 찾을 수 없거나 접근 권한이 없는 경우
      */
     private Store findStoreByIdAndOwnerId(final Long storeId, final Long ownerId) {
-        return storeRepository.findByIdAndOwnerAccountId(storeId, ownerId)
+        return storeRepository
+                .findByIdAndOwnerAccountId(storeId, ownerId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 }
