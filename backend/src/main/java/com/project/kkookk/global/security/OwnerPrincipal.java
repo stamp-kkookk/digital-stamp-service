@@ -23,10 +23,7 @@ public class OwnerPrincipal implements UserDetails {
     }
 
     public static OwnerPrincipal of(Long ownerId, String email) {
-        return OwnerPrincipal.builder()
-                .ownerId(ownerId)
-                .email(email)
-                .build();
+        return OwnerPrincipal.builder().ownerId(ownerId).email(email).build();
     }
 
     @Override

@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 매장 관리 컨트롤러.
- */
+/** 매장 관리 컨트롤러. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/owner/stores")
@@ -34,8 +32,7 @@ public class StoreController implements StoreApi {
     @PostMapping
     public ResponseEntity<StoreResponse> createStore(
             @Valid @RequestBody StoreCreateRequest request,
-            @AuthenticationPrincipal OwnerPrincipal principal
-    ) {
+            @AuthenticationPrincipal OwnerPrincipal principal) {
         StoreResponse response = storeService.createStore(principal.getOwnerId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -43,8 +40,7 @@ public class StoreController implements StoreApi {
     @Override
     @GetMapping
     public ResponseEntity<List<StoreResponse>> getStores(
-            @AuthenticationPrincipal OwnerPrincipal principal
-    ) {
+            @AuthenticationPrincipal OwnerPrincipal principal) {
         List<StoreResponse> response = storeService.getStores(principal.getOwnerId());
         return ResponseEntity.ok(response);
     }
@@ -52,9 +48,7 @@ public class StoreController implements StoreApi {
     @Override
     @GetMapping("/{storeId}")
     public ResponseEntity<StoreResponse> getStore(
-            @PathVariable Long storeId,
-            @AuthenticationPrincipal OwnerPrincipal principal
-    ) {
+            @PathVariable Long storeId, @AuthenticationPrincipal OwnerPrincipal principal) {
         StoreResponse response = storeService.getStore(principal.getOwnerId(), storeId);
         return ResponseEntity.ok(response);
     }
@@ -64,10 +58,8 @@ public class StoreController implements StoreApi {
     public ResponseEntity<StoreResponse> updateStore(
             @PathVariable Long storeId,
             @Valid @RequestBody StoreUpdateRequest request,
-            @AuthenticationPrincipal OwnerPrincipal principal
-    ) {
-        StoreResponse response =
-                storeService.updateStore(principal.getOwnerId(), storeId, request);
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StoreResponse response = storeService.updateStore(principal.getOwnerId(), storeId, request);
         return ResponseEntity.ok(response);
     }
 

@@ -9,6 +9,11 @@
               files=".*Config\.java$"
               message=".*should be alone on a line.*"/>
 
+    <!-- Suppress RightCurlyAlone for JPA entities with empty constructors (Spotless conflict) -->
+    <suppress checks="RightCurly"
+              files=".*/domain/.*\.java$"
+              message=".*should be alone on a line.*"/>
+
     <!-- Suppress VariableDeclarationUsageDistance for test files (given-when-then pattern) -->
     <suppress checks="VariableDeclarationUsageDistance"
               files=".*Test\.java$"/>

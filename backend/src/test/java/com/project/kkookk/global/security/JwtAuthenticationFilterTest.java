@@ -51,11 +51,7 @@ class JwtAuthenticationFilterTest {
         Long ownerId = 1L;
         String email = "owner@example.com";
 
-        Claims claims =
-                Jwts.claims()
-                        .subject(String.valueOf(ownerId))
-                        .add("email", email)
-                        .build();
+        Claims claims = Jwts.claims().subject(String.valueOf(ownerId)).add("email", email).build();
 
         request.addHeader("Authorization", bearerToken);
 
