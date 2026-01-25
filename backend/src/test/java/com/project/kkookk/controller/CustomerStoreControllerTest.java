@@ -1,5 +1,12 @@
 package com.project.kkookk.controller;
 
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.kkookk.common.exception.BusinessException;
 import com.project.kkookk.common.exception.ErrorCode;
@@ -9,27 +16,21 @@ import com.project.kkookk.service.CustomerStoreService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(CustomerStoreController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
 class CustomerStoreControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private CustomerStoreService customerStoreService;
+    @MockBean private CustomerStoreService customerStoreService;
 
     @Test
     @DisplayName("API 요약 조회 성공: 활성 스탬프카드가 존재할 경우")
@@ -37,7 +38,8 @@ class CustomerStoreControllerTest {
         // given
         long storeId = 1L;
         StampCardInfo stampCardInfo = new StampCardInfo(10L, "테스트 스탬프카드", "리워드", "혜택", "url");
-        StoreStampCardSummaryResponse mockResponse = new StoreStampCardSummaryResponse("테스트 매장", stampCardInfo);
+        StoreStampCardSummaryResponse mockResponse =
+                new StoreStampCardSummaryResponse("테스트 매장", stampCardInfo);
 
         given(customerStoreService.getStoreStampCardSummary(storeId)).willReturn(mockResponse);
 
@@ -56,7 +58,8 @@ class CustomerStoreControllerTest {
     void getStoreSummary_Empty() throws Exception {
         // given
         long storeId = 2L;
-        StoreStampCardSummaryResponse mockResponse = new StoreStampCardSummaryResponse("다른 매장", null);
+        StoreStampCardSummaryResponse mockResponse =
+                new StoreStampCardSummaryResponse("다른 매장", null);
         given(customerStoreService.getStoreStampCardSummary(storeId)).willReturn(mockResponse);
 
         // when & then

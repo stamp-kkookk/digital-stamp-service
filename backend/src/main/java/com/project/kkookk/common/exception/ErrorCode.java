@@ -13,7 +13,9 @@ public enum ErrorCode {
     STORE_INACTIVE(HttpStatus.NOT_FOUND, "현재 운영 중인 매장이 아닙니다."),
 
     // 500 INTERNAL_SERVER_ERROR
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 오류가 발생했습니다."),
+    QR_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "QR 코드 생성에 실패했습니다."),
+    FILE_STORAGE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 저장소 처리 중 오류가 발생했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
