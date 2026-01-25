@@ -8,11 +8,6 @@
 -- Note: MYSQL_USER is automatically created by MySQL Docker image
 -- with access to MYSQL_DATABASE, but we ensure explicit grants here.
 
-GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'%';
-GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'localhost';
-
-FLUSH PRIVILEGES;
-
 -- ============================================
 -- Schema Definition
 -- ============================================

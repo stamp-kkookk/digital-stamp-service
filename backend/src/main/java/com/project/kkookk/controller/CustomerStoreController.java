@@ -17,8 +17,10 @@ public class CustomerStoreController {
     private final CustomerStoreService customerStoreService;
 
     @GetMapping("/{storeId}/summary")
-    public ResponseEntity<StoreStampCardSummaryResponse> getStoreSummary(@PathVariable Long storeId) {
-        StoreStampCardSummaryResponse response = customerStoreService.getStoreStampCardSummary(storeId);
+    public ResponseEntity<StoreStampCardSummaryResponse> getStoreSummary(
+            @PathVariable Long storeId) {
+        StoreStampCardSummaryResponse response =
+                customerStoreService.getStoreStampCardSummary(storeId);
         return ResponseEntity.ok(response);
     }
 }

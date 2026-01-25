@@ -22,6 +22,11 @@ spring:
     console:
       enabled: false
 
+app:
+  storage:
+    local-path: ${java.io.tmpdir}/kkookk-test-storage
+  qr-base-url: "http://localhost/test-qr/"
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

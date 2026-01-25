@@ -1,5 +1,10 @@
 package com.project.kkookk.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
 import com.project.kkookk.common.domain.StampCardStatus;
 import com.project.kkookk.common.domain.StoreStatus;
 import com.project.kkookk.common.exception.BusinessException;
@@ -9,6 +14,7 @@ import com.project.kkookk.domain.StampCard;
 import com.project.kkookk.domain.Store;
 import com.project.kkookk.repository.StampCardRepository;
 import com.project.kkookk.repository.StoreRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,25 +22,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class CustomerStoreServiceTest {
 
-    @InjectMocks
-    private CustomerStoreService customerStoreService;
+    @InjectMocks private CustomerStoreService customerStoreService;
 
-    @Mock
-    private StoreRepository storeRepository;
+    @Mock private StoreRepository storeRepository;
 
-    @Mock
-    private StampCardRepository stampCardRepository;
+    @Mock private StampCardRepository stampCardRepository;
 
     @Test
     @DisplayName("매장/스탬프카드 요약 조회 성공: 활성 스탬프카드가 존재할 경우")
@@ -45,11 +40,13 @@ class CustomerStoreServiceTest {
         StampCard mockStampCard = createMockStampCard(mockStore);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE))
+        when(stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                        storeId, StampCardStatus.ACTIVE))
                 .thenReturn(Optional.of(mockStampCard));
 
         // when
-        StoreStampCardSummaryResponse response = customerStoreService.getStoreStampCardSummary(storeId);
+        StoreStampCardSummaryResponse response =
+                customerStoreService.getStoreStampCardSummary(storeId);
 
         // then
         assertThat(response).isNotNull();
@@ -66,11 +63,13 @@ class CustomerStoreServiceTest {
         Store mockStore = createMockStore(storeId, "테스트 매장", StoreStatus.ACTIVE);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
-        when(stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE))
+        when(stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                        storeId, StampCardStatus.ACTIVE))
                 .thenReturn(Optional.empty());
 
         // when
-        StoreStampCardSummaryResponse response = customerStoreService.getStoreStampCardSummary(storeId);
+        StoreStampCardSummaryResponse response =
+                customerStoreService.getStoreStampCardSummary(storeId);
 
         // then
         assertThat(response).isNotNull();
@@ -86,8 +85,10 @@ class CustomerStoreServiceTest {
         when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> customerStoreService.getStoreStampCardSummary(storeId));
+        BusinessException exception =
+                assertThrows(
+                        BusinessException.class,
+                        () -> customerStoreService.getStoreStampCardSummary(storeId));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.STORE_NOT_FOUND);
     }
@@ -101,8 +102,10 @@ class CustomerStoreServiceTest {
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
 
         // when & then
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> customerStoreService.getStoreStampCardSummary(storeId));
+        BusinessException exception =
+                assertThrows(
+                        BusinessException.class,
+                        () -> customerStoreService.getStoreStampCardSummary(storeId));
 
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.STORE_INACTIVE);
     }
@@ -110,20 +113,20 @@ class CustomerStoreServiceTest {
     // Helper methods to create mock objects
     private Store createMockStore(Long id, String name, StoreStatus status) {
         Store store = org.mockito.Mockito.mock(Store.class);
-        when(store.getId()).thenReturn(id);
-        when(store.getName()).thenReturn(name);
-        when(store.getStatus()).thenReturn(status);
+        lenient().when(store.getId()).thenReturn(id);
+        lenient().when(store.getName()).thenReturn(name);
+        lenient().when(store.getStatus()).thenReturn(status);
         return store;
     }
 
     private StampCard createMockStampCard(Store store) {
         StampCard stampCard = org.mockito.Mockito.mock(StampCard.class);
-        when(stampCard.getId()).thenReturn(10L);
-        when(stampCard.getName()).thenReturn("테스트 스탬프카드");
-        when(stampCard.getReward()).thenReturn("아메리카노 1잔");
-        when(stampCard.getStampBenefit()).thenReturn("음료 1잔당 1개");
-        when(stampCard.getImageUrl()).thenReturn("http://example.com/image.png");
-        when(stampCard.getStore()).thenReturn(store);
+        lenient().when(stampCard.getId()).thenReturn(10L);
+        lenient().when(stampCard.getName()).thenReturn("테스트 스탬프카드");
+        lenient().when(stampCard.getReward()).thenReturn("아메리카노 1잔");
+        lenient().when(stampCard.getStampBenefit()).thenReturn("음료 1잔당 1개");
+        lenient().when(stampCard.getImageUrl()).thenReturn("http://example.com/image.png");
+        lenient().when(stampCard.getStore()).thenReturn(store);
         return stampCard;
     }
 }

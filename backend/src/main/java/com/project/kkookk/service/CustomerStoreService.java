@@ -11,12 +11,11 @@ import com.project.kkookk.domain.StampCard;
 import com.project.kkookk.domain.Store;
 import com.project.kkookk.repository.StampCardRepository;
 import com.project.kkookk.repository.StoreRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,19 +27,20 @@ public class CustomerStoreService {
 
     @Cacheable(value = CacheConfig.STORE_SUMMARY_CACHE, key = "#storeId")
     public StoreStampCardSummaryResponse getStoreStampCardSummary(Long storeId) {
-        Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+        Store store =
+                storeRepository
+                        .findById(storeId)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
         if (store.getStatus() != StoreStatus.ACTIVE) {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
-        Optional<StampCard> activeStampCardOpt = stampCardRepository
-                .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE);
+        Optional<StampCard> activeStampCardOpt =
+                stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                        storeId, StampCardStatus.ACTIVE);
 
-        StampCardInfo stampCardInfo = activeStampCardOpt
-                .map(StampCardInfo::from)
-                .orElse(null);
+        StampCardInfo stampCardInfo = activeStampCardOpt.map(StampCardInfo::from).orElse(null);
 
         return new StoreStampCardSummaryResponse(store.getName(), stampCardInfo);
     }
