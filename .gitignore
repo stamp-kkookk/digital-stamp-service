@@ -1,3 +1,4 @@
 .claude/settings.local.json
 .idea
-.npm-cache/\nmocks/
+.npm-cache/
+.vscode

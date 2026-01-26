@@ -1,4 +1,7 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
+
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
     username: sa
@@ -30,3 +33,7 @@ app:
 logging:
   level:
     org.hibernate.SQL: DEBUG
+
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-minimum-256-bits-required-for-testing
+  access-token-expiration: 3600000
