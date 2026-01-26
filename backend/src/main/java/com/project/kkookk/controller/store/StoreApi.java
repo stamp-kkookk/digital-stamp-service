@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-/** 매장 관리 API. */
 @Tag(name = "Store", description = "매장 관리 API")
 @SecurityRequirement(name = "bearerAuth")
 public interface StoreApi {

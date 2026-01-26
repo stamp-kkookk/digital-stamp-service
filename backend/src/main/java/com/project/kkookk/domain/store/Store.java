@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/** 매장 엔티티. */
 @Entity
 @Table(name = "store")
 public class Store extends BaseTimeEntity {
@@ -37,15 +36,6 @@ public class Store extends BaseTimeEntity {
 
     protected Store() {}
 
-    /**
-     * 매장 생성자.
-     *
-     * @param name 매장명
-     * @param address 매장 주소
-     * @param phone 매장 전화번호
-     * @param status 매장 상태
-     * @param ownerAccountId 점주 ID
-     */
     public Store(
             final String name,
             final String address,
@@ -59,14 +49,6 @@ public class Store extends BaseTimeEntity {
         this.ownerAccountId = ownerAccountId;
     }
 
-    /**
-     * 매장 정보 수정.
-     *
-     * @param name 매장명
-     * @param address 매장 주소
-     * @param phone 매장 전화번호
-     * @param status 매장 상태
-     */
     public void update(
             final String name, final String address, final String phone, final StoreStatus status) {
         this.name = name;

@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** 매장 관리 컨트롤러. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/owner/stores")

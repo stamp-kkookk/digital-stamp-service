@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-/** 매장 수정 요청 DTO. */
 @Schema(description = "매장 수정 요청")
 public record StoreUpdateRequest(
         @Schema(description = "매장명", example = "스타벅스 강남점")
