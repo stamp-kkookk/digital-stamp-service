@@ -12,9 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(
-        name = "stamp_cards",
-        indexes = {@Index(name = "idx_stamp_cards_store_id", columnList = "store_id")})
+@Table(name = "stamp_cards")
 public class StampCard extends BaseTimeEntity {
 
     @Id
