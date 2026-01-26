@@ -6,7 +6,7 @@ import com.project.kkookk.controller.stampcard.dto.StampCardResponse;
 import com.project.kkookk.controller.stampcard.dto.UpdateStampCardRequest;
 import com.project.kkookk.controller.stampcard.dto.UpdateStampCardStatusRequest;
 import com.project.kkookk.domain.stampcard.StampCardStatus;
-import com.project.kkookk.global.response.ErrorResponse;
+import com.project.kkookk.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

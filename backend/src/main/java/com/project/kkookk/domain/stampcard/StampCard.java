@@ -1,6 +1,6 @@
 package com.project.kkookk.domain.stampcard;
 
-import com.project.kkookk.domain.common.BaseTimeEntity;
+import com.project.kkookk.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

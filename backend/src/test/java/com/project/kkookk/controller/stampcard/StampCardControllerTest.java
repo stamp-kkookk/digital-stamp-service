@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -14,6 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.kkookk.controller.owner.config.TestSecurityConfig;
+import com.project.kkookk.controller.owner.config.WithMockOwner;
 import com.project.kkookk.controller.stampcard.dto.CreateStampCardRequest;
 import com.project.kkookk.controller.stampcard.dto.StampCardListResponse;
 import com.project.kkookk.controller.stampcard.dto.StampCardResponse;
@@ -21,6 +24,7 @@ import com.project.kkookk.controller.stampcard.dto.StampCardSummary;
 import com.project.kkookk.controller.stampcard.dto.UpdateStampCardRequest;
 import com.project.kkookk.controller.stampcard.dto.UpdateStampCardStatusRequest;
 import com.project.kkookk.domain.stampcard.StampCardStatus;
+import com.project.kkookk.global.security.JwtAuthenticationFilter;
 import com.project.kkookk.service.stampcard.StampCardService;
 import com.project.kkookk.service.stampcard.exception.StampCardAlreadyActiveException;
 import com.project.kkookk.service.stampcard.exception.StampCardDeleteNotAllowedException;
@@ -28,27 +32,38 @@ import com.project.kkookk.service.stampcard.exception.StampCardNotFoundException
 import com.project.kkookk.service.stampcard.exception.StampCardStatusInvalidException;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-@WebMvcTest(
-        controllers = StampCardController.class,
-        excludeAutoConfiguration = {
-            org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
-        })
+@WebMvcTest(StampCardController.class)
+@Import(TestSecurityConfig.class)
+@WithMockOwner(ownerId = 1L, email = "owner@example.com")
 class StampCardControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
     @Autowired private ObjectMapper objectMapper;
 
+    @Autowired private WebApplicationContext context;
+
     @MockitoBean private StampCardService stampCardService;
+
+    @MockitoBean private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @BeforeEach
+    public void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    }
 
     @Test
     @DisplayName("스탬프 카드 생성 성공")
@@ -102,7 +117,7 @@ class StampCardControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }
 
     @Test
@@ -119,7 +134,7 @@ class StampCardControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }
 
     @Test

@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useStampCardCreation } from '../hooks/useStampCardCreation'
 import { DesignStudioPanel } from '../components/DesignStudioPanel'
 import { PreviewPanel } from '../components/PreviewPanel'
 import { RulesPanel } from '../components/RulesPanel'
+import { stampCardFormSchema, type StampCardFormData } from '../schemas/stampCardSchema'
 import type { StampCardDesign } from '@/types/stampCard'
 import { STAMP_CARD_STATUS } from '@/types/stampCard'
 import { showToast } from '@/lib/toast'
@@ -14,23 +17,36 @@ export function StampCardCreationPage() {
     const navigate = useNavigate()
     const { createStampCard, publishStampCard, isCreating, isPublishing } = useStampCardCreation(Number(storeId))
 
+    // Form with validation
+    const form = useForm<StampCardFormData>({
+        resolver: zodResolver(stampCardFormSchema),
+        mode: 'onChange',
+        defaultValues: {
+            title: '',
+            goalStampCount: 8,
+            rewardName: '',
+            rewardQuantity: 1,
+            expireDays: 30,
+        },
+    })
+
+    const { handleSubmit, watch, setValue } = form
+
     // Design state
     const [mode, setMode] = useState<'custom' | 'puzzle'>('custom')
-    const [totalStamps, setTotalStamps] = useState(8)
     const [puzzleGrid, setPuzzleGrid] = useState<'2x2' | '3x3' | '4x4' | '5x4'>('3x3')
     const [puzzleImage, setPuzzleImage] = useState<string | null>(null)
     const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
     const [emptyIcon, setEmptyIcon] = useState<string | null>(null)
     const [stampIcon, setStampIcon] = useState<string | null>(null)
 
-    // Rules state
-    const [cardTitle, setCardTitle] = useState('')
-    const [rewardName, setRewardName] = useState('')
-    const [rewardQuantity, setRewardQuantity] = useState(1)
-    const [expireDays, setExpireDays] = useState(30)
-
     // Loading/Error states
     const [saveError, setSaveError] = useState<string | null>(null)
+
+    // Watch form values for preview
+    const goalStampCount = watch('goalStampCount')
+    const title = watch('title')
+    const rewardName = watch('rewardName')
 
     const buildDesignJson = (): string => {
         const design: StampCardDesign = {
@@ -49,44 +65,16 @@ export function StampCardCreationPage() {
         return JSON.stringify(design)
     }
 
-    const validateForm = (): string | null => {
-        if (!cardTitle.trim()) {
-            return '카드 제목을 입력해주세요'
-        }
-        if (cardTitle.length > 100) {
-            return '카드 제목은 100자 이하여야 합니다'
-        }
-        if (totalStamps < 4 || totalStamps > 20) {
-            return '스탬프 개수는 4~20개 사이여야 합니다'
-        }
-        if (rewardName && rewardName.length > 255) {
-            return '리워드 명은 255자 이하여야 합니다'
-        }
-        if (rewardQuantity < 1) {
-            return '리워드 수량은 1 이상이어야 합니다'
-        }
-        if (expireDays < 1) {
-            return '리워드 유효기간은 1일 이상이어야 합니다'
-        }
-        return null
-    }
-
-    const handleSaveDraft = async () => {
-        const validationError = validateForm()
-        if (validationError) {
-            setSaveError(validationError)
-            return
-        }
-
+    const onSaveDraft = async (data: StampCardFormData) => {
         try {
             setSaveError(null)
             await createStampCard({
-                title: cardTitle,
-                goalStampCount: totalStamps,
-                requiredStamps: totalStamps,
-                rewardName: rewardName || undefined,
-                rewardQuantity: rewardQuantity || undefined,
-                expireDays: expireDays || undefined,
+                title: data.title,
+                goalStampCount: data.goalStampCount,
+                requiredStamps: data.goalStampCount,
+                rewardName: data.rewardName || undefined,
+                rewardQuantity: data.rewardQuantity,
+                expireDays: data.expireDays,
                 designJson: buildDesignJson(),
             })
 
@@ -100,13 +88,7 @@ export function StampCardCreationPage() {
         }
     }
 
-    const handlePublish = async () => {
-        const validationError = validateForm()
-        if (validationError) {
-            setSaveError(validationError)
-            return
-        }
-
+    const onPublish = async (data: StampCardFormData) => {
         if (!confirm('스탬프 카드를 발행하시겠습니까? 발행 후에는 일부 항목만 수정할 수 있습니다.')) {
             return
         }
@@ -115,12 +97,12 @@ export function StampCardCreationPage() {
             setSaveError(null)
             // Step 1: Create as DRAFT
             const created = await createStampCard({
-                title: cardTitle,
-                goalStampCount: totalStamps,
-                requiredStamps: totalStamps,
-                rewardName: rewardName || undefined,
-                rewardQuantity: rewardQuantity || undefined,
-                expireDays: expireDays || undefined,
+                title: data.title,
+                goalStampCount: data.goalStampCount,
+                requiredStamps: data.goalStampCount,
+                rewardName: data.rewardName || undefined,
+                rewardQuantity: data.rewardQuantity,
+                expireDays: data.expireDays,
                 designJson: buildDesignJson(),
             })
 
@@ -139,6 +121,9 @@ export function StampCardCreationPage() {
             console.error('Publish error:', error)
         }
     }
+
+    const handleSaveDraft = handleSubmit(onSaveDraft)
+    const handlePublish = handleSubmit(onPublish)
 
     const isProcessing = isCreating || isPublishing
 
@@ -187,8 +172,8 @@ export function StampCardCreationPage() {
                     <DesignStudioPanel
                         mode={mode}
                         onModeChange={setMode}
-                        totalStamps={totalStamps}
-                        onTotalStampsChange={setTotalStamps}
+                        totalStamps={goalStampCount}
+                        onTotalStampsChange={(value) => setValue('goalStampCount', value, { shouldValidate: true })}
                         puzzleGrid={puzzleGrid}
                         onPuzzleGridChange={setPuzzleGrid}
                         puzzleImage={puzzleImage}
@@ -206,29 +191,20 @@ export function StampCardCreationPage() {
                 <div className="flex-1 overflow-y-auto">
                     <PreviewPanel
                         mode={mode}
-                        totalStamps={totalStamps}
+                        totalStamps={goalStampCount}
                         puzzleGrid={puzzleGrid}
                         puzzleImage={puzzleImage}
                         backgroundImage={backgroundImage}
                         emptyIcon={emptyIcon}
                         stampIcon={stampIcon}
-                        cardTitle={cardTitle}
-                        rewardName={rewardName}
+                        cardTitle={title}
+                        rewardName={rewardName || ''}
                     />
                 </div>
 
                 {/* Right Panel - Rules */}
                 <div className="w-full lg:w-[320px] border-t lg:border-t-0 lg:border-l border-black/5 bg-white">
-                    <RulesPanel
-                        cardTitle={cardTitle}
-                        onCardTitleChange={setCardTitle}
-                        rewardName={rewardName}
-                        onRewardNameChange={setRewardName}
-                        rewardQuantity={rewardQuantity}
-                        onRewardQuantityChange={setRewardQuantity}
-                        expireDays={expireDays}
-                        onExpireDaysChange={setExpireDays}
-                    />
+                    <RulesPanel form={form} />
                 </div>
             </div>
         </div>
