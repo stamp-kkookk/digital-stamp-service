@@ -13,6 +13,5 @@ import org.springframework.test.context.TestPropertySource;
 class KkookkApplicationTests {
 
     @Test
-    void contextLoads() {
-    }
+    void contextLoads() {}
 }
