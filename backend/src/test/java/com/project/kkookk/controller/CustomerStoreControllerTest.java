@@ -8,8 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.kkookk.common.exception.BusinessException;
-import com.project.kkookk.common.exception.ErrorCode;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.controller.dto.StampCardInfo;
 import com.project.kkookk.controller.dto.StoreStampCardSummaryResponse;
 import com.project.kkookk.service.CustomerStoreService;
@@ -37,7 +37,7 @@ class CustomerStoreControllerTest {
     void getStoreSummary_Success() throws Exception {
         // given
         long storeId = 1L;
-        StampCardInfo stampCardInfo = new StampCardInfo(10L, "테스트 스탬프카드", "리워드", "혜택", "url");
+        StampCardInfo stampCardInfo = new StampCardInfo(10L, "테스트 스탬프카드", "아메리카노 1잔", 10, "{\"color\":\"blue\"}");
         StoreStampCardSummaryResponse mockResponse =
                 new StoreStampCardSummaryResponse("테스트 매장", stampCardInfo);
 
@@ -49,7 +49,7 @@ class CustomerStoreControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.storeName").value("테스트 매장"))
                 .andExpect(jsonPath("$.stampCard").exists())
-                .andExpect(jsonPath("$.stampCard.name").value("테스트 스탬프카드"))
+                .andExpect(jsonPath("$.stampCard.title").value("테스트 스탬프카드"))
                 .andDo(print());
     }
 
@@ -84,7 +84,7 @@ class CustomerStoreControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("STORE_NOT_FOUND"))
-                .andExpect(jsonPath("$.message").value("매장을 찾을 수 없습니다."))
+                .andExpect(jsonPath("$.message").value("매장을 찾을 수 없습니다"))
                 .andDo(print());
     }
 
@@ -98,10 +98,10 @@ class CustomerStoreControllerTest {
 
         // when & then
         mockMvc.perform(get("/api/customer/stores/{storeId}/summary", storeId))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("STORE_INACTIVE"))
-                .andExpect(jsonPath("$.message").value("현재 운영 중인 매장이 아닙니다."))
+                .andExpect(jsonPath("$.message").value("비활성화된 매장입니다"))
                 .andDo(print());
     }
 }

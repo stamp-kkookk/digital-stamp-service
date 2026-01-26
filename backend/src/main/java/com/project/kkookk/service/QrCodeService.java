@@ -1,10 +1,10 @@
 package com.project.kkookk.service;
 
 import com.project.kkookk.adapter.s3.FileStorageAdapter;
-import com.project.kkookk.common.exception.BusinessException;
-import com.project.kkookk.common.exception.ErrorCode;
-import com.project.kkookk.domain.Store;
-import com.project.kkookk.repository.StoreRepository;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.domain.store.Store;
+import com.project.kkookk.repository.store.StoreRepository;
 import com.project.kkookk.util.QrGenerator;
 import java.net.URL;
 import lombok.RequiredArgsConstructor;

@@ -6,5 +6,8 @@ public enum StoreStatus {
     ACTIVE,
 
     /** 비활성 상태. */
-    INACTIVE
+    INACTIVE,
+
+    /** 삭제됨. */
+    DELETED
 }

@@ -1,15 +1,19 @@
 package com.project.kkookk.controller.dto;
 
-import com.project.kkookk.domain.StampCard;
+import com.project.kkookk.domain.stampcard.StampCard;
 
 public record StampCardInfo(
-        Long stampCardId, String name, String reward, String stampBenefit, String imageUrl) {
+        Long stampCardId,
+        String title,
+        String rewardName,
+        Integer goalStampCount,
+        String designJson) {
     public static StampCardInfo from(StampCard stampCard) {
         return new StampCardInfo(
                 stampCard.getId(),
-                stampCard.getName(),
-                stampCard.getReward(),
-                stampCard.getStampBenefit(),
-                stampCard.getImageUrl());
+                stampCard.getTitle(),
+                stampCard.getRewardName(),
+                stampCard.getGoalStampCount(),
+                stampCard.getDesignJson());
     }
 }

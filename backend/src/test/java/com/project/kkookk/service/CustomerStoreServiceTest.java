@@ -5,15 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.project.kkookk.common.domain.StampCardStatus;
-import com.project.kkookk.common.domain.StoreStatus;
-import com.project.kkookk.common.exception.BusinessException;
-import com.project.kkookk.common.exception.ErrorCode;
+import com.project.kkookk.domain.stampcard.StampCard;
+import com.project.kkookk.domain.stampcard.StampCardStatus;
+import com.project.kkookk.domain.store.Store;
+import com.project.kkookk.domain.store.StoreStatus;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.controller.dto.StoreStampCardSummaryResponse;
-import com.project.kkookk.domain.StampCard;
-import com.project.kkookk.domain.Store;
-import com.project.kkookk.repository.StampCardRepository;
-import com.project.kkookk.repository.StoreRepository;
+import com.project.kkookk.repository.stampcard.StampCardRepository;
+import com.project.kkookk.repository.store.StoreRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class CustomerStoreServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.storeName()).isEqualTo("테스트 매장");
         assertThat(response.stampCard()).isNotNull();
-        assertThat(response.stampCard().name()).isEqualTo("테스트 스탬프카드");
+        assertThat(response.stampCard().title()).isEqualTo("테스트 스탬프카드");
     }
 
     @Test
@@ -122,11 +122,10 @@ class CustomerStoreServiceTest {
     private StampCard createMockStampCard(Store store) {
         StampCard stampCard = org.mockito.Mockito.mock(StampCard.class);
         lenient().when(stampCard.getId()).thenReturn(10L);
-        lenient().when(stampCard.getName()).thenReturn("테스트 스탬프카드");
-        lenient().when(stampCard.getReward()).thenReturn("아메리카노 1잔");
-        lenient().when(stampCard.getStampBenefit()).thenReturn("음료 1잔당 1개");
-        lenient().when(stampCard.getImageUrl()).thenReturn("http://example.com/image.png");
-        lenient().when(stampCard.getStore()).thenReturn(store);
+        lenient().when(stampCard.getTitle()).thenReturn("테스트 스탬프카드");
+        lenient().when(stampCard.getRewardName()).thenReturn("아메리카노 1잔");
+        lenient().when(stampCard.getGoalStampCount()).thenReturn(10);
+        lenient().when(stampCard.getDesignJson()).thenReturn("{\"color\":\"blue\"}");
         return stampCard;
     }
 }

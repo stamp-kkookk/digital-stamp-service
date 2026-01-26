@@ -1,16 +1,16 @@
 package com.project.kkookk.service;
 
-import com.project.kkookk.common.domain.StampCardStatus;
-import com.project.kkookk.common.domain.StoreStatus;
-import com.project.kkookk.common.exception.BusinessException;
-import com.project.kkookk.common.exception.ErrorCode;
+import com.project.kkookk.domain.stampcard.StampCard;
+import com.project.kkookk.domain.stampcard.StampCardStatus;
+import com.project.kkookk.domain.store.Store;
+import com.project.kkookk.domain.store.StoreStatus;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.config.CacheConfig;
 import com.project.kkookk.controller.dto.StampCardInfo;
 import com.project.kkookk.controller.dto.StoreStampCardSummaryResponse;
-import com.project.kkookk.domain.StampCard;
-import com.project.kkookk.domain.Store;
-import com.project.kkookk.repository.StampCardRepository;
-import com.project.kkookk.repository.StoreRepository;
+import com.project.kkookk.repository.stampcard.StampCardRepository;
+import com.project.kkookk.repository.store.StoreRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;

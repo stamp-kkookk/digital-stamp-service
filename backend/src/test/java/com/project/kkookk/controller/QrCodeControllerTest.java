@@ -6,8 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.project.kkookk.common.exception.BusinessException;
-import com.project.kkookk.common.exception.ErrorCode;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.service.QrCodeService;
 import java.net.URL;
 import org.junit.jupiter.api.DisplayName;
