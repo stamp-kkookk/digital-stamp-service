@@ -36,8 +36,8 @@ logs/
 ################################
 # Environment variables
 .env
-.env.*
-!.env.example
+config/checkstyle/.env.example
+!config/checkstyle/.env.example
 
 # Spring profiles (local/dev only)
 application-local.yml

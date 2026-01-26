@@ -58,3 +58,6 @@ Thumbs.db
 # Misc
 *.bak
 *.tmp
+
+# Mock images (screenshots for design reference)
+mock/*.png

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import axiosInstance from '../lib/api/axiosInstance'
+import apiClient from '../lib/api/client'
 import type { CreateStoreRequest, CreateStoreResponse } from '../types/storeRegistration'
 
 /**
@@ -14,7 +14,7 @@ export const useCreateStore = () => {
 
     return useMutation({
         mutationFn: async (data: CreateStoreRequest): Promise<CreateStoreResponse> => {
-            const response = await axiosInstance.post<CreateStoreResponse>(
+            const response = await apiClient.post<CreateStoreResponse>(
                 '/api/owner/stores',
                 data
             )

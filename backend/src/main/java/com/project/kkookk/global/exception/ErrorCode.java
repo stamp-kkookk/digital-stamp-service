@@ -12,6 +12,10 @@ public enum ErrorCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "INVALID_INPUT_VALUE", "입력값이 올바르지 않습니다"),
     INTERNAL_SERVER_ERROR(
             HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다"),
+    FILE_STORAGE_ERROR(
+            HttpStatus.INTERNAL_SERVER_ERROR, "FILE_STORAGE_ERROR", "파일 저장 중 오류가 발생했습니다"),
+    QR_GENERATION_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR, "QR_GENERATION_FAILED", "QR 코드 생성 중 오류가 발생했습니다"),
 
     // Auth
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다"),
@@ -35,7 +39,17 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST, "STAMP_CARD_UPDATE_NOT_ALLOWED", "활성 상태에서는 일부 필드만 수정할 수 있습니다"),
 
     // Store
-    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다");
+    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),
+    STORE_INACTIVE(HttpStatus.BAD_REQUEST, "STORE_INACTIVE", "비활성화된 매장입니다"),
+
+    // Terminal
+    TERMINAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "TERMINAL_ACCESS_DENIED", "단말기 접근 권한이 없습니다"),
+
+    // Issuance
+    ISSUANCE_REQUEST_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "발급 요청을 찾을 수 없습니다"),
+    ISSUANCE_REQUEST_NOT_PENDING(
+            HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다");
 
     private final HttpStatus status;
     private final String code;
