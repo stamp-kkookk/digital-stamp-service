@@ -2,10 +2,6 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import StoreSummaryContainer from './StoreSummaryContainer';
 import * as useStoreSummaryQueryModule from '../../../hooks/queries/useStoreSummaryQuery'; // Import module to mock
-import Loading from '../../../components/common/Loading';
-import Error from '../../../components/common/Error';
-import Empty from '../../../components/common/Empty';
-import StoreSummary from './components/StoreSummary';
 import type { StoreStampCardSummaryResponse } from 'store-types';
 
 // Mock child components to simplify testing StoreSummaryContainer's conditional rendering
@@ -34,7 +30,7 @@ describe('StoreSummaryContainer', () => {
     data: StoreStampCardSummaryResponse | undefined,
     isLoading: boolean,
     isError: boolean,
-    error?: Error
+    error?: any // Change type to any for flexible error mocking
   ) => {
     return vi.spyOn(useStoreSummaryQueryModule, 'useStoreSummaryQuery').mockReturnValue({
       data,
@@ -54,9 +50,19 @@ describe('StoreSummaryContainer', () => {
     expect(screen.getByTestId('loading-component')).toBeInTheDocument();
   });
 
-  it('renders Error component when there is an error', () => {
-    const errorMessage = 'Network Error';
-    mockUseStoreSummaryQuery(undefined, false, true, new Error(errorMessage));
+  it('renders Error component with custom message when error.response.data.message exists', () => {
+    const customErrorMessage = 'Custom error message from API';
+    const errorResponse = {
+      response: { data: { message: customErrorMessage } },
+    };
+    mockUseStoreSummaryQuery(undefined, false, true, errorResponse);
+    render(<StoreSummaryContainer storeId={mockStoreId} />);
+    expect(screen.getByTestId('error-component')).toHaveTextContent(customErrorMessage);
+  });
+  
+  it('renders default Error component message when error has no specific message', () => {
+    // Simulate a generic network error or error without a specific message from API
+    mockUseStoreSummaryQuery(undefined, false, true, new Error('Network Error'));
     render(<StoreSummaryContainer storeId={mockStoreId} />);
     expect(screen.getByTestId('error-component')).toHaveTextContent(
       '매장 정보를 불러오는데 실패했습니다.'
