@@ -1,9 +1,4 @@
-const Loading = () => {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      <p className="text-lg text-gray-500">불러오는 중...</p>
-    </div>
-  );
-};
-
-export default Loading;
+/**
+ * @deprecated Use LoadingView from @/components/common/StateViews instead
+ */
+export { LoadingView as default } from './StateViews'

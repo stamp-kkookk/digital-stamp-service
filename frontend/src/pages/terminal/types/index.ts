@@ -8,10 +8,8 @@ export interface TerminalLoginResponse {
   refreshToken: string;
 }
 
-export interface OwnerStore {
-  storeId: string;
-  storeName: string;
-}
+// Re-export from central store types
+export type { OwnerStore } from '@/types/store'
 
 export interface PendingIssuanceRequest {
   requestId: string;

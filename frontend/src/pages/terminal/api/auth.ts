@@ -1,4 +1,4 @@
-import apiClient from '../../../lib/api/axios';
+import apiClient from '../../../lib/api/client';
 import type { TerminalLoginRequest, TerminalLoginResponse } from '../types';
 
 export const terminalLogin = async (credentials: TerminalLoginRequest): Promise<TerminalLoginResponse> => {

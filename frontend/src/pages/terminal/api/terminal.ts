@@ -1,4 +1,4 @@
-import apiClient from '../../../lib/api/axios';
+import apiClient from '../../../lib/api/client';
 import type { PendingIssuancesResponse, DashboardKpi } from '../types';
 
 interface FetchIssuancesParams {

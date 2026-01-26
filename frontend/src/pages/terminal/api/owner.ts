@@ -1,4 +1,4 @@
-import apiClient from '../../../lib/api/axios';
+import apiClient from '../../../lib/api/client';
 import type { OwnerStore } from '../types';
 
 export const fetchOwnerStores = async (): Promise<OwnerStore[]> => {
