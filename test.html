@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stamp Card Maker Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 아이콘 컴포넌트 간이 구현 (Lucide CDN 사용)
+        const Icon = ({ name, size = 20, className = "" }) => {
+            useEffect(() => { lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} className={className} style={{ width: size, height: size }}></i>;
+        };
+
+        const StampCardMaker = () => {
+            const [mode, setMode] = useState('custom');
+            const [viewMode, setViewMode] = useState('design');
+            const [totalStamps, setTotalStamps] = useState(10);
+            const [stampedCount, setStampedCount] = useState(2);
+            const [cardTitle, setCardTitle] = useState("마이 카페 리워드");
+            const [rewardName, setRewardName] = useState("아메리카노 1잔 무료");
+
+            const handleStampClick = (index) => {
+                if (viewMode === 'simulator') {
+                    setStampedCount(index + 1);
+                }
+            };
+
+            return (
+                <div className="flex h-screen bg-gray-50 text-slate-900 overflow-hidden font-sans">
+                    {/* 왼쪽 설정 패널 */}
+                    <div className="w-80 bg-white border-r border-gray-200 flex flex-col shrink-0">
+                        <div className="p-6 border-b">
+                            <h2 className="text-xl font-bold">Design Studio</h2>
+                        </div>
+                        <div className="p-6 space-y-8 overflow-y-auto">
+                            <section>
+                                <label className="text-xs font-bold text-gray-400 uppercase block mb-3">Stamp Mode</label>
+                                <div className="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-lg">
+                                    <button onClick={() => setMode('custom')} className={`py-2 text-sm rounded-md ${mode === 'custom' ? 'bg-white shadow font-bold text-blue-600' : 'text-gray-500'}`}>일반</button>
+                                    <button onClick={() => setMode('puzzle')} className={`py-2 text-sm rounded-md ${mode === 'puzzle' ? 'bg-white shadow font-bold text-blue-600' : 'text-gray-500'}`}>퍼즐</button>
+                                </div>
+                            </section>
+                            <section>
+                                <label className="text-xs font-bold text-gray-400 uppercase block mb-3">Grid Layout</label>
+                                <input type="range" min="4" max="20" value={totalStamps} onChange={(e) => setTotalStamps(parseInt(e.target.value))} className="w-full accent-blue-600" />
+                                <div className="flex justify-between text-sm mt-2"><span>총 개수</span><b>{totalStamps}개</b></div>
+                            </section>
+                            <section className="space-y-3">
+                                <label className="text-xs font-bold text-gray-400 uppercase block">텍스트 설정</label>
+                                <input type="text" value={cardTitle} onChange={(e) => setCardTitle(e.target.value)} className="w-full border p-2 rounded-md text-sm" placeholder="카드 제목" />
+                                <input type="text" value={rewardName} onChange={(e) => setRewardName(e.target.value)} className="w-full border p-2 rounded-md text-sm" placeholder="리워드 이름" />
+                            </section>
+                        </div>
+                    </div>
+
+                    {/* 중앙 프리뷰 패널 */}
+                    <div className="flex-1 flex flex-col bg-slate-100 relative">
+                        <div className="h-16 bg-white border-b flex items-center justify-center z-10">
+                            <div className="flex bg-gray-200 p-1 rounded-full text-xs font-semibold">
+                                <button onClick={() => setViewMode('design')} className={`px-6 py-1.5 rounded-full ${viewMode === 'design' ? 'bg-white shadow' : 'text-gray-500'}`}>Design</button>
+                                <button onClick={() => setViewMode('simulator')} className={`px-6 py-1.5 rounded-full ${viewMode === 'simulator' ? 'bg-white shadow' : 'text-gray-500'}`}>Simulator</button>
+                            </div>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center p-10">
+                            <div className="w-[320px] h-[640px] bg-black rounded-[45px] shadow-2xl p-3 border-[6px] border-slate-800 relative">
+                                <div className="w-full h-full bg-white rounded-[35px] overflow-hidden flex flex-col">
+                                    <div className="h-40 bg-blue-600 p-6 pt-10 text-white">
+                                        <h3 className="text-lg font-bold">{cardTitle}</h3>
+                                        <p className="text-xs opacity-80">{rewardName}</p>
+                                    </div>
+                                    <div className="flex-1 p-4 -mt-8">
+                                        <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col border border-gray-100">
+                                            <div className="grid grid-cols-4 gap-2">
+                                                {[...Array(totalStamps)].map((_, i) => (
+                                                    <div key={i} onClick={() => handleStampClick(i)} className={`aspect-square rounded-lg flex items-center justify-center transition-all ${viewMode === 'simulator' ? 'cursor-pointer hover:bg-blue-50' : ''} ${i < stampedCount ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                                                        {i < stampedCount ? <Icon name="check-circle-2" className="text-blue-600" /> : <div className="w-4 h-4 bg-gray-200 rounded-full" />}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="mt-auto">
+                                                <button className={`w-full py-3 rounded-xl font-bold text-sm ${stampedCount >= totalStamps ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                    {stampedCount >= totalStamps ? '쿠폰 받기' : '도장을 더 모아보세요'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<StampCardMaker />);
+    </script>
+</body>
+
+</html>
