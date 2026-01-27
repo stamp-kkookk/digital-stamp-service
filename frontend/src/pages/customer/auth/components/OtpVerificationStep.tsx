@@ -23,7 +23,7 @@ const OtpVerificationStep = ({
 }: OtpVerificationStepProps) => {
   const {
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     setValue,
     watch,
   } = useForm<OtpVerificationFormData>({

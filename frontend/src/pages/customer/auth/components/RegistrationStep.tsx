@@ -25,7 +25,6 @@ const RegistrationStep = ({
     register,
     handleSubmit,
     formState: { errors, isValid },
-    watch,
   } = useForm<CustomerRegistrationFormData>({
     resolver: zodResolver(customerRegistrationSchema),
     mode: 'onChange',
@@ -34,8 +33,6 @@ const RegistrationStep = ({
       nickname,
     },
   });
-
-  const nicknameValue = watch('nickname');
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);

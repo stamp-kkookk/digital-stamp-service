@@ -20,7 +20,6 @@ const PhoneInputStep = ({
   clearError,
 }: PhoneInputStepProps) => {
   const {
-    register,
     handleSubmit,
     formState: { errors, isValid },
     setValue,
