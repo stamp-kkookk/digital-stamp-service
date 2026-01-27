@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import type { OwnerStore } from '../../types';
+import { Card } from '@/components/ui/Card';
 
 interface StoreCardProps {
   store: OwnerStore;
@@ -13,28 +15,18 @@ const StoreCard = ({ store }: StoreCardProps) => {
   };
 
   return (
-    <div
-      className="flex items-center justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer"
+    <Card
+      variant="elevated"
+      padding="md"
       onClick={handleClick}
+      className="flex items-center justify-between cursor-pointer"
     >
       <div>
-        <p className="text-lg font-semibold">{store.storeName}</p>
-        <p className="text-sm text-gray-500">ID: {store.storeId}</p>
+        <p className="text-lg font-semibold text-kkookk-navy">{store.storeName}</p>
+        <p className="text-sm text-kkookk-steel">ID: {store.storeId}</p>
       </div>
-      <svg
-        className="h-6 w-6 text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </div>
+      <ChevronRight className="h-6 w-6 text-kkookk-steel" />
+    </Card>
   );
 };
 

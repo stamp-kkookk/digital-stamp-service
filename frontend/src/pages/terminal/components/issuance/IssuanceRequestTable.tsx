@@ -1,5 +1,9 @@
 import { ArrowPathIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import type { PendingIssuanceRequest } from '../../types';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Card } from '@/components/ui/Card';
 
 interface IssuanceRequestTableProps {
   requests: PendingIssuanceRequest[];
@@ -10,25 +14,35 @@ interface IssuanceRequestTableProps {
 
 const TableRow = ({ request, onApprove, onReject }: { request: PendingIssuanceRequest, onApprove: (id: string) => void, onReject: (id: string) => void }) => {
   return (
-    <tr className="bg-white border-b">
+    <tr className="bg-white border-b border-black/5">
       <td className="px-6 py-4">
-        <div className="font-medium">{request.customerNickname}</div>
-        <div className="text-sm text-gray-500">{request.customerPhoneNumber}</div>
+        <div className="font-medium text-kkookk-navy">{request.customerNickname}</div>
+        <div className="text-sm text-kkookk-steel">{request.customerPhoneNumber}</div>
       </td>
-      <td className="px-6 py-4">{new Date(request.requestedAt).toLocaleString()}</td>
-      <td className="px-6 py-4">{new Date(request.expiresAt).toLocaleString()}</td>
+      <td className="px-6 py-4 text-kkookk-steel">{new Date(request.requestedAt).toLocaleString()}</td>
+      <td className="px-6 py-4 text-kkookk-steel">{new Date(request.expiresAt).toLocaleString()}</td>
       <td className="px-6 py-4">
-        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-          {request.status}
-        </span>
+        <Badge variant="warning" size="sm">{request.status}</Badge>
       </td>
-      <td className="px-6 py-4 space-x-2">
-        <button onClick={() => onReject(request.requestId)} className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200">
-          <XMarkIcon className="h-5 w-5" />
-        </button>
-        <button onClick={() => onApprove(request.requestId)} className="p-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200">
-          <CheckIcon className="h-5 w-5" />
-        </button>
+      <td className="px-6 py-4">
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={() => onReject(request.requestId)}
+            className="!h-9 !w-9 !p-0"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => onApprove(request.requestId)}
+            className="!h-9 !w-9 !p-0 !bg-kkookk-green hover:!bg-kkookk-green/90"
+          >
+            <CheckIcon className="h-5 w-5" />
+          </Button>
+        </div>
       </td>
     </tr>
   );
@@ -36,23 +50,28 @@ const TableRow = ({ request, onApprove, onReject }: { request: PendingIssuanceRe
 
 const IssuanceRequestTable = ({ requests, onApprove, onReject, onRefresh }: IssuanceRequestTableProps) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow mt-4">
+    <Card padding="md" className="mt-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">실시간 발급 요청 목록</h2>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
+        <h2 className="text-lg font-semibold text-kkookk-navy">실시간 발급 요청 목록</h2>
+        <div className="flex items-center gap-2">
+          <Input
+            inputSize="sm"
             placeholder="고객 닉네임, 번호 검색"
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+            className="w-56"
           />
-          <button onClick={onRefresh} className="p-2 text-gray-500 hover:text-gray-700">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onRefresh}
+            className="!h-10 !w-10 !p-0"
+          >
             <ArrowPathIcon className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="relative overflow-x-auto">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+        <table className="w-full text-sm text-left">
+          <thead className="text-xs text-kkookk-steel uppercase bg-kkookk-navy-50">
             <tr>
               <th scope="col" className="px-6 py-3">고객 정보</th>
               <th scope="col" className="px-6 py-3">요청 시간</th>
@@ -68,7 +87,7 @@ const IssuanceRequestTable = ({ requests, onApprove, onReject, onRefresh }: Issu
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 };
 
