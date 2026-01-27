@@ -1,12 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../../../../components/ui/Button';
 import type { UserStatus } from '../types';
 
 // Heroicon: arrow-right
 const ArrowRightIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1"
+    className="h-5 w-5 transition-transform group-hover:translate-x-1"
     fill="none"
     viewBox="0 0 24 24"
     stroke="currentColor"
@@ -55,13 +56,15 @@ const CtaSection: React.FC<CtaSectionProps> = ({ userStatus, storeId }) => {
 
   return (
     <section className="w-full">
-      <button
+      <Button
         onClick={action}
-        className="group w-full flex items-center justify-center bg-black text-white font-bold py-4 px-6 rounded-2xl shadow-lg hover:bg-gray-900 transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-50"
+        variant="primary"
+        size="lg"
+        className="w-full group shadow-kkookk-lg hover:shadow-kkookk-lg hover:-translate-y-0.5"
+        rightIcon={<ArrowRightIcon />}
       >
         {text}
-        <ArrowRightIcon />
-      </button>
+      </Button>
     </section>
   );
 };
