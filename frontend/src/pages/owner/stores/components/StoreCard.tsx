@@ -1,5 +1,6 @@
 import type { Store, ViewMode } from '../../../../types/store'
 import { MapPin, Phone, Users, Ticket, TrendingUp, TrendingDown } from 'lucide-react'
+import { Badge } from '@/components/ui/Badge'
 
 interface StoreCardProps {
     store: Store
@@ -10,7 +11,7 @@ interface StoreCardProps {
 export default function StoreCard({ store, viewMode, onClick }: StoreCardProps) {
     const isActive = store.status === 'ACTIVE'
     const statusLabel = isActive ? '영업중' : '준비중'
-    const statusColorClass = isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+    const statusVariant = isActive ? 'success' : 'warning'
 
     const weeklyChange = store.weeklyChange ?? 0
     const isPositiveChange = weeklyChange >= 0
@@ -42,9 +43,9 @@ export default function StoreCard({ store, viewMode, onClick }: StoreCardProps) 
             >
                 {/* Status Badge */}
                 <div className="flex-shrink-0">
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${statusColorClass}`}>
+                    <Badge variant={statusVariant} size="sm">
                         {statusLabel}
-                    </span>
+                    </Badge>
                 </div>
 
                 {/* Store Info */}
@@ -107,9 +108,9 @@ export default function StoreCard({ store, viewMode, onClick }: StoreCardProps) 
         >
             {/* Status Badge */}
             <div className="mb-4">
-                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${statusColorClass}`}>
+                <Badge variant={statusVariant} size="sm">
                     {statusLabel}
-                </span>
+                </Badge>
             </div>
 
             {/* Store Info */}

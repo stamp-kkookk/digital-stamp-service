@@ -1,5 +1,6 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 
 interface MetricCardProps {
     title: string
@@ -14,7 +15,7 @@ export default function MetricCard({ title, value, unit, change, trend }: Metric
     const chartData = trend.map((value, index) => ({ index, value }))
 
     return (
-        <div className="group flex flex-col p-6 bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out">
+        <Card variant="elevated" padding="md" className="group flex flex-col">
             {/* Header */}
             <div className="mb-4">
                 <h3 className="text-sm font-medium text-kkookk-steel mb-2">{title}</h3>
@@ -57,6 +58,6 @@ export default function MetricCard({ title, value, unit, change, trend }: Metric
                 </span>
                 <span className="text-xs text-kkookk-steel ml-1">전주 대비</span>
             </div>
-        </div>
+        </Card>
     )
 }

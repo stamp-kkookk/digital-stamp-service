@@ -1,5 +1,6 @@
 import type { Store, ViewMode } from '../../../../types/store'
 import StoreCard from './StoreCard'
+import { Button } from '@/components/ui/Button'
 
 interface StoreGridProps {
     stores: Store[]
@@ -19,13 +20,15 @@ export default function StoreGrid({ stores, viewMode, onStoreClick, onNewStore }
                 <p className="text-xl font-semibold text-kkookk-navy">등록된 매장이 없습니다</p>
                 <p className="text-sm text-kkookk-steel">첫 매장을 등록해보세요</p>
                 {onNewStore && (
-                    <button
+                    <Button
                         onClick={onNewStore}
-                        className="btn-secondary mt-2"
+                        variant="secondary"
+                        size="md"
+                        className="mt-2"
                         aria-label="새 매장 등록하기"
                     >
                         + 새 매장 등록
-                    </button>
+                    </Button>
                 )}
             </div>
         )

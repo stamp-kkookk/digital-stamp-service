@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { Button } from '@/components/ui/Button'
 import OwnerLayout from '../../../../components/layout/OwnerLayout'
 import WizardProgressBar from './components/WizardProgressBar'
 import WizardStepContainer from './components/WizardStepContainer'
@@ -224,44 +225,41 @@ export default function StoreRegistrationWizardPage() {
                             {/* Navigation Buttons */}
                             <div className="flex items-center justify-between gap-4">
                                 {/* Back Button */}
-                                <button
+                                <Button
                                     type="button"
                                     onClick={handleBack}
                                     disabled={currentStep === 1}
-                                    className="btn-ghost flex items-center gap-2"
+                                    variant="ghost"
+                                    size="md"
+                                    leftIcon={<ArrowLeft className="h-5 w-5" />}
                                 >
-                                    <ArrowLeft className="h-5 w-5" />
                                     이전
-                                </button>
+                                </Button>
 
                                 {/* Next/Submit Button */}
                                 {currentStep < 3 ? (
-                                    <button
+                                    <Button
                                         type="button"
                                         onClick={handleNext}
                                         disabled={!canProceed()}
-                                        className="btn-secondary flex items-center gap-2"
+                                        variant="secondary"
+                                        size="md"
+                                        rightIcon={<ArrowRight className="h-5 w-5" />}
                                     >
                                         다음
-                                        <ArrowRight className="h-5 w-5" />
-                                    </button>
+                                    </Button>
                                 ) : (
-                                    <button
+                                    <Button
                                         type="submit"
                                         disabled={
                                             !canProceed() || createStoreMutation.isPending
                                         }
-                                        className="btn-secondary flex items-center gap-2"
+                                        variant="secondary"
+                                        size="md"
+                                        isLoading={createStoreMutation.isPending}
                                     >
-                                        {createStoreMutation.isPending ? (
-                                            <>
-                                                <Loader2 className="h-5 w-5 animate-spin" />
-                                                등록 중...
-                                            </>
-                                        ) : (
-                                            '매장 등록 완료'
-                                        )}
-                                    </button>
+                                        매장 등록 완료
+                                    </Button>
                                 )}
                             </div>
 

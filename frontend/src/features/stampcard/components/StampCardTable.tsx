@@ -1,5 +1,6 @@
 import { Edit2, Trash2, Play, Pause, Archive } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Badge } from '@/components/ui/Badge'
 import type { StampCardSummary, StampCardStatus } from '@/types/stampCard'
 import { STAMP_CARD_STATUS } from '@/types/stampCard'
 
@@ -19,27 +20,27 @@ export function StampCardTable({ cards, onDelete, onUpdateStatus, isDeleting, is
         const configs = {
             [STAMP_CARD_STATUS.DRAFT]: {
                 label: '임시저장',
-                className: 'bg-kkookk-steel/10 text-kkookk-steel',
+                variant: 'default' as const,
             },
             [STAMP_CARD_STATUS.ACTIVE]: {
                 label: '발행중',
-                className: 'bg-green-50 text-green-700',
+                variant: 'success' as const,
             },
             [STAMP_CARD_STATUS.PAUSED]: {
                 label: '일시정지',
-                className: 'bg-kkookk-amber/10 text-kkookk-amber',
+                variant: 'warning' as const,
             },
             [STAMP_CARD_STATUS.ARCHIVED]: {
                 label: '보관됨',
-                className: 'bg-gray-100 text-gray-600',
+                variant: 'default' as const,
             },
         }
 
         const config = configs[status]
         return (
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${config.className}`}>
+            <Badge variant={config.variant} size="sm">
                 {config.label}
-            </span>
+            </Badge>
         )
     }
 
