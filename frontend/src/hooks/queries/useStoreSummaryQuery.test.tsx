@@ -15,6 +15,7 @@ describe('useStoreSummaryQuery', () => {
         },
       },
     });
+    vi.clearAllMocks(); // Clear all mocks between tests
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (

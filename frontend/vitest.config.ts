@@ -9,6 +9,9 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: './src/test/setup.ts',
     css: true,
+    env: {
+      VITE_USE_MOCK: 'false', // Disable mock mode in tests to allow proper mocking
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
