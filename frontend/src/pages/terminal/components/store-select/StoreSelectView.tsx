@@ -1,6 +1,6 @@
 import type { OwnerStore } from '../../types';
 import StoreCard from './StoreCard';
-import Empty from '../../../../components/common/Empty'; // Common Empty component
+import Empty from '@/components/shared/Empty';
 
 interface StoreSelectViewProps {
   stores: OwnerStore[];

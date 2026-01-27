@@ -1,8 +1,8 @@
 import AuthLayout from './components/AuthLayout';
 import StoreSelectView from './components/store-select/StoreSelectView';
 import { useOwnerStoresQuery } from './hooks/useOwnerStoresQuery';
-import Loading from '../../components/common/Loading';
-import Error from '../../components/common/Error';
+import Loading from '@/components/shared/Loading';
+import Error from '@/components/shared/Error';
 
 const StoreSelectPage = () => {
   const { data: stores, isLoading, isError, refetch } = useOwnerStoresQuery();

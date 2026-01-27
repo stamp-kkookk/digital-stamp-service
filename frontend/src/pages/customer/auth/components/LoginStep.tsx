@@ -5,11 +5,11 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../../../components/ui/button';
-import { PhoneInput } from '../../../../components/form/PhoneInput';
-import { Input } from '../../../../components/ui/input';
-import { loginSchema } from '../../../../lib/validation/customer';
-import type { LoginFormData } from '../../../../lib/validation/customer';
+import { Button } from '@/components/ui/button';
+import { PhoneInput } from '@/components/shared/form/PhoneInput';
+import { Input } from '@/components/ui/input';
+import { loginSchema } from '@/lib/utils/validation/customer';
+import type { LoginFormData } from '@/lib/utils/validation/customer';
 import type { LoginStepProps } from '../types';
 
 const LoginStep = ({

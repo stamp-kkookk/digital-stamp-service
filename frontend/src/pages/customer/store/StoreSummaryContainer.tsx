@@ -1,7 +1,7 @@
-import { useStoreSummaryQuery } from '../../../hooks/queries/useStoreSummaryQuery';
-import Loading from '../../../components/common/Loading';
-import Error from '../../../components/common/Error';
-import Empty from '../../../components/common/Empty';
+import { useStoreSummaryQuery } from '@/hooks/queries/useStoreSummaryQuery';
+import Loading from '@/components/shared/Loading';
+import Error from '@/components/shared/Error';
+import Empty from '@/components/shared/Empty';
 import StoreSummary from './components/StoreSummary';
 
 interface StoreSummaryContainerProps {

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { storeNameSchema, addressSchema, phoneSchema } from '@/lib/validation'
+import { storeNameSchema, addressSchema, phoneSchema } from '@/lib/utils/validation'
 
 /**
  * Store Registration Wizard Validation Schemas

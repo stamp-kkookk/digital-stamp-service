@@ -11,7 +11,7 @@ interface LoadingViewProps {
 
 export const LoadingView = ({ message = '불러오는 중...', className = '' }: LoadingViewProps) => {
     return (
-        <div className={`flex items-center justify-center ${className || 'h-screen'}`}>
+        <div className={`flex items-center justify-center ${className || 'h-screen'}`} data-testid="loading-component">
             <p className="text-lg text-gray-500">{message}</p>
         </div>
     )
@@ -33,7 +33,7 @@ export const ErrorView = ({
     className = '',
 }: ErrorViewProps) => {
     return (
-        <div className={`flex flex-col items-center justify-center ${className || 'h-screen'}`}>
+        <div className={`flex flex-col items-center justify-center ${className || 'h-screen'}`} data-testid="error-component">
             <p className="text-lg text-red-500">{message}</p>
             {onRetry && (
                 <button
@@ -65,7 +65,7 @@ export const EmptyView = ({ title, description, message, action, className = '' 
     const displayDescription = description
 
     return (
-        <div className={`flex flex-col items-center justify-center text-center ${className || 'h-64'}`}>
+        <div className={`flex flex-col items-center justify-center text-center ${className || 'h-64'}`} data-testid="empty-component">
             {displayTitle && <p className="text-lg text-gray-500">{displayTitle}</p>}
             {displayDescription && <p className="text-sm text-gray-400 mt-2">{displayDescription}</p>}
             {action && <div className="mt-4">{action}</div>}

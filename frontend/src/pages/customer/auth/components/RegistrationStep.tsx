@@ -5,10 +5,10 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../../../components/ui/button';
-import { Input } from '../../../../components/ui/input';
-import { customerRegistrationSchema } from '../../../../lib/validation/customer';
-import type { CustomerRegistrationFormData } from '../../../../lib/validation/customer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { customerRegistrationSchema } from '@/lib/utils/validation/customer';
+import type { CustomerRegistrationFormData } from '@/lib/utils/validation/customer';
 import type { RegistrationStepProps } from '../types';
 
 const RegistrationStep = ({

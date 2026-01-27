@@ -7,8 +7,8 @@ import { useDashboardKpiQuery } from './hooks/useDashboardKpiQuery';
 import { usePendingIssuancesQuery } from './hooks/usePendingIssuancesQuery';
 import { useApproveIssuanceMutation } from './hooks/useApproveIssuanceMutation';
 import { useRejectIssuanceMutation } from './hooks/useRejectIssuanceMutation';
-import Error from '../../components/common/Error';
-import Loading from '../../components/common/Loading';
+import Error from '@/components/shared/Error';
+import Loading from '@/components/shared/Loading';
 
 const IssuanceDashboardPage = () => {
   const { storeId } = useParams<{ storeId: string }>();
