@@ -1,6 +1,6 @@
 import type { Store, ViewMode } from '../../../../types/store'
 import StoreCard from './StoreCard'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface StoreGridProps {
     stores: Store[]

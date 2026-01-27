@@ -1,6 +1,6 @@
 import { LineChart, Line, ResponsiveContainer } from 'recharts'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { Card } from '@/components/ui/Card'
+import { Card } from '@/components/ui/card'
 
 interface MetricCardProps {
     title: string

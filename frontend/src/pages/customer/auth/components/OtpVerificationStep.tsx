@@ -5,7 +5,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '../../../../components/ui/button';
 import { OtpInput } from '../../../../components/form/OtpInput';
 import { otpVerificationSchema } from '../../../../lib/validation/customer';
 import type { OtpVerificationFormData } from '../../../../lib/validation/customer';

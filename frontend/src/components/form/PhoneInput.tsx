@@ -1,6 +1,6 @@
 import React, { forwardRef, useState, useEffect } from 'react';
-import { Input } from '../ui/Input';
-import type { InputProps } from '../ui/Input';
+import { Input } from '../ui/input';
+import type { InputProps } from '../ui/input';
 
 export interface PhoneInputProps extends Omit<InputProps, 'type' | 'value' | 'onChange'> {
   value: string;

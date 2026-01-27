@@ -5,7 +5,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '../../../../components/ui/Button';
+import { Button } from '../../../../components/ui/button';
 import { PhoneInput } from '../../../../components/form/PhoneInput';
 import { phoneInputSchema } from '../../../../lib/validation/customer';
 import type { PhoneInputFormData } from '../../../../lib/validation/customer';

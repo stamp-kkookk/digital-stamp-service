@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import type { OwnerStore } from '../../types';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 
 interface StoreCardProps {
   store: OwnerStore;

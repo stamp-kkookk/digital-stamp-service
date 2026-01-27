@@ -1,6 +1,5 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
   // Base styles
@@ -60,7 +59,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={buttonVariants({ variant, size, className })}
         disabled={isDisabled}
         {...props}
       >

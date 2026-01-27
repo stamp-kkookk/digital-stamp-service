@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { FormField } from '../FormField';
-import { Input } from '../../ui/Input';
+import { Input } from '../../ui/input';
 
 // Test wrapper component
 interface TestFormData {

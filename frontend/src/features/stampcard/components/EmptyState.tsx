@@ -1,6 +1,6 @@
 import { FileQuestion } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface EmptyStateProps {
     status?: string

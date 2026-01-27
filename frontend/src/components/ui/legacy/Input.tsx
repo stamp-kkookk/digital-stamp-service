@@ -1,6 +1,5 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
 
 const inputVariants = cva(
   'w-full px-4 transition-all border focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed',
@@ -84,12 +83,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
-            className={cn(
-              inputVariants({ variant, inputSize, hasError }),
-              leftIcon && 'pl-12',
-              rightIcon && 'pr-12',
-              className
-            )}
+            className={inputVariants({
+              variant,
+              inputSize,
+              hasError,
+              className: [
+                leftIcon && 'pl-12',
+                rightIcon && 'pr-12',
+                className,
+              ].filter(Boolean).join(' '),
+            })}
             maxLength={maxLength}
             value={value}
             aria-invalid={hasError}
