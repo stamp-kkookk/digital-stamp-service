@@ -22,6 +22,24 @@ description: design system with Tailwind v4.0, accessibility patterns, and proje
 
 ---
 
+## UI Component Library
+
+- **Base**: [shadcn/ui](https://ui.shadcn.com/) (Radix UI primitives + Tailwind)
+- Install components as needed: `npx shadcn@latest add button dialog ...`
+- Components are copied to `src/components/ui/` — customize freely to match KKOOKK design tokens
+- **Do NOT** install other UI libraries (MUI, Chakra, Ant Design, etc.) without explicit approval
+
+### When to Use shadcn/ui
+
+| Use shadcn/ui | Build from scratch |
+|---------------|-------------------|
+| Dialog, Modal, Sheet | Simple presentational components |
+| Dropdown, Select, Combobox | KKOOKK-specific stamp card UI |
+| Toast, Alert | Custom animations with Framer Motion |
+| Form inputs (with validation) | Layout components |
+
+---
+
 ## Tailwind CSS v4.0 Rules
 
 ### ⚠️ Configuration Method
