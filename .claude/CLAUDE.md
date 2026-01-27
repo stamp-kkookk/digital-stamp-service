@@ -7,7 +7,7 @@
 
 This repository contains:
 - `frontend/`: React + Tailwind web app (customer + owner/backoffice views)
-- `server/`: Spring Boot API (Java 17, MySQL)
+- `backend/` : Spring Boot 3.4+ API (Java 17, Swagger 2.7.0, MySQL)
 
 Product: **KKOOKK** (digital stamp / reward SaaS).
 - **No POS integration**: approval-based system (owner terminal confirms)
@@ -34,7 +34,7 @@ repo-root/
 │  └─ commands/
 ├─ frontend/
 │  └─ CLAUDE.md
-├─ server/
+├─ backend/
 │  └─ CLAUDE.md
 └─ .github/
    └─ pull_request_template.md
@@ -48,7 +48,7 @@ repo-root/
 2) Compare trade-offs + risks
 3) Recommend **1 option** (team chooses)
 4) Implement as **file-by-file diff**
-5) Provide **tests + verification checklist**
+5) Provide **tests + verification checklist** (Must use `@MockitoBean` for backend tests)
 
 Tip: split big tasks into phases and reset context between phases (e.g., `/clear`).
 
