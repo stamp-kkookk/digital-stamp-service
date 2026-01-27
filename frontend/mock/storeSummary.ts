@@ -1,4 +1,4 @@
-import type { StoreStampCardSummaryResponse } from 'store-types';
+import type { StoreStampCardSummaryResponse } from '../src/types/store';
 
 /**
  * Mock 데이터: 매장 스탬프 카드 요약

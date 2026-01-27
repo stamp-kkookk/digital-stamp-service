@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import StoreSummary from './StoreSummary';
-import type { StampCardInfo } from 'store-types';
+import type { StampCardInfo } from '@/types/store';
 
 // Mock CtaButton to isolate StoreSummary component
 vi.mock('./CtaButton', () => ({

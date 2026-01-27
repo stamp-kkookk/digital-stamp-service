@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import StoreSummaryContainer from './StoreSummaryContainer';
 import * as useStoreSummaryQueryModule from '../../../hooks/queries/useStoreSummaryQuery'; // Import module to mock
-import type { StoreStampCardSummaryResponse } from 'store-types';
+import type { StoreStampCardSummaryResponse } from '@/types/store';
 
 // Mock child components to simplify testing StoreSummaryContainer's conditional rendering
 vi.mock('../../../components/common/Loading', () => ({
