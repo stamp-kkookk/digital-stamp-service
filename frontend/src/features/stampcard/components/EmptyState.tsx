@@ -1,5 +1,6 @@
 import { FileQuestion } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from '@/components/ui/Button'
 
 interface EmptyStateProps {
     status?: string
@@ -47,12 +48,9 @@ export function EmptyState({ status }: EmptyStateProps) {
             </div>
 
             {!status && (
-                <button
-                    onClick={handleCreate}
-                    className="h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
-                >
+                <Button onClick={handleCreate} size="md">
                     스탬프 카드 만들기
-                </button>
+                </Button>
             )}
         </div>
     )
