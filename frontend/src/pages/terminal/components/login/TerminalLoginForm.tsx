@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Button } from '../../../../components/ui/Button';
+import { Input } from '../../../../components/ui/Input';
 import type { TerminalLoginRequest } from '../../types';
 
 const loginSchema = z.object({
@@ -25,51 +27,39 @@ const TerminalLoginForm = ({ onSubmit, isPending, error }: TerminalLoginFormProp
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          아이디 (이메일)
-        </label>
-        <input
-          type="email"
-          id="email"
-          {...register('email')}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          disabled={isPending}
-        />
-        {errors.email && (
-          <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
-        )}
-      </div>
-      <div>
-        <label htmlFor="password_hash" className="block text-sm font-medium text-gray-700">
-          비밀번호
-        </label>
-        <input
-          type="password"
-          id="password_hash"
-          {...register('password_hash')}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          disabled={isPending}
-        />
-        {errors.password_hash && (
-          <p className="mt-2 text-sm text-red-600">{errors.password_hash.message}</p>
-        )}
-      </div>
+      <Input
+        label="아이디 (이메일)"
+        type="email"
+        error={errors.email?.message}
+        disabled={isPending}
+        {...register('email')}
+      />
+
+      <Input
+        label="비밀번호"
+        type="password"
+        error={errors.password_hash?.message}
+        disabled={isPending}
+        {...register('password_hash')}
+      />
 
       {error && (
-        <p className="mt-2 text-sm text-red-600 text-center">{error}</p>
+        <p className="mt-2 text-sm text-kkookk-red text-center">{error}</p>
       )}
 
-      <button
+      <Button
         type="submit"
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        variant="secondary"
+        size="md"
+        className="w-full"
         disabled={isPending}
+        isLoading={isPending}
       >
-        {isPending ? '로그인 중...' : '관리자 로그인'}
-      </button>
+        관리자 로그인
+      </Button>
 
       <div className="text-center mt-4">
-        <a href="#" className="text-sm text-blue-600 hover:text-blue-500">
+        <a href="#" className="text-sm text-kkookk-indigo hover:text-kkookk-indigo-600">
           처음이신가요? 사장님 백오피스에서 매장을 등록한 후 단말기 로그인이 가능합니다.
         </a>
       </div>

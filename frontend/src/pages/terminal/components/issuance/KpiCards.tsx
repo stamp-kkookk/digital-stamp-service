@@ -1,3 +1,4 @@
+import { Card } from '../../../../components/ui/Card';
 import type { DashboardKpi } from '../../types';
 
 interface KpiCardsProps {
@@ -7,14 +8,14 @@ interface KpiCardsProps {
 
 const KpiCard = ({ title, value, isLoading }: { title: string; value?: number; isLoading: boolean }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+    <Card variant="default" padding="md">
+      <h3 className="text-sm font-medium text-kkookk-steel">{title}</h3>
       {isLoading ? (
-        <div className="h-8 bg-gray-200 rounded animate-pulse mt-1"></div>
+        <div className="h-8 bg-kkookk-navy-100 rounded animate-pulse mt-1"></div>
       ) : (
-        <p className="mt-1 text-3xl font-semibold">{value ?? '-'}</p>
+        <p className="mt-1 text-3xl font-semibold text-kkookk-navy">{value ?? '-'}</p>
       )}
-    </div>
+    </Card>
   );
 };
 
