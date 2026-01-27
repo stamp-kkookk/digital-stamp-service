@@ -1,6 +1,6 @@
 import { Edit2, Trash2, Play, Pause, Archive } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Badge } from '@/components/ui/Badge'
+import { Badge } from '@/components/ui/badge'
 import type { StampCardSummary, StampCardStatus } from '@/types/stampCard'
 import { STAMP_CARD_STATUS } from '@/types/stampCard'
 

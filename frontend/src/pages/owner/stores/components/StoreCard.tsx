@@ -1,6 +1,6 @@
 import type { Store, ViewMode } from '../../../../types/store'
 import { MapPin, Phone, Users, Ticket, TrendingUp, TrendingDown } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
+import { Badge } from '@/components/ui/badge'
 
 interface StoreCardProps {
     store: Store

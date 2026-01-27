@@ -1,5 +1,6 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
   'inline-flex items-center justify-center font-medium rounded-full',
@@ -35,7 +36,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     return (
       <span
         ref={ref}
-        className={badgeVariants({ variant, size, className })}
+        className={cn(badgeVariants({ variant, size }), className)}
         {...props}
       >
         {children}
