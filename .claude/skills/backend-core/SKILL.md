@@ -11,7 +11,7 @@ description: Design and implement backend APIs, services, JPA entities, and secu
 - Designing DTOs, entities, or database schema
 - Implementing service layer business logic
 - Adding security (OTP, rate limiting, audit logging)
-- Working with files under `server/`
+- Working with files under `backend/`
 
 ---
 
@@ -65,45 +65,52 @@ Log issuance/redeem/migration events with:
 ### Package Strategy (Feature-based)
 
 ```
-com.yourteam.kkoookk
+com.project.kkookk
   global/
     config/
     security/
     exception/
     response/
     util/
-  controller/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  service/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  repository/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  domain/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
+  owner/
+    controller/
+    service/
+    repository/
+    domain/
+  store/
+    controller/
+    service/
+    repository/
+    domain/
+  stampcard/
+    controller/
+    service/
+    repository/
+    domain/
+  wallet/
+    controller/
+    service/
+    repository/
+    domain/
+  issuance/
+    controller/
+    service/
+    repository/
+    domain/
+  redeem/
+    controller/
+    service/
+    repository/
+    domain/
+  migration/
+    controller/
+    service/
+    repository/
+    domain/
+  qrcode/
+    controller/
+    service/
+    exception/
 ```
 
 ### Layer Responsibilities
