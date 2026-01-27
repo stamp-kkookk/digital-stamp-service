@@ -6,5 +6,6 @@ export * from './form';
 export * from './select';
 export * from './checkbox';
 export * from './badge';
-export * from './Modal';
+export * from './dialog';
+export * from './modal';
 export * from './StateViews';
