@@ -49,7 +49,16 @@ public enum ErrorCode {
     ISSUANCE_REQUEST_NOT_FOUND(
             HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "발급 요청을 찾을 수 없습니다"),
     ISSUANCE_REQUEST_NOT_PENDING(
-            HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다");
+            HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
+
+    // OTP
+    OTP_RATE_LIMIT_EXCEEDED(
+            HttpStatus.TOO_MANY_REQUESTS, "OTP_001", "OTP 요청 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
+    OTP_SEND_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "OTP_002", "OTP 발송에 실패했습니다."),
+    OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP_003", "OTP가 만료되었습니다."),
+    OTP_EXHAUSTED(HttpStatus.BAD_REQUEST, "OTP_004", "OTP 시도 횟수를 초과했습니다."),
+    OTP_NOT_FOUND(HttpStatus.NOT_FOUND, "OTP_005", "OTP 세션을 찾을 수 없습니다."),
+    OTP_INVALID(HttpStatus.BAD_REQUEST, "OTP_006", "잘못된 OTP 코드입니다.");
 
     private final HttpStatus status;
     private final String code;

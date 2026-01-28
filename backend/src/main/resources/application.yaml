@@ -36,3 +36,12 @@ app:
 jwt:
   secret: kkookk-super-secret-key-for-jwt-token-generation-minimum-256-bits-required
   access-token-expiration: 3600000
+
+otp:
+  expiration-seconds: 180
+  max-attempts: 5
+  rate-limit:
+    window-seconds: 60
+    max-requests: 3
+  dev:
+    fixed-code: "123456"
