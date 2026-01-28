@@ -2,6 +2,7 @@ package com.project.kkookk.wallet.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.otp.controller.dto.OtpVerifyRequest;
 import com.project.kkookk.otp.controller.dto.OtpVerifyResponse;
 import com.project.kkookk.otp.service.OtpService;
@@ -22,6 +23,7 @@ public class WalletService {
 
     private final CustomerWalletRepository customerWalletRepository;
     private final OtpService otpService;
+    private final JwtUtil jwtUtil;
 
     /**
      * 지갑 최초 생성 (OTP 검증 후 처리)
@@ -60,6 +62,10 @@ public class WalletService {
         CustomerWallet savedWallet = customerWalletRepository.save(wallet);
         log.info("지갑 생성 완료: walletId={}, phone={}", savedWallet.getId(), savedWallet.getPhone());
 
-        return WalletRegisterResponse.from(savedWallet);
+        // 4. JWT 토큰 생성
+        String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId(), savedWallet.getPhone());
+        log.info("Customer 토큰 발급 완료: walletId={}", savedWallet.getId());
+
+        return WalletRegisterResponse.of(savedWallet, accessToken);
     }
 }

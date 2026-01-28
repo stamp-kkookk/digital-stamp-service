@@ -70,7 +70,8 @@ class WalletControllerTest {
                         "홍길동",
                         "길동이",
                         CustomerWalletStatus.ACTIVE,
-                        LocalDateTime.of(2026, 1, 28, 10, 30, 0));
+                        LocalDateTime.of(2026, 1, 28, 10, 30, 0),
+                        "test.jwt.token");
 
         given(walletService.registerWallet(any(WalletRegisterRequest.class))).willReturn(response);
 
@@ -86,7 +87,8 @@ class WalletControllerTest {
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.nickname").value("길동이"))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.createdAt").value("2026-01-28T10:30:00"));
+                .andExpect(jsonPath("$.createdAt").value("2026-01-28T10:30:00"))
+                .andExpect(jsonPath("$.accessToken").value("test.jwt.token"));
     }
 
     @Test

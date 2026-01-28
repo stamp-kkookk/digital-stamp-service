@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.otp.controller.dto.OtpVerifyRequest;
 import com.project.kkookk.otp.controller.dto.OtpVerifyResponse;
 import com.project.kkookk.otp.service.OtpService;
@@ -31,10 +32,12 @@ class WalletServiceTest {
 
     @Mock private OtpService otpService;
 
+    @Mock private JwtUtil jwtUtil;
+
     @InjectMocks private WalletService walletService;
 
     @Test
-    @DisplayName("OTP 검증 성공 후 지갑 생성 성공")
+    @DisplayName("OTP 검증 성공 후 지갑 생성 및 토큰 발급 성공")
     void registerWallet_Success() {
         // given
         WalletRegisterRequest request =
@@ -59,6 +62,9 @@ class WalletServiceTest {
                         .build();
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
 
+        String expectedToken = "test.jwt.token";
+        given(jwtUtil.generateCustomerToken(any(), any())).willReturn(expectedToken);
+
         // when
         WalletRegisterResponse response = walletService.registerWallet(request);
 
@@ -67,10 +73,12 @@ class WalletServiceTest {
         assertThat(response.name()).isEqualTo("홍길동");
         assertThat(response.nickname()).isEqualTo("길동이");
         assertThat(response.status()).isEqualTo(CustomerWalletStatus.ACTIVE);
+        assertThat(response.accessToken()).isEqualTo(expectedToken);
 
         verify(otpService).verifyOtp(any(OtpVerifyRequest.class));
         verify(customerWalletRepository).existsByPhone("010-1234-5678");
         verify(customerWalletRepository).save(any(CustomerWallet.class));
+        verify(jwtUtil).generateCustomerToken(any(), any());
     }
 
     @Test
