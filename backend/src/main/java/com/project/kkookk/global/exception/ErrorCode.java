@@ -58,7 +58,11 @@ public enum ErrorCode {
     OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP_003", "OTP가 만료되었습니다."),
     OTP_EXHAUSTED(HttpStatus.BAD_REQUEST, "OTP_004", "OTP 시도 횟수를 초과했습니다."),
     OTP_NOT_FOUND(HttpStatus.NOT_FOUND, "OTP_005", "OTP 세션을 찾을 수 없습니다."),
-    OTP_INVALID(HttpStatus.BAD_REQUEST, "OTP_006", "잘못된 OTP 코드입니다.");
+    OTP_INVALID(HttpStatus.BAD_REQUEST, "OTP_006", "잘못된 OTP 코드입니다."),
+
+    // Wallet
+    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다."),
+    OTP_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "WALLET_002", "OTP 검증에 실패했습니다.");
 
     private final HttpStatus status;
     private final String code;
