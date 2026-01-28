@@ -15,6 +15,8 @@ import com.project.kkookk.global.security.JwtAuthenticationFilter;
 import com.project.kkookk.otp.controller.config.OtpTestSecurityConfig;
 import com.project.kkookk.otp.controller.dto.OtpRequestRequest;
 import com.project.kkookk.otp.controller.dto.OtpRequestResponse;
+import com.project.kkookk.otp.controller.dto.OtpVerifyRequest;
+import com.project.kkookk.otp.controller.dto.OtpVerifyResponse;
 import com.project.kkookk.otp.service.OtpService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -150,5 +152,139 @@ class OtpControllerTest {
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.code").value("OTP_002"))
                 .andExpect(jsonPath("$.message").value("OTP 발송에 실패했습니다."));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 성공 - 200 OK")
+    @WithMockUser
+    void verifyOtp_Success() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest(
+                        "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "123456");
+
+        OtpVerifyResponse response = OtpVerifyResponse.of(true, "010-1234-5678");
+
+        given(otpService.verifyOtp(any(OtpVerifyRequest.class))).willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verified").value(true))
+                .andExpect(jsonPath("$.phone").value("010-1234-5678"));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - OTP 코드 불일치 (400)")
+    @WithMockUser
+    void verifyOtp_Fail_InvalidCode() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest(
+                        "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "999999");
+
+        given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.OTP_INVALID));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("OTP_006"))
+                .andExpect(jsonPath("$.message").value("잘못된 OTP 코드입니다."));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - OTP 만료 (400)")
+    @WithMockUser
+    void verifyOtp_Fail_Expired() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest(
+                        "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "123456");
+
+        given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.OTP_EXPIRED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("OTP_003"))
+                .andExpect(jsonPath("$.message").value("OTP가 만료되었습니다."));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - 시도 횟수 초과 (400)")
+    @WithMockUser
+    void verifyOtp_Fail_Exhausted() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest(
+                        "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "123456");
+
+        given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.OTP_EXHAUSTED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("OTP_004"))
+                .andExpect(jsonPath("$.message").value("OTP 시도 횟수를 초과했습니다."));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - 세션 없음 (404)")
+    @WithMockUser
+    void verifyOtp_Fail_NotFound() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest(
+                        "010-1234-5678", "invalid-verification-id", "123456");
+
+        given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.OTP_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("OTP_005"))
+                .andExpect(jsonPath("$.message").value("OTP 세션을 찾을 수 없습니다."));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - OTP 코드 형식 오류 (400)")
+    @WithMockUser
+    void verifyOtp_Fail_InvalidCodeFormat() throws Exception {
+        // given
+        OtpVerifyRequest request =
+                new OtpVerifyRequest("010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "12345");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }
 }

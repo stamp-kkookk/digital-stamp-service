@@ -15,7 +15,10 @@ import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.otp.config.OtpProperties;
 import com.project.kkookk.otp.controller.dto.OtpRequestRequest;
 import com.project.kkookk.otp.controller.dto.OtpRequestResponse;
+import com.project.kkookk.otp.controller.dto.OtpVerifyRequest;
+import com.project.kkookk.otp.controller.dto.OtpVerifyResponse;
 import com.project.kkookk.otp.domain.OtpSessionData;
+import com.project.kkookk.otp.domain.OtpSessionStatus;
 import com.project.kkookk.otp.service.sms.SmsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -148,5 +151,137 @@ class OtpServiceTest {
         verify(sessionCache).evict(eq("otp:session:010-1234-5678"));
         verify(sessionCache).put(eq("otp:session:010-1234-5678"), any(OtpSessionData.class));
         verify(rateLimitCache).put(eq("otp:rate:010-1234-5678"), eq(2));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 성공")
+    void verifyOtp_Success() {
+        // given
+        String phone = "010-1234-5678";
+        String verificationId = "550e8400-e29b-41d4-a716-446655440000";
+        String otpCode = "123456";
+
+        OtpVerifyRequest request = new OtpVerifyRequest(phone, verificationId, otpCode);
+
+        OtpSessionData sessionData =
+                OtpSessionData.builder()
+                        .phone(phone)
+                        .otpCode(otpCode)
+                        .verificationId(verificationId)
+                        .status(OtpSessionStatus.PENDING)
+                        .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
+                        .attemptCount(0)
+                        .createdAt(java.time.LocalDateTime.now())
+                        .build();
+
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
+                .willReturn(sessionData);
+
+        // when
+        OtpVerifyResponse response = otpService.verifyOtp(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.verified()).isTrue();
+        assertThat(response.phone()).isEqualTo(phone);
+
+        verify(sessionCache).put(eq("otp:session:" + phone), any(OtpSessionData.class));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - OTP 코드 불일치")
+    void verifyOtp_Fail_InvalidCode() {
+        // given
+        String phone = "010-1234-5678";
+        String verificationId = "550e8400-e29b-41d4-a716-446655440000";
+        String wrongOtpCode = "999999";
+
+        OtpVerifyRequest request = new OtpVerifyRequest(phone, verificationId, wrongOtpCode);
+
+        OtpSessionData sessionData =
+                OtpSessionData.builder()
+                        .phone(phone)
+                        .otpCode("123456")
+                        .verificationId(verificationId)
+                        .status(OtpSessionStatus.PENDING)
+                        .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
+                        .attemptCount(0)
+                        .createdAt(java.time.LocalDateTime.now())
+                        .build();
+
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
+                .willReturn(sessionData);
+
+        // when & then
+        assertThatThrownBy(() -> otpService.verifyOtp(request))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(
+                        exception -> {
+                            BusinessException be = (BusinessException) exception;
+                            assertThat(be.getErrorCode()).isEqualTo(ErrorCode.OTP_INVALID);
+                        });
+
+        // 시도 횟수 증가 확인
+        verify(sessionCache).put(eq("otp:session:" + phone), any(OtpSessionData.class));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - 세션 없음")
+    void verifyOtp_Fail_NotFound() {
+        // given
+        String phone = "010-1234-5678";
+        String verificationId = "invalid-verification-id";
+        String otpCode = "123456";
+
+        OtpVerifyRequest request = new OtpVerifyRequest(phone, verificationId, otpCode);
+
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> otpService.verifyOtp(request))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(
+                        exception -> {
+                            BusinessException be = (BusinessException) exception;
+                            assertThat(be.getErrorCode()).isEqualTo(ErrorCode.OTP_NOT_FOUND);
+                        });
+    }
+
+    @Test
+    @DisplayName("OTP 검증 실패 - 전화번호 불일치")
+    void verifyOtp_Fail_PhoneMismatch() {
+        // given
+        String phone = "010-1234-5678";
+        String wrongPhone = "010-9999-9999";
+        String verificationId = "550e8400-e29b-41d4-a716-446655440000";
+        String otpCode = "123456";
+
+        OtpVerifyRequest request = new OtpVerifyRequest(wrongPhone, verificationId, otpCode);
+
+        OtpSessionData sessionData =
+                OtpSessionData.builder()
+                        .phone(phone)
+                        .otpCode(otpCode)
+                        .verificationId(verificationId)
+                        .status(OtpSessionStatus.PENDING)
+                        .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
+                        .attemptCount(0)
+                        .createdAt(java.time.LocalDateTime.now())
+                        .build();
+
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
+                .willReturn(sessionData);
+
+        // when & then
+        assertThatThrownBy(() -> otpService.verifyOtp(request))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(
+                        exception -> {
+                            BusinessException be = (BusinessException) exception;
+                            assertThat(be.getErrorCode()).isEqualTo(ErrorCode.OTP_INVALID);
+                        });
     }
 }
