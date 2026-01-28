@@ -9,7 +9,7 @@
 - Axios (HTTP client)
 - React Hook Form + Zod (forms & validation)
 
-> Rule files live in `.claude/rules/frontend/*`.
+> Skill files live in `.claude/skills/frontend-core/*`, `.claude/skills/frontend-testing/*`, and `.claude/skills/design-system/*`.
 
 ## 2) Product contexts (KKOOKK)
 

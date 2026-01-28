@@ -10,15 +10,15 @@
 * MySQL
 * Spring Security (owner/admin auth)
 * Lombok (limited usage)
-* **Swagger (OpenAPI 3) via springdoc-openapi**
+* **Swagger (OpenAPI 3) via springdoc-openapi v2.7.0**
 * JUnit5 + Spring Boot Test
 
-> Rule files live in `.claude/rules/backend/*`.
+> Skill files live in `.claude/skills/backend-core/*` and `.claude/skills/backend-testing/*`.
 
 ✅ Recommended dependency (Spring Boot 3.x)
 
 ```gradle
-implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0"
+implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0"
 ```
 
 ---
@@ -85,6 +85,10 @@ Follow team conventions:
   → **테스트에서 snippet 생성은 하지 않는다**
   → 대신 **MockMvc 테스트는 “정상/실패 케이스 + 에러 응답 형식 보장”** 중심으로 검증한다.
 
+* Mocking Standards (Spring Boot 3.4+):
+  * Use `@MockitoBean` instead of `@MockBean`.
+  * Use `@MockitoSpyBean` instead of `@SpyBean`.
+  
 ---
 
 ## 7) Local commands
@@ -94,5 +98,5 @@ Follow team conventions:
 ./gradlew bootRun
 ```
 
-See `.claude/commands/be-api-design.md` and `.claude/commands/be-controller-service.md`.
+See `.claude/commands/be-api.md`, `.claude/commands/be-design.md`, `.claude/commands/be-impl.md`, `.claude/commands/be-review.md`, and `.claude/commands/be-test.md`.
 

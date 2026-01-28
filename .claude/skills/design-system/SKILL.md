@@ -23,7 +23,6 @@ description: design system with Tailwind v4.0, accessibility patterns, and proje
 ---
 
 ## UI Component Library
-
 - **Base**: [shadcn/ui](https://ui.shadcn.com/) (Radix UI primitives + Tailwind)
 - Install components as needed: `npx shadcn@latest add button dialog ...`
 - Components copied to `src/components/ui/` — customize freely
