@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, AlertCircle } from 'lucide-react'
+import OwnerLayout from '@/components/layout/OwnerLayout'
 import { useStampCardForm } from '../hooks/useStampCardForm'
 import { useStampCardDetail } from '../hooks/useStampCardDetail'
 import { DesignStudioPanel } from '../components/DesignStudioPanel'
@@ -219,44 +220,49 @@ export function StampCardFormPage() {
     // Loading state for edit mode
     if (isEditMode && isLoadingCard) {
         return (
-            <div className="min-h-screen bg-kkookk-paper flex items-center justify-center">
-                <div className="animate-pulse flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-kkookk-indigo/20"></div>
-                    <div className="text-sm text-kkookk-steel">데이터 로딩 중...</div>
+            <OwnerLayout>
+                <div className="flex items-center justify-center h-full">
+                    <div className="animate-pulse flex flex-col items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-kkookk-indigo/20"></div>
+                        <div className="text-sm text-kkookk-steel">데이터 로딩 중...</div>
+                    </div>
                 </div>
-            </div>
+            </OwnerLayout>
         )
     }
 
     // Error state for edit mode
     if (isEditMode && isLoadError) {
         return (
-            <div className="min-h-screen bg-kkookk-paper flex items-center justify-center">
-                <div className="flex flex-col items-center gap-6 py-16 px-4">
-                    <div className="flex items-center justify-center w-20 h-20 rounded-full bg-kkookk-red/10">
-                        <AlertCircle className="w-10 h-10 text-kkookk-red" />
-                    </div>
+            <OwnerLayout>
+                <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center gap-6 py-16 px-4">
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-kkookk-red/10">
+                            <AlertCircle className="w-10 h-10 text-kkookk-red" />
+                        </div>
 
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <h3 className="text-xl font-semibold text-kkookk-navy">데이터를 불러올 수 없습니다</h3>
-                        <p className="text-sm text-kkookk-steel">
-                            {loadError instanceof Error ? loadError.message : '알 수 없는 오류가 발생했습니다'}
-                        </p>
-                    </div>
+                        <div className="flex flex-col items-center gap-2 text-center">
+                            <h3 className="text-xl font-semibold text-kkookk-navy">데이터를 불러올 수 없습니다</h3>
+                            <p className="text-sm text-kkookk-steel">
+                                {loadError instanceof Error ? loadError.message : '알 수 없는 오류가 발생했습니다'}
+                            </p>
+                        </div>
 
-                    <button
-                        onClick={handleBack}
-                        className="h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
-                    >
-                        목록으로 돌아가기
-                    </button>
+                        <button
+                            onClick={handleBack}
+                            className="h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
+                        >
+                            목록으로 돌아가기
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </OwnerLayout>
         )
     }
 
     return (
-        <div className="min-h-screen bg-kkookk-paper">
+        <OwnerLayout>
+            <div className="bg-kkookk-paper -m-4 md:-m-8">
             {/* Header */}
             <header className="flex items-center justify-between h-16 px-4 lg:px-8 bg-white border-b border-black/5">
                 <div className="flex items-center gap-4">
@@ -327,49 +333,50 @@ export function StampCardFormPage() {
                 </div>
             )}
 
-            {/* Three-panel layout */}
-            <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-4rem)]">
-                {/* Left Panel - Design Studio */}
-                <div className="w-full lg:w-[320px] border-b lg:border-b-0 lg:border-r border-black/5 bg-white">
-                    <DesignStudioPanel
-                        mode={mode}
-                        onModeChange={setMode}
-                        totalStamps={goalStampCount}
-                        onTotalStampsChange={(value) => setValue('goalStampCount', value, { shouldValidate: true })}
-                        puzzleGrid={puzzleGrid}
-                        onPuzzleGridChange={setPuzzleGrid}
-                        puzzleImage={puzzleImage}
-                        onPuzzleImageChange={setPuzzleImage}
-                        backgroundImage={backgroundImage}
-                        onBackgroundImageChange={setBackgroundImage}
-                        emptyIcon={emptyIcon}
-                        onEmptyIconChange={setEmptyIcon}
-                        stampIcon={stampIcon}
-                        onStampIconChange={setStampIcon}
-                        disabled={isDesignLocked}
-                    />
-                </div>
+                {/* Three-panel layout */}
+                <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-4rem)]">
+                    {/* Left Panel - Design Studio */}
+                    <div className="w-full lg:w-[320px] border-b lg:border-b-0 lg:border-r border-black/5 bg-white">
+                        <DesignStudioPanel
+                            mode={mode}
+                            onModeChange={setMode}
+                            totalStamps={goalStampCount}
+                            onTotalStampsChange={(value) => setValue('goalStampCount', value, { shouldValidate: true })}
+                            puzzleGrid={puzzleGrid}
+                            onPuzzleGridChange={setPuzzleGrid}
+                            puzzleImage={puzzleImage}
+                            onPuzzleImageChange={setPuzzleImage}
+                            backgroundImage={backgroundImage}
+                            onBackgroundImageChange={setBackgroundImage}
+                            emptyIcon={emptyIcon}
+                            onEmptyIconChange={setEmptyIcon}
+                            stampIcon={stampIcon}
+                            onStampIconChange={setStampIcon}
+                            disabled={isDesignLocked}
+                        />
+                    </div>
 
-                {/* Center Panel - Preview */}
-                <div className="flex-1 overflow-y-auto">
-                    <PreviewPanel
-                        mode={mode}
-                        totalStamps={goalStampCount}
-                        puzzleGrid={puzzleGrid}
-                        puzzleImage={puzzleImage}
-                        backgroundImage={backgroundImage}
-                        emptyIcon={emptyIcon}
-                        stampIcon={stampIcon}
-                        cardTitle={title}
-                        rewardName={rewardName || ''}
-                    />
-                </div>
+                    {/* Center Panel - Preview */}
+                    <div className="flex-1 overflow-y-auto">
+                        <PreviewPanel
+                            mode={mode}
+                            totalStamps={goalStampCount}
+                            puzzleGrid={puzzleGrid}
+                            puzzleImage={puzzleImage}
+                            backgroundImage={backgroundImage}
+                            emptyIcon={emptyIcon}
+                            stampIcon={stampIcon}
+                            cardTitle={title}
+                            rewardName={rewardName || ''}
+                        />
+                    </div>
 
-                {/* Right Panel - Rules */}
-                <div className="w-full lg:w-[320px] border-t lg:border-t-0 lg:border-l border-black/5 bg-white">
-                    <RulesPanel form={form} />
+                    {/* Right Panel - Rules */}
+                    <div className="w-full lg:w-[320px] border-t lg:border-t-0 lg:border-l border-black/5 bg-white">
+                        <RulesPanel form={form} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </OwnerLayout>
     )
 }
