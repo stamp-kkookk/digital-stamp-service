@@ -53,7 +53,7 @@ export function StampCardTable({ cards, onDelete, onUpdateStatus, isDeleting, is
     }
 
     const handleEdit = (id: number) => {
-        navigate(`/o/stores/${storeId}/stamp-cards/${id}/edit`)
+        navigate(`/owner/stores/${storeId}/stamp-cards/${id}/edit`)
     }
 
     const handleDelete = async (id: number, title: string) => {
@@ -120,7 +120,7 @@ export function StampCardTable({ cards, onDelete, onUpdateStatus, isDeleting, is
                             <td className="px-6 py-4">
                                 <button
                                     onClick={() => handleEdit(card.id)}
-                                    className="text-base font-medium text-kkookk-navy hover:text-kkookk-orange-600 transition-colors text-left"
+                                    className="text-base font-medium text-kkookk-navy hover:text-kkookk-indigo transition-colors text-left"
                                 >
                                     {card.title}
                                 </button>
@@ -221,7 +221,7 @@ export function StampCardTable({ cards, onDelete, onUpdateStatus, isDeleting, is
                         <div className="flex items-start justify-between gap-3 mb-3">
                             <button
                                 onClick={() => handleEdit(card.id)}
-                                className="flex-1 text-left text-base font-semibold text-kkookk-navy hover:text-kkookk-orange-600 transition-colors"
+                                className="flex-1 text-left text-base font-semibold text-kkookk-navy hover:text-kkookk-indigo transition-colors"
                             >
                                 {card.title}
                             </button>
@@ -257,7 +257,7 @@ export function StampCardTable({ cards, onDelete, onUpdateStatus, isDeleting, is
                                     <button
                                         onClick={() => handleStatusChange(card.id, card.status)}
                                         disabled={isDeleting || isUpdatingStatus}
-                                        className="flex-1 h-12 px-4 rounded-xl bg-kkookk-orange-500 text-white font-medium active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 h-12 px-4 rounded-xl bg-kkookk-indigo text-white font-medium active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         발행
                                     </button>

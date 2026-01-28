@@ -129,7 +129,7 @@ export function StampCardFormPage() {
             })
 
             showToast.success('스탬프 카드가 임시 저장되었습니다')
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         } catch (error) {
             const errorMessage = error instanceof ApiError ? error.message : '저장 중 오류가 발생했습니다'
             setSaveError(errorMessage)
@@ -163,7 +163,7 @@ export function StampCardFormPage() {
             })
 
             showToast.success('스탬프 카드가 발행되었습니다')
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         } catch (error) {
             const errorMessage = error instanceof ApiError ? error.message : '발행 중 오류가 발생했습니다'
             setSaveError(errorMessage)
@@ -193,7 +193,7 @@ export function StampCardFormPage() {
             })
 
             showToast.success('스탬프 카드가 수정되었습니다')
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         } catch (error) {
             const errorMessage = error instanceof ApiError ? error.message : '수정 중 오류가 발생했습니다'
             setSaveError(errorMessage)
@@ -208,7 +208,7 @@ export function StampCardFormPage() {
 
     const handleBack = () => {
         if (confirm('변경 사항이 저장되지 않을 수 있습니다. 뒤로 가시겠습니까?')) {
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         }
     }
 
@@ -221,7 +221,7 @@ export function StampCardFormPage() {
         return (
             <div className="min-h-screen bg-kkookk-paper flex items-center justify-center">
                 <div className="animate-pulse flex flex-col items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-kkookk-orange-200"></div>
+                    <div className="w-12 h-12 rounded-full bg-kkookk-indigo/20"></div>
                     <div className="text-sm text-kkookk-steel">데이터 로딩 중...</div>
                 </div>
             </div>
@@ -246,7 +246,7 @@ export function StampCardFormPage() {
 
                     <button
                         onClick={handleBack}
-                        className="h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
+                        className="h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
                     >
                         목록으로 돌아가기
                     </button>
@@ -286,7 +286,7 @@ export function StampCardFormPage() {
                             type="button"
                             onClick={handleUpdate}
                             disabled={isProcessing}
-                            className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-orange-500 text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-indigo text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isUpdating ? '저장 중...' : '저장'}
                         </button>
@@ -296,7 +296,7 @@ export function StampCardFormPage() {
                                 type="button"
                                 onClick={handleSaveDraft}
                                 disabled={isProcessing}
-                                className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-sand text-kkookk-steel border border-black/5 font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-11 px-6 rounded-2xl transition-all bg-white border-2 border-kkookk-indigo text-kkookk-indigo hover:bg-kkookk-indigo hover:text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isCreating ? '저장 중...' : '임시 저장'}
                             </button>
@@ -304,7 +304,7 @@ export function StampCardFormPage() {
                                 type="button"
                                 onClick={handlePublish}
                                 disabled={isProcessing}
-                                className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-orange-500 text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-indigo text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isUpdatingStatus ? '발행 중...' : '발행'}
                             </button>

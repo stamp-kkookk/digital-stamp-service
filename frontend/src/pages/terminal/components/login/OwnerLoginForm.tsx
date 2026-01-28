@@ -10,13 +10,13 @@ const loginSchema = z.object({
   password_hash: z.string().min(6, '비밀번호는 최소 6자 이상이어야 합니다.'),
 });
 
-interface TerminalLoginFormProps {
+interface OwnerLoginFormProps {
   onSubmit: (data: TerminalLoginRequest) => void;
   isPending: boolean;
   error?: string;
 }
 
-const TerminalLoginForm = ({ onSubmit, isPending, error }: TerminalLoginFormProps) => {
+const OwnerLoginForm = ({ onSubmit, isPending, error }: OwnerLoginFormProps) => {
   const {
     register,
     handleSubmit,
@@ -60,11 +60,11 @@ const TerminalLoginForm = ({ onSubmit, isPending, error }: TerminalLoginFormProp
 
       <div className="text-center mt-4">
         <a href="#" className="text-sm text-kkookk-indigo hover:text-kkookk-indigo-600">
-          처음이신가요? 사장님 백오피스에서 매장을 등록한 후 단말기 로그인이 가능합니다.
+          처음이신가요? 회원가입 후 매장을 등록하고 관리를 시작하세요.
         </a>
       </div>
     </form>
   );
 };
 
-export default TerminalLoginForm;
+export default OwnerLoginForm;

@@ -15,13 +15,13 @@ interface MenuItem {
 
 export default function Sidebar({ className = '' }: SidebarProps) {
     const menuItems: MenuItem[] = [
-        { icon: Home, label: '대시보드', path: '/o/dashboard', isActive: false, isDisabled: true },
-        { icon: Store, label: '매장 관리', path: '/o/stores', isActive: true, isDisabled: false },
-        { icon: CreditCard, label: '스탬프카드 관리', path: '/o/stamp-cards', isActive: false, isDisabled: true },
-        { icon: CheckCircle, label: '적립 승인', path: '/o/approvals', isActive: false, isDisabled: true, badge: 5 },
-        { icon: FileText, label: '이전 요청 처리', path: '/o/migrations', isActive: false, isDisabled: true, badge: 3 },
-        { icon: BarChart3, label: '통계', path: '/o/stats', isActive: false, isDisabled: true },
-        { icon: Settings, label: '설정', path: '/o/settings', isActive: false, isDisabled: true },
+        { icon: Home, label: '대시보드', path: '/owner/dashboard', isActive: false, isDisabled: true },
+        { icon: Store, label: '매장 관리', path: '/owner/stores', isActive: true, isDisabled: false },
+        { icon: CreditCard, label: '스탬프카드 관리', path: '/owner/stamp-cards', isActive: false, isDisabled: true },
+        { icon: CheckCircle, label: '적립 승인', path: '/owner/approvals', isActive: false, isDisabled: true, badge: 5 },
+        { icon: FileText, label: '이전 요청 처리', path: '/owner/migrations', isActive: false, isDisabled: true, badge: 3 },
+        { icon: BarChart3, label: '통계', path: '/owner/stats', isActive: false, isDisabled: true },
+        { icon: Settings, label: '설정', path: '/owner/settings', isActive: false, isDisabled: true },
     ]
 
     const handleMenuClick = (item: MenuItem) => {

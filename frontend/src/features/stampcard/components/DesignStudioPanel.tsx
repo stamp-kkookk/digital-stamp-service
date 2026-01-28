@@ -101,11 +101,11 @@ export function DesignStudioPanel({
                         disabled={disabled}
                         className={twMerge(
                             'flex-1 h-11 rounded-2xl transition-all font-medium',
-                            'focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30',
+                            'focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30',
                             'disabled:opacity-50 disabled:cursor-not-allowed',
                             mode === 'custom'
                                 ? 'bg-kkookk-indigo text-white'
-                                : 'bg-kkookk-sand text-kkookk-steel border border-black/5'
+                                : 'bg-white text-kkookk-steel border-2 border-kkookk-steel/20'
                         )}
                     >
                         일반
@@ -116,11 +116,11 @@ export function DesignStudioPanel({
                         disabled={disabled}
                         className={twMerge(
                             'flex-1 h-11 rounded-2xl transition-all font-medium',
-                            'focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30',
+                            'focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30',
                             'disabled:opacity-50 disabled:cursor-not-allowed',
                             mode === 'puzzle'
                                 ? 'bg-kkookk-indigo text-white'
-                                : 'bg-kkookk-sand text-kkookk-steel border border-black/5'
+                                : 'bg-white text-kkookk-steel border-2 border-kkookk-steel/20'
                         )}
                     >
                         퍼즐
@@ -258,7 +258,7 @@ export function DesignStudioPanel({
                             value={totalStamps}
                             onChange={(e) => onTotalStampsChange(parseInt(e.target.value))}
                             disabled={disabled}
-                            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-kkookk-sand disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{
                                 accentColor: '#2e58ff',
                             }}
@@ -286,11 +286,11 @@ export function DesignStudioPanel({
                                     disabled={disabled}
                                     className={twMerge(
                                         'h-11 rounded-2xl transition-all font-medium',
-                                        'focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30',
+                                        'focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30',
                                         'disabled:opacity-50 disabled:cursor-not-allowed',
                                         puzzleGrid === grid
                                             ? 'bg-kkookk-indigo text-white'
-                                            : 'bg-kkookk-sand text-kkookk-steel border border-black/5'
+                                            : 'bg-white text-kkookk-steel border-2 border-kkookk-steel/20'
                                     )}
                                 >
                                     {grid}
@@ -342,7 +342,7 @@ export function DesignStudioPanel({
                         <button
                             type="button"
                             disabled={disabled}
-                            className="w-full h-11 rounded-2xl transition-all hover:opacity-90 bg-kkookk-sand text-kkookk-navy border border-black/5 font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full h-11 rounded-2xl transition-all bg-gray-100 hover:bg-gray-200 text-kkookk-navy border border-kkookk-steel/20 font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             랜덤 섞기
                         </button>

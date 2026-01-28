@@ -32,7 +32,7 @@ export function RulesPanel({ form }: RulesPanelProps) {
                     maxLength={100}
                     aria-invalid={errors.title ? 'true' : 'false'}
                     aria-describedby={errors.title ? 'title-error' : undefined}
-                    className="w-full h-14 px-4 rounded-2xl bg-kkookk-sand border border-black/5 text-kkookk-navy placeholder:text-kkookk-steel/50 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 aria-[invalid=true]:border-kkookk-red"
+                    className="w-full h-14 px-4 rounded-2xl bg-white border-2 border-kkookk-steel/20 text-kkookk-navy placeholder:text-kkookk-steel/50 focus:outline-none focus:border-kkookk-indigo focus:ring-4 focus:ring-kkookk-indigo/30 aria-[invalid=true]:border-kkookk-red"
                 />
                 <div className="flex justify-between items-center mt-1">
                     {errors.title && (
@@ -57,7 +57,7 @@ export function RulesPanel({ form }: RulesPanelProps) {
                     maxLength={255}
                     aria-invalid={errors.rewardName ? 'true' : 'false'}
                     aria-describedby={errors.rewardName ? 'rewardName-error' : undefined}
-                    className="w-full h-14 px-4 rounded-2xl bg-kkookk-sand border border-black/5 text-kkookk-navy placeholder:text-kkookk-steel/50 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 aria-[invalid=true]:border-kkookk-red"
+                    className="w-full h-14 px-4 rounded-2xl bg-white border-2 border-kkookk-steel/20 text-kkookk-navy placeholder:text-kkookk-steel/50 focus:outline-none focus:border-kkookk-indigo focus:ring-4 focus:ring-kkookk-indigo/30 aria-[invalid=true]:border-kkookk-red"
                 />
                 <div className="flex justify-between items-center mt-1">
                     {errors.rewardName && (
@@ -81,7 +81,7 @@ export function RulesPanel({ form }: RulesPanelProps) {
                     {...register('rewardQuantity', { valueAsNumber: true })}
                     aria-invalid={errors.rewardQuantity ? 'true' : 'false'}
                     aria-describedby={errors.rewardQuantity ? 'rewardQuantity-error' : undefined}
-                    className="w-full h-14 px-4 rounded-2xl bg-kkookk-sand border border-black/5 text-kkookk-navy focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 aria-[invalid=true]:border-kkookk-red"
+                    className="w-full h-14 px-4 rounded-2xl bg-white border-2 border-kkookk-steel/20 text-kkookk-navy focus:outline-none focus:border-kkookk-indigo focus:ring-4 focus:ring-kkookk-indigo/30 aria-[invalid=true]:border-kkookk-red"
                 />
                 {errors.rewardQuantity && (
                     <p id="rewardQuantity-error" className="mt-1 text-xs text-kkookk-red">
@@ -102,7 +102,7 @@ export function RulesPanel({ form }: RulesPanelProps) {
                     {...register('expireDays', { valueAsNumber: true })}
                     aria-invalid={errors.expireDays ? 'true' : 'false'}
                     aria-describedby={errors.expireDays ? 'expireDays-error' : undefined}
-                    className="w-full h-14 px-4 rounded-2xl bg-kkookk-sand border border-black/5 text-kkookk-navy focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 aria-[invalid=true]:border-kkookk-red"
+                    className="w-full h-14 px-4 rounded-2xl bg-white border-2 border-kkookk-steel/20 text-kkookk-navy focus:outline-none focus:border-kkookk-indigo focus:ring-4 focus:ring-kkookk-indigo/30 aria-[invalid=true]:border-kkookk-red"
                 />
                 {errors.expireDays && (
                     <p id="expireDays-error" className="mt-1 text-xs text-kkookk-red">
@@ -112,7 +112,7 @@ export function RulesPanel({ form }: RulesPanelProps) {
             </div>
 
             {/* Info Box */}
-            <div className="p-4 rounded-2xl bg-kkookk-sand border border-black/5">
+            <div className="p-4 rounded-2xl bg-kkookk-navy-50 border border-kkookk-steel/20">
                 <p className="mb-2 text-sm font-medium text-kkookk-navy">리워드 설정 안내</p>
                 <p className="text-sm text-kkookk-steel">
                     스탬프를 모두 적립한 고객에게 제공할 리워드를 설정하세요. 리워드는 자동으로 발급되며, 설정한

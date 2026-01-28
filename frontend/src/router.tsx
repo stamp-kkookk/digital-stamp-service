@@ -1,12 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import LandingPage from '@/pages/landing/LandingPage'
-import OwnerStoreListPage from '@/pages/owner/stores/OwnerStoreListPage'
-import StoreRegistrationWizardPage from '@/pages/owner/stores/new/StoreRegistrationWizardPage'
-import { StampCardListPage } from '@/features/stampcard/pages/StampCardListPage'
-import { StampCardFormPage } from '@/features/stampcard/pages/StampCardFormPage'
-import CustomerStoreEntryPage from '@/pages/customer/store-entry/CustomerStoreEntryPage'
-import CustomerAuthPage from '@/pages/customer/auth/CustomerAuthPage'
-import OwnerLoginPage from '@/pages/owner/OwnerLoginPage'
+import { StampCardFormPage } from './features/stampcard/pages/StampCardFormPage'
+import { StampCardListPage } from './features/stampcard/pages/StampCardListPage'
+import CustomerAuthPage from './pages/customer/auth/CustomerAuthPage'
+import CustomerStoreEntryPage from './pages/customer/store-entry/CustomerStoreEntryPage'
+import LandingPage from './pages/landing/LandingPage'
+import OwnerLoginPage from './pages/owner/OwnerLoginPage'
+import OwnerStoreListPage from './pages/owner/stores/OwnerStoreListPage'
+import StoreRegistrationWizardPage from './pages/owner/stores/new/StoreRegistrationWizardPage'
 
 export const router = createBrowserRouter([
     // Landing

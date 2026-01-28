@@ -145,7 +145,7 @@ export default function StoreRegistrationWizardPage() {
 
             // Wait a bit for confetti, then navigate
             setTimeout(() => {
-                navigate('/o/stores')
+                navigate('/owner/stores')
             }, 1500)
         } catch (error) {
             console.error('Failed to create store:', error)

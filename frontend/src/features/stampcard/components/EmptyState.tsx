@@ -33,13 +33,13 @@ export function EmptyState({ status }: EmptyStateProps) {
     }
 
     const handleCreate = () => {
-        navigate(`/o/stores/${storeId}/stamp-cards/create`)
+        navigate(`/owner/stores/${storeId}/stamp-cards/create`)
     }
 
     return (
         <div className="flex flex-col items-center justify-center gap-6 py-16 px-4">
-            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-kkookk-orange-50">
-                <FileQuestion className="w-10 h-10 text-kkookk-orange-500" />
+            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-kkookk-indigo/10">
+                <FileQuestion className="w-10 h-10 text-kkookk-indigo" />
             </div>
 
             <div className="flex flex-col items-center gap-2 text-center">
