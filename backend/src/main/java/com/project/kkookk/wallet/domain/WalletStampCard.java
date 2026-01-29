@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -37,6 +38,8 @@ public class WalletStampCard extends BaseTimeEntity {
 
     @Column(name = "last_stamped_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime lastStampedAt;
+
+    @Version private Long version;
 
     @Builder
     private WalletStampCard(
