@@ -1,5 +1,7 @@
 package com.project.kkookk.global.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,30 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest()
                 .body(ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, fieldErrors));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            ConstraintViolationException e) {
+        log.warn("ConstraintViolationException: {}", e.getMessage());
+        List<ErrorResponse.FieldError> fieldErrors =
+                e.getConstraintViolations().stream()
+                        .map(
+                                violation -> {
+                                    String fieldName = extractFieldName(violation);
+                                    return new ErrorResponse.FieldError(
+                                            fieldName, violation.getMessage());
+                                })
+                        .toList();
+
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(ErrorCode.INVALID_INPUT_VALUE, fieldErrors));
+    }
+
+    private String extractFieldName(ConstraintViolation<?> violation) {
+        String propertyPath = violation.getPropertyPath().toString();
+        String[] parts = propertyPath.split("\\.");
+        return parts[parts.length - 1];
     }
 
     @ExceptionHandler(Exception.class)

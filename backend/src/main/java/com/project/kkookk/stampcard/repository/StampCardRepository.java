@@ -19,4 +19,6 @@ public interface StampCardRepository extends JpaRepository<StampCard, Long> {
 
     Optional<StampCard> findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
             Long storeId, StampCardStatus status);
+
+    int countByStoreIdAndStatus(Long storeId, StampCardStatus status);
 }
