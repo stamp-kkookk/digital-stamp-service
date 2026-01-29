@@ -60,7 +60,7 @@ export default function OwnerStoreListPage() {
     }
 
     const handleNewStore = () => {
-        navigate('/o/stores/new')
+        navigate('/owner/stores/new')
     }
 
     return (

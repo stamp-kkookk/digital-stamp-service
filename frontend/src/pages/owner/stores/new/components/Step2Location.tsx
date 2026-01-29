@@ -52,7 +52,7 @@ export default function Step2Location({ form }: Step2LocationProps) {
                         placeholder="예: 서울시 강남구 테헤란로 123"
                         {...register('address')}
                         className={`w-full rounded-xl border-2 py-3 pl-11 pr-4 text-kkookk-navy transition-colors focus:border-kkookk-indigo focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 ${
-                            errors.address ? 'border-kkookk-red' : 'border-gray-300'
+                            errors.address ? 'border-kkookk-red' : 'border-black/5'
                         }`}
                         aria-invalid={errors.address ? 'true' : 'false'}
                         aria-describedby={errors.address ? 'address-error' : undefined}
@@ -84,7 +84,7 @@ export default function Step2Location({ form }: Step2LocationProps) {
                         placeholder="예: 02-1234-5678"
                         {...register('phone')}
                         className={`w-full rounded-xl border-2 py-3 pl-11 pr-4 text-kkookk-navy transition-colors focus:border-kkookk-indigo focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 ${
-                            errors.phone ? 'border-kkookk-red' : 'border-gray-300'
+                            errors.phone ? 'border-kkookk-red' : 'border-black/5'
                         }`}
                         aria-invalid={errors.phone ? 'true' : 'false'}
                         aria-describedby={errors.phone ? 'phone-error' : undefined}

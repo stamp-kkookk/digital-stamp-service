@@ -65,7 +65,7 @@ export default function Step3StampSetup({ form }: Step3StampSetupProps) {
                     placeholder="예: 기본 적립 카드"
                     {...register('stampCardName')}
                     className={`w-full rounded-xl border-2 px-4 py-3 text-kkookk-navy transition-colors focus:border-kkookk-indigo focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 ${
-                        errors.stampCardName ? 'border-kkookk-red' : 'border-gray-300'
+                        errors.stampCardName ? 'border-kkookk-red' : 'border-black/5'
                     }`}
                     aria-invalid={errors.stampCardName ? 'true' : 'false'}
                     aria-describedby={
@@ -89,7 +89,7 @@ export default function Step3StampSetup({ form }: Step3StampSetupProps) {
                         type="button"
                         onClick={handleStampDecrement}
                         disabled={maxStamps <= 1}
-                        className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-300 text-kkookk-navy transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black/5 text-kkookk-navy transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="스탬프 개수 감소"
                     >
                         <Minus className="h-5 w-5" />
@@ -104,7 +104,7 @@ export default function Step3StampSetup({ form }: Step3StampSetupProps) {
                         type="button"
                         onClick={handleStampIncrement}
                         disabled={maxStamps >= 20}
-                        className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-300 text-kkookk-navy transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black/5 text-kkookk-navy transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5 disabled:cursor-not-allowed disabled:opacity-50"
                         aria-label="스탬프 개수 증가"
                     >
                         <Plus className="h-5 w-5" />
@@ -132,7 +132,7 @@ export default function Step3StampSetup({ form }: Step3StampSetupProps) {
                     placeholder="예: 아메리카노 1잔 무료"
                     {...register('rewardDescription')}
                     className={`w-full rounded-xl border-2 px-4 py-3 text-kkookk-navy transition-colors focus:border-kkookk-indigo focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 ${
-                        errors.rewardDescription ? 'border-kkookk-red' : 'border-gray-300'
+                        errors.rewardDescription ? 'border-kkookk-red' : 'border-black/5'
                     }`}
                     aria-invalid={errors.rewardDescription ? 'true' : 'false'}
                     aria-describedby={
@@ -151,11 +151,11 @@ export default function Step3StampSetup({ form }: Step3StampSetupProps) {
 
             {/* Terms Agreement */}
             <div className="mt-6">
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-gray-300 p-4 transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border-2 border-black/5 p-4 transition-colors hover:border-kkookk-indigo hover:bg-kkookk-indigo/5">
                     <input
                         type="checkbox"
                         {...register('termsAgreed')}
-                        className="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-kkookk-indigo focus:ring-2 focus:ring-kkookk-indigo/50"
+                        className="mt-1 h-5 w-5 cursor-pointer rounded border-black/5 text-kkookk-indigo focus:ring-2 focus:ring-kkookk-indigo/50"
                     />
                     <span className="text-sm text-kkookk-navy">
                         <span className={termsAgreed ? 'font-semibold' : ''}>

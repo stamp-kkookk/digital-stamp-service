@@ -1,35 +1,131 @@
-import { Home, Store, CreditCard, CheckCircle, FileText, BarChart3, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Home, Store, CreditCard, CheckCircle, FileText, BarChart3, Settings, ChevronDown, ChevronRight, Plus, Edit, Building2 } from 'lucide-react'
 
 interface SidebarProps {
     className?: string
 }
 
+interface SubMenuItem {
+    label: string
+    path: string
+    icon?: typeof CreditCard
+    children?: SubMenuItem[]
+}
+
 interface MenuItem {
     icon: typeof Home
     label: string
-    path: string
-    isActive: boolean
-    isDisabled: boolean
+    path?: string
     badge?: number
+    children?: SubMenuItem[]
 }
 
 export default function Sidebar({ className = '' }: SidebarProps) {
+    const navigate = useNavigate()
+    const location = useLocation()
+    const [expandedItems, setExpandedItems] = useState<string[]>(['매장 관리', '스탬프 카드 관리'])
+
+    // TODO: Get actual storeId and cardId from context or route params
+    const currentStoreId = 1
+    const currentCardId = 1
+
     const menuItems: MenuItem[] = [
-        { icon: Home, label: '대시보드', path: '/o/dashboard', isActive: false, isDisabled: true },
-        { icon: Store, label: '매장 관리', path: '/o/stores', isActive: true, isDisabled: false },
-        { icon: CreditCard, label: '스탬프카드 관리', path: '/o/stamp-cards', isActive: false, isDisabled: true },
-        { icon: CheckCircle, label: '적립 승인', path: '/o/approvals', isActive: false, isDisabled: true, badge: 5 },
-        { icon: FileText, label: '이전 요청 처리', path: '/o/migrations', isActive: false, isDisabled: true, badge: 3 },
-        { icon: BarChart3, label: '통계', path: '/o/stats', isActive: false, isDisabled: true },
-        { icon: Settings, label: '설정', path: '/o/settings', isActive: false, isDisabled: true },
+        {
+            icon: Home,
+            label: '대시보드',
+            path: '/owner/dashboard'
+        },
+        {
+            icon: Store,
+            label: '매장 관리',
+            children: [
+                { label: '매장 목록', path: '/owner/stores', icon: Building2 },
+                {
+                    label: '스탬프 카드 관리',
+                    path: `/owner/stores/${currentStoreId}/stamp-cards`,
+                    icon: CreditCard,
+                    children: [
+                        { label: '카드 생성하기', path: `/owner/stores/${currentStoreId}/stamp-cards/create`, icon: Plus },
+                        { label: '카드 수정하기', path: `/owner/stores/${currentStoreId}/stamp-cards/${currentCardId}/edit`, icon: Edit },
+                    ]
+                },
+                { label: '적립 승인', path: '/owner/approvals', icon: CheckCircle },
+                { label: '이전 요청 처리', path: '/owner/migrations', icon: FileText },
+            ]
+        },
+        {
+            icon: BarChart3,
+            label: '통계',
+            path: '/owner/stats'
+        },
+        {
+            icon: Settings,
+            label: '설정',
+            path: '/owner/settings'
+        },
     ]
 
-    const handleMenuClick = (item: MenuItem) => {
-        if (item.isDisabled) {
-            console.log(`${item.label} 메뉴는 준비 중입니다`)
+    const toggleExpand = (label: string) => {
+        setExpandedItems(prev =>
+            prev.includes(label)
+                ? prev.filter(item => item !== label)
+                : [...prev, label]
+        )
+    }
+
+    const handleMenuClick = (path?: string, label?: string, hasChildren?: boolean) => {
+        if (hasChildren) {
+            toggleExpand(label!)
             return
         }
-        console.log(`Navigate to ${item.path}`)
+        if (path) {
+            navigate(path)
+        }
+    }
+
+    const isPathActive = (path: string) => {
+        return location.pathname === path || location.pathname.startsWith(path + '/')
+    }
+
+    const renderSubMenu = (items: SubMenuItem[], depth: number = 1) => {
+        return (
+            <ul className={`flex flex-col ${depth === 1 ? 'mt-1 mb-2' : 'mt-1'}`}>
+                {items.map((item) => {
+                    const hasChildren = item.children && item.children.length > 0
+                    const isExpanded = expandedItems.includes(item.label)
+                    const isActive = item.path ? isPathActive(item.path) : false
+                    const Icon = item.icon
+
+                    return (
+                        <li key={item.label}>
+                            <button
+                                onClick={() => handleMenuClick(item.path, item.label, hasChildren)}
+                                className={`
+                                    flex items-center gap-2 w-full h-10 px-4 rounded-lg text-sm font-medium transition-all duration-200
+                                    ${depth === 1 ? 'ml-8' : 'ml-12'}
+                                    ${isActive
+                                        ? 'bg-kkookk-indigo/10 text-kkookk-indigo'
+                                        : 'text-kkookk-steel hover:bg-gray-50'
+                                    }
+                                    focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 focus:ring-offset-2
+                                `}
+                                aria-current={isActive ? 'page' : undefined}
+                            >
+                                {Icon && <Icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />}
+                                <span className="text-left">{item.label}</span>
+                                {hasChildren && (
+                                    isExpanded
+                                        ? <ChevronDown className="w-4 h-4 flex-shrink-0 ml-1" aria-hidden="true" />
+                                        : <ChevronRight className="w-4 h-4 flex-shrink-0 ml-1" aria-hidden="true" />
+                                )}
+                            </button>
+                            {hasChildren && isExpanded && renderSubMenu(item.children!, depth + 1)}
+                        </li>
+                    )
+                })}
+            </ul>
+        )
     }
 
     return (
@@ -55,12 +151,13 @@ export default function Sidebar({ className = '' }: SidebarProps) {
                 <ul className="flex flex-col gap-1">
                     {menuItems.map((item, index) => {
                         const Icon = item.icon
-                        const isActive = item.isActive
-                        const isDisabled = item.isDisabled
+                        const hasChildren = item.children && item.children.length > 0
+                        const isExpanded = expandedItems.includes(item.label)
+                        const isActive = item.path ? isPathActive(item.path) : false
 
                         return (
                             <li
-                                key={item.path}
+                                key={item.label}
                                 className="animate-slideInLeft"
                                 style={{
                                     animationDelay: `${index * 50}ms`,
@@ -68,8 +165,7 @@ export default function Sidebar({ className = '' }: SidebarProps) {
                                 }}
                             >
                                 <button
-                                    onClick={() => handleMenuClick(item)}
-                                    disabled={isDisabled}
+                                    onClick={() => handleMenuClick(item.path, item.label, hasChildren)}
                                     className={`
                                         flex items-center gap-3 w-full h-12 px-4 rounded-xl text-sm font-medium transition-all duration-200
                                         ${
@@ -77,14 +173,18 @@ export default function Sidebar({ className = '' }: SidebarProps) {
                                                 ? 'bg-kkookk-indigo/10 text-kkookk-indigo border-l-4 border-kkookk-indigo pl-3'
                                                 : 'text-kkookk-steel hover:bg-gray-50'
                                         }
-                                        ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                        cursor-pointer
                                         focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 focus:ring-offset-2
                                     `}
                                     aria-current={isActive ? 'page' : undefined}
-                                    aria-disabled={isDisabled}
                                 >
                                     <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                                     <span className="flex-1 text-left">{item.label}</span>
+                                    {hasChildren && (
+                                        isExpanded
+                                            ? <ChevronDown className="w-4 h-4" aria-hidden="true" />
+                                            : <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                                    )}
                                     {item.badge !== undefined && (
                                         <span
                                             className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-kkookk-indigo text-white text-xs font-semibold animate-pulse-badge"
@@ -94,6 +194,7 @@ export default function Sidebar({ className = '' }: SidebarProps) {
                                         </span>
                                     )}
                                 </button>
+                                {hasChildren && isExpanded && renderSubMenu(item.children!)}
                             </li>
                         )
                     })}

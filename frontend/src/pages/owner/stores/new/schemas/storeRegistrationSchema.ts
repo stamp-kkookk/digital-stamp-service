@@ -1,6 +1,5 @@
 import { z } from 'zod'
-import type { StoreRegistrationFormData as FormData } from '@/types/store'
-import { storeNameSchema, addressSchema, phoneSchema } from '@/lib/validation'
+import { storeNameSchema, addressSchema, phoneSchema } from '@/lib/utils/validation'
 
 /**
  * Store Registration Wizard Validation Schemas
@@ -45,7 +44,7 @@ export const step3Schema = z.object({
 
 // Complete form schema (all steps combined)
 // Ensures schema matches the FormData type from @/types/store
-export const storeRegistrationSchema: z.ZodType<FormData> = z.object({
+export const storeRegistrationSchema = z.object({
     // Step 1
     name: storeNameSchema,
     category: z.enum(['카페', '음식점', '베이커리', '뷰티/미용', '리테일', '기타'], {
@@ -73,7 +72,7 @@ export const storeRegistrationSchema: z.ZodType<FormData> = z.object({
     termsAgreed: z.boolean().refine((val) => val === true, {
         message: '약관에 동의해주세요',
     }),
-}) as z.ZodType<FormData>
+})
 
 // Re-export the type from central location for convenience
 export type { StoreRegistrationFormData } from '@/types/store'
