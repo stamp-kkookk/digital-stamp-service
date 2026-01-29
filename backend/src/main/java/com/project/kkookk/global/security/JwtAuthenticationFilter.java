@@ -56,17 +56,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void authenticateUser(String token, HttpServletRequest request) {
         Claims claims = jwtUtil.parseToken(token);
-        Long ownerId = Long.parseLong(claims.getSubject());
+        Long subjectId = Long.parseLong(claims.getSubject());
+
+        // email 클레임이 있으면 Owner, phone 클레임이 있으면 Customer
         String email = claims.get("email", String.class);
+        String phone = claims.get("phone", String.class);
 
-        OwnerPrincipal principal = OwnerPrincipal.of(ownerId, email);
+        UsernamePasswordAuthenticationToken authentication;
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        principal, null, principal.getAuthorities());
+        if (email != null) {
+            // Owner 인증
+            OwnerPrincipal principal = OwnerPrincipal.of(subjectId, email);
+            authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            principal, null, principal.getAuthorities());
+        } else if (phone != null) {
+            // Customer 인증
+            CustomerPrincipal principal = CustomerPrincipal.of(subjectId, phone);
+            authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            principal, null, principal.getAuthorities());
+        } else {
+            log.warn("JWT token has neither email nor phone claim");
+            return;
+        }
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

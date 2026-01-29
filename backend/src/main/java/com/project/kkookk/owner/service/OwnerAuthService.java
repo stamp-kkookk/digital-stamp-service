@@ -1,5 +1,6 @@
 package com.project.kkookk.owner.service;
 
+import com.project.kkookk.common.limit.application.FailureLimitService;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.util.JwtUtil;
@@ -22,6 +23,7 @@ public class OwnerAuthService {
     private final OwnerAccountRepository ownerAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final FailureLimitService failureLimitService;
 
     @Transactional
     public OwnerSignupResponse signup(OwnerSignupRequest request) {
@@ -41,19 +43,28 @@ public class OwnerAuthService {
     }
 
     public OwnerLoginResponse login(OwnerLoginRequest request) {
-        OwnerAccount ownerAccount =
-                ownerAccountRepository
-                        .findByEmail(request.email())
-                        .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
+        failureLimitService.checkBlocked(request.email());
 
-        if (!passwordEncoder.matches(request.password(), ownerAccount.getPasswordHash())) {
-            throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
+        try {
+            OwnerAccount ownerAccount =
+                    ownerAccountRepository
+                            .findByEmail(request.email())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
+
+            if (!passwordEncoder.matches(request.password(), ownerAccount.getPasswordHash())) {
+                throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
+            }
+
+            failureLimitService.recordSuccess(request.email());
+
+            String accessToken =
+                    jwtUtil.generateAccessToken(ownerAccount.getId(), ownerAccount.getEmail());
+
+            return OwnerLoginResponse.of(accessToken, ownerAccount);
+        } catch (BusinessException e) {
+            failureLimitService.recordFailure(request.email());
+            throw e;
         }
-
-        String accessToken =
-                jwtUtil.generateAccessToken(ownerAccount.getId(), ownerAccount.getEmail());
-
-        return OwnerLoginResponse.of(accessToken, ownerAccount);
     }
 
     private void validateEmailNotDuplicated(String email) {
