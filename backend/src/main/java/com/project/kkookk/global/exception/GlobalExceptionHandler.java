@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BlockedErrorResponse> handleBlockedException(BlockedException e) {
         log.warn("BlockedException: {}", e.getMessage());
         ErrorCode errorCode = e.getErrorCode();
-        BlockedErrorResponse body = BlockedErrorResponse.of(errorCode, e.getBlockedDuration(), e.getFailureCount());
+        BlockedErrorResponse body =
+                BlockedErrorResponse.of(errorCode, e.getBlockedDuration(), e.getFailureCount());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(body);
     }
 

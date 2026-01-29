@@ -47,9 +47,9 @@ public class OwnerAuthService {
 
         try {
             OwnerAccount ownerAccount =
-                ownerAccountRepository
-                    .findByEmail(request.email())
-                    .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
+                    ownerAccountRepository
+                            .findByEmail(request.email())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
 
             if (!passwordEncoder.matches(request.password(), ownerAccount.getPasswordHash())) {
                 throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
@@ -58,7 +58,7 @@ public class OwnerAuthService {
             failureLimitService.recordSuccess(request.email());
 
             String accessToken =
-                jwtUtil.generateAccessToken(ownerAccount.getId(), ownerAccount.getEmail());
+                    jwtUtil.generateAccessToken(ownerAccount.getId(), ownerAccount.getEmail());
 
             return OwnerLoginResponse.of(accessToken, ownerAccount);
         } catch (BusinessException e) {

@@ -32,17 +32,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class WalletAccessServiceTest {
 
-    @Mock
-    private CustomerWalletRepository customerWalletRepository;
+    @Mock private CustomerWalletRepository customerWalletRepository;
 
-    @Mock
-    private StoreRepository storeRepository;
+    @Mock private StoreRepository storeRepository;
 
-    @Mock
-    private CustomerStampCardRepository customerStampCardRepository;
+    @Mock private CustomerStampCardRepository customerStampCardRepository;
 
-    @InjectMocks
-    private WalletAccessService walletAccessService;
+    @InjectMocks private WalletAccessService walletAccessService;
 
     private CustomerWallet customerWallet;
     private Store store;
@@ -51,22 +47,24 @@ class WalletAccessServiceTest {
 
     @BeforeEach
     void setUp() {
-        customerWallet = CustomerWallet.builder()
-            .phone("010-1234-5678")
-            .name("홍길동")
-            .nickname("테스트닉네임")
-            .build();
+        customerWallet =
+                CustomerWallet.builder()
+                        .phone("010-1234-5678")
+                        .name("홍길동")
+                        .nickname("테스트닉네임")
+                        .build();
         ReflectionTestUtils.setField(customerWallet, "id", 1L);
 
         store = new Store("테스트 매장", "서울시 강남구", "123-45-67890", StoreStatus.ACTIVE, 1L);
         ReflectionTestUtils.setField(store, "id", 1L);
 
-        stampCard = StampCard.builder()
-            .storeId(store.getId())
-            .title("테스트 스탬프 카드")
-            .goalStampCount(10)
-            .rewardName("아메리카노")
-            .build();
+        stampCard =
+                StampCard.builder()
+                        .storeId(store.getId())
+                        .title("테스트 스탬프 카드")
+                        .goalStampCount(10)
+                        .rewardName("아메리카노")
+                        .build();
         ReflectionTestUtils.setField(stampCard, "id", 1L);
 
         customerStampCard = CustomerStampCard.of(customerWallet, store, stampCard);
@@ -78,13 +76,16 @@ class WalletAccessServiceTest {
     void getWalletInfo_Success_WithStampCard() {
         // given
         given(customerWalletRepository.findByPhoneAndName(anyString(), anyString()))
-            .willReturn(Optional.of(customerWallet));
+                .willReturn(Optional.of(customerWallet));
         given(storeRepository.findById(anyLong())).willReturn(Optional.of(store));
-        given(customerStampCardRepository.findByCustomerWalletAndStore(any(CustomerWallet.class), any(Store.class)))
-            .willReturn(Optional.of(customerStampCard));
+        given(
+                        customerStampCardRepository.findByCustomerWalletAndStore(
+                                any(CustomerWallet.class), any(Store.class)))
+                .willReturn(Optional.of(customerStampCard));
 
         // when
-        WalletAccessResponse response = walletAccessService.getWalletInfo("010-1234-5678", "홍길동", 1L);
+        WalletAccessResponse response =
+                walletAccessService.getWalletInfo("010-1234-5678", "홍길동", 1L);
 
         // then
         assertThat(response).isNotNull();
@@ -103,13 +104,16 @@ class WalletAccessServiceTest {
     void getWalletInfo_Success_WithoutStampCard() {
         // given
         given(customerWalletRepository.findByPhoneAndName(anyString(), anyString()))
-            .willReturn(Optional.of(customerWallet));
+                .willReturn(Optional.of(customerWallet));
         given(storeRepository.findById(anyLong())).willReturn(Optional.of(store));
-        given(customerStampCardRepository.findByCustomerWalletAndStore(any(CustomerWallet.class), any(Store.class)))
-            .willReturn(Optional.empty());
+        given(
+                        customerStampCardRepository.findByCustomerWalletAndStore(
+                                any(CustomerWallet.class), any(Store.class)))
+                .willReturn(Optional.empty());
 
         // when
-        WalletAccessResponse response = walletAccessService.getWalletInfo("010-1234-5678", "홍길동", 1L);
+        WalletAccessResponse response =
+                walletAccessService.getWalletInfo("010-1234-5678", "홍길동", 1L);
 
         // then
         assertThat(response).isNotNull();
@@ -127,12 +131,12 @@ class WalletAccessServiceTest {
     void getWalletInfo_Fail_WalletNotFound() {
         // given
         given(customerWalletRepository.findByPhoneAndName(anyString(), anyString()))
-            .willReturn(Optional.empty());
+                .willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> walletAccessService.getWalletInfo("010-9999-9999", "김철수", 1L))
-            .isInstanceOf(BusinessException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WALLET_NOT_FOUND);
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WALLET_NOT_FOUND);
     }
 
     @Test
@@ -140,12 +144,12 @@ class WalletAccessServiceTest {
     void getWalletInfo_Fail_StoreNotFound() {
         // given
         given(customerWalletRepository.findByPhoneAndName(anyString(), anyString()))
-            .willReturn(Optional.of(customerWallet));
+                .willReturn(Optional.of(customerWallet));
         given(storeRepository.findById(anyLong())).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> walletAccessService.getWalletInfo("010-1234-5678", "홍길동", 999L))
-            .isInstanceOf(BusinessException.class)
-            .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_NOT_FOUND);
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_NOT_FOUND);
     }
 }

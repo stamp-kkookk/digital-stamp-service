@@ -275,8 +275,7 @@ class WalletControllerTest {
     @WithMockUser
     void getWalletAccessInfo_Success_WithStampCard() throws Exception {
         // given
-        StampCardInfo stampCardInfo =
-                new StampCardInfo(1L, 1L, "테스트 매장", 5, 10, "아메리카노", false);
+        StampCardInfo stampCardInfo = new StampCardInfo(1L, 1L, "테스트 매장", 5, 10, "아메리카노", false);
         WalletAccessResponse response =
                 new WalletAccessResponse(1L, "홍길동", "01012345678", stampCardInfo);
 

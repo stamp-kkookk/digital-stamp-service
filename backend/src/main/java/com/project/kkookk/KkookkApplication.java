@@ -9,7 +9,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 
 @EnableCaching
-@EnableConfigurationProperties({JwtProperties.class, OtpProperties.class, FailureLimitProperties.class})
+@EnableConfigurationProperties({
+    JwtProperties.class,
+    OtpProperties.class,
+    FailureLimitProperties.class
+})
 @SpringBootApplication
 public class KkookkApplication {
 

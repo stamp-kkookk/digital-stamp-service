@@ -107,7 +107,8 @@ class OtpServiceTest {
                 .satisfies(
                         exception -> {
                             BusinessException be = (BusinessException) exception;
-                            assertThat(be.getErrorCode()).isEqualTo(ErrorCode.OTP_RATE_LIMIT_EXCEEDED);
+                            assertThat(be.getErrorCode())
+                                    .isEqualTo(ErrorCode.OTP_RATE_LIMIT_EXCEEDED);
                         });
 
         verify(sessionCache, org.mockito.Mockito.never()).evict(anyString());
@@ -121,7 +122,9 @@ class OtpServiceTest {
         OtpRequestRequest request = new OtpRequestRequest("010-1234-5678");
 
         given(rateLimitCache.get(anyString(), eq(Integer.class))).willReturn(null);
-        doThrow(new RuntimeException("SMS 발송 오류")).when(smsProvider).sendOtp(anyString(), anyString());
+        doThrow(new RuntimeException("SMS 발송 오류"))
+                .when(smsProvider)
+                .sendOtp(anyString(), anyString());
 
         // when & then
         assertThatThrownBy(() -> otpService.requestOtp(request))
@@ -173,11 +176,11 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 
-        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class)))
+                .willReturn(phone);
         given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
                 .willReturn(sessionData);
 
@@ -209,11 +212,11 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 
-        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class)))
+                .willReturn(phone);
         given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
                 .willReturn(sessionData);
 
@@ -240,7 +243,8 @@ class OtpServiceTest {
 
         OtpVerifyRequest request = new OtpVerifyRequest(phone, verificationId, otpCode);
 
-        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(null);
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class)))
+                .willReturn(null);
 
         // when & then
         assertThatThrownBy(() -> otpService.verifyOtp(request))
@@ -270,11 +274,11 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 
-        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class))).willReturn(phone);
+        given(sessionCache.get(eq("otp:verify:" + verificationId), eq(String.class)))
+                .willReturn(phone);
         given(sessionCache.get(eq("otp:session:" + phone), eq(OtpSessionData.class)))
                 .willReturn(sessionData);
 

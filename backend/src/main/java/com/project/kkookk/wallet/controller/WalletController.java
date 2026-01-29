@@ -6,7 +6,6 @@ import com.project.kkookk.wallet.service.WalletAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +18,10 @@ public class WalletController implements WalletApi {
 
     @Override
     public ResponseEntity<WalletAccessResponse> getWalletAccessInfo(
-            @Valid @ModelAttribute WalletAccessRequest request,
-            @RequestParam Long storeId) {
-        WalletAccessResponse response = walletAccessService.getWalletInfo(
-            request.phoneNumber(), request.userName(), storeId);
+            @Valid @ModelAttribute WalletAccessRequest request, @RequestParam Long storeId) {
+        WalletAccessResponse response =
+                walletAccessService.getWalletInfo(
+                        request.phoneNumber(), request.userName(), storeId);
         return ResponseEntity.ok(response);
     }
 }

@@ -19,9 +19,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "customer_stamp_cards", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"customer_wallet_id", "store_id", "stamp_card_id"})
-})
+@Table(
+        name = "customer_stamp_cards",
+        uniqueConstraints = {
+            @UniqueConstraint(columnNames = {"customer_wallet_id", "store_id", "stamp_card_id"})
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class CustomerStampCard extends BaseTimeEntity {
@@ -56,7 +58,8 @@ public class CustomerStampCard extends BaseTimeEntity {
         this.isRewarded = false;
     }
 
-    public static CustomerStampCard of(CustomerWallet customerWallet, Store store, StampCard stampCard) {
+    public static CustomerStampCard of(
+            CustomerWallet customerWallet, Store store, StampCard stampCard) {
         return new CustomerStampCard(customerWallet, store, stampCard);
     }
 }

@@ -95,7 +95,6 @@ public class OtpService {
     public OtpVerifyResponse verifyOtp(OtpVerifyRequest request) {
         String phone = request.phone();
         String verificationId = request.verificationId();
-        String otpCode = request.otpCode();
 
         // 0. 차단 여부 확인
         failureLimitService.checkBlocked(phone);
@@ -118,13 +117,12 @@ public class OtpService {
         }
 
         // 4. OTP 코드 검증
+        String otpCode = request.otpCode();
         if (!sessionData.getOtpCode().equals(otpCode)) {
             // 실패 시 시도 횟수 증가
             failureLimitService.recordFailure(phone);
 
-            log.warn(
-                "OTP 코드 불일치: phone={}",
-                phone);
+            log.warn("OTP 코드 불일치: phone={}", phone);
             throw new BusinessException(ErrorCode.OTP_INVALID);
         }
 

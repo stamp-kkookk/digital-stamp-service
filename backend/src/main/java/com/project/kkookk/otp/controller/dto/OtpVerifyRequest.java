@@ -12,7 +12,9 @@ public record OtpVerifyRequest(
                 @Schema(description = "전화번호", example = "010-1234-5678")
                 String phone,
         @NotBlank(message = "검증 ID는 필수입니다")
-                @Schema(description = "검증 ID (OTP 요청 시 받은 값)", example = "550e8400-e29b-41d4-a716-446655440000")
+                @Schema(
+                        description = "검증 ID (OTP 요청 시 받은 값)",
+                        example = "550e8400-e29b-41d4-a716-446655440000")
                 String verificationId,
         @NotBlank(message = "OTP 코드는 필수입니다")
                 @Pattern(regexp = "^\\d{6}$", message = "OTP 코드는 6자리 숫자여야 합니다")

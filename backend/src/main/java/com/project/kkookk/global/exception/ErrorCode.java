@@ -65,8 +65,12 @@ public enum ErrorCode {
     WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑 정보를 찾을 수 없습니다"),
 
     // Failure Limit
-    FAILURE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "FAILURE_LIMIT_001", "시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
-    ACCOUNT_BLOCKED(HttpStatus.TOO_MANY_REQUESTS, "FAILURE_LIMIT_002", "계정이 일시적으로 차단되었습니다. {0} 후에 다시 시도해주세요.");
+    FAILURE_LIMIT_EXCEEDED(
+            HttpStatus.TOO_MANY_REQUESTS, "FAILURE_LIMIT_001", "시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
+    ACCOUNT_BLOCKED(
+            HttpStatus.TOO_MANY_REQUESTS,
+            "FAILURE_LIMIT_002",
+            "계정이 일시적으로 차단되었습니다. {0} 후에 다시 시도해주세요.");
 
     private final HttpStatus status;
     private final String code;

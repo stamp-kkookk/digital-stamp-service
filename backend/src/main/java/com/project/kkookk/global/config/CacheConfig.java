@@ -18,7 +18,11 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager =
-                new CaffeineCacheManager(STORE_SUMMARY_CACHE, OTP_SESSION_CACHE, OTP_RATE_LIMIT_CACHE, FAILURE_CACHE);
+                new CaffeineCacheManager(
+                        STORE_SUMMARY_CACHE,
+                        OTP_SESSION_CACHE,
+                        OTP_RATE_LIMIT_CACHE,
+                        FAILURE_CACHE);
         cacheManager.registerCustomCache(OTP_SESSION_CACHE, otpSessionCacheBuilder().build());
         cacheManager.registerCustomCache(OTP_RATE_LIMIT_CACHE, otpRateLimitCacheBuilder().build());
         cacheManager.registerCustomCache(FAILURE_CACHE, failureCacheBuilder().build());

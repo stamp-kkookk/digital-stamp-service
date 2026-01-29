@@ -8,14 +8,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class FailureLimitProperties {
 
-    /**
-     * 최대 실패 횟수
-     */
+    /** 최대 실패 횟수 */
     private int maxAttempts = 5;
 
-    /**
-     * 실패 횟수 도달 시 차단 기간
-     */
+    /** 실패 횟수 도달 시 차단 기간 */
     private Duration cooldownPeriod = Duration.ofMinutes(10);
 
     public int getMaxAttempts() {

@@ -24,18 +24,26 @@ public class FailureLimitService {
     }
 
     public void checkBlocked(String identifier) {
-        getFailureRecord(identifier).ifPresent(record -> {
-            if (record.isBlocked()) {
-                Duration remaining = Duration.between(LocalDateTime.now(), record.getBlockedUntil());
-                throw new BlockedException(ErrorCode.ACCOUNT_BLOCKED, record.getFailureCount(), remaining);
-            }
-        });
+        getFailureRecord(identifier)
+                .ifPresent(
+                        record -> {
+                            if (record.isBlocked()) {
+                                Duration remaining =
+                                        Duration.between(
+                                                LocalDateTime.now(), record.getBlockedUntil());
+                                throw new BlockedException(
+                                        ErrorCode.ACCOUNT_BLOCKED,
+                                        record.getFailureCount(),
+                                        remaining);
+                            }
+                        });
     }
 
     public void recordFailure(String identifier) {
-        FailureRecord record = getFailureRecord(identifier)
-            .map(FailureRecord::incrementFailureCount)
-            .orElse(FailureRecord.initialRecord(identifier));
+        FailureRecord record =
+                getFailureRecord(identifier)
+                        .map(FailureRecord::incrementFailureCount)
+                        .orElse(FailureRecord.initialRecord(identifier));
 
         if (record.getFailureCount() >= properties.getMaxAttempts()) {
             LocalDateTime blockedUntil = LocalDateTime.now().plus(properties.getCooldownPeriod());
@@ -50,14 +58,14 @@ public class FailureLimitService {
 
     public int getRemainingAttempts(String identifier) {
         return getFailureRecord(identifier)
-            .map(r -> properties.getMaxAttempts() - r.getFailureCount())
-            .orElse(properties.getMaxAttempts());
+                .map(r -> properties.getMaxAttempts() - r.getFailureCount())
+                .orElse(properties.getMaxAttempts());
     }
 
     public Optional<Duration> getBlockedDuration(String identifier) {
         return getFailureRecord(identifier)
-            .filter(FailureRecord::isBlocked)
-            .map(r -> Duration.between(LocalDateTime.now(), r.getBlockedUntil()));
+                .filter(FailureRecord::isBlocked)
+                .map(r -> Duration.between(LocalDateTime.now(), r.getBlockedUntil()));
     }
 
     private Optional<FailureRecord> getFailureRecord(String identifier) {

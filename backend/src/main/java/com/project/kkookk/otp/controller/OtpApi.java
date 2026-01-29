@@ -26,7 +26,10 @@ public interface OtpApi {
                         description = "OTP 발송 성공",
                         content =
                                 @Content(
-                                        schema = @Schema(implementation = OtpRequestResponse.class))),
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                OtpRequestResponse.class))),
                 @ApiResponse(
                         responseCode = "400",
                         description = "유효성 검증 실패 (전화번호 형식 오류)",
@@ -49,7 +52,9 @@ public interface OtpApi {
                         responseCode = "200",
                         description = "OTP 검증 성공",
                         content =
-                                @Content(schema = @Schema(implementation = OtpVerifyResponse.class))),
+                                @Content(
+                                        schema =
+                                                @Schema(implementation = OtpVerifyResponse.class))),
                 @ApiResponse(
                         responseCode = "400",
                         description = "유효성 검증 실패 또는 OTP 불일치",

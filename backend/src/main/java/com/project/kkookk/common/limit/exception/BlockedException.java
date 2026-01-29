@@ -14,7 +14,8 @@ public class BlockedException extends BusinessException {
         this.blockedDuration = blockedDuration;
     }
 
-    public BlockedException(ErrorCode errorCode, String message, int failureCount, Duration blockedDuration) {
+    public BlockedException(
+            ErrorCode errorCode, String message, int failureCount, Duration blockedDuration) {
         super(errorCode, message);
         this.failureCount = failureCount;
         this.blockedDuration = blockedDuration;

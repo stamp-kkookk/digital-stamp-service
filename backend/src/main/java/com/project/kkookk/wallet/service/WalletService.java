@@ -35,12 +35,14 @@ public class WalletService {
     public WalletRegisterResponse registerWallet(WalletRegisterRequest request) {
         // 1. OTP 검증
         OtpVerifyRequest otpVerifyRequest =
-                new OtpVerifyRequest(
-                        request.phone(), request.verificationId(), request.otpCode());
+                new OtpVerifyRequest(request.phone(), request.verificationId(), request.otpCode());
         OtpVerifyResponse otpVerifyResponse = otpService.verifyOtp(otpVerifyRequest);
 
         if (!otpVerifyResponse.verified()) {
-            log.warn("OTP 검증 실패: phone={}, verificationId={}", request.phone(), request.verificationId());
+            log.warn(
+                    "OTP 검증 실패: phone={}, verificationId={}",
+                    request.phone(),
+                    request.verificationId());
             throw new BusinessException(ErrorCode.OTP_VERIFICATION_FAILED);
         }
 
@@ -63,7 +65,8 @@ public class WalletService {
         log.info("지갑 생성 완료: walletId={}, phone={}", savedWallet.getId(), savedWallet.getPhone());
 
         // 4. JWT 토큰 생성
-        String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId(), savedWallet.getPhone());
+        String accessToken =
+                jwtUtil.generateCustomerToken(savedWallet.getId(), savedWallet.getPhone());
         log.info("Customer 토큰 발급 완료: walletId={}", savedWallet.getId());
 
         return WalletRegisterResponse.of(savedWallet, accessToken);

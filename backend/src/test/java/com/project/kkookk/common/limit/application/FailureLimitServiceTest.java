@@ -32,10 +32,10 @@ class FailureLimitServiceTest {
         // CacheManager 설정
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager("failureCache");
         caffeineCacheManager.setCaffeine(
-            Caffeine.newBuilder()
-                .expireAfterWrite(properties.getCooldownPeriod().toMillis(), TimeUnit.MILLISECONDS)
-                .maximumSize(10000)
-        );
+                Caffeine.newBuilder()
+                        .expireAfterWrite(
+                                properties.getCooldownPeriod().toMillis(), TimeUnit.MILLISECONDS)
+                        .maximumSize(10000));
         cacheManager = caffeineCacheManager;
 
         // Service 생성
@@ -109,12 +109,13 @@ class FailureLimitServiceTest {
 
         // when & then
         assertThatThrownBy(() -> failureLimitService.checkBlocked(identifier))
-            .isInstanceOf(BlockedException.class)
-            .satisfies(e -> {
-                BlockedException be = (BlockedException) e;
-                assertThat(be.getFailureCount()).isEqualTo(properties.getMaxAttempts());
-                assertThat(be.getBlockedDuration().toSeconds()).isBetween(0L, 1L);
-            });
+                .isInstanceOf(BlockedException.class)
+                .satisfies(
+                        e -> {
+                            BlockedException be = (BlockedException) e;
+                            assertThat(be.getFailureCount()).isEqualTo(properties.getMaxAttempts());
+                            assertThat(be.getBlockedDuration().toSeconds()).isBetween(0L, 1L);
+                        });
     }
 
     @Test
@@ -129,7 +130,7 @@ class FailureLimitServiceTest {
 
         // when & then
         assertThatThrownBy(() -> failureLimitService.checkBlocked(identifier))
-            .isInstanceOf(BlockedException.class);
+                .isInstanceOf(BlockedException.class);
     }
 
     @Test
@@ -162,13 +163,15 @@ class FailureLimitServiceTest {
     void getRemainingAttempts_shouldReturnCorrectCount() {
         // given
         String identifier = "user@example.com";
-        assertThat(failureLimitService.getRemainingAttempts(identifier)).isEqualTo(properties.getMaxAttempts());
+        assertThat(failureLimitService.getRemainingAttempts(identifier))
+                .isEqualTo(properties.getMaxAttempts());
 
         // when
         failureLimitService.recordFailure(identifier);
 
         // then
-        assertThat(failureLimitService.getRemainingAttempts(identifier)).isEqualTo(properties.getMaxAttempts() - 1);
+        assertThat(failureLimitService.getRemainingAttempts(identifier))
+                .isEqualTo(properties.getMaxAttempts() - 1);
     }
 
     @Test

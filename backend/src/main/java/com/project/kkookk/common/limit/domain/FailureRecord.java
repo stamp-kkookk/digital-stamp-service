@@ -9,7 +9,11 @@ public class FailureRecord {
     private final LocalDateTime blockedUntil;
     private final LocalDateTime lastFailureAt;
 
-    public FailureRecord(String identifier, int failureCount, LocalDateTime blockedUntil, LocalDateTime lastFailureAt) {
+    public FailureRecord(
+            String identifier,
+            int failureCount,
+            LocalDateTime blockedUntil,
+            LocalDateTime lastFailureAt) {
         this.identifier = identifier;
         this.failureCount = failureCount;
         this.blockedUntil = blockedUntil;
@@ -21,11 +25,13 @@ public class FailureRecord {
     }
 
     public FailureRecord incrementFailureCount() {
-        return new FailureRecord(this.identifier, this.failureCount + 1, this.blockedUntil, LocalDateTime.now());
+        return new FailureRecord(
+                this.identifier, this.failureCount + 1, this.blockedUntil, LocalDateTime.now());
     }
 
     public FailureRecord block(LocalDateTime blockedUntil) {
-        return new FailureRecord(this.identifier, this.failureCount, blockedUntil, this.lastFailureAt);
+        return new FailureRecord(
+                this.identifier, this.failureCount, blockedUntil, this.lastFailureAt);
     }
 
     public boolean isBlocked() {
@@ -50,13 +56,17 @@ public class FailureRecord {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         FailureRecord that = (FailureRecord) o;
-        return failureCount == that.failureCount &&
-               Objects.equals(identifier, that.identifier) &&
-               Objects.equals(blockedUntil, that.blockedUntil) &&
-               Objects.equals(lastFailureAt, that.lastFailureAt);
+        return failureCount == that.failureCount
+                && Objects.equals(identifier, that.identifier)
+                && Objects.equals(blockedUntil, that.blockedUntil)
+                && Objects.equals(lastFailureAt, that.lastFailureAt);
     }
 
     @Override
@@ -67,10 +77,15 @@ public class FailureRecord {
     @Override
     public String toString() {
         return "FailureRecord{"
-               + "identifier='" + identifier + "'"
-               + ", failureCount=" + failureCount
-               + ", blockedUntil=" + blockedUntil
-               + ", lastFailureAt=" + lastFailureAt
-               + "}";
+                + "identifier='"
+                + identifier
+                + "'"
+                + ", failureCount="
+                + failureCount
+                + ", blockedUntil="
+                + blockedUntil
+                + ", lastFailureAt="
+                + lastFailureAt
+                + "}";
     }
 }

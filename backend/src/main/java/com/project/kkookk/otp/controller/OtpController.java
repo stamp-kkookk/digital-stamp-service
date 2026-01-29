@@ -22,14 +22,16 @@ public class OtpController implements OtpApi {
 
     @Override
     @PostMapping("/request")
-    public ResponseEntity<OtpRequestResponse> requestOtp(@Valid @RequestBody OtpRequestRequest request) {
+    public ResponseEntity<OtpRequestResponse> requestOtp(
+            @Valid @RequestBody OtpRequestRequest request) {
         OtpRequestResponse response = otpService.requestOtp(request);
         return ResponseEntity.ok(response);
     }
 
     @Override
     @PostMapping("/verify")
-    public ResponseEntity<OtpVerifyResponse> verifyOtp(@Valid @RequestBody OtpVerifyRequest request) {
+    public ResponseEntity<OtpVerifyResponse> verifyOtp(
+            @Valid @RequestBody OtpVerifyRequest request) {
         OtpVerifyResponse response = otpService.verifyOtp(request);
         return ResponseEntity.ok(response);
     }

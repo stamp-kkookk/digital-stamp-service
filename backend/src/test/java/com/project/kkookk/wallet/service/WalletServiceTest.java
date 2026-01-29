@@ -42,11 +42,7 @@ class WalletServiceTest {
         // given
         WalletRegisterRequest request =
                 new WalletRegisterRequest(
-                        "010-1234-5678",
-                        "test-verification-id",
-                        "123456",
-                        "홍길동",
-                        "길동이");
+                        "010-1234-5678", "test-verification-id", "123456", "홍길동", "길동이");
 
         given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
                 .willReturn(OtpVerifyResponse.of(true, "010-1234-5678"));
@@ -87,11 +83,7 @@ class WalletServiceTest {
         // given
         WalletRegisterRequest request =
                 new WalletRegisterRequest(
-                        "010-1234-5678",
-                        "test-verification-id",
-                        "123456",
-                        "홍길동",
-                        "길동이");
+                        "010-1234-5678", "test-verification-id", "123456", "홍길동", "길동이");
 
         given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
                 .willReturn(OtpVerifyResponse.of(false, "010-1234-5678"));
@@ -112,11 +104,7 @@ class WalletServiceTest {
         // given
         WalletRegisterRequest request =
                 new WalletRegisterRequest(
-                        "010-1234-5678",
-                        "test-verification-id",
-                        "123456",
-                        "홍길동",
-                        "길동이");
+                        "010-1234-5678", "test-verification-id", "123456", "홍길동", "길동이");
 
         given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
                 .willReturn(OtpVerifyResponse.of(true, "010-1234-5678"));
