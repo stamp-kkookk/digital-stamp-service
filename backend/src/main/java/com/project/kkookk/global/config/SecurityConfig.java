@@ -39,6 +39,10 @@ public class SecurityConfig {
                         auth ->
                                 auth.requestMatchers("/api/owner/auth/**")
                                         .permitAll()
+                                        .requestMatchers("/api/public/**")
+                                        .permitAll()
+                                        .requestMatchers("/api/customer/wallet/stamp-cards")
+                                        .permitAll()
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
                                         .permitAll()
                                         .anyRequest()
