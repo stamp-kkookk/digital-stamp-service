@@ -47,9 +47,16 @@ public enum ErrorCode {
 
     // Issuance
     ISSUANCE_REQUEST_NOT_FOUND(
-            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "발급 요청을 찾을 수 없습니다"),
+            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "적립 요청을 찾을 수 없습니다"),
     ISSUANCE_REQUEST_NOT_PENDING(
-            HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다");
+            HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
+    ISSUANCE_REQUEST_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "ISSUANCE_REQUEST_ALREADY_PENDING", "이미 대기 중인 적립 요청이 있습니다"),
+
+    // Wallet
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
+    WALLET_STAMP_CARD_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "WALLET_STAMP_CARD_NOT_FOUND", "지갑 스탬프카드를 찾을 수 없습니다");
 
     private final HttpStatus status;
     private final String code;
