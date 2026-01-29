@@ -3,6 +3,7 @@ package com.project.kkookk.otp.service;
 import static com.project.kkookk.global.config.CacheConfig.OTP_RATE_LIMIT_CACHE;
 import static com.project.kkookk.global.config.CacheConfig.OTP_SESSION_CACHE;
 
+import com.project.kkookk.common.limit.application.FailureLimitService;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.otp.config.OtpProperties;
@@ -32,6 +33,7 @@ public class OtpService {
     private final CacheManager cacheManager;
     private final SmsProvider smsProvider;
     private final OtpProperties otpProperties;
+    private final FailureLimitService failureLimitService;
 
     /**
      * OTP 요청 처리
@@ -63,7 +65,6 @@ public class OtpService {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(expiresAt)
-                        .attemptCount(0)
                         .createdAt(now)
                         .build();
 
@@ -96,42 +97,41 @@ public class OtpService {
         String verificationId = request.verificationId();
         String otpCode = request.otpCode();
 
+        // 0. 차단 여부 확인
+        failureLimitService.checkBlocked(phone);
+
         // 1. 세션 조회 (verificationId로 전화번호 찾기)
         OtpSessionData sessionData = findSessionByVerificationId(verificationId);
 
         // 2. 전화번호 일치 확인
         if (!sessionData.getPhone().equals(phone)) {
             log.warn("OTP 검증 실패 - 전화번호 불일치: expected={}, actual={}", sessionData.getPhone(), phone);
+            failureLimitService.recordFailure(phone);
             throw new BusinessException(ErrorCode.OTP_INVALID);
         }
 
         // 3. 세션 상태 검증
         if (sessionData.isExpired()) {
             log.warn("OTP 만료: phone={}, verificationId={}", phone, verificationId);
+            // 만료는 실패로 간주하지 않음.
             throw new BusinessException(ErrorCode.OTP_EXPIRED);
-        }
-
-        if (!sessionData.canAttempt()) {
-            log.warn("OTP 시도 횟수 초과: phone={}, attemptCount={}", phone, sessionData.getAttemptCount());
-            throw new BusinessException(ErrorCode.OTP_EXHAUSTED);
         }
 
         // 4. OTP 코드 검증
         if (!sessionData.getOtpCode().equals(otpCode)) {
             // 실패 시 시도 횟수 증가
-            sessionData.incrementAttempt();
-            updateSession(phone, sessionData);
+            failureLimitService.recordFailure(phone);
 
             log.warn(
-                    "OTP 코드 불일치: phone={}, attemptCount={}",
-                    phone,
-                    sessionData.getAttemptCount());
+                "OTP 코드 불일치: phone={}",
+                phone);
             throw new BusinessException(ErrorCode.OTP_INVALID);
         }
 
         // 5. 검증 성공 - VERIFIED 상태로 전환
         sessionData.verify();
         updateSession(phone, sessionData);
+        failureLimitService.recordSuccess(phone);
 
         log.info("OTP 검증 성공: phone={}, verificationId={}", phone, verificationId);
         return OtpVerifyResponse.of(true, phone);

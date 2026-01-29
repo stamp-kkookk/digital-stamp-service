@@ -56,13 +56,17 @@ public enum ErrorCode {
             HttpStatus.TOO_MANY_REQUESTS, "OTP_001", "OTP 요청 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
     OTP_SEND_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "OTP_002", "OTP 발송에 실패했습니다."),
     OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP_003", "OTP가 만료되었습니다."),
-    OTP_EXHAUSTED(HttpStatus.BAD_REQUEST, "OTP_004", "OTP 시도 횟수를 초과했습니다."),
     OTP_NOT_FOUND(HttpStatus.NOT_FOUND, "OTP_005", "OTP 세션을 찾을 수 없습니다."),
     OTP_INVALID(HttpStatus.BAD_REQUEST, "OTP_006", "잘못된 OTP 코드입니다."),
 
     // Wallet
     WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다."),
-    OTP_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "WALLET_002", "OTP 검증에 실패했습니다.");
+    OTP_VERIFICATION_FAILED(HttpStatus.BAD_REQUEST, "WALLET_002", "OTP 검증에 실패했습니다."),
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑 정보를 찾을 수 없습니다"),
+
+    // Failure Limit
+    FAILURE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "FAILURE_LIMIT_001", "시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."),
+    ACCOUNT_BLOCKED(HttpStatus.TOO_MANY_REQUESTS, "FAILURE_LIMIT_002", "계정이 일시적으로 차단되었습니다. {0} 후에 다시 시도해주세요.");
 
     private final HttpStatus status;
     private final String code;

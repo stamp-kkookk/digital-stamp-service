@@ -1,7 +1,10 @@
 package com.project.kkookk.wallet.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,6 +19,9 @@ import com.project.kkookk.wallet.controller.config.WalletTestSecurityConfig;
 import com.project.kkookk.wallet.controller.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.controller.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.domain.CustomerWalletStatus;
+import com.project.kkookk.wallet.dto.StampCardInfo;
+import com.project.kkookk.wallet.dto.WalletAccessResponse;
+import com.project.kkookk.wallet.service.WalletAccessService;
 import com.project.kkookk.wallet.service.WalletService;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +55,8 @@ class WalletControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean private WalletService walletService;
+
+    @MockitoBean private WalletAccessService walletAccessService;
 
     @Test
     @DisplayName("지갑 생성 성공 - 200 OK")
@@ -258,6 +266,140 @@ class WalletControllerTest {
                                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 성공 - 스탬프 카드 있음 (200)")
+    @WithMockUser
+    void getWalletAccessInfo_Success_WithStampCard() throws Exception {
+        // given
+        StampCardInfo stampCardInfo =
+                new StampCardInfo(1L, 1L, "테스트 매장", 5, 10, "아메리카노", false);
+        WalletAccessResponse response =
+                new WalletAccessResponse(1L, "홍길동", "01012345678", stampCardInfo);
+
+        given(walletAccessService.getWalletInfo(anyString(), anyString(), anyLong()))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01012345678")
+                                .param("userName", "홍길동")
+                                .param("storeId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.userName").value("홍길동"))
+                .andExpect(jsonPath("$.phoneNumber").value("01012345678"))
+                .andExpect(jsonPath("$.stampCardInfo.stampCardId").value(1))
+                .andExpect(jsonPath("$.stampCardInfo.storeId").value(1))
+                .andExpect(jsonPath("$.stampCardInfo.storeName").value("테스트 매장"))
+                .andExpect(jsonPath("$.stampCardInfo.currentStamps").value(5))
+                .andExpect(jsonPath("$.stampCardInfo.totalStampsToReward").value(10))
+                .andExpect(jsonPath("$.stampCardInfo.rewardName").value("아메리카노"))
+                .andExpect(jsonPath("$.stampCardInfo.isRewarded").value(false));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 성공 - 스탬프 카드 없음 (200)")
+    @WithMockUser
+    void getWalletAccessInfo_Success_WithoutStampCard() throws Exception {
+        // given
+        WalletAccessResponse response = new WalletAccessResponse(1L, "홍길동", "01012345678", null);
+
+        given(walletAccessService.getWalletInfo(anyString(), anyString(), anyLong()))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01012345678")
+                                .param("userName", "홍길동")
+                                .param("storeId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.userName").value("홍길동"))
+                .andExpect(jsonPath("$.phoneNumber").value("01012345678"))
+                .andExpect(jsonPath("$.stampCardInfo").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 실패 - 전화번호 형식 오류 (400)")
+    @WithMockUser
+    void getWalletAccessInfo_Fail_InvalidPhoneFormat() throws Exception {
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "1234567890")
+                                .param("userName", "홍길동")
+                                .param("storeId", "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 실패 - 필수 파라미터 누락 (400)")
+    @WithMockUser
+    void getWalletAccessInfo_Fail_MissingRequiredParameter() throws Exception {
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01012345678")
+                                .param("storeId", "1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 실패 - 지갑을 찾을 수 없음 (404)")
+    @WithMockUser
+    void getWalletAccessInfo_Fail_WalletNotFound() throws Exception {
+        // given
+        given(walletAccessService.getWalletInfo(anyString(), anyString(), anyLong()))
+                .willThrow(new BusinessException(ErrorCode.WALLET_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01099999999")
+                                .param("userName", "김철수")
+                                .param("storeId", "1"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("WALLET_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("지갑 정보를 찾을 수 없습니다"));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 실패 - 매장을 찾을 수 없음 (404)")
+    @WithMockUser
+    void getWalletAccessInfo_Fail_StoreNotFound() throws Exception {
+        // given
+        given(walletAccessService.getWalletInfo(anyString(), anyString(), anyLong()))
+                .willThrow(new BusinessException(ErrorCode.STORE_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01012345678")
+                                .param("userName", "홍길동")
+                                .param("storeId", "999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("STORE_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("매장을 찾을 수 없습니다"));
+    }
+
+    @Test
+    @DisplayName("지갑 정보 조회 실패 - 이름 길이 부족 (400)")
+    @WithMockUser
+    void getWalletAccessInfo_Fail_NameTooShort() throws Exception {
+        // when & then
+        mockMvc.perform(
+                        get("/api/public/wallet/access")
+                                .param("phoneNumber", "01012345678")
+                                .param("userName", "a")
+                                .param("storeId", "1"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }

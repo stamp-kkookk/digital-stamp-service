@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
+import com.project.kkookk.common.limit.application.FailureLimitService;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.otp.config.OtpProperties;
@@ -48,6 +49,8 @@ class OtpServiceTest {
     @Mock private Cache sessionCache;
 
     @Mock private Cache rateLimitCache;
+
+    @Mock private FailureLimitService failureLimitService;
 
     @BeforeEach
     void setUp() {
@@ -170,7 +173,7 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-                        .attemptCount(0)
+
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 
@@ -206,7 +209,7 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-                        .attemptCount(0)
+
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 
@@ -223,8 +226,8 @@ class OtpServiceTest {
                             assertThat(be.getErrorCode()).isEqualTo(ErrorCode.OTP_INVALID);
                         });
 
-        // 시도 횟수 증가 확인
-        verify(sessionCache).put(eq("otp:session:" + phone), any(OtpSessionData.class));
+        // 실패 기록 확인
+        verify(failureLimitService).recordFailure(phone);
     }
 
     @Test
@@ -267,7 +270,7 @@ class OtpServiceTest {
                         .verificationId(verificationId)
                         .status(OtpSessionStatus.PENDING)
                         .expiresAt(java.time.LocalDateTime.now().plusMinutes(3))
-                        .attemptCount(0)
+
                         .createdAt(java.time.LocalDateTime.now())
                         .build();
 

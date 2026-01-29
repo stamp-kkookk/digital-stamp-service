@@ -1,28 +1,28 @@
 package com.project.kkookk.wallet.controller;
 
-import com.project.kkookk.wallet.controller.dto.WalletRegisterRequest;
-import com.project.kkookk.wallet.controller.dto.WalletRegisterResponse;
-import com.project.kkookk.wallet.service.WalletService;
+import com.project.kkookk.wallet.dto.WalletAccessRequest;
+import com.project.kkookk.wallet.dto.WalletAccessResponse;
+import com.project.kkookk.wallet.service.WalletAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/public/wallet")
 @RequiredArgsConstructor
 public class WalletController implements WalletApi {
 
-    private final WalletService walletService;
+    private final WalletAccessService walletAccessService;
 
     @Override
-    @PostMapping("/register")
-    public ResponseEntity<WalletRegisterResponse> registerWallet(
-            @Valid @RequestBody WalletRegisterRequest request) {
-        WalletRegisterResponse response = walletService.registerWallet(request);
+    public ResponseEntity<WalletAccessResponse> getWalletAccessInfo(
+            @Valid @ModelAttribute WalletAccessRequest request,
+            @RequestParam Long storeId) {
+        WalletAccessResponse response = walletAccessService.getWalletInfo(
+            request.phoneNumber(), request.userName(), storeId);
         return ResponseEntity.ok(response);
     }
 }

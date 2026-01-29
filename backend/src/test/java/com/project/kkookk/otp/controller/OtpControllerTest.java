@@ -18,6 +18,7 @@ import com.project.kkookk.otp.controller.dto.OtpRequestResponse;
 import com.project.kkookk.otp.controller.dto.OtpVerifyRequest;
 import com.project.kkookk.otp.controller.dto.OtpVerifyResponse;
 import com.project.kkookk.otp.service.OtpService;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -224,27 +225,32 @@ class OtpControllerTest {
                 .andExpect(jsonPath("$.message").value("OTP가 만료되었습니다."));
     }
 
+
+
+
     @Test
-    @DisplayName("OTP 검증 실패 - 시도 횟수 초과 (400)")
+    @DisplayName("OTP 검증 실패 - 계정 차단 (429)")
     @WithMockUser
-    void verifyOtp_Fail_Exhausted() throws Exception {
+    void verifyOtp_Fail_Blocked() throws Exception {
         // given
         OtpVerifyRequest request =
-                new OtpVerifyRequest(
-                        "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "123456");
+            new OtpVerifyRequest(
+                "010-1234-5678", "550e8400-e29b-41d4-a716-446655440000", "123456");
 
         given(otpService.verifyOtp(any(OtpVerifyRequest.class)))
-                .willThrow(new BusinessException(ErrorCode.OTP_EXHAUSTED));
+            .willThrow(new com.project.kkookk.common.limit.exception.BlockedException(ErrorCode.FAILURE_LIMIT_EXCEEDED, 3, Duration.ofSeconds(60)));
 
         // when & then
         mockMvc.perform(
-                        post("/api/public/otp/verify")
-                                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("OTP_004"))
-                .andExpect(jsonPath("$.message").value("OTP 시도 횟수를 초과했습니다."));
+                post("/api/public/otp/verify")
+                    .with(SecurityMockMvcRequestPostProcessors.csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.code").value("FAILURE_LIMIT_001"))
+            .andExpect(jsonPath("$.message").value("시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."))
+            .andExpect(jsonPath("$.blockedDurationSeconds").value(60))
+            .andExpect(jsonPath("$.failureCount").value(3));
     }
 
     @Test
