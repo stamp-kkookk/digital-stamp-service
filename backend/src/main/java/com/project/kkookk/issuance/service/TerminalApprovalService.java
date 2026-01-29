@@ -46,9 +46,7 @@ public class TerminalApprovalService {
     private final WalletStampCardRepository walletStampCardRepository;
     private final StampEventRepository stampEventRepository;
 
-    /**
-     * 승인 대기 목록 조회 (터미널 Polling용)
-     */
+    /** 승인 대기 목록 조회 (터미널 Polling용) */
     public PendingIssuanceRequestListResponse getPendingRequests(Long storeId, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
 
@@ -59,9 +57,7 @@ public class TerminalApprovalService {
         // 만료된 요청은 필터링 (lazy expiration)
         LocalDateTime now = LocalDateTime.now();
         List<IssuanceRequest> validRequests =
-                pendingRequests.stream()
-                        .filter(r -> !r.isExpired())
-                        .toList();
+                pendingRequests.stream().filter(r -> !r.isExpired()).toList();
 
         // 고객명 조회 (N+1 방지)
         Set<Long> walletIds =
@@ -75,15 +71,19 @@ public class TerminalApprovalService {
 
         List<PendingIssuanceRequestItem> items =
                 validRequests.stream()
-                        .map(r -> toItem(r, walletNameMap.getOrDefault(r.getWalletId(), "알 수 없음"), now))
+                        .map(
+                                r ->
+                                        toItem(
+                                                r,
+                                                walletNameMap.getOrDefault(
+                                                        r.getWalletId(), "알 수 없음"),
+                                                now))
                         .toList();
 
         return new PendingIssuanceRequestListResponse(items, items.size());
     }
 
-    /**
-     * 적립 요청 승인
-     */
+    /** 적립 요청 승인 */
     @Transactional
     public IssuanceApprovalResponse approveRequest(Long storeId, Long requestId, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
@@ -137,9 +137,7 @@ public class TerminalApprovalService {
                 walletStampCard.getStampCount());
     }
 
-    /**
-     * 적립 요청 거절
-     */
+    /** 적립 요청 거절 */
     @Transactional
     public IssuanceRejectionResponse rejectRequest(Long storeId, Long requestId, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);

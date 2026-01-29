@@ -39,8 +39,7 @@ public class WalletStampCard extends BaseTimeEntity {
     @Column(name = "last_stamped_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime lastStampedAt;
 
-    @Version
-    private Long version;
+    @Version private Long version;
 
     @Builder
     private WalletStampCard(

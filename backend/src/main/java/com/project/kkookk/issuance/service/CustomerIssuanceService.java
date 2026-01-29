@@ -40,7 +40,8 @@ public class CustomerIssuanceService {
      * @return 생성된 적립 요청 결과 (신규 생성 여부 포함)
      */
     @Transactional
-    public IssuanceRequestResult createIssuanceRequest(Long walletId, CreateIssuanceRequest request) {
+    public IssuanceRequestResult createIssuanceRequest(
+            Long walletId, CreateIssuanceRequest request) {
         // 1. 매장 존재 확인
         if (!storeRepository.existsById(request.storeId())) {
             throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
@@ -67,7 +68,8 @@ public class CustomerIssuanceService {
             // 만료된 요청이 아니면 기존 요청 반환
             if (existingRequest.getStatus() != IssuanceRequestStatus.EXPIRED) {
                 return new IssuanceRequestResult(
-                        IssuanceRequestResponse.from(existingRequest, walletStampCard.getStampCount()),
+                        IssuanceRequestResponse.from(
+                                existingRequest, walletStampCard.getStampCount()),
                         false);
             }
         }
@@ -111,7 +113,9 @@ public class CustomerIssuanceService {
     @Transactional
     public IssuanceRequestResponse getIssuanceRequest(Long id, Long walletId) {
         IssuanceRequest request =
-                issuanceRequestRepository.findById(id).orElseThrow(IssuanceRequestNotFoundException::new);
+                issuanceRequestRepository
+                        .findById(id)
+                        .orElseThrow(IssuanceRequestNotFoundException::new);
 
         // 본인 요청 검증
         if (!request.getWalletId().equals(walletId)) {

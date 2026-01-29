@@ -60,12 +60,15 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, idempotencyKey);
 
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
 
             given(storeRepository.existsById(storeId)).willReturn(true);
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
-            given(issuanceRequestRepository.findByWalletIdAndIdempotencyKey(walletId, idempotencyKey))
+            given(
+                            issuanceRequestRepository.findByWalletIdAndIdempotencyKey(
+                                    walletId, idempotencyKey))
                     .willReturn(Optional.empty());
             given(
                             issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
@@ -77,12 +80,14 @@ class CustomerIssuanceServiceTest {
                             invocation -> {
                                 IssuanceRequest savedRequest = invocation.getArgument(0);
                                 ReflectionTestUtils.setField(savedRequest, "id", 1L);
-                                ReflectionTestUtils.setField(savedRequest, "createdAt", LocalDateTime.now());
+                                ReflectionTestUtils.setField(
+                                        savedRequest, "createdAt", LocalDateTime.now());
                                 return savedRequest;
                             });
 
             // when
-            IssuanceRequestResult result = customerIssuanceService.createIssuanceRequest(walletId, request);
+            IssuanceRequestResult result =
+                    customerIssuanceService.createIssuanceRequest(walletId, request);
 
             // then
             assertThat(result.newlyCreated()).isTrue();
@@ -104,18 +109,22 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, idempotencyKey);
 
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             IssuanceRequest existingRequest =
                     createIssuanceRequest(1L, storeId, walletId, walletStampCardId);
 
             given(storeRepository.existsById(storeId)).willReturn(true);
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
-            given(issuanceRequestRepository.findByWalletIdAndIdempotencyKey(walletId, idempotencyKey))
+            given(
+                            issuanceRequestRepository.findByWalletIdAndIdempotencyKey(
+                                    walletId, idempotencyKey))
                     .willReturn(Optional.of(existingRequest));
 
             // when
-            IssuanceRequestResult result = customerIssuanceService.createIssuanceRequest(walletId, request);
+            IssuanceRequestResult result =
+                    customerIssuanceService.createIssuanceRequest(walletId, request);
 
             // then
             assertThat(result.newlyCreated()).isFalse();
@@ -135,11 +144,13 @@ class CustomerIssuanceServiceTest {
             given(storeRepository.existsById(storeId)).willReturn(false);
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.createIssuanceRequest(walletId, request))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(
-                            e -> assertThat(((BusinessException) e).getErrorCode())
-                                    .isEqualTo(ErrorCode.STORE_NOT_FOUND));
+                            e ->
+                                    assertThat(((BusinessException) e).getErrorCode())
+                                            .isEqualTo(ErrorCode.STORE_NOT_FOUND));
         }
 
         @Test
@@ -154,10 +165,12 @@ class CustomerIssuanceServiceTest {
                     new CreateIssuanceRequest(storeId, walletStampCardId, "test-key");
 
             given(storeRepository.existsById(storeId)).willReturn(true);
-            given(walletStampCardRepository.findById(walletStampCardId)).willReturn(Optional.empty());
+            given(walletStampCardRepository.findById(walletStampCardId))
+                    .willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.createIssuanceRequest(walletId, request))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
                     .isInstanceOf(WalletStampCardNotFoundException.class);
         }
 
@@ -181,11 +194,13 @@ class CustomerIssuanceServiceTest {
                     .willReturn(Optional.of(walletStampCard));
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.createIssuanceRequest(walletId, request))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(
-                            e -> assertThat(((BusinessException) e).getErrorCode())
-                                    .isEqualTo(ErrorCode.ACCESS_DENIED));
+                            e ->
+                                    assertThat(((BusinessException) e).getErrorCode())
+                                            .isEqualTo(ErrorCode.ACCESS_DENIED));
         }
 
         @Test
@@ -199,7 +214,8 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, "new-key");
 
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
 
             given(storeRepository.existsById(storeId)).willReturn(true);
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -212,7 +228,8 @@ class CustomerIssuanceServiceTest {
                     .willReturn(true);
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.createIssuanceRequest(walletId, request))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
                     .isInstanceOf(IssuanceRequestAlreadyPendingException.class);
         }
 
@@ -227,7 +244,8 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, "test-key");
 
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
 
             given(storeRepository.existsById(storeId)).willReturn(true);
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -242,7 +260,8 @@ class CustomerIssuanceServiceTest {
                     .willThrow(new DataIntegrityViolationException("Unique constraint violation"));
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.createIssuanceRequest(walletId, request))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
                     .isInstanceOf(IssuanceRequestAlreadyPendingException.class);
         }
 
@@ -258,14 +277,17 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, idempotencyKey);
 
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             IssuanceRequest expiredRequest =
                     createExpiredIssuanceRequest(1L, storeId, walletId, walletStampCardId);
 
             given(storeRepository.existsById(storeId)).willReturn(true);
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
-            given(issuanceRequestRepository.findByWalletIdAndIdempotencyKey(walletId, idempotencyKey))
+            given(
+                            issuanceRequestRepository.findByWalletIdAndIdempotencyKey(
+                                    walletId, idempotencyKey))
                     .willReturn(Optional.of(expiredRequest));
             given(
                             issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
@@ -277,12 +299,14 @@ class CustomerIssuanceServiceTest {
                             invocation -> {
                                 IssuanceRequest savedRequest = invocation.getArgument(0);
                                 ReflectionTestUtils.setField(savedRequest, "id", 2L);
-                                ReflectionTestUtils.setField(savedRequest, "createdAt", LocalDateTime.now());
+                                ReflectionTestUtils.setField(
+                                        savedRequest, "createdAt", LocalDateTime.now());
                                 return savedRequest;
                             });
 
             // when
-            IssuanceRequestResult result = customerIssuanceService.createIssuanceRequest(walletId, request);
+            IssuanceRequestResult result =
+                    customerIssuanceService.createIssuanceRequest(walletId, request);
 
             // then
             assertThat(result.newlyCreated()).isTrue();
@@ -302,8 +326,10 @@ class CustomerIssuanceServiceTest {
             Long walletId = 1L;
             Long walletStampCardId = 10L;
 
-            IssuanceRequest request = createIssuanceRequest(requestId, 1L, walletId, walletStampCardId);
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, 1L, 3);
+            IssuanceRequest request =
+                    createIssuanceRequest(requestId, 1L, walletId, walletStampCardId);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, 1L, 3);
 
             given(issuanceRequestRepository.findById(requestId)).willReturn(Optional.of(request));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -329,7 +355,8 @@ class CustomerIssuanceServiceTest {
             given(issuanceRequestRepository.findById(requestId)).willReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.getIssuanceRequest(requestId, walletId))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.getIssuanceRequest(requestId, walletId))
                     .isInstanceOf(IssuanceRequestNotFoundException.class);
         }
 
@@ -346,11 +373,13 @@ class CustomerIssuanceServiceTest {
             given(issuanceRequestRepository.findById(requestId)).willReturn(Optional.of(request));
 
             // when & then
-            assertThatThrownBy(() -> customerIssuanceService.getIssuanceRequest(requestId, walletId))
+            assertThatThrownBy(
+                            () -> customerIssuanceService.getIssuanceRequest(requestId, walletId))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(
-                            e -> assertThat(((BusinessException) e).getErrorCode())
-                                    .isEqualTo(ErrorCode.ACCESS_DENIED));
+                            e ->
+                                    assertThat(((BusinessException) e).getErrorCode())
+                                            .isEqualTo(ErrorCode.ACCESS_DENIED));
         }
 
         @Test
@@ -362,8 +391,10 @@ class CustomerIssuanceServiceTest {
             Long walletStampCardId = 10L;
 
             IssuanceRequest request =
-                    createExpiredButPendingIssuanceRequest(requestId, 1L, walletId, walletStampCardId);
-            WalletStampCard walletStampCard = createWalletStampCard(walletStampCardId, walletId, 1L, 3);
+                    createExpiredButPendingIssuanceRequest(
+                            requestId, 1L, walletId, walletStampCardId);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, 1L, 3);
 
             given(issuanceRequestRepository.findById(requestId)).willReturn(Optional.of(request));
             given(walletStampCardRepository.findById(walletStampCardId))

@@ -57,7 +57,8 @@ public interface TerminalApprovalApi {
                 responseCode = "200",
                 description = "승인 성공",
                 content =
-                        @Content(schema = @Schema(implementation = IssuanceApprovalResponse.class))),
+                        @Content(
+                                schema = @Schema(implementation = IssuanceApprovalResponse.class))),
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요",
@@ -91,7 +92,8 @@ public interface TerminalApprovalApi {
                 description = "거절 성공",
                 content =
                         @Content(
-                                schema = @Schema(implementation = IssuanceRejectionResponse.class))),
+                                schema =
+                                        @Schema(implementation = IssuanceRejectionResponse.class))),
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요",

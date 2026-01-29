@@ -84,7 +84,9 @@ class CustomerIssuanceControllerTest {
                             4,
                             now);
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willReturn(new IssuanceRequestResult(response, true));
 
             // when & then
@@ -118,7 +120,9 @@ class CustomerIssuanceControllerTest {
                             4,
                             now);
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willReturn(new IssuanceRequestResult(response, false));
 
             // when & then
@@ -185,7 +189,9 @@ class CustomerIssuanceControllerTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(999L, 10L, "550e8400-e29b-41d4-a716-446655440000");
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willThrow(new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
             // when & then
@@ -204,7 +210,9 @@ class CustomerIssuanceControllerTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(1L, 999L, "550e8400-e29b-41d4-a716-446655440000");
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willThrow(new WalletStampCardNotFoundException());
 
             // when & then
@@ -223,7 +231,9 @@ class CustomerIssuanceControllerTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(1L, 10L, "550e8400-e29b-41d4-a716-446655440000");
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willThrow(new BusinessException(ErrorCode.ACCESS_DENIED));
 
             // when & then
@@ -242,7 +252,9 @@ class CustomerIssuanceControllerTest {
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(1L, 10L, "different-idempotency-key");
 
-            given(customerIssuanceService.createIssuanceRequest(eq(1L), any(CreateIssuanceRequest.class)))
+            given(
+                            customerIssuanceService.createIssuanceRequest(
+                                    eq(1L), any(CreateIssuanceRequest.class)))
                     .willThrow(new IssuanceRequestAlreadyPendingException());
 
             // when & then

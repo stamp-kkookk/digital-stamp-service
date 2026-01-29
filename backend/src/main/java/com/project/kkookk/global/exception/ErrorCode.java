@@ -52,8 +52,7 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
     ISSUANCE_REQUEST_ALREADY_PENDING(
             HttpStatus.CONFLICT, "ISSUANCE_REQUEST_ALREADY_PENDING", "이미 대기 중인 적립 요청이 있습니다"),
-    ISSUANCE_ALREADY_PROCESSED(
-            HttpStatus.CONFLICT, "ISSUANCE_ALREADY_PROCESSED", "이미 처리된 요청입니다"),
+    ISSUANCE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "ISSUANCE_ALREADY_PROCESSED", "이미 처리된 요청입니다"),
     ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
 
     // Wallet

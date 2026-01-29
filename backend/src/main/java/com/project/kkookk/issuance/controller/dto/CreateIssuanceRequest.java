@@ -7,8 +7,7 @@ import jakarta.validation.constraints.Size;
 
 @Schema(description = "적립 요청 생성")
 public record CreateIssuanceRequest(
-        @Schema(description = "매장 ID", example = "1")
-                @NotNull(message = "매장 ID는 필수입니다")
+        @Schema(description = "매장 ID", example = "1") @NotNull(message = "매장 ID는 필수입니다")
                 Long storeId,
         @Schema(description = "지갑 스탬프카드 ID", example = "10")
                 @NotNull(message = "지갑 스탬프카드 ID는 필수입니다")
