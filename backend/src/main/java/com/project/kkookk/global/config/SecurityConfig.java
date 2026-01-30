@@ -39,6 +39,8 @@ public class SecurityConfig {
                         auth ->
                                 auth.requestMatchers("/api/owner/auth/**")
                                         .permitAll()
+                                        .requestMatchers("/api/public/otp/**")
+                                        .permitAll()
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
                                         .permitAll()
                                         .anyRequest()
