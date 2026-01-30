@@ -55,7 +55,10 @@ public enum ErrorCode {
     OTP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "OTP_001", "OTP 요청 제한을 초과했습니다"),
     OTP_EXPIRED(HttpStatus.UNAUTHORIZED, "OTP_002", "OTP가 만료되었습니다"),
     OTP_INVALID(HttpStatus.UNAUTHORIZED, "OTP_003", "OTP가 일치하지 않습니다"),
-    OTP_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "OTP_004", "OTP 시도 횟수를 초과했습니다");
+    OTP_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "OTP_004", "OTP 시도 횟수를 초과했습니다"),
+
+    // Wallet
+    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다");
 
     private final HttpStatus status;
     private final String code;

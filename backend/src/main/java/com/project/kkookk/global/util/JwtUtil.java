@@ -29,6 +29,20 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateCustomerAccessToken(Long walletId, String phone) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + jwtProperties.getAccessTokenExpiration());
+
+        return Jwts.builder()
+                .subject(String.valueOf(walletId))
+                .claim("phone", phone)
+                .claim("type", "customer")
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     public Claims parseToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
