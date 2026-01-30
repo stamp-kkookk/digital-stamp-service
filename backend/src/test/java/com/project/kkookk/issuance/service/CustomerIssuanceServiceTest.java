@@ -93,7 +93,6 @@ class CustomerIssuanceServiceTest {
             assertThat(result.newlyCreated()).isTrue();
             assertThat(result.response().status()).isEqualTo(IssuanceRequestStatus.PENDING);
             assertThat(result.response().currentStampCount()).isEqualTo(3);
-            assertThat(result.response().afterStampCount()).isEqualTo(4);
             verify(issuanceRequestRepository).save(any(IssuanceRequest.class));
         }
 

@@ -79,9 +79,7 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.PENDING,
                             now.plusSeconds(120),
                             120L,
-                            "REQ-20250129-1",
                             3,
-                            4,
                             now);
 
             given(
@@ -97,8 +95,7 @@ class CustomerIssuanceControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(1))
                     .andExpect(jsonPath("$.status").value("PENDING"))
-                    .andExpect(jsonPath("$.currentStampCount").value(3))
-                    .andExpect(jsonPath("$.afterStampCount").value(4));
+                    .andExpect(jsonPath("$.currentStampCount").value(3));
         }
 
         @Test
@@ -115,9 +112,7 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.PENDING,
                             now.plusSeconds(60),
                             60L,
-                            "REQ-20250129-1",
                             3,
-                            4,
                             now);
 
             given(
@@ -283,9 +278,7 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.PENDING,
                             now.plusSeconds(60),
                             60L,
-                            "REQ-20250129-1",
                             3,
-                            4,
                             now);
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);
@@ -310,9 +303,7 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.APPROVED,
                             now.plusSeconds(60),
                             60L,
-                            "REQ-20250129-1",
                             3,
-                            4,
                             now);
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);
@@ -335,9 +326,7 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.EXPIRED,
                             now.minusSeconds(60),
                             0L,
-                            "REQ-20250129-1",
                             3,
-                            4,
                             now.minusSeconds(120));
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);

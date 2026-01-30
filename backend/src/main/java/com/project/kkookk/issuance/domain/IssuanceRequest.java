@@ -8,7 +8,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
@@ -24,14 +23,6 @@ import lombok.NoArgsConstructor;
             @UniqueConstraint(
                     name = "uk_issuance_wallet_idempotency",
                     columnNames = {"wallet_id", "idempotency_key"})
-        },
-        indexes = {
-            @Index(name = "idx_issuance_wallet_status", columnList = "wallet_id, status"),
-            @Index(name = "idx_issuance_expires_pending", columnList = "status, expires_at"),
-            @Index(
-                    name = "idx_issuance_wallet_card_status",
-                    columnList = "wallet_stamp_card_id, status"),
-            @Index(name = "idx_issuance_store_status", columnList = "store_id, status")
         })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
