@@ -8,4 +8,8 @@ public class WalletStampCardNotFoundException extends BusinessException {
     public WalletStampCardNotFoundException() {
         super(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND);
     }
+
+    public WalletStampCardNotFoundException(String message) {
+        super(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND, message);
+    }
 }

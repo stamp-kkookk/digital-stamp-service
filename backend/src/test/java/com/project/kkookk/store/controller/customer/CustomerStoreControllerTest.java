@@ -90,7 +90,7 @@ class CustomerStoreControllerTest {
     }
 
     @Test
-    @DisplayName("API 요약 조회 실패: 매장이 비활성 상태인 경우 404 반환")
+    @DisplayName("API 요약 조회 실패: 매장이 비활성 상태인 경우 403 반환")
     void getStoreSummary_StoreInactive() throws Exception {
         // given
         long storeId = 3L;
@@ -99,10 +99,10 @@ class CustomerStoreControllerTest {
 
         // when & then
         mockMvc.perform(get("/api/customer/stores/{storeId}/summary", storeId))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isForbidden())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.code").value("STORE_INACTIVE"))
-                .andExpect(jsonPath("$.message").value("비활성화된 매장입니다"))
+                .andExpect(jsonPath("$.message").value("해당 매장은 현재 이용할 수 없습니다"))
                 .andDo(print());
     }
 }

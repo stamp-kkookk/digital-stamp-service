@@ -8,4 +8,8 @@ public class StoreNotFoundException extends BusinessException {
     public StoreNotFoundException() {
         super(ErrorCode.STORE_NOT_FOUND);
     }
+
+    public StoreNotFoundException(String message) {
+        super(ErrorCode.STORE_NOT_FOUND, message);
+    }
 }
