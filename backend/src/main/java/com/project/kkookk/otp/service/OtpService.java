@@ -22,11 +22,6 @@ public class OtpService {
             new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
 
-    /**
-     * OTP 요청 처리
-     *
-     * @param phone 전화번호
-     */
     public void requestOtp(String phone) {
         // Rate limit 체크
         LocalDateTime lastRequestTime = rateLimitStore.get(phone);
@@ -48,13 +43,6 @@ public class OtpService {
         System.out.println(String.format("[OTP] phone=%s, code=%s", phone, otpCode));
     }
 
-    /**
-     * OTP 검증 처리
-     *
-     * @param phone 전화번호
-     * @param code OTP 코드
-     * @return 검증 성공 여부
-     */
     public boolean verifyOtp(String phone, String code) {
         // OTP 조회
         OtpData otpData = otpStore.get(phone);
@@ -95,23 +83,11 @@ public class OtpService {
         return true;
     }
 
-    /**
-     * 6자리 OTP 코드 생성
-     *
-     * @return 6자리 숫자 문자열
-     */
     private String generateOtpCode() {
         int otp = secureRandom.nextInt(1000000); // 0 ~ 999999
         return String.format("%06d", otp);
     }
 
-    /**
-     * OTP 데이터 내부 저장 객체
-     *
-     * @param code OTP 코드
-     * @param createdAt 생성 시각
-     * @param attempts 시도 횟수
-     */
     record OtpData(String code, LocalDateTime createdAt, int attempts) {
         boolean isExpired() {
             return LocalDateTime.now().isAfter(createdAt.plusMinutes(OTP_TTL_MINUTES));
