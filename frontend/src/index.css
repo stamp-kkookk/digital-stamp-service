@@ -1,30 +1,101 @@
 @import "tailwindcss";
 
 @theme {
-  /* KKOOKK Orange Scale */
+  /* ============================================
+     KKOOKK Design System - Color Tokens
+     ============================================ */
+
+  /* Primary Colors - Orange Scale (Brand) */
   --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-100: #ffedd5;
   --color-kkookk-orange-200: #fed7aa;
+  --color-kkookk-orange-300: #fdba74;
+  --color-kkookk-orange-400: #fb923c;
   --color-kkookk-orange-500: #ff4d00;
   --color-kkookk-orange-600: #ea580c;
+  --color-kkookk-orange-700: #c2410c;
+  --color-kkookk-orange-800: #9a3412;
   --color-kkookk-orange-900: #7c2d12;
 
-  /* Status */
-  --color-kkookk-red: #dc2626;
-  --color-kkookk-amber: #f59e0b;
+  /* Secondary Colors - Indigo Scale (Owner Persona) */
+  --color-kkookk-indigo-50: #eef2ff;
+  --color-kkookk-indigo-100: #e0e7ff;
+  --color-kkookk-indigo-200: #c7d2fe;
+  --color-kkookk-indigo-500: #2e58ff;
+  --color-kkookk-indigo-600: #4f46e5;
+  --color-kkookk-indigo-700: #4338ca;
+  --color-kkookk-indigo: #2e58ff; /* Alias for default */
 
-  /* Global */
-  --color-kkookk-paper: #faf9f6;
-  --color-kkookk-navy: #1a1c1e;
+  /* Neutral Colors - Navy Scale (Text/Backgrounds) */
+  --color-kkookk-navy-50: #f8fafc;
+  --color-kkookk-navy-100: #f1f5f9;
+  --color-kkookk-navy-900: #1a1c1e;
+  --color-kkookk-navy: #1a1c1e; /* Alias for default */
 
-  /* Owner Persona */
-  --color-kkookk-indigo: #2e58ff;
-  --color-kkookk-steel: #64748b;
+  /* Neutral Colors - Steel Scale (Borders/Secondary Text) */
+  --color-kkookk-steel-100: #cbd5e1;
+  --color-kkookk-steel-200: #94a3b8;
+  --color-kkookk-steel-300: #64748b;
+  --color-kkookk-steel-400: #475569;
+  --color-kkookk-steel: #64748b; /* Alias for default */
 
-  /* Customer Persona */
+  /* Status Colors */
+  --color-kkookk-green-50: #f0fdf4;
+  --color-kkookk-green-500: #16a34a;
+  --color-kkookk-green: #16a34a; /* Alias for default */
+
+  --color-kkookk-red-50: #fef2f2;
+  --color-kkookk-red-500: #dc2626;
+  --color-kkookk-red: #dc2626; /* Alias for default */
+
+  --color-kkookk-amber-50: #fffbeb;
+  --color-kkookk-amber-500: #f59e0b;
+  --color-kkookk-amber: #f59e0b; /* Alias for default */
+
+  /* Customer Persona Colors */
   --color-kkookk-sand: #f5f5f0;
   --color-kkookk-yellow: #ffd600;
 
-  /* Typography */
+  /* Global/Background */
+  --color-kkookk-paper: #faf9f6;
+
+  /* ============================================
+     KKOOKK Design System - Spacing Scale
+     ============================================ */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;      /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 3rem;     /* 48px */
+
+  /* ============================================
+     KKOOKK Design System - Border Radius
+     ============================================ */
+  --radius-sm: 0.5rem;     /* 8px */
+  --radius-md: 0.75rem;    /* 12px */
+  --radius-lg: 1rem;       /* 16px */
+  --radius-xl: 1.5rem;     /* 24px */
+
+  /* ============================================
+     KKOOKK Design System - Shadows
+     ============================================ */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* ============================================
+     KKOOKK Design System - Typography Scale
+     ============================================ */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+
+  /* Typography - Font Family */
   --font-family-pretendard: "Pretendard Variable", -apple-system, sans-serif;
 }
 
@@ -41,22 +112,6 @@ body {
 
 /* Common utilities */
 @layer utilities {
-  .btn-primary {
-    @apply h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .btn-secondary {
-    @apply h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .btn-outline {
-    @apply h-14 px-6 rounded-2xl border-2 border-kkookk-orange-500 text-kkookk-orange-600 font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  .btn-ghost {
-    @apply h-14 px-6 rounded-2xl text-kkookk-orange-600 font-semibold hover:bg-kkookk-orange-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
   /* Toast animations */
   @keyframes enter {
     from {

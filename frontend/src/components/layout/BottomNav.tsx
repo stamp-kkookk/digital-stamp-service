@@ -13,10 +13,10 @@ interface NavItem {
 
 export default function BottomNav({ className = '' }: BottomNavProps) {
     const navItems: NavItem[] = [
-        { icon: Home, label: '대시보드', path: '/o/dashboard', isActive: false },
-        { icon: Store, label: '매장 관리', path: '/o/stores', isActive: true },
-        { icon: BarChart3, label: '통계', path: '/o/stats', isActive: false },
-        { icon: Settings, label: '설정', path: '/o/settings', isActive: false },
+        { icon: Home, label: '대시보드', path: '/owner/dashboard', isActive: false },
+        { icon: Store, label: '매장 관리', path: '/owner/stores', isActive: true },
+        { icon: BarChart3, label: '통계', path: '/owner/stats', isActive: false },
+        { icon: Settings, label: '설정', path: '/owner/settings', isActive: false },
     ]
 
     const handleNavClick = (item: NavItem) => {

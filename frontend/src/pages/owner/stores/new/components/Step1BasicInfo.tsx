@@ -72,7 +72,7 @@ export default function Step1BasicInfo({ form }: Step1BasicInfoProps) {
                     placeholder="예: 우리 카페"
                     {...register('name')}
                     className={`w-full rounded-xl border-2 px-4 py-3 text-kkookk-navy transition-colors focus:border-kkookk-indigo focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/50 ${
-                        errors.name ? 'border-kkookk-red' : 'border-gray-300'
+                        errors.name ? 'border-kkookk-red' : 'border-black/5'
                     }`}
                     aria-invalid={errors.name ? 'true' : 'false'}
                     aria-describedby={errors.name ? 'name-error' : undefined}
@@ -99,7 +99,7 @@ export default function Step1BasicInfo({ form }: Step1BasicInfoProps) {
                             className={`cursor-pointer rounded-xl border-2 p-4 text-center text-sm font-medium transition-all hover:border-kkookk-indigo hover:bg-kkookk-indigo/5 ${
                                 selectedCategory === category
                                     ? 'border-kkookk-indigo bg-kkookk-indigo/10 text-kkookk-indigo'
-                                    : 'border-gray-300 text-kkookk-navy'
+                                    : 'border-black/5 text-kkookk-navy'
                             } ${errors.category ? 'border-kkookk-red/50' : ''}`}
                         >
                             <input

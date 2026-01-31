@@ -79,7 +79,7 @@ export function StampCardCreationPage() {
             })
 
             showToast.success('스탬프 카드가 임시 저장되었습니다')
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         } catch (error) {
             const errorMessage = error instanceof ApiError ? error.message : '저장 중 오류가 발생했습니다'
             setSaveError(errorMessage)
@@ -113,7 +113,7 @@ export function StampCardCreationPage() {
             })
 
             showToast.success('스탬프 카드가 발행되었습니다')
-            navigate(`/o/stores/${storeId}/stamp-cards`)
+            navigate(`/owner/stores/${storeId}/stamp-cards`)
         } catch (error) {
             const errorMessage = error instanceof ApiError ? error.message : '발행 중 오류가 발생했습니다'
             setSaveError(errorMessage)
@@ -143,7 +143,7 @@ export function StampCardCreationPage() {
                         type="button"
                         onClick={handleSaveDraft}
                         disabled={isProcessing}
-                        className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-sand text-kkookk-steel border border-black/5 font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-11 px-6 rounded-2xl transition-all bg-white border-2 border-kkookk-indigo text-kkookk-indigo hover:bg-kkookk-indigo hover:text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isCreating ? '저장 중...' : '임시 저장'}
                     </button>
@@ -151,7 +151,7 @@ export function StampCardCreationPage() {
                         type="button"
                         onClick={handlePublish}
                         disabled={isProcessing}
-                        className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-orange-500 text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-11 px-6 rounded-2xl transition-all hover:opacity-90 bg-kkookk-indigo text-white font-medium focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isPublishing ? '발행 중...' : '발행'}
                     </button>

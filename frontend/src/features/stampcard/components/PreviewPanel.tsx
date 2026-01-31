@@ -144,13 +144,13 @@ export function PreviewPanel({
     return (
         <div className="flex flex-col items-center gap-6 lg:gap-8 p-4 lg:p-8 h-full overflow-y-auto">
             {/* Segmented Toggle */}
-            <div className="inline-flex rounded-3xl p-1 bg-kkookk-sand">
+            <div className="inline-flex rounded-3xl p-1 bg-gray-100">
                 <button
                     type="button"
                     onClick={() => setViewMode('design')}
                     className={twMerge(
                         'px-6 lg:px-8 h-11 rounded-[20px] transition-all font-medium',
-                        'focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30',
+                        'focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30',
                         viewMode === 'design'
                             ? 'bg-white text-kkookk-navy shadow-sm'
                             : 'text-kkookk-steel'
@@ -163,7 +163,7 @@ export function PreviewPanel({
                     onClick={() => setViewMode('simulator')}
                     className={twMerge(
                         'px-6 lg:px-8 h-11 rounded-[20px] transition-all font-medium',
-                        'focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30',
+                        'focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30',
                         viewMode === 'simulator'
                             ? 'bg-white text-kkookk-navy shadow-sm'
                             : 'text-kkookk-steel'
@@ -284,14 +284,14 @@ export function PreviewPanel({
                                     type="button"
                                     onClick={handleStampCollect}
                                     disabled={isStampDisabled}
-                                    className="flex-1 h-14 rounded-[20px] transition-all hover:opacity-90 bg-kkookk-orange-500 text-white font-semibold focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 h-14 rounded-[20px] transition-all hover:opacity-90 bg-kkookk-indigo text-white font-semibold focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     스탬프 적립
                                 </button>
                             ) : (
                                 <button
                                     type="button"
-                                    className="flex-1 h-14 rounded-[20px] transition-all hover:opacity-90 bg-kkookk-indigo text-white font-semibold focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
+                                    className="flex-1 h-14 rounded-[20px] transition-all hover:opacity-90 bg-kkookk-indigo text-white font-semibold focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
                                 >
                                     리워드 쿠폰 받기
                                 </button>
@@ -299,7 +299,7 @@ export function PreviewPanel({
                             <button
                                 type="button"
                                 onClick={handleReset}
-                                className="h-14 px-6 rounded-[20px] transition-all hover:opacity-90 flex items-center justify-center bg-kkookk-sand text-kkookk-steel focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
+                                className="h-14 px-6 rounded-[20px] transition-all bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-kkookk-steel focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
                             >
                                 <RotateCcw size={20} />
                             </button>

@@ -36,7 +36,7 @@ export function StampCardListPage() {
     }
 
     const handleCreateNew = () => {
-        navigate(`/o/stores/${storeId}/stamp-cards/create`)
+        navigate(`/owner/stores/${storeId}/stamp-cards/create`)
     }
 
     const handlePageChange = (newPage: number) => {
@@ -67,7 +67,7 @@ export function StampCardListPage() {
                 <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-center py-16">
                         <div className="animate-pulse flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-kkookk-orange-200"></div>
+                            <div className="w-12 h-12 rounded-full bg-kkookk-indigo/20"></div>
                             <div className="text-sm text-kkookk-steel">로딩 중...</div>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ export function StampCardListPage() {
 
                         <button
                             onClick={() => window.location.reload()}
-                            className="h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
+                            className="h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
                         >
                             다시 시도
                         </button>
@@ -128,7 +128,7 @@ export function StampCardListPage() {
                         <h1 className="text-2xl font-semibold text-kkookk-navy">스탬프 카드 관리</h1>
                         <button
                             onClick={handleCreateNew}
-                            className="flex items-center gap-2 h-12 px-5 rounded-xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-orange-500/30"
+                            className="flex items-center gap-2 h-12 px-5 rounded-xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-kkookk-indigo/30"
                         >
                             <Plus className="w-5 h-5" />
                             <span className="hidden sm:inline">새 카드 만들기</span>
@@ -151,10 +151,10 @@ export function StampCardListPage() {
                                     flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all
                                     ${
                                         selectedStatus === tab.value
-                                            ? 'bg-kkookk-orange-500 text-white'
-                                            : 'bg-white text-kkookk-steel hover:bg-gray-50'
+                                            ? 'bg-kkookk-indigo text-white'
+                                            : 'bg-white text-kkookk-steel hover:bg-gray-50 border border-kkookk-steel/20'
                                     }
-                                    active:scale-95 focus:outline-none focus:ring-2 focus:ring-kkookk-orange-500/30
+                                    active:scale-95 focus:outline-none focus:ring-2 focus:ring-kkookk-indigo/30
                                 `}
                             >
                                 {tab.label}
@@ -224,7 +224,7 @@ export function StampCardListPage() {
                                                                 min-w-[40px] h-10 px-3 rounded-lg text-sm font-medium transition-all
                                                                 ${
                                                                     page === currentPage
-                                                                        ? 'bg-kkookk-orange-500 text-white'
+                                                                        ? 'bg-kkookk-indigo text-white'
                                                                         : 'text-kkookk-steel hover:bg-gray-100'
                                                                 }
                                                                 active:scale-95

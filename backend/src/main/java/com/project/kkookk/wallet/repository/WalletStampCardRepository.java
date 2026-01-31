@@ -11,7 +11,14 @@ public interface WalletStampCardRepository extends JpaRepository<WalletStampCard
 
     List<WalletStampCard> findByCustomerWalletIdOrderByCreatedAtDesc(Long customerWalletId);
 
+    Optional<WalletStampCard> findByIdAndCustomerWalletId(Long id, Long customerWalletId);
+  
+    /** 고객 지갑의 모든 스탬프카드 조회 */
     List<WalletStampCard> findByCustomerWalletId(Long customerWalletId);
 
+    /** 고객 지갑 + 스탬프카드 ID로 조회 */
     Optional<WalletStampCard> findByIdAndCustomerWalletId(Long id, Long customerWalletId);
+
+    /** 매장별 고객 지갑 스탬프카드 조회 */
+    Optional<WalletStampCard> findByCustomerWalletIdAndStoreId(Long customerWalletId, Long storeId);
 }

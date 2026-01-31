@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+/* ============================================
+   SHADCN UI CSS VARIABLES
+   Mapped to KKOOKK brand colors for consistency
+   ============================================ */
+@layer base {
+  :root {
+    /* Background colors */
+    --background: 250 249 246; /* kkookk-paper (#faf9f6) */
+    --foreground: 26 28 30; /* kkookk-navy (#1a1c1e) */
+
+    /* Card colors */
+    --card: 255 255 255; /* white */
+    --card-foreground: 26 28 30; /* kkookk-navy */
+
+    /* Popover colors */
+    --popover: 255 255 255; /* white */
+    --popover-foreground: 26 28 30; /* kkookk-navy */
+
+    /* Primary color - KKOOKK Orange */
+    --primary: 255 77 0; /* kkookk-orange-500 (#ff4d00) */
+    --primary-foreground: 255 255 255; /* white */
+
+    /* Secondary color - KKOOKK Indigo */
+    --secondary: 46 88 255; /* kkookk-indigo (#2e58ff) */
+    --secondary-foreground: 255 255 255; /* white */
+
+    /* Muted colors */
+    --muted: 245 245 240; /* kkookk-sand (#f5f5f0) */
+    --muted-foreground: 100 116 139; /* kkookk-steel (#64748b) */
+
+    /* Accent colors */
+    --accent: 255 255 237; /* kkookk-orange-50 (#fff7ed) */
+    --accent-foreground: 255 77 0; /* kkookk-orange-500 */
+
+    /* Destructive/Error colors */
+    --destructive: 220 38 38; /* kkookk-red (#dc2626) */
+    --destructive-foreground: 255 255 255; /* white */
+
+    /* Border and input colors */
+    --border: 100 116 139 / 0.2; /* kkookk-steel with opacity */
+    --input: 100 116 139 / 0.2; /* kkookk-steel with opacity */
+    --ring: 255 77 0; /* kkookk-orange-500 for focus rings */
+
+    /* Border radius - KKOOKK uses rounded-2xl (16px) by default */
+    --radius: 1rem; /* 16px */
+  }
+
+  .dark {
+    /* Dark mode support (optional, KKOOKK doesn't use dark mode yet) */
+    --background: 26 28 30; /* kkookk-navy */
+    --foreground: 250 249 246; /* kkookk-paper */
+    --card: 26 28 30;
+    --card-foreground: 250 249 246;
+    --popover: 26 28 30;
+    --popover-foreground: 250 249 246;
+    --primary: 255 77 0;
+    --primary-foreground: 255 255 255;
+    --secondary: 46 88 255;
+    --secondary-foreground: 255 255 255;
+    --muted: 100 116 139 / 0.2;
+    --muted-foreground: 245 245 240;
+    --accent: 124 45 18; /* kkookk-orange-900 */
+    --accent-foreground: 255 255 255;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+    --border: 100 116 139 / 0.3;
+    --input: 100 116 139 / 0.3;
+    --ring: 255 77 0;
+  }
+}
+
+@theme {
+  /* KKOOKK Orange Scale */
+  --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-200: #fed7aa;
+  --color-kkookk-orange-500: #ff4d00;
+  --color-kkookk-orange-600: #ea580c;
+  --color-kkookk-orange-900: #7c2d12;
+
+  /* Status */
+  --color-kkookk-red: #dc2626;
+  --color-kkookk-amber: #f59e0b;
+
+  /* Global */
+  --color-kkookk-paper: #faf9f6;
+  --color-kkookk-navy: #1a1c1e;
+
+  /* Owner Persona */
+  --color-kkookk-indigo: #2e58ff;
+  --color-kkookk-steel: #64748b;
+
+  /* Customer Persona */
+  --color-kkookk-sand: #f5f5f0;
+  --color-kkookk-yellow: #ffd600;
+
+  /* Typography */
+  --font-family-pretendard: "Pretendard Variable", -apple-system, sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-family-pretendard);
+  background-color: var(--color-kkookk-paper);
+  color: var(--color-kkookk-navy);
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Common utilities */
+@layer utilities {
+  .btn-primary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-orange-500 text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply h-14 px-6 rounded-2xl bg-kkookk-indigo text-white font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply h-14 px-6 rounded-2xl border-2 border-kkookk-orange-500 text-kkookk-orange-600 font-semibold active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply h-14 px-6 rounded-2xl text-kkookk-orange-600 font-semibold hover:bg-kkookk-orange-50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Toast animations */
+  @keyframes enter {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes leave {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+  }
+
+  .animate-enter {
+    animation: enter 0.3s ease-out;
+  }
+
+  .animate-leave {
+    animation: leave 0.2s ease-in forwards;
+  }
+}
+
+/* Custom animations for Owner Store List page */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUpBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes pulseBadge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slideUpBottom {
+  animation: slideUpBottom 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 3s ease-in-out infinite;
+}
+
+.animate-pulse-badge {
+  animation: pulseBadge 2s ease-in-out infinite;
+}

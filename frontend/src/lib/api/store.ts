@@ -1,4 +1,4 @@
-import type { StoreStampCardSummaryResponse } from 'store-types';
+import type { StoreStampCardSummaryResponse } from '@/types/store';
 import apiClient from './client';
 
 export const getStoreSummary = async (storeId: string) => {

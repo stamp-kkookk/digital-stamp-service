@@ -1,4 +1,4 @@
-import type { StampCardInfo } from 'store-types';
+import type { StampCardInfo } from '@/types/store';
 import CtaButton from './CtaButton';
 
 interface StoreSummaryProps {

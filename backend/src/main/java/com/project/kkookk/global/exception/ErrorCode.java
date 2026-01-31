@@ -47,7 +47,7 @@ public enum ErrorCode {
 
     // Issuance
     ISSUANCE_REQUEST_NOT_FOUND(
-            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "발급 요청을 찾을 수 없습니다"),
+            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "적립 요청을 찾을 수 없습니다"),
     ISSUANCE_REQUEST_NOT_PENDING(
             HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
 
@@ -59,6 +59,15 @@ public enum ErrorCode {
             HttpStatus.NOT_FOUND, "WALLET_STAMP_CARD_NOT_FOUND", "해당 지갑 스탬프카드를 찾을 수 없습니다"),
     WALLET_STAMP_CARD_ACCESS_DENIED(
             HttpStatus.FORBIDDEN, "WALLET_STAMP_CARD_ACCESS_DENIED", "다른 고객의 스탬프카드에 접근할 수 없습니다");
+    ISSUANCE_REQUEST_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "ISSUANCE_REQUEST_ALREADY_PENDING", "이미 대기 중인 적립 요청이 있습니다"),
+    ISSUANCE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "ISSUANCE_ALREADY_PROCESSED", "이미 처리된 요청입니다"),
+    ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
+
+    // Wallet
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
+    WALLET_STAMP_CARD_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "WALLET_STAMP_CARD_NOT_FOUND", "지갑 스탬프카드를 찾을 수 없습니다");
 
     private final HttpStatus status;
     private final String code;
