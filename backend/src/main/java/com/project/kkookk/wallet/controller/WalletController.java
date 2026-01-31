@@ -1,5 +1,7 @@
 package com.project.kkookk.wallet.controller;
 
+import com.project.kkookk.wallet.dto.WalletAccessRequest;
+import com.project.kkookk.wallet.dto.WalletAccessResponse;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.service.CustomerWalletService;
@@ -21,5 +23,12 @@ public class WalletController implements WalletApi {
             @Valid @RequestBody WalletRegisterRequest request) {
         WalletRegisterResponse response = customerWalletService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<WalletAccessResponse> accessWallet(
+            @Valid @RequestBody WalletAccessRequest request) {
+        WalletAccessResponse response = customerWalletService.accessWallet(request);
+        return ResponseEntity.ok(response);
     }
 }

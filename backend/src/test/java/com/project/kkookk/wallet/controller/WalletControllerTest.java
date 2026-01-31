@@ -14,6 +14,8 @@ import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.exception.GlobalExceptionHandler;
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
+import com.project.kkookk.wallet.dto.WalletAccessRequest;
+import com.project.kkookk.wallet.dto.WalletAccessResponse;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.service.CustomerWalletService;
@@ -307,6 +309,219 @@ class WalletControllerTest {
         // when & then
         mockMvc.perform(
                         post("/api/public/wallet/register")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 접근 성공 - 200 OK")
+    void accessWallet_Success() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
+
+        WalletAccessResponse response =
+                new WalletAccessResponse(1L, "010-1234-5678", "홍길동", "길동이");
+
+        given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.walletId").value(1))
+                .andExpect(jsonPath("$.phone").value("010-1234-5678"))
+                .andExpect(jsonPath("$.name").value("홍길동"))
+                .andExpect(jsonPath("$.nickname").value("길동이"));
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 전화번호 누락 (400)")
+    void accessWallet_Fail_PhoneRequired() throws Exception {
+        // given
+        String requestBody =
+                """
+                {
+                    "name": "홍길동"
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 이름 누락 (400)")
+    void accessWallet_Fail_NameRequired() throws Exception {
+        // given
+        String requestBody =
+                """
+                {
+                    "phone": "010-1234-5678"
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 잘못된 전화번호 형식 (400)")
+    void accessWallet_Fail_InvalidPhoneFormat() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("123-4567", "홍길동");
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 지갑 없음 (404)")
+    void accessWallet_Fail_WalletNotFound() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("010-9999-9999", "홍길동");
+
+        given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.WALLET_NOT_FOUND));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("WALLET_003"))
+                .andExpect(jsonPath("$.message").value("지갑을 찾을 수 없습니다"));
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 차단된 지갑 (403)")
+    void accessWallet_Fail_WalletBlocked() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
+
+        given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.WALLET_BLOCKED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("WALLET_004"))
+                .andExpect(jsonPath("$.message").value("차단된 지갑입니다"));
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - Rate Limit 초과 (429)")
+    void accessWallet_Fail_RateLimitExceeded() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
+
+        given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.WALLET_ACCESS_RATE_LIMIT_EXCEEDED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("WALLET_002"))
+                .andExpect(jsonPath("$.message").value("지갑 접근 요청 제한을 초과했습니다"));
+    }
+
+    @Test
+    @DisplayName("지갑 접근 성공 - 전화번호 하이픈 없는 형식")
+    void accessWallet_Success_PhoneWithoutHyphen() throws Exception {
+        // given
+        WalletAccessRequest request = new WalletAccessRequest("01012345678", "홍길동");
+
+        WalletAccessResponse response = new WalletAccessResponse(1L, "01012345678", "홍길동", "길동이");
+
+        given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
+                .willReturn(response);
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.phone").value("01012345678"));
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 빈 문자열 (400)")
+    void accessWallet_Fail_EmptyStrings() throws Exception {
+        // given
+        String requestBody =
+                """
+                {
+                    "phone": "",
+                    "name": ""
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestBody))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 접근 실패 - 공백만 있는 문자열 (400)")
+    void accessWallet_Fail_BlankStrings() throws Exception {
+        // given
+        String requestBody =
+                """
+                {
+                    "phone": "   ",
+                    "name": "   "
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/access")
                                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(requestBody))
