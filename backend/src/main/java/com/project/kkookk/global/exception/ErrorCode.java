@@ -58,11 +58,7 @@ public enum ErrorCode {
     OTP_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "OTP_004", "OTP 시도 횟수를 초과했습니다"),
 
     // Wallet
-    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다"),
-    WALLET_ACCESS_RATE_LIMIT_EXCEEDED(
-            HttpStatus.TOO_MANY_REQUESTS, "WALLET_002", "지갑 접근 요청 제한을 초과했습니다"),
-    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_003", "지갑을 찾을 수 없습니다"),
-    WALLET_BLOCKED(HttpStatus.FORBIDDEN, "WALLET_004", "차단된 지갑입니다");
+    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다");
 
     private final HttpStatus status;
     private final String code;
