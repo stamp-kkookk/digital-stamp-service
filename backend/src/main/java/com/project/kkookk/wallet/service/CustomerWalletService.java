@@ -3,16 +3,6 @@ package com.project.kkookk.wallet.service;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.util.JwtUtil;
-import com.project.kkookk.wallet.domain.CustomerWallet;
-import com.project.kkookk.wallet.dto.WalletRegisterRequest;
-import com.project.kkookk.wallet.dto.WalletRegisterResponse;
-import com.project.kkookk.wallet.repository.CustomerWalletRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-@Slf4j
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.stamp.domain.StampEvent;
@@ -24,6 +14,8 @@ import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.dto.WalletRegisterRequest;
+import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.PageInfo;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventSummary;
@@ -43,17 +35,24 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CustomerWalletService {
 
     private final CustomerWalletRepository customerWalletRepository;
+    private final WalletStampCardRepository walletStampCardRepository;
+    private final StampCardRepository stampCardRepository;
+    private final StoreRepository storeRepository;
+    private final StampEventRepository stampEventRepository;
+    private final RedeemEventRepository redeemEventRepository;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -90,11 +89,7 @@ public class CustomerWalletService {
                 savedWallet.getPhone(),
                 savedWallet.getName(),
                 savedWallet.getNickname());
-    private final WalletStampCardRepository walletStampCardRepository;
-    private final StampCardRepository stampCardRepository;
-    private final StoreRepository storeRepository;
-    private final StampEventRepository stampEventRepository;
-    private final RedeemEventRepository redeemEventRepository;
+    }
 
     public WalletStampCardListResponse getStampCardsByPhoneAndName(
             String phone, String name, StampCardSortType sortType) {

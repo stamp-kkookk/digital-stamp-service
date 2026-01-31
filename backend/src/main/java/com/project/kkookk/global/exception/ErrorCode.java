@@ -56,7 +56,8 @@ public enum ErrorCode {
     OTP_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "OTP_004", "OTP 시도 횟수를 초과했습니다"),
 
     // Wallet
-    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다");
+    WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다"),
+
     // Customer Wallet
     CUSTOMER_WALLET_NOT_FOUND(
             HttpStatus.NOT_FOUND, "CUSTOMER_WALLET_NOT_FOUND", "해당 전화번호와 이름으로 지갑을 찾을 수 없습니다"),

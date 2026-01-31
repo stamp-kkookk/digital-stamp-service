@@ -3,6 +3,7 @@ package com.project.kkookk.wallet.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -13,15 +14,6 @@ import static org.mockito.Mockito.verify;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.util.JwtUtil;
-import com.project.kkookk.wallet.domain.CustomerWallet;
-import com.project.kkookk.wallet.domain.CustomerWalletStatus;
-import com.project.kkookk.wallet.dto.WalletRegisterRequest;
-import com.project.kkookk.wallet.dto.WalletRegisterResponse;
-import com.project.kkookk.wallet.repository.CustomerWalletRepository;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.domain.RedeemEventResult;
 import com.project.kkookk.redeem.domain.RedeemEventType;
@@ -38,6 +30,8 @@ import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.CustomerWalletStatus;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.dto.WalletRegisterRequest;
+import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
@@ -56,8 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-@ExtendWith(MockitoExtension.class)
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -71,6 +63,16 @@ class CustomerWalletServiceTest {
     @InjectMocks private CustomerWalletService customerWalletService;
 
     @Mock private CustomerWalletRepository customerWalletRepository;
+
+    @Mock private WalletStampCardRepository walletStampCardRepository;
+
+    @Mock private StampCardRepository stampCardRepository;
+
+    @Mock private StoreRepository storeRepository;
+
+    @Mock private StampEventRepository stampEventRepository;
+
+    @Mock private RedeemEventRepository redeemEventRepository;
 
     @Mock private JwtUtil jwtUtil;
 
@@ -194,15 +196,7 @@ class CustomerWalletServiceTest {
         // then
         assertThat(response.accessToken()).isEqualTo("token.with.walletId.and.phone");
         verify(jwtUtil, times(1)).generateCustomerAccessToken(99L, "010-5555-6666");
-    @Mock private WalletStampCardRepository walletStampCardRepository;
-
-    @Mock private StampCardRepository stampCardRepository;
-
-    @Mock private StoreRepository storeRepository;
-
-    @Mock private StampEventRepository stampEventRepository;
-
-    @Mock private RedeemEventRepository redeemEventRepository;
+    }
 
     @Test
     @DisplayName("전화번호와 이름으로 지갑 홈 조회 성공")
