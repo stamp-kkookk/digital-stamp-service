@@ -54,12 +54,10 @@ class WalletControllerTest {
     @DisplayName("지갑 생성 성공 - 201 CREATED")
     void register_Success() throws Exception {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
 
         WalletRegisterResponse response =
-                new WalletRegisterResponse(
-                        "mock.jwt.token", 1L, "010-1234-5678", "홍길동", "길동이");
+                new WalletRegisterResponse("mock.jwt.token", 1L, "010-1234-5678", "홍길동", "길동이");
 
         given(customerWalletService.register(any(WalletRegisterRequest.class)))
                 .willReturn(response);
@@ -166,8 +164,7 @@ class WalletControllerTest {
     void register_Fail_NameTooLong() throws Exception {
         // given
         String longName = "a".repeat(51); // 51자
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", longName, "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", longName, "길동이");
 
         // when & then
         mockMvc.perform(
@@ -201,8 +198,7 @@ class WalletControllerTest {
     @DisplayName("지갑 생성 실패 - 전화번호 중복 (409)")
     void register_Fail_PhoneDuplicated() throws Exception {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
 
         given(customerWalletService.register(any(WalletRegisterRequest.class)))
                 .willThrow(new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED));
@@ -223,8 +219,7 @@ class WalletControllerTest {
     @DisplayName("지갑 생성 성공 - 전화번호 하이픈 없는 형식")
     void register_Success_PhoneWithoutHyphen() throws Exception {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("01012345678", "홍길동", "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("01012345678", "홍길동", "길동이");
 
         WalletRegisterResponse response =
                 new WalletRegisterResponse("mock.jwt.token", 1L, "01012345678", "홍길동", "길동이");
@@ -322,8 +317,7 @@ class WalletControllerTest {
         // given
         WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
 
-        WalletAccessResponse response =
-                new WalletAccessResponse(1L, "010-1234-5678", "홍길동", "길동이");
+        WalletAccessResponse response = new WalletAccessResponse(1L, "010-1234-5678", "홍길동", "길동이");
 
         given(customerWalletService.accessWallet(any(WalletAccessRequest.class)))
                 .willReturn(response);

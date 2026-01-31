@@ -110,8 +110,7 @@ public class CustomerWalletService {
     private void checkRateLimit(String normalizedPhone) {
         LocalDateTime lastAccessTime = rateLimitStore.get(normalizedPhone);
         if (lastAccessTime != null
-                && LocalDateTime.now()
-                        .isBefore(lastAccessTime.plusSeconds(RATE_LIMIT_SECONDS))) {
+                && LocalDateTime.now().isBefore(lastAccessTime.plusSeconds(RATE_LIMIT_SECONDS))) {
             throw new BusinessException(ErrorCode.WALLET_ACCESS_RATE_LIMIT_EXCEEDED);
         }
     }

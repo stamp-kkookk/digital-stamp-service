@@ -22,11 +22,7 @@ class CustomerWalletRepositoryTest {
     void findByPhone_Success() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-1234-5678")
-                        .name("홍길동")
-                        .nickname("길동이")
-                        .build();
+                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
         customerWalletRepository.save(wallet);
 
         // when
@@ -55,11 +51,7 @@ class CustomerWalletRepositoryTest {
     void existsByPhone_True() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-1234-5678")
-                        .name("홍길동")
-                        .nickname("길동이")
-                        .build();
+                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
         customerWalletRepository.save(wallet);
 
         // when
@@ -84,11 +76,7 @@ class CustomerWalletRepositoryTest {
     void save_DefaultStatus_Active() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-5555-6666")
-                        .name("김철수")
-                        .nickname("철수")
-                        .build();
+                CustomerWallet.builder().phone("010-5555-6666").name("김철수").nickname("철수").build();
 
         // when
         CustomerWallet saved = customerWalletRepository.save(wallet);
@@ -104,11 +92,7 @@ class CustomerWalletRepositoryTest {
     void save_AutoTimestamps() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-7777-8888")
-                        .name("이영희")
-                        .nickname("영희")
-                        .build();
+                CustomerWallet.builder().phone("010-7777-8888").name("이영희").nickname("영희").build();
 
         // when
         CustomerWallet saved = customerWalletRepository.save(wallet);
@@ -123,11 +107,7 @@ class CustomerWalletRepositoryTest {
     void changeStatus_ActiveToBlocked() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-1111-2222")
-                        .name("박민수")
-                        .nickname("민수")
-                        .build();
+                CustomerWallet.builder().phone("010-1111-2222").name("박민수").nickname("민수").build();
         CustomerWallet saved = customerWalletRepository.save(wallet);
 
         // when
@@ -147,11 +127,7 @@ class CustomerWalletRepositoryTest {
     void changeStatus_BlockedToActive() {
         // given
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-3333-4444")
-                        .name("최유진")
-                        .nickname("유진")
-                        .build();
+                CustomerWallet.builder().phone("010-3333-4444").name("최유진").nickname("유진").build();
         CustomerWallet saved = customerWalletRepository.save(wallet);
         saved.block();
         customerWalletRepository.save(saved);

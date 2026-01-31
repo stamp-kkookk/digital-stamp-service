@@ -39,9 +39,7 @@ public interface WalletApi {
     ResponseEntity<WalletRegisterResponse> register(
             @Valid @RequestBody WalletRegisterRequest request);
 
-    @Operation(
-            summary = "지갑 접근",
-            description = "전화번호와 이름으로 기존 지갑을 조회합니다. Rate Limit: 60초에 1회")
+    @Operation(summary = "지갑 접근", description = "전화번호와 이름으로 기존 지갑을 조회합니다. Rate Limit: 60초에 1회")
     @ApiResponses(
             value = {
                 @ApiResponse(

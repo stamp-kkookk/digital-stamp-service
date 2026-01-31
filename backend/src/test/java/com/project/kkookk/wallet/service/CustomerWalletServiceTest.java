@@ -41,15 +41,10 @@ class CustomerWalletServiceTest {
     @DisplayName("지갑 생성 성공")
     void register_Success() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder()
-                        .phone("010-1234-5678")
-                        .name("홍길동")
-                        .nickname("길동이")
-                        .build();
+                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
 
         // Reflection을 사용하여 ID 설정
         try {
@@ -87,8 +82,7 @@ class CustomerWalletServiceTest {
     @DisplayName("지갑 생성 실패 - 전화번호 중복")
     void register_Fail_PhoneDuplicated() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(true);
 
@@ -108,15 +102,10 @@ class CustomerWalletServiceTest {
     @DisplayName("생성된 지갑의 기본 상태는 ACTIVE")
     void register_DefaultStatus_Active() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-9999-8888", "김철수", "철수");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-9999-8888", "김철수", "철수");
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder()
-                        .phone("010-9999-8888")
-                        .name("김철수")
-                        .nickname("철수")
-                        .build();
+                CustomerWallet.builder().phone("010-9999-8888").name("김철수").nickname("철수").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -128,8 +117,7 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
-        given(jwtUtil.generateCustomerAccessToken(anyLong(), anyString()))
-                .willReturn("mock.token");
+        given(jwtUtil.generateCustomerAccessToken(anyLong(), anyString())).willReturn("mock.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -145,15 +133,10 @@ class CustomerWalletServiceTest {
     @DisplayName("JWT 토큰에 walletId와 phone이 포함됨")
     void register_JwtToken_ContainsWalletIdAndPhone() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-5555-6666", "이영희", "영희");
+        WalletRegisterRequest request = new WalletRegisterRequest("010-5555-6666", "이영희", "영희");
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder()
-                        .phone("010-5555-6666")
-                        .name("이영희")
-                        .nickname("영희")
-                        .build();
+                CustomerWallet.builder().phone("010-5555-6666").name("이영희").nickname("영희").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -183,11 +166,7 @@ class CustomerWalletServiceTest {
         WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
 
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-1234-5678")
-                        .name("홍길동")
-                        .nickname("길동이")
-                        .build();
+                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -234,10 +213,8 @@ class CustomerWalletServiceTest {
             throw new RuntimeException(e);
         }
 
-        given(customerWalletRepository.findByPhone("010-1234-5678"))
-                .willReturn(Optional.empty());
-        given(customerWalletRepository.findByPhone("01012345678"))
-                .willReturn(Optional.of(wallet));
+        given(customerWalletRepository.findByPhone("010-1234-5678")).willReturn(Optional.empty());
+        given(customerWalletRepository.findByPhone("01012345678")).willReturn(Optional.of(wallet));
 
         // when
         WalletAccessResponse response = customerWalletService.accessWallet(request);
@@ -290,11 +267,7 @@ class CustomerWalletServiceTest {
         WalletAccessRequest request = new WalletAccessRequest("010-1234-5678", "홍길동");
 
         CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone("010-1234-5678")
-                        .name("홍길동")
-                        .nickname("길동이")
-                        .build();
+                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -324,8 +297,7 @@ class CustomerWalletServiceTest {
         // given
         WalletAccessRequest request = new WalletAccessRequest("010-9999-9999", "홍길동");
 
-        given(customerWalletRepository.findByPhone("010-9999-9999"))
-                .willReturn(Optional.empty());
+        given(customerWalletRepository.findByPhone("010-9999-9999")).willReturn(Optional.empty());
         given(customerWalletRepository.findByPhone("01099999999")).willReturn(Optional.empty());
 
         // when & then
