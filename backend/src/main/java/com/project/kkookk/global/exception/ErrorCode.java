@@ -1,11 +1,9 @@
 package com.project.kkookk.global.exception;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@RequiredArgsConstructor
 public enum ErrorCode {
 
     // Common
@@ -40,14 +38,14 @@ public enum ErrorCode {
 
     // Store
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),
-    STORE_INACTIVE(HttpStatus.BAD_REQUEST, "STORE_INACTIVE", "비활성화된 매장입니다"),
+    STORE_INACTIVE(HttpStatus.FORBIDDEN, "STORE_INACTIVE", "해당 매장은 현재 이용할 수 없습니다"),
 
     // Terminal
     TERMINAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "TERMINAL_ACCESS_DENIED", "단말기 접근 권한이 없습니다"),
 
     // Issuance
     ISSUANCE_REQUEST_NOT_FOUND(
-            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "발급 요청을 찾을 수 없습니다"),
+            HttpStatus.NOT_FOUND, "ISSUANCE_REQUEST_NOT_FOUND", "적립 요청을 찾을 수 없습니다"),
     ISSUANCE_REQUEST_NOT_PENDING(
             HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
 
@@ -59,8 +57,29 @@ public enum ErrorCode {
 
     // Wallet
     WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다");
+    // Customer Wallet
+    CUSTOMER_WALLET_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "CUSTOMER_WALLET_NOT_FOUND", "해당 전화번호와 이름으로 지갑을 찾을 수 없습니다"),
+    CUSTOMER_WALLET_BLOCKED(HttpStatus.FORBIDDEN, "CUSTOMER_WALLET_BLOCKED", "차단된 지갑입니다"),
+    WALLET_STAMP_CARD_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "WALLET_STAMP_CARD_NOT_FOUND", "해당 지갑 스탬프카드를 찾을 수 없습니다"),
+    WALLET_STAMP_CARD_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN, "WALLET_STAMP_CARD_ACCESS_DENIED", "다른 고객의 스탬프카드에 접근할 수 없습니다"),
+    ISSUANCE_REQUEST_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "ISSUANCE_REQUEST_ALREADY_PENDING", "이미 대기 중인 적립 요청이 있습니다"),
+    ISSUANCE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "ISSUANCE_ALREADY_PROCESSED", "이미 처리된 요청입니다"),
+    ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
+
+    // Wallet
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다");
 
     private final HttpStatus status;
     private final String code;
     private final String message;
+
+    ErrorCode(HttpStatus status, String code, String message) {
+        this.status = status;
+        this.code = code;
+        this.message = message;
+    }
 }
