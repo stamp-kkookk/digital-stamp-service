@@ -75,12 +75,7 @@ class CustomerIssuanceControllerTest {
             LocalDateTime now = LocalDateTime.now();
             IssuanceRequestResponse response =
                     new IssuanceRequestResponse(
-                            1L,
-                            IssuanceRequestStatus.PENDING,
-                            now.plusSeconds(120),
-                            120L,
-                            3,
-                            now);
+                            1L, IssuanceRequestStatus.PENDING, now.plusSeconds(120), 120L, 3, now);
 
             given(
                             customerIssuanceService.createIssuanceRequest(
@@ -108,12 +103,7 @@ class CustomerIssuanceControllerTest {
             LocalDateTime now = LocalDateTime.now();
             IssuanceRequestResponse response =
                     new IssuanceRequestResponse(
-                            1L,
-                            IssuanceRequestStatus.PENDING,
-                            now.plusSeconds(60),
-                            60L,
-                            3,
-                            now);
+                            1L, IssuanceRequestStatus.PENDING, now.plusSeconds(60), 60L, 3, now);
 
             given(
                             customerIssuanceService.createIssuanceRequest(
