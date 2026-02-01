@@ -10,6 +10,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface CustomerWalletRepository extends JpaRepository<CustomerWallet, Long> {
 
+    Optional<CustomerWallet> findByPhone(String phone);
+
+    boolean existsByPhone(String phone);
+
     Optional<CustomerWallet> findByPhoneAndName(String phone, String name);
 
     /** 여러 지갑 ID에 대해 ID와 이름을 한 번에 조회 (N+1 방지) */
