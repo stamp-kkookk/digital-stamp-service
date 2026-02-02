@@ -72,7 +72,13 @@ public enum ErrorCode {
     ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
 
     // Wallet
-    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다");
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
+
+    // Redeem
+    REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
+    REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
+    REDEEM_SESSION_ALREADY_EXISTS(
+            HttpStatus.CONFLICT, "REDEEM_SESSION_ALREADY_EXISTS", "이미 진행 중인 사용 요청이 있습니다");
 
     private final HttpStatus status;
     private final String code;
