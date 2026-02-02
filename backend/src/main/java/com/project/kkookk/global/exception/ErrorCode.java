@@ -72,7 +72,17 @@ public enum ErrorCode {
     ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
 
     // Wallet
-    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다");
+    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
+
+    // Migration
+    MIGRATION_REQUEST_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "MIGRATION_REQUEST_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),
+    MIGRATION_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "MIGRATION_ALREADY_PENDING", "이미 처리 중인 마이그레이션 요청이 있습니다"),
+    MIGRATION_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
+    MIGRATION_IMAGE_TOO_LARGE(
+            HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)");
 
     private final HttpStatus status;
     private final String code;

@@ -31,8 +31,11 @@ public class StampMigrationRequest extends BaseTimeEntity {
     @Column(name = "store_id", nullable = false)
     private Long storeId;
 
-    @Column(name = "image_url", nullable = false, length = 1024)
-    private String imageUrl;
+    @Column(name = "image_data", nullable = false, columnDefinition = "MEDIUMTEXT")
+    private String imageData;
+
+    @Column(name = "claimed_stamp_count", nullable = false)
+    private Integer claimedStampCount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -52,10 +55,15 @@ public class StampMigrationRequest extends BaseTimeEntity {
 
     @Builder
     private StampMigrationRequest(
-            Long customerWalletId, Long storeId, String imageUrl, LocalDateTime requestedAt) {
+            Long customerWalletId,
+            Long storeId,
+            String imageData,
+            Integer claimedStampCount,
+            LocalDateTime requestedAt) {
         this.customerWalletId = customerWalletId;
         this.storeId = storeId;
-        this.imageUrl = imageUrl;
+        this.imageData = imageData;
+        this.claimedStampCount = claimedStampCount;
         this.status = StampMigrationStatus.SUBMITTED;
         this.requestedAt = requestedAt != null ? requestedAt : LocalDateTime.now();
     }
