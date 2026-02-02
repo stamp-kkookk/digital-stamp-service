@@ -6,7 +6,6 @@
 ## 1) Project scope
 
 This repository contains:
-- `frontend/`: React + Tailwind web app (customer + owner/backoffice views)
 - `backend/` : Spring Boot 3.4+ API (Java 17, Swagger 2.7.0, MySQL)
 
 Product: **KKOOKK** (digital stamp / reward SaaS).
@@ -27,13 +26,13 @@ repo-root/
 │  ├─ CLAUDE.md
 │  ├─ skills/
 │  │  ├─ backend-core/SKILL.md       # Always needed for backend
-│  │  ├─ backend-testing/SKILL.md    # Optional: tests
-│  │  ├─ frontend-core/SKILL.md      # Always needed for frontend
-│  │  ├─ frontend-testing/SKILL.md   # Optional: tests
-│  │  └─ design-system/SKILL.md      # Optional: UI/UX
+│  │  └─ backend-testing/SKILL.md    # Optional: tests
 │  └─ commands/
-├─ frontend/
-│  └─ CLAUDE.md
+│     ├─ be-api.md
+│     ├─ be-design.md
+│     ├─ be-impl.md
+│     ├─ be-review.md
+│     └─ be-test.md
 ├─ backend/
 │  └─ CLAUDE.md
 └─ .github/
@@ -55,8 +54,8 @@ Tip: split big tasks into phases and reset context between phases (e.g., `/clear
 
 ## 4) Definition of Done (Checklist)
 
-- [ ] lint passes
-- [ ] test passes
+- [ ] Spotless and Checkstyle checks pass
+- [ ] All tests pass
 - [ ] No TODO in changed files
 - [ ] Error handling for expected failures exists
 - [ ] API contracts documented (DTO + status codes)
