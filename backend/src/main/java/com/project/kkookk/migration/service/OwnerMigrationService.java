@@ -34,8 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OwnerMigrationService {
 
-    private static final int DEFAULT_STAMP_COUNT = 1;
-
     private final StampMigrationRequestRepository migrationRepository;
     private final CustomerWalletRepository customerWalletRepository;
     private final WalletStampCardRepository walletStampCardRepository;
@@ -119,11 +117,7 @@ public class OwnerMigrationService {
             throw new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED);
         }
 
-        // approvedStampCount 결정: 입력값 > requestedStampCount(BE2 추가 예정) > 기본값 1
-        int stampCount =
-                request.approvedStampCount() != null
-                        ? request.approvedStampCount()
-                        : DEFAULT_STAMP_COUNT;
+        int stampCount = request.approvedStampCount();
 
         // Store의 ACTIVE StampCard 조회
         StampCard activeStampCard =
