@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Customer Redeem", description = "고객 리워드 사용 API")
@@ -38,5 +39,28 @@ public interface CustomerRedeemApi {
     })
     ResponseEntity<RedeemSessionResponse> createRedeemSession(
             @Valid @RequestBody CreateRedeemSessionRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
+
+    @Operation(summary = "리워드 사용 세션 완료", description = "리워드 사용 세션을 완료 처리합니다")
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "세션 완료 성공",
+                content = @Content(schema = @Schema(implementation = RedeemSessionResponse.class))),
+        @ApiResponse(
+                responseCode = "400",
+                description = "처리 대기 중인 세션이 아님",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "404",
+                description = "세션 또는 리워드 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "410",
+                description = "세션 만료됨",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<RedeemSessionResponse> completeRedeemSession(
+            @Parameter(description = "세션 ID", required = true) @PathVariable Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 }

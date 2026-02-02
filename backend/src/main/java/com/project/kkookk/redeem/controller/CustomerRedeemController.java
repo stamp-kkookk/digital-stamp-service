@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,5 +32,16 @@ public class CustomerRedeemController implements CustomerRedeemApi {
                 customerRedeemService.createRedeemSession(principal.getWalletId(), request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<RedeemSessionResponse> completeRedeemSession(
+            @PathVariable Long id, @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        RedeemSessionResponse response =
+                customerRedeemService.completeRedeemSession(id, principal.getWalletId());
+
+        return ResponseEntity.ok(response);
     }
 }
