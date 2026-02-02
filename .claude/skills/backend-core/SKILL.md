@@ -66,52 +66,59 @@ Log issuance/redeem/migration events with:
 
 ```
 com.project.kkookk
-  global/
+  global/              # Cross-cutting concerns
     config/
+    dto/
+    entity/
+    exception/
     security/
-    exception/
-    response/
     util/
-  owner/
+  owner/               # 사장님 관리
     controller/
-    service/
-    repository/
     domain/
-  store/
-    controller/
-    service/
     repository/
-    domain/
-  stampcard/
-    controller/
     service/
+  store/               # 매장 관리
+    controller/
+    domain/
+    dto/
     repository/
-    domain/
-  wallet/
-    controller/
     service/
+  stampcard/           # 스탬프 카드 관리
+    controller/
+    domain/
     repository/
-    domain/
-  issuance/
-    controller/
     service/
+  wallet/              # 고객 지갑
+    controller/
+    domain/
+    dto/
     repository/
-    domain/
-  redeem/
-    controller/
     service/
+  issuance/            # 적립 프로세스
+    controller/
+    domain/
     repository/
-    domain/
-  migration/
-    controller/
     service/
+  redeem/              # 사용 프로세스 (domain layer only)
+    domain/
     repository/
+  migration/           # 종이 스탬프 마이그레이션 (domain layer only)
     domain/
-  qrcode/
+  qrcode/              # QR 코드 생성/관리 (no domain/repository)
     controller/
-    service/
     exception/
+    service/
+  otp/                 # OTP 인증 (no domain/repository)
+    controller/
+    dto/
+    service/
+  stamp/               # 스탬프 엔티티 (domain layer only)
+    domain/
+    repository/
 ```
+
+**Note:** Not all packages have complete layers. Some features only contain domain models or service logic without full controller/service/repository layers.
 
 ### Layer Responsibilities
 - **Controller:** HTTP + DTO mapping + validation
