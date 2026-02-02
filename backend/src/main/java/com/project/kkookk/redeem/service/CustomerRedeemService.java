@@ -30,7 +30,8 @@ public class CustomerRedeemService {
     private final WalletRewardRepository walletRewardRepository;
 
     @Transactional
-    public RedeemSessionResponse createRedeemSession(Long walletId, CreateRedeemSessionRequest request) {
+    public RedeemSessionResponse createRedeemSession(
+            Long walletId, CreateRedeemSessionRequest request) {
         // 1. 리워드 조회 + 본인 소유 검증
         WalletReward reward =
                 walletRewardRepository
@@ -71,7 +72,8 @@ public class CustomerRedeemService {
         RedeemSession session =
                 redeemSessionRepository
                         .findById(sessionId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.REDEEM_SESSION_NOT_FOUND));
+                        .orElseThrow(
+                                () -> new BusinessException(ErrorCode.REDEEM_SESSION_NOT_FOUND));
 
         // 2. 리워드 조회 + 소유권 검증
         WalletReward reward =
