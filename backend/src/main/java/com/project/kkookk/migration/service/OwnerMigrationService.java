@@ -76,7 +76,7 @@ public class OwnerMigrationService {
                                             m.getId(),
                                             wallet != null ? wallet.getPhone() : null,
                                             wallet != null ? wallet.getName() : null,
-                                            m.getImageUrl(),
+                                            m.getImageData(),
                                             m.getStatus().name(),
                                             m.getRequestedAt());
                                 })
@@ -99,7 +99,7 @@ public class OwnerMigrationService {
                 migration.getCustomerWalletId(),
                 wallet != null ? wallet.getPhone() : null,
                 wallet != null ? wallet.getName() : null,
-                migration.getImageUrl(),
+                migration.getImageData(),
                 requestedStampCount,
                 migration.getStatus().name(),
                 migration.getApprovedStampCount(),
