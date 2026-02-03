@@ -15,6 +15,7 @@ public interface StampMigrationRequestRepository
             Long customerWalletId, Long storeId, StampMigrationStatus status);
 
     List<StampMigrationRequest> findByCustomerWalletIdOrderByRequestedAtDesc(Long customerWalletId);
+
     List<StampMigrationRequest> findByStoreIdAndStatusOrderByRequestedAtDesc(
             Long storeId, StampMigrationStatus status);
 

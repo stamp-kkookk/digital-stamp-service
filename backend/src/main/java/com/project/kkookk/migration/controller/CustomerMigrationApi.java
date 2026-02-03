@@ -5,7 +5,6 @@ import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
 import com.project.kkookk.migration.dto.MigrationListItemResponse;
 import com.project.kkookk.migration.dto.MigrationRequestResponse;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -124,9 +124,7 @@ public interface CustomerMigrationApi {
                 content =
                         @Content(
                                 schema =
-                                        @Schema(
-                                                implementation =
-                                                        MigrationListItemResponse.class))),
+                                        @Schema(implementation = MigrationListItemResponse.class))),
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요 (JWT 토큰 없음/만료)",
