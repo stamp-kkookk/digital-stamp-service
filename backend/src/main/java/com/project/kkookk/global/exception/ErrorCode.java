@@ -83,6 +83,20 @@ public enum ErrorCode {
             HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
     MIGRATION_IMAGE_TOO_LARGE(
             HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)");
+    // Redeem
+    REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
+    REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
+    REDEEM_SESSION_ALREADY_EXISTS(
+            HttpStatus.CONFLICT, "REDEEM_SESSION_ALREADY_EXISTS", "이미 진행 중인 사용 요청이 있습니다"),
+    REDEEM_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "REDEEM_SESSION_NOT_FOUND", "사용 세션을 찾을 수 없습니다"),
+    REDEEM_SESSION_NOT_PENDING(
+            HttpStatus.BAD_REQUEST, "REDEEM_SESSION_NOT_PENDING", "처리 대기 중인 세션이 아닙니다"),
+    REDEEM_SESSION_EXPIRED(HttpStatus.GONE, "REDEEM_SESSION_EXPIRED", "사용 세션이 만료되었습니다"),
+    // Migration
+    MIGRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MIGRATION_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),
+    MIGRATION_ALREADY_PROCESSED(
+            HttpStatus.CONFLICT, "MIGRATION_ALREADY_PROCESSED", "이미 처리된 마이그레이션 요청입니다"),
+    NO_ACTIVE_STAMP_CARD(HttpStatus.CONFLICT, "NO_ACTIVE_STAMP_CARD", "활성 스탬프 카드가 없습니다");
 
     private final HttpStatus status;
     private final String code;
