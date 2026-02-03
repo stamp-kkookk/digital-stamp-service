@@ -194,8 +194,8 @@ class OwnerMigrationServiceTest {
         }
 
         @Test
-        @DisplayName("승인 성공 - 스탬프 수 미입력 (기본값 1)")
-        void approve_Success_WithDefaultStampCount() {
+        @DisplayName("승인 실패 - WalletStampCard 없음")
+        void approve_Fail_WalletStampCardNotFound() {
             // given
             Long storeId = 1L;
             Long migrationId = 1L;
@@ -203,41 +203,6 @@ class OwnerMigrationServiceTest {
 
             StampMigrationRequest migration = createMigration(migrationId, walletId, storeId);
             StampCard activeCard = createActiveStampCard(10L, storeId);
-            WalletStampCard walletStampCard = createWalletStampCard(50L, walletId, storeId, 10L, 0);
-
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
-                    .willReturn(Optional.of(migration));
-            given(
-                            stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
-                                    storeId, StampCardStatus.ACTIVE))
-                    .willReturn(Optional.of(activeCard));
-            given(walletStampCardRepository.findByCustomerWalletIdAndStoreId(walletId, storeId))
-                    .willReturn(Optional.of(walletStampCard));
-            given(stampEventRepository.save(any(StampEvent.class)))
-                    .willAnswer(i -> i.getArgument(0));
-
-            MigrationApproveRequest request = new MigrationApproveRequest(null);
-
-            // when
-            MigrationApproveResponse response =
-                    ownerMigrationService.approve(storeId, migrationId, request);
-
-            // then
-            assertThat(response.approvedStampCount()).isEqualTo(1);
-        }
-
-        @Test
-        @DisplayName("승인 성공 - WalletStampCard 신규 생성")
-        void approve_Success_CreateNewWalletStampCard() {
-            // given
-            Long storeId = 1L;
-            Long migrationId = 1L;
-            Long walletId = 100L;
-
-            StampMigrationRequest migration = createMigration(migrationId, walletId, storeId);
-            StampCard activeCard = createActiveStampCard(10L, storeId);
-            WalletStampCard newWalletStampCard =
-                    createWalletStampCard(50L, walletId, storeId, 10L, 0);
 
             given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
                     .willReturn(Optional.of(migration));
@@ -247,20 +212,16 @@ class OwnerMigrationServiceTest {
                     .willReturn(Optional.of(activeCard));
             given(walletStampCardRepository.findByCustomerWalletIdAndStoreId(walletId, storeId))
                     .willReturn(Optional.empty());
-            given(walletStampCardRepository.save(any(WalletStampCard.class)))
-                    .willReturn(newWalletStampCard);
-            given(stampEventRepository.save(any(StampEvent.class)))
-                    .willAnswer(i -> i.getArgument(0));
 
             MigrationApproveRequest request = new MigrationApproveRequest(3);
 
-            // when
-            MigrationApproveResponse response =
-                    ownerMigrationService.approve(storeId, migrationId, request);
-
-            // then
-            assertThat(response.status()).isEqualTo("APPROVED");
-            verify(walletStampCardRepository).save(any(WalletStampCard.class));
+            // when & then
+            assertThatThrownBy(() -> ownerMigrationService.approve(storeId, migrationId, request))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(
+                            ex ->
+                                    assertThat(((BusinessException) ex).getErrorCode())
+                                            .isEqualTo(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND));
         }
 
         @Test

@@ -126,20 +126,12 @@ public class OwnerMigrationService {
                                 storeId, StampCardStatus.ACTIVE)
                         .orElseThrow(() -> new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
 
-        // WalletStampCard 조회 또는 생성
+        // WalletStampCard 조회 (마이그레이션은 지갑 카드 등록 이후에만 가능)
         WalletStampCard walletStampCard =
                 walletStampCardRepository
                         .findByCustomerWalletIdAndStoreId(migration.getCustomerWalletId(), storeId)
-                        .orElseGet(
-                                () ->
-                                        walletStampCardRepository.save(
-                                                WalletStampCard.builder()
-                                                        .customerWalletId(
-                                                                migration.getCustomerWalletId())
-                                                        .storeId(storeId)
-                                                        .stampCardId(activeStampCard.getId())
-                                                        .stampCount(0)
-                                                        .build()));
+                        .orElseThrow(
+                                () -> new BusinessException(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND));
 
         // 스탬프 증가
         walletStampCard.addStamps(stampCount);
