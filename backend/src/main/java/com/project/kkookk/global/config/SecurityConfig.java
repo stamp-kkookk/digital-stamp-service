@@ -50,7 +50,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/customer/**")
                                         .hasRole("CUSTOMER")
                                         .requestMatchers("/api/terminal/**")
-                                        .hasRole("OWNER")
+                                        .hasRole("TERMINAL")
                                         .requestMatchers("/api/owner/**")
                                         .hasRole("OWNER")
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")

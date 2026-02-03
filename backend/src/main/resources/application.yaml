@@ -34,5 +34,6 @@ app:
     local-path: "storage" # 로컬 파일 저장소 경로
 
 jwt:
-  secret: kkookk-super-secret-key-for-jwt-token-generation-minimum-256-bits-required
-  access-token-expiration: 3600000
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}
+  stepup-token-expiration: ${JWT_STEPUP_TOKEN_EXPIRATION:600000}

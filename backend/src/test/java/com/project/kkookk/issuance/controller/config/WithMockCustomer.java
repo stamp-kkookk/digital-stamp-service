@@ -9,6 +9,4 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 public @interface WithMockCustomer {
 
     long walletId() default 1L;
-
-    String phone() default "010-1234-5678";
 }
