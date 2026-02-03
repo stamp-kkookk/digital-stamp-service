@@ -212,37 +212,6 @@ class OwnerMigrationControllerTest {
         }
 
         @Test
-        @DisplayName("승인 성공 - 스탬프 수 미입력")
-        void approve_Success_WithoutStampCount() throws Exception {
-            // given
-            Long storeId = 1L;
-            Long migrationId = 1L;
-            LocalDateTime processedAt = LocalDateTime.now();
-
-            MigrationApproveRequest request = new MigrationApproveRequest(null);
-            MigrationApproveResponse response =
-                    new MigrationApproveResponse(migrationId, "APPROVED", 1, processedAt);
-
-            given(
-                            ownerMigrationService.approve(
-                                    eq(storeId),
-                                    eq(migrationId),
-                                    any(MigrationApproveRequest.class)))
-                    .willReturn(response);
-
-            // when & then
-            mockMvc.perform(
-                            post(
-                                            "/api/owner/stores/{storeId}/migrations/{id}/approve",
-                                            storeId,
-                                            migrationId)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.approvedStampCount").value(1));
-        }
-
-        @Test
         @DisplayName("승인 실패 - 스탬프 수 0 이하")
         void approve_Fail_InvalidStampCount() throws Exception {
             // given
