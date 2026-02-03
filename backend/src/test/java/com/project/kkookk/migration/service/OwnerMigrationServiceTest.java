@@ -383,7 +383,8 @@ class OwnerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(walletId)
                         .storeId(storeId)
-                        .imageUrl("https://storage.example.com/migrations/" + id + ".jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRg" + id)
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
         setId(migration, id);

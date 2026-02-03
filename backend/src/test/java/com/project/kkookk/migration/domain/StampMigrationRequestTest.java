@@ -17,7 +17,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
 
@@ -34,7 +35,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
 
@@ -56,7 +58,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
 
@@ -78,7 +81,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
 
@@ -99,7 +103,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
         request.approve(10);
@@ -118,7 +123,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
         request.reject("불명확");
@@ -137,7 +143,8 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageUrl("https://example.com/stamp.jpg")
+                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
         request.cancel();

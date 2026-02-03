@@ -74,6 +74,16 @@ public enum ErrorCode {
     // Wallet
     WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
 
+    // Migration
+    MIGRATION_REQUEST_NOT_FOUND(
+            HttpStatus.NOT_FOUND, "MIGRATION_REQUEST_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),
+    MIGRATION_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "MIGRATION_ALREADY_PENDING", "이미 처리 중인 마이그레이션 요청이 있습니다"),
+    MIGRATION_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
+    MIGRATION_IMAGE_TOO_LARGE(
+            HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)"),
+
     // Redeem
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
     REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
