@@ -3,7 +3,9 @@ package com.project.kkookk.migration.controller;
 import com.project.kkookk.global.exception.ErrorResponse;
 import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
+import com.project.kkookk.migration.dto.MigrationListItemResponse;
 import com.project.kkookk.migration.dto.MigrationRequestResponse;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -104,5 +106,33 @@ public interface CustomerMigrationApi {
     @GetMapping("/api/customer/migrations/{id}")
     ResponseEntity<MigrationRequestResponse> getMigrationRequest(
             @Parameter(description = "마이그레이션 요청 ID", example = "1") @PathVariable Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
+
+    @Operation(
+            summary = "내 마이그레이션 요청 목록 조회",
+            description =
+                    """
+                인증된 사용자의 모든 마이그레이션 요청 목록을 조회합니다.
+                - 최신순 정렬 (requestedAt DESC)
+                - 이미지 데이터는 제외되며, 상세 조회 API에서 확인 가능
+                - 반려된 요청의 경우 rejectReason 포함
+                """)
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content =
+                        @Content(
+                                schema =
+                                        @Schema(
+                                                implementation =
+                                                        MigrationListItemResponse.class))),
+        @ApiResponse(
+                responseCode = "401",
+                description = "인증 필요 (JWT 토큰 없음/만료)",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/api/customer/migrations")
+    ResponseEntity<List<MigrationListItemResponse>> getMyMigrationRequests(
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 }

@@ -3,7 +3,9 @@ package com.project.kkookk.migration.service;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
+import com.project.kkookk.migration.dto.MigrationListItemResponse;
 import com.project.kkookk.migration.dto.MigrationRequestResponse;
+import java.util.List;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
 import com.project.kkookk.migration.service.exception.MigrationAccessDeniedException;
 import com.project.kkookk.migration.service.exception.MigrationAlreadyPendingException;
@@ -90,5 +92,13 @@ public class CustomerMigrationService {
                                 });
 
         return MigrationRequestResponse.from(migrationRequest);
+    }
+
+    public List<MigrationListItemResponse> getMyMigrationRequests(Long customerWalletId) {
+        List<StampMigrationRequest> requests =
+                migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
+                        customerWalletId);
+
+        return requests.stream().map(MigrationListItemResponse::from).toList();
     }
 }

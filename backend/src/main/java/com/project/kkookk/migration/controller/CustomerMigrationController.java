@@ -2,8 +2,10 @@ package com.project.kkookk.migration.controller;
 
 import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
+import com.project.kkookk.migration.dto.MigrationListItemResponse;
 import com.project.kkookk.migration.dto.MigrationRequestResponse;
 import com.project.kkookk.migration.service.CustomerMigrationService;
+import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -44,5 +46,16 @@ public class CustomerMigrationController implements CustomerMigrationApi {
                 customerMigrationService.getMigrationRequest(principal.getWalletId(), id);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @GetMapping
+    public ResponseEntity<List<MigrationListItemResponse>> getMyMigrationRequests(
+            @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        List<MigrationListItemResponse> responses =
+                customerMigrationService.getMyMigrationRequests(principal.getWalletId());
+
+        return ResponseEntity.ok(responses);
     }
 }

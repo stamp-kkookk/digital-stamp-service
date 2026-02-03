@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
+import com.project.kkookk.migration.dto.MigrationListItemResponse;
 import com.project.kkookk.migration.dto.MigrationRequestResponse;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
 import com.project.kkookk.migration.service.exception.MigrationAccessDeniedException;
@@ -24,6 +25,7 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -291,5 +293,61 @@ class CustomerMigrationServiceTest {
                                 customerMigrationService.getMigrationRequest(
                                         otherWalletId, migrationId))
                 .isInstanceOf(MigrationAccessDeniedException.class);
+    }
+
+    @Test
+    @DisplayName("내 마이그레이션 요청 목록 조회 성공")
+    void getMyMigrationRequests_Success() {
+        // given
+        StampMigrationRequest request1 =
+                StampMigrationRequest.builder()
+                        .customerWalletId(CUSTOMER_WALLET_ID)
+                        .storeId(STORE_ID)
+                        .imageData(VALID_BASE64_IMAGE)
+                        .claimedStampCount(5)
+                        .requestedAt(LocalDateTime.now().minusDays(1))
+                        .build();
+
+        StampMigrationRequest request2 =
+                StampMigrationRequest.builder()
+                        .customerWalletId(CUSTOMER_WALLET_ID)
+                        .storeId(200L)
+                        .imageData(VALID_BASE64_IMAGE)
+                        .claimedStampCount(3)
+                        .requestedAt(LocalDateTime.now())
+                        .build();
+
+        given(
+                        migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
+                                CUSTOMER_WALLET_ID))
+                .willReturn(List.of(request2, request1));
+
+        // when
+        List<MigrationListItemResponse> responses =
+                customerMigrationService.getMyMigrationRequests(CUSTOMER_WALLET_ID);
+
+        // then
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).storeId()).isEqualTo(200L);
+        assertThat(responses.get(0).claimedStampCount()).isEqualTo(3);
+        assertThat(responses.get(1).storeId()).isEqualTo(STORE_ID);
+        assertThat(responses.get(1).claimedStampCount()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("내 마이그레이션 요청 목록 조회 - 빈 목록")
+    void getMyMigrationRequests_EmptyList() {
+        // given
+        given(
+                        migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
+                                CUSTOMER_WALLET_ID))
+                .willReturn(List.of());
+
+        // when
+        List<MigrationListItemResponse> responses =
+                customerMigrationService.getMyMigrationRequests(CUSTOMER_WALLET_ID);
+
+        // then
+        assertThat(responses).isEmpty();
     }
 }
