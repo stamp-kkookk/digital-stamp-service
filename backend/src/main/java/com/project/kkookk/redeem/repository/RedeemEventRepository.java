@@ -25,4 +25,28 @@ public interface RedeemEventRepository extends JpaRepository<RedeemEvent, Long> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
             @Param("result") RedeemEventResult result);
+
+    @Query(
+            """
+            SELECT
+                e.id as id,
+                e.redeemSessionId as redeemSessionId,
+                cw.nickname as customerNickname,
+                sc.rewardName as rewardName,
+                sc.title as stampCardTitle,
+                e.type as type,
+                e.result as result,
+                e.occurredAt as occurredAt
+            FROM RedeemEvent e
+            JOIN RedeemSession rs ON e.redeemSessionId = rs.id
+            JOIN WalletReward wr ON rs.walletRewardId = wr.id
+            JOIN CustomerWallet cw ON e.walletId = cw.id
+            JOIN StampCard sc ON wr.stampCardId = sc.id
+            WHERE e.storeId = :storeId
+            AND e.type = com.project.kkookk.redeem.domain.RedeemEventType.COMPLETED
+            AND e.result = com.project.kkookk.redeem.domain.RedeemEventResult.SUCCESS
+            ORDER BY e.occurredAt DESC
+            """)
+    Page<RedeemEventProjection> findCompletedByStoreId(
+            @Param("storeId") Long storeId, Pageable pageable);
 }

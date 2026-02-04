@@ -13,6 +13,8 @@ import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.StampCardSortType;
+import com.project.kkookk.wallet.domain.WalletReward;
+import com.project.kkookk.wallet.domain.WalletRewardStatus;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
@@ -21,9 +23,13 @@ import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventSummary;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventSummary;
+import com.project.kkookk.wallet.dto.response.StoreInfo;
+import com.project.kkookk.wallet.dto.response.WalletRewardItem;
+import com.project.kkookk.wallet.dto.response.WalletRewardListResponse;
 import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
 import com.project.kkookk.wallet.dto.response.WalletStampCardSummary;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
+import com.project.kkookk.wallet.repository.WalletRewardRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
@@ -49,6 +55,7 @@ public class CustomerWalletService {
 
     private final CustomerWalletRepository customerWalletRepository;
     private final WalletStampCardRepository walletStampCardRepository;
+    private final WalletRewardRepository walletRewardRepository;
     private final StampCardRepository stampCardRepository;
     private final StoreRepository storeRepository;
     private final StampEventRepository stampEventRepository;
@@ -211,6 +218,59 @@ public class CustomerWalletService {
                         .toList();
 
         return new RedeemEventHistoryResponse(events, PageInfo.from(eventPage));
+    }
+
+    public WalletRewardListResponse getRewards(
+            Long walletId, WalletRewardStatus status, Pageable pageable) {
+
+        // Step 1: WalletReward 페이징 조회 (상태 필터 선택적)
+        Page<WalletReward> rewardPage;
+        if (status != null) {
+            rewardPage =
+                    walletRewardRepository.findByWalletIdAndStatusOrderByIssuedAtDesc(
+                            walletId, status, pageable);
+        } else {
+            rewardPage =
+                    walletRewardRepository.findByWalletIdOrderByIssuedAtDesc(walletId, pageable);
+        }
+
+        // Step 2: Store, StampCard Batch 조회 (N+1 방지)
+        Set<Long> storeIds =
+                rewardPage.getContent().stream()
+                        .map(WalletReward::getStoreId)
+                        .collect(Collectors.toSet());
+        Set<Long> stampCardIds =
+                rewardPage.getContent().stream()
+                        .map(WalletReward::getStampCardId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, Store> storeMap =
+                storeRepository.findAllById(storeIds).stream()
+                        .collect(Collectors.toMap(Store::getId, Function.identity()));
+        Map<Long, StampCard> stampCardMap =
+                stampCardRepository.findAllById(stampCardIds).stream()
+                        .collect(Collectors.toMap(StampCard::getId, Function.identity()));
+
+        // Step 3: Response 조립
+        List<WalletRewardItem> rewards =
+                rewardPage.getContent().stream()
+                        .map(
+                                reward -> {
+                                    Store store = storeMap.get(reward.getStoreId());
+                                    StampCard stampCard = stampCardMap.get(reward.getStampCardId());
+                                    return new WalletRewardItem(
+                                            reward.getId(),
+                                            new StoreInfo(store.getId(), store.getName()),
+                                            stampCard != null ? stampCard.getRewardName() : null,
+                                            stampCard != null ? stampCard.getTitle() : null,
+                                            reward.getStatus(),
+                                            reward.getIssuedAt(),
+                                            reward.getExpiresAt(),
+                                            reward.getRedeemedAt());
+                                })
+                        .toList();
+
+        return new WalletRewardListResponse(rewards, PageInfo.from(rewardPage));
     }
 
     private List<WalletStampCard> getWalletStampCardsSorted(
