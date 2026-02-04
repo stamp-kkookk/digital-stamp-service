@@ -57,8 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void authenticateUser(String token, HttpServletRequest request) {
         TokenType tokenType = jwtUtil.getTokenType(token);
         if (tokenType == null) {
-            log.warn("Token type is missing, treating as legacy OWNER token");
-            tokenType = TokenType.OWNER;
+            log.warn("Token type is missing, rejecting authentication");
+            return;
         }
 
         UserDetails principal = createPrincipal(token, tokenType);
@@ -85,7 +85,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Long storeId = jwtUtil.getStoreId(token);
                 yield TerminalPrincipal.of(subjectId, email, storeId);
             }
-            case STEPUP -> CustomerPrincipal.of(subjectId);
+            case CUSTOMER -> CustomerPrincipal.of(subjectId, false);
+            case STEPUP -> CustomerPrincipal.of(subjectId, true);
         };
     }
 }

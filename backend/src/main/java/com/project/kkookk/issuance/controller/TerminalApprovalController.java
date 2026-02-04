@@ -1,6 +1,6 @@
 package com.project.kkookk.issuance.controller;
 
-import com.project.kkookk.global.security.OwnerPrincipal;
+import com.project.kkookk.global.security.TerminalPrincipal;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestListResponse;
@@ -24,7 +24,7 @@ public class TerminalApprovalController implements TerminalApprovalApi {
     @Override
     @GetMapping
     public ResponseEntity<PendingIssuanceRequestListResponse> getPendingRequests(
-            @PathVariable Long storeId, @AuthenticationPrincipal OwnerPrincipal principal) {
+            @PathVariable Long storeId, @AuthenticationPrincipal TerminalPrincipal principal) {
 
         PendingIssuanceRequestListResponse response =
                 terminalApprovalService.getPendingRequests(storeId, principal.getOwnerId());
@@ -37,7 +37,7 @@ public class TerminalApprovalController implements TerminalApprovalApi {
     public ResponseEntity<IssuanceApprovalResponse> approveRequest(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @AuthenticationPrincipal OwnerPrincipal principal) {
+            @AuthenticationPrincipal TerminalPrincipal principal) {
 
         IssuanceApprovalResponse response =
                 terminalApprovalService.approveRequest(storeId, id, principal.getOwnerId());
@@ -50,7 +50,7 @@ public class TerminalApprovalController implements TerminalApprovalApi {
     public ResponseEntity<IssuanceRejectionResponse> rejectRequest(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @AuthenticationPrincipal OwnerPrincipal principal) {
+            @AuthenticationPrincipal TerminalPrincipal principal) {
 
         IssuanceRejectionResponse response =
                 terminalApprovalService.rejectRequest(storeId, id, principal.getOwnerId());

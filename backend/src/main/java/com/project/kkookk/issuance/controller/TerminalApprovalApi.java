@@ -1,7 +1,7 @@
 package com.project.kkookk.issuance.controller;
 
 import com.project.kkookk.global.exception.ErrorResponse;
-import com.project.kkookk.global.security.OwnerPrincipal;
+import com.project.kkookk.global.security.TerminalPrincipal;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestListResponse;
@@ -49,7 +49,7 @@ public interface TerminalApprovalApi {
     })
     ResponseEntity<PendingIssuanceRequestListResponse> getPendingRequests(
             @Parameter(description = "매장 ID", example = "1") @PathVariable Long storeId,
-            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
+            @Parameter(hidden = true) @AuthenticationPrincipal TerminalPrincipal principal);
 
     @Operation(summary = "적립 요청 승인", description = "PENDING 상태의 적립 요청을 승인. 스탬프 1개 적립 + 원장 기록")
     @ApiResponses({
@@ -83,7 +83,7 @@ public interface TerminalApprovalApi {
     ResponseEntity<IssuanceApprovalResponse> approveRequest(
             @Parameter(description = "매장 ID", example = "1") @PathVariable Long storeId,
             @Parameter(description = "요청 ID", example = "1") @PathVariable Long id,
-            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
+            @Parameter(hidden = true) @AuthenticationPrincipal TerminalPrincipal principal);
 
     @Operation(summary = "적립 요청 거절", description = "PENDING 상태의 적립 요청을 거절")
     @ApiResponses({
@@ -118,5 +118,5 @@ public interface TerminalApprovalApi {
     ResponseEntity<IssuanceRejectionResponse> rejectRequest(
             @Parameter(description = "매장 ID", example = "1") @PathVariable Long storeId,
             @Parameter(description = "요청 ID", example = "1") @PathVariable Long id,
-            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
+            @Parameter(hidden = true) @AuthenticationPrincipal TerminalPrincipal principal);
 }

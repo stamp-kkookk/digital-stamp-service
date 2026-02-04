@@ -1,11 +1,20 @@
 package com.project.kkookk.wallet.repository;
 
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WalletStampCardRepository extends JpaRepository<WalletStampCard, Long> {
+
+    /** 비관적 락으로 조회 (동시성 제어) */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT w FROM WalletStampCard w WHERE w.id = :id")
+    Optional<WalletStampCard> findByIdWithLock(@Param("id") Long id);
 
     List<WalletStampCard> findByCustomerWalletIdOrderByLastStampedAtDesc(Long customerWalletId);
 

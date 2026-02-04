@@ -9,4 +9,6 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 public @interface WithMockCustomer {
 
     long walletId() default 1L;
+
+    boolean stepUp() default false;
 }

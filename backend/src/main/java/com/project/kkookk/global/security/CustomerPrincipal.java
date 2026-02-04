@@ -12,16 +12,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class CustomerPrincipal implements UserDetails {
 
     private final Long walletId;
+    private final boolean stepUp;
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Builder
-    private CustomerPrincipal(Long walletId) {
+    private CustomerPrincipal(Long walletId, boolean stepUp) {
         this.walletId = walletId;
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        this.stepUp = stepUp;
+        this.authorities =
+                stepUp
+                        ? List.of(
+                                new SimpleGrantedAuthority("ROLE_CUSTOMER"),
+                                new SimpleGrantedAuthority("ROLE_STEPUP"))
+                        : List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
     }
 
-    public static CustomerPrincipal of(Long walletId) {
-        return CustomerPrincipal.builder().walletId(walletId).build();
+    public static CustomerPrincipal of(Long walletId, boolean stepUp) {
+        return CustomerPrincipal.builder().walletId(walletId).stepUp(stepUp).build();
     }
 
     @Override

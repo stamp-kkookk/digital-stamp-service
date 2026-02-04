@@ -72,9 +72,8 @@ public class CustomerWalletService {
 
         CustomerWallet savedWallet = customerWalletRepository.save(wallet);
 
-        // 3. JWT 토큰 생성
-        String accessToken =
-                jwtUtil.generateCustomerAccessToken(savedWallet.getId(), savedWallet.getPhone());
+        // 3. JWT 토큰 생성 (일반 CUSTOMER 토큰, STEPUP 아님)
+        String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId());
 
         log.info(
                 "[Wallet Register] walletId={}, phone={}, name={}",

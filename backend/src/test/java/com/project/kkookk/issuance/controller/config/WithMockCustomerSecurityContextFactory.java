@@ -13,7 +13,7 @@ public class WithMockCustomerSecurityContextFactory
     public SecurityContext createSecurityContext(WithMockCustomer annotation) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        CustomerPrincipal principal = CustomerPrincipal.of(annotation.walletId());
+        CustomerPrincipal principal = CustomerPrincipal.of(annotation.walletId(), annotation.stepUp());
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(

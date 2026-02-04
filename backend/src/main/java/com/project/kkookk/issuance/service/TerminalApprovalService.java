@@ -99,10 +99,10 @@ public class TerminalApprovalService {
         // 상태 변경
         request.approve();
 
-        // 스탬프 적립
+        // 스탬프 적립 (비관적 락으로 동시성 제어)
         WalletStampCard walletStampCard =
                 walletStampCardRepository
-                        .findById(request.getWalletStampCardId())
+                        .findByIdWithLock(request.getWalletStampCardId())
                         .orElseThrow(WalletStampCardNotFoundException::new);
 
         walletStampCard.addStamps(STAMP_DELTA);

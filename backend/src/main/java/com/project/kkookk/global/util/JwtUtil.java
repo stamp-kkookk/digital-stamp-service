@@ -47,6 +47,16 @@ public class JwtUtil {
     }
 
     /**
+     * Customer 일반 토큰 생성 (지갑 등록/조회용)
+     */
+    public String generateCustomerToken(Long walletId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(CLAIM_TYPE, TokenType.CUSTOMER.name());
+
+        return generateToken(walletId, claims, jwtProperties.getAccessTokenExpiration());
+    }
+
+    /**
      * Customer StepUp 토큰 생성 (OTP 인증 후 민감 기능용)
      */
     public String generateStepUpToken(Long walletId) {
@@ -141,11 +151,11 @@ public class JwtUtil {
     }
 
     /**
-     * @deprecated Use {@link #generateStepUpToken(Long)} instead
+     * @deprecated Use {@link #generateCustomerToken(Long)} instead
      */
     @Deprecated
     public String generateCustomerAccessToken(Long walletId, String phone) {
-        return generateStepUpToken(walletId);
+        return generateCustomerToken(walletId);
     }
 
     /**
