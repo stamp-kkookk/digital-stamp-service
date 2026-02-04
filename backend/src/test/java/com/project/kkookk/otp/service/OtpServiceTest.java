@@ -2,7 +2,6 @@ package com.project.kkookk.otp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.project.kkookk.global.exception.BusinessException;
@@ -183,7 +182,8 @@ class OtpServiceTest {
         java.lang.reflect.Constructor<?> constructor =
                 otpData.getClass()
                         .getDeclaredConstructor(String.class, LocalDateTime.class, int.class);
-        Object expiredOtpData = constructor.newInstance(code, LocalDateTime.now().minusMinutes(4), 0);
+        Object expiredOtpData =
+                constructor.newInstance(code, LocalDateTime.now().minusMinutes(4), 0);
         otpStore.put(phone, expiredOtpData);
 
         // when & then
