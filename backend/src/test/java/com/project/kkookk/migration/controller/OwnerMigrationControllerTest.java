@@ -84,7 +84,7 @@ class OwnerMigrationControllerTest {
 
             MigrationListResponse response = new MigrationListResponse(List.of(summary));
 
-            given(ownerMigrationService.getList(storeId)).willReturn(response);
+            given(ownerMigrationService.getList(eq(storeId), any(Long.class))).willReturn(response);
 
             // when & then
             mockMvc.perform(get("/api/owner/stores/{storeId}/migrations", storeId))
@@ -102,7 +102,7 @@ class OwnerMigrationControllerTest {
             Long storeId = 1L;
             MigrationListResponse response = new MigrationListResponse(List.of());
 
-            given(ownerMigrationService.getList(storeId)).willReturn(response);
+            given(ownerMigrationService.getList(eq(storeId), any(Long.class))).willReturn(response);
 
             // when & then
             mockMvc.perform(get("/api/owner/stores/{storeId}/migrations", storeId))
@@ -137,7 +137,8 @@ class OwnerMigrationControllerTest {
                             requestedAt,
                             null);
 
-            given(ownerMigrationService.getDetail(storeId, migrationId)).willReturn(response);
+            given(ownerMigrationService.getDetail(eq(storeId), eq(migrationId), any(Long.class)))
+                    .willReturn(response);
 
             // when & then
             mockMvc.perform(
@@ -158,7 +159,7 @@ class OwnerMigrationControllerTest {
             Long storeId = 1L;
             Long migrationId = 999L;
 
-            given(ownerMigrationService.getDetail(storeId, migrationId))
+            given(ownerMigrationService.getDetail(eq(storeId), eq(migrationId), any(Long.class)))
                     .willThrow(new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
 
             // when & then
@@ -194,7 +195,8 @@ class OwnerMigrationControllerTest {
                             ownerMigrationService.approve(
                                     eq(storeId),
                                     eq(migrationId),
-                                    any(MigrationApproveRequest.class)))
+                                    any(MigrationApproveRequest.class),
+                                    any(Long.class)))
                     .willReturn(response);
 
             // when & then
@@ -243,7 +245,8 @@ class OwnerMigrationControllerTest {
                             ownerMigrationService.approve(
                                     eq(storeId),
                                     eq(migrationId),
-                                    any(MigrationApproveRequest.class)))
+                                    any(MigrationApproveRequest.class),
+                                    any(Long.class)))
                     .willThrow(new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED));
 
             // when & then
@@ -270,7 +273,8 @@ class OwnerMigrationControllerTest {
                             ownerMigrationService.approve(
                                     eq(storeId),
                                     eq(migrationId),
-                                    any(MigrationApproveRequest.class)))
+                                    any(MigrationApproveRequest.class),
+                                    any(Long.class)))
                     .willThrow(new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
 
             // when & then
@@ -307,7 +311,8 @@ class OwnerMigrationControllerTest {
                             ownerMigrationService.reject(
                                     eq(storeId),
                                     eq(migrationId),
-                                    any(MigrationRejectRequest.class)))
+                                    any(MigrationRejectRequest.class),
+                                    any(Long.class)))
                     .willReturn(response);
 
             // when & then
@@ -356,7 +361,8 @@ class OwnerMigrationControllerTest {
                             ownerMigrationService.reject(
                                     eq(storeId),
                                     eq(migrationId),
-                                    any(MigrationRejectRequest.class)))
+                                    any(MigrationRejectRequest.class),
+                                    any(Long.class)))
                     .willThrow(new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED));
 
             // when & then
