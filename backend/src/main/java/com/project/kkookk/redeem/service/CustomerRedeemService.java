@@ -52,12 +52,17 @@ public class CustomerRedeemService {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
-        // 3. AVAILABLE 상태 검증
+        // 3. 만료 여부 검증
+        if (reward.isExpired()) {
+            throw new BusinessException(ErrorCode.REWARD_EXPIRED);
+        }
+
+        // 4. AVAILABLE 상태 검증
         if (!reward.isAvailable()) {
             throw new BusinessException(ErrorCode.REWARD_NOT_AVAILABLE);
         }
 
-        // 4. 중복 PENDING 세션 검증
+        // 5. 중복 PENDING 세션 검증
         boolean hasPendingSession =
                 redeemSessionRepository.existsByWalletRewardIdAndStatus(
                         request.walletRewardId(), RedeemSessionStatus.PENDING);
@@ -65,10 +70,10 @@ public class CustomerRedeemService {
             throw new BusinessException(ErrorCode.REDEEM_SESSION_ALREADY_EXISTS);
         }
 
-        // 5. WalletReward 상태 변경 (AVAILABLE → REDEEMING)
+        // 6. WalletReward 상태 변경 (AVAILABLE → REDEEMING)
         reward.startRedeeming();
 
-        // 6. RedeemSession 생성
+        // 7. RedeemSession 생성
         RedeemSession session =
                 RedeemSession.builder()
                         .walletRewardId(request.walletRewardId())
