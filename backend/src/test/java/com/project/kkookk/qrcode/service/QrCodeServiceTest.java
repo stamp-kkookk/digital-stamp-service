@@ -67,7 +67,8 @@ class QrCodeServiceTest {
         // given
         long storeId = 999L;
         long ownerId = 1L;
-        when(storeRepository.findByIdAndOwnerAccountId(storeId, ownerId)).thenReturn(Optional.empty());
+        when(storeRepository.findByIdAndOwnerAccountId(storeId, ownerId))
+                .thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> qrCodeService.getQrCodeBase64(storeId, ownerId))

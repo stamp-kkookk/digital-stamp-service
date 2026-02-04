@@ -25,11 +25,7 @@ public class TerminalPrincipal implements UserDetails {
     }
 
     public static TerminalPrincipal of(Long ownerId, String email, Long storeId) {
-        return TerminalPrincipal.builder()
-                .ownerId(ownerId)
-                .email(email)
-                .storeId(storeId)
-                .build();
+        return TerminalPrincipal.builder().ownerId(ownerId).email(email).storeId(storeId).build();
     }
 
     @Override

@@ -23,9 +23,7 @@ public class JwtUtil {
 
     private final JwtProperties jwtProperties;
 
-    /**
-     * Owner 백오피스용 토큰 생성
-     */
+    /** Owner 백오피스용 토큰 생성 */
     public String generateOwnerToken(Long ownerId, String email) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.OWNER.name());
@@ -34,9 +32,7 @@ public class JwtUtil {
         return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
     }
 
-    /**
-     * Terminal 매장단말용 토큰 생성
-     */
+    /** Terminal 매장단말용 토큰 생성 */
     public String generateTerminalToken(Long ownerId, String email, Long storeId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.TERMINAL.name());
@@ -46,9 +42,7 @@ public class JwtUtil {
         return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
     }
 
-    /**
-     * Customer 일반 토큰 생성 (지갑 등록/조회용)
-     */
+    /** Customer 일반 토큰 생성 (지갑 등록/조회용) */
     public String generateCustomerToken(Long walletId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.CUSTOMER.name());
@@ -56,9 +50,7 @@ public class JwtUtil {
         return generateToken(walletId, claims, jwtProperties.getAccessTokenExpiration());
     }
 
-    /**
-     * Customer StepUp 토큰 생성 (OTP 인증 후 민감 기능용)
-     */
+    /** Customer StepUp 토큰 생성 (OTP 인증 후 민감 기능용) */
     public String generateStepUpToken(Long walletId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.STEPUP.name());
@@ -66,9 +58,7 @@ public class JwtUtil {
         return generateToken(walletId, claims, jwtProperties.getStepupTokenExpiration());
     }
 
-    /**
-     * 공통 토큰 생성 메서드
-     */
+    /** 공통 토큰 생성 메서드 */
     private String generateToken(Long subjectId, Map<String, Object> claims, long expiration) {
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + expiration);
@@ -82,9 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    /**
-     * 토큰에서 타입 추출
-     */
+    /** 토큰에서 타입 추출 */
     public TokenType getTokenType(String token) {
         Claims claims = parseToken(token);
         String type = claims.get(CLAIM_TYPE, String.class);
@@ -94,25 +82,19 @@ public class JwtUtil {
         return TokenType.valueOf(type);
     }
 
-    /**
-     * 토큰에서 Subject ID 추출
-     */
+    /** 토큰에서 Subject ID 추출 */
     public Long getSubjectId(String token) {
         Claims claims = parseToken(token);
         return Long.parseLong(claims.getSubject());
     }
 
-    /**
-     * 토큰에서 이메일 추출 (Owner, Terminal용)
-     */
+    /** 토큰에서 이메일 추출 (Owner, Terminal용) */
     public String getEmail(String token) {
         Claims claims = parseToken(token);
         return claims.get(CLAIM_EMAIL, String.class);
     }
 
-    /**
-     * 토큰에서 매장 ID 추출 (Terminal용)
-     */
+    /** 토큰에서 매장 ID 추출 (Terminal용) */
     public Long getStoreId(String token) {
         Claims claims = parseToken(token);
         return claims.get(CLAIM_STORE_ID, Long.class);

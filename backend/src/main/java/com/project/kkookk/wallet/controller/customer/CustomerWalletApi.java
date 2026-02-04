@@ -1,10 +1,10 @@
 package com.project.kkookk.wallet.controller.customer;
 
+import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
-import com.project.kkookk.global.security.CustomerPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

@@ -6,5 +6,4 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "OTP 요청 응답")
 public record OtpRequestResponse(
         @Schema(description = "요청 성공 여부", example = "true") boolean success,
-        @Schema(description = "시연용 OTP 코드 (프로덕션에서 제거)", example = "123456")
-                String devOtpCode) {}
+        @Schema(description = "시연용 OTP 코드 (프로덕션에서 제거)", example = "123456") String devOtpCode) {}
