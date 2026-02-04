@@ -1,5 +1,7 @@
 package com.project.kkookk.wallet.controller.customer;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
@@ -49,6 +51,11 @@ public class CustomerWalletController implements CustomerWalletApi {
             @Min(0) int page,
             @Min(1) @Max(100) int size) {
 
+        // StepUp 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
+
         Long walletId = principal.getWalletId();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("occurredAt").descending());
@@ -61,6 +68,11 @@ public class CustomerWalletController implements CustomerWalletApi {
     @Override
     public ResponseEntity<RedeemEventHistoryResponse> getRedeemHistory(
             CustomerPrincipal principal, @Min(0) int page, @Min(1) @Max(100) int size) {
+
+        // StepUp 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
 
         Long walletId = principal.getWalletId();
 

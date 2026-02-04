@@ -2,14 +2,20 @@ package com.project.kkookk.otp.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.util.JwtUtil;
+import com.project.kkookk.wallet.domain.CustomerWallet;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OtpService {
 
     private static final int OTP_LENGTH = 6;
@@ -21,6 +27,9 @@ public class OtpService {
     private final ConcurrentHashMap<String, LocalDateTime> rateLimitStore =
             new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
+
+    private final JwtUtil jwtUtil;
+    private final CustomerWalletRepository customerWalletRepository;
 
     // TODO: 시연용 - 프로덕션 배포 시 반환값 제거하고 void로 변경 필요
     public String requestOtp(String phone) {
@@ -49,7 +58,14 @@ public class OtpService {
         return otpCode;
     }
 
-    public boolean verifyOtp(String phone, String code) {
+    /**
+     * OTP 검증 및 StepUp 토큰 발급
+     *
+     * @param phone 전화번호
+     * @param code OTP 코드
+     * @return 검증 결과와 StepUp 토큰이 포함된 OtpVerifyResult
+     */
+    public OtpVerifyResult verifyOtp(String phone, String code) {
         // OTP 조회
         OtpData otpData = otpStore.get(phone);
         if (otpData == null) {
@@ -86,8 +102,20 @@ public class OtpService {
 
         // 검증 성공: OTP 삭제
         otpStore.remove(phone);
-        return true;
+
+        // 지갑 조회 및 StepUp 토큰 발급
+        Optional<CustomerWallet> walletOptional = customerWalletRepository.findByPhone(phone);
+        String stepUpToken = null;
+        if (walletOptional.isPresent()) {
+            Long walletId = walletOptional.get().getId();
+            stepUpToken = jwtUtil.generateStepUpToken(walletId);
+        }
+
+        return new OtpVerifyResult(true, stepUpToken);
     }
+
+    /** OTP 검증 결과 */
+    public record OtpVerifyResult(boolean verified, String stepUpToken) {}
 
     private String generateOtpCode() {
         int otp = secureRandom.nextInt(1000000); // 0 ~ 999999

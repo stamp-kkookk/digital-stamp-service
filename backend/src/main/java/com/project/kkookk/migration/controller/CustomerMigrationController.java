@@ -1,5 +1,7 @@
 package com.project.kkookk.migration.controller;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
 import com.project.kkookk.migration.dto.MigrationListItemResponse;
@@ -31,6 +33,11 @@ public class CustomerMigrationController implements CustomerMigrationApi {
             @Valid @RequestBody CreateMigrationRequest request,
             @AuthenticationPrincipal CustomerPrincipal principal) {
 
+        // StepUp 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
+
         MigrationRequestResponse response =
                 customerMigrationService.createMigrationRequest(principal.getWalletId(), request);
 
@@ -42,6 +49,11 @@ public class CustomerMigrationController implements CustomerMigrationApi {
     public ResponseEntity<MigrationRequestResponse> getMigrationRequest(
             @PathVariable Long id, @AuthenticationPrincipal CustomerPrincipal principal) {
 
+        // StepUp 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
+
         MigrationRequestResponse response =
                 customerMigrationService.getMigrationRequest(principal.getWalletId(), id);
 
@@ -52,6 +64,11 @@ public class CustomerMigrationController implements CustomerMigrationApi {
     @GetMapping
     public ResponseEntity<List<MigrationListItemResponse>> getMyMigrationRequests(
             @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        // StepUp 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
 
         List<MigrationListItemResponse> responses =
                 customerMigrationService.getMyMigrationRequests(principal.getWalletId());
