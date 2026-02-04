@@ -24,9 +24,7 @@ public interface OwnerStatisticsApi {
 
     @Operation(
             summary = "매장 통계 조회",
-            description =
-                    "매장의 적립/리워드 통계를 조회합니다. "
-                            + "기간을 지정하지 않으면 최근 30일 데이터를 반환합니다.")
+            description = "매장의 적립/리워드 통계를 조회합니다. " + "기간을 지정하지 않으면 최근 30일 데이터를 반환합니다.")
     @ApiResponses({
         @ApiResponse(
                 responseCode = "200",

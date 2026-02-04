@@ -11,8 +11,7 @@ public record StoreStatisticsResponse(
         @Schema(description = "총 적립 스탬프 수", example = "1234") long totalStamps,
         @Schema(description = "총 발급된 리워드 수", example = "50") long totalRewardsIssued,
         @Schema(description = "총 사용된 리워드 수", example = "30") long totalRewardsRedeemed,
-        @Schema(description = "활성 이용자 수 (기간 내 적립 또는 사용한 고유 고객)", example = "120")
-                long activeUsers,
+        @Schema(description = "활성 이용자 수 (기간 내 적립 또는 사용한 고유 고객)", example = "120") long activeUsers,
         @Schema(description = "일별 적립 추이") List<DailyStampCount> dailyTrend) {
 
     @Schema(description = "일별 적립 수")
