@@ -1,5 +1,7 @@
 package com.project.kkookk.redeem.controller;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.redeem.controller.dto.CreateRedeemSessionRequest;
 import com.project.kkookk.redeem.controller.dto.RedeemSessionResponse;
@@ -27,6 +29,11 @@ public class CustomerRedeemController implements CustomerRedeemApi {
     public ResponseEntity<RedeemSessionResponse> createRedeemSession(
             @Valid @RequestBody CreateRedeemSessionRequest request,
             @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        // OTP step-up 인증 필수
+        if (!principal.isStepUp()) {
+            throw new BusinessException(ErrorCode.STEPUP_REQUIRED);
+        }
 
         RedeemSessionResponse response =
                 customerRedeemService.createRedeemSession(principal.getWalletId(), request);

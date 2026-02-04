@@ -18,6 +18,7 @@ import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
+import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
@@ -39,21 +40,26 @@ public class OwnerMigrationService {
     private final WalletStampCardRepository walletStampCardRepository;
     private final StampCardRepository stampCardRepository;
     private final StampEventRepository stampEventRepository;
+    private final StoreRepository storeRepository;
 
     public OwnerMigrationService(
             StampMigrationRequestRepository migrationRepository,
             CustomerWalletRepository customerWalletRepository,
             WalletStampCardRepository walletStampCardRepository,
             StampCardRepository stampCardRepository,
-            StampEventRepository stampEventRepository) {
+            StampEventRepository stampEventRepository,
+            StoreRepository storeRepository) {
         this.migrationRepository = migrationRepository;
         this.customerWalletRepository = customerWalletRepository;
         this.walletStampCardRepository = walletStampCardRepository;
         this.stampCardRepository = stampCardRepository;
         this.stampEventRepository = stampEventRepository;
+        this.storeRepository = storeRepository;
     }
 
-    public MigrationListResponse getList(Long storeId) {
+    public MigrationListResponse getList(Long storeId, Long ownerId) {
+        validateStoreOwnership(storeId, ownerId);
+
         List<StampMigrationRequest> migrations =
                 migrationRepository.findByStoreIdAndStatusOrderByRequestedAtDesc(
                         storeId, StampMigrationStatus.SUBMITTED);
@@ -76,7 +82,7 @@ public class OwnerMigrationService {
                                             m.getId(),
                                             wallet != null ? wallet.getPhone() : null,
                                             wallet != null ? wallet.getName() : null,
-                                            m.getImageData(),
+                                            null, // 목록에서는 이미지 제외 (성능/보안)
                                             m.getStatus().name(),
                                             m.getRequestedAt());
                                 })
@@ -85,7 +91,8 @@ public class OwnerMigrationService {
         return new MigrationListResponse(summaries);
     }
 
-    public MigrationDetailResponse getDetail(Long storeId, Long migrationId) {
+    public MigrationDetailResponse getDetail(Long storeId, Long migrationId, Long ownerId) {
+        validateStoreOwnership(storeId, ownerId);
         StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
 
         CustomerWallet wallet =
@@ -110,7 +117,8 @@ public class OwnerMigrationService {
 
     @Transactional
     public MigrationApproveResponse approve(
-            Long storeId, Long migrationId, MigrationApproveRequest request) {
+            Long storeId, Long migrationId, MigrationApproveRequest request, Long ownerId) {
+        validateStoreOwnership(storeId, ownerId);
         StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
 
         if (!migration.isSubmitted()) {
@@ -126,10 +134,11 @@ public class OwnerMigrationService {
                                 storeId, StampCardStatus.ACTIVE)
                         .orElseThrow(() -> new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
 
-        // WalletStampCard 조회 (마이그레이션은 지갑 카드 등록 이후에만 가능)
+        // WalletStampCard 조회 (비관적 락으로 동시성 제어)
         WalletStampCard walletStampCard =
                 walletStampCardRepository
-                        .findByCustomerWalletIdAndStoreId(migration.getCustomerWalletId(), storeId)
+                        .findByCustomerWalletIdAndStoreIdWithLock(
+                                migration.getCustomerWalletId(), storeId)
                         .orElseThrow(
                                 () -> new BusinessException(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND));
 
@@ -162,7 +171,8 @@ public class OwnerMigrationService {
 
     @Transactional
     public MigrationRejectResponse reject(
-            Long storeId, Long migrationId, MigrationRejectRequest request) {
+            Long storeId, Long migrationId, MigrationRejectRequest request, Long ownerId) {
+        validateStoreOwnership(storeId, ownerId);
         StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
 
         if (!migration.isSubmitted()) {
@@ -182,5 +192,11 @@ public class OwnerMigrationService {
         return migrationRepository
                 .findByIdAndStoreId(migrationId, storeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
+    }
+
+    private void validateStoreOwnership(Long storeId, Long ownerId) {
+        storeRepository
+                .findByIdAndOwnerAccountId(storeId, ownerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACCESS_DENIED));
     }
 }

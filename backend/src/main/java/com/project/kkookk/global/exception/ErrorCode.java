@@ -85,6 +85,7 @@ public enum ErrorCode {
             HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)"),
 
     // Redeem
+    STEPUP_REQUIRED(HttpStatus.FORBIDDEN, "STEPUP_REQUIRED", "OTP 인증이 필요합니다"),
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
     REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
     REDEEM_SESSION_ALREADY_EXISTS(

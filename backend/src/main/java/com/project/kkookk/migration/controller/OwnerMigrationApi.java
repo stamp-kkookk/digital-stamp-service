@@ -1,6 +1,7 @@
 package com.project.kkookk.migration.controller;
 
 import com.project.kkookk.global.exception.ErrorResponse;
+import com.project.kkookk.global.security.OwnerPrincipal;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
 import com.project.kkookk.migration.controller.dto.MigrationApproveResponse;
 import com.project.kkookk.migration.controller.dto.MigrationDetailResponse;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -33,7 +35,8 @@ public interface OwnerMigrationApi {
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<MigrationListResponse> getList(
-            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId);
+            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
+            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "마이그레이션 요청 상세 조회", description = "마이그레이션 요청의 상세 정보를 조회합니다.")
     @ApiResponses({
@@ -49,7 +52,8 @@ public interface OwnerMigrationApi {
     })
     ResponseEntity<MigrationDetailResponse> getDetail(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Parameter(description = "마이그레이션 요청 ID", required = true) @PathVariable Long id);
+            @Parameter(description = "마이그레이션 요청 ID", required = true) @PathVariable Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(
             summary = "마이그레이션 승인",
@@ -78,7 +82,8 @@ public interface OwnerMigrationApi {
     ResponseEntity<MigrationApproveResponse> approve(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "마이그레이션 요청 ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody MigrationApproveRequest request);
+            @Valid @RequestBody MigrationApproveRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "마이그레이션 반려", description = "마이그레이션 요청을 반려합니다.")
     @ApiResponses({
@@ -103,5 +108,6 @@ public interface OwnerMigrationApi {
     ResponseEntity<MigrationRejectResponse> reject(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "마이그레이션 요청 ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody MigrationRejectRequest request);
+            @Valid @RequestBody MigrationRejectRequest request,
+            @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 }
