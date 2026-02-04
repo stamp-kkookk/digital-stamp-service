@@ -2,20 +2,37 @@ package com.project.kkookk.otp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.util.JwtUtil;
+import com.project.kkookk.otp.service.OtpService.OtpVerifyResult;
+import com.project.kkookk.wallet.domain.CustomerWallet;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class OtpServiceTest {
+
+    @Mock private JwtUtil jwtUtil;
+
+    @Mock private CustomerWalletRepository customerWalletRepository;
 
     private OtpService otpService;
 
     @BeforeEach
     void setUp() {
-        otpService = new OtpService();
+        otpService = new OtpService(jwtUtil, customerWalletRepository);
     }
 
     @Test
@@ -24,33 +41,60 @@ class OtpServiceTest {
         // given
         String phone = "010-1234-5678";
 
-        // when & then
-        otpService.requestOtp(phone);
+        // when
+        String otpCode = otpService.requestOtp(phone);
+
+        // then
+        assertThat(otpCode).isNotNull().hasSize(6);
     }
 
     @Test
-    @DisplayName("OTP 검증 성공")
-    void verifyOtp_Success() throws Exception {
+    @DisplayName("OTP 검증 성공 - StepUp 토큰 발급")
+    void verifyOtp_Success_WithStepUpToken() throws Exception {
         // given
         String phone = "010-1234-5678";
+        String stepUpToken = "test-stepup-token";
+        Long walletId = 1L;
+
         otpService.requestOtp(phone);
 
         // OTP 코드 추출 (테스트를 위해 리플렉션 사용)
-        java.lang.reflect.Field otpStoreField = OtpService.class.getDeclaredField("otpStore");
-        otpStoreField.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        java.util.concurrent.ConcurrentHashMap<String, Object> otpStore =
-                (java.util.concurrent.ConcurrentHashMap<String, Object>)
-                        otpStoreField.get(otpService);
-        Object otpData = otpStore.get(phone);
-        java.lang.reflect.Method codeMethod = otpData.getClass().getDeclaredMethod("code");
-        String code = (String) codeMethod.invoke(otpData);
+        String code = extractOtpCode(phone);
+
+        CustomerWallet wallet =
+                CustomerWallet.builder().phone(phone).name("테스트").nickname("테스터").build();
+        // walletId를 설정하기 위해 리플렉션 사용
+        java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(wallet, walletId);
+
+        given(customerWalletRepository.findByPhone(phone)).willReturn(Optional.of(wallet));
+        given(jwtUtil.generateStepUpToken(walletId)).willReturn(stepUpToken);
 
         // when
-        boolean result = otpService.verifyOtp(phone, code);
+        OtpVerifyResult result = otpService.verifyOtp(phone, code);
 
         // then
-        assertThat(result).isTrue();
+        assertThat(result.verified()).isTrue();
+        assertThat(result.stepUpToken()).isEqualTo(stepUpToken);
+    }
+
+    @Test
+    @DisplayName("OTP 검증 성공 - 미등록 사용자 (StepUp 토큰 없음)")
+    void verifyOtp_Success_NoWallet() throws Exception {
+        // given
+        String phone = "010-9876-5432";
+        otpService.requestOtp(phone);
+        String code = extractOtpCode(phone);
+
+        given(customerWalletRepository.findByPhone(phone)).willReturn(Optional.empty());
+
+        // when
+        OtpVerifyResult result = otpService.verifyOtp(phone, code);
+
+        // then
+        assertThat(result.verified()).isTrue();
+        assertThat(result.stepUpToken()).isNull();
     }
 
     @Test
@@ -68,7 +112,7 @@ class OtpServiceTest {
 
     @Test
     @DisplayName("OTP 검증 실패 - 잘못된 코드")
-    void verifyOtp_Fail_InvalidCode() throws Exception {
+    void verifyOtp_Fail_InvalidCode() {
         // given
         String phone = "010-1234-5678";
         otpService.requestOtp(phone);
@@ -128,9 +172,8 @@ class OtpServiceTest {
         java.lang.reflect.Field otpStoreField = OtpService.class.getDeclaredField("otpStore");
         otpStoreField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.concurrent.ConcurrentHashMap<String, Object> otpStore =
-                (java.util.concurrent.ConcurrentHashMap<String, Object>)
-                        otpStoreField.get(otpService);
+        ConcurrentHashMap<String, Object> otpStore =
+                (ConcurrentHashMap<String, Object>) otpStoreField.get(otpService);
         Object otpData = otpStore.get(phone);
 
         // OTP 데이터의 createdAt을 4분 전으로 변경
@@ -139,15 +182,24 @@ class OtpServiceTest {
 
         java.lang.reflect.Constructor<?> constructor =
                 otpData.getClass()
-                        .getDeclaredConstructor(
-                                String.class, java.time.LocalDateTime.class, int.class);
-        Object expiredOtpData =
-                constructor.newInstance(code, java.time.LocalDateTime.now().minusMinutes(4), 0);
+                        .getDeclaredConstructor(String.class, LocalDateTime.class, int.class);
+        Object expiredOtpData = constructor.newInstance(code, LocalDateTime.now().minusMinutes(4), 0);
         otpStore.put(phone, expiredOtpData);
 
         // when & then
         assertThatThrownBy(() -> otpService.verifyOtp(phone, code))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.OTP_EXPIRED);
+    }
+
+    private String extractOtpCode(String phone) throws Exception {
+        java.lang.reflect.Field otpStoreField = OtpService.class.getDeclaredField("otpStore");
+        otpStoreField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        ConcurrentHashMap<String, Object> otpStore =
+                (ConcurrentHashMap<String, Object>) otpStoreField.get(otpService);
+        Object otpData = otpStore.get(phone);
+        java.lang.reflect.Method codeMethod = otpData.getClass().getDeclaredMethod("code");
+        return (String) codeMethod.invoke(otpData);
     }
 }

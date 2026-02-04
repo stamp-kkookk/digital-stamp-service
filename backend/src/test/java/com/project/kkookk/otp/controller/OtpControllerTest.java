@@ -16,6 +16,7 @@ import com.project.kkookk.global.security.JwtAuthenticationFilter;
 import com.project.kkookk.otp.dto.OtpRequestDto;
 import com.project.kkookk.otp.dto.OtpVerifyDto;
 import com.project.kkookk.otp.service.OtpService;
+import com.project.kkookk.otp.service.OtpService.OtpVerifyResult;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -100,11 +101,13 @@ class OtpControllerTest {
     }
 
     @Test
-    @DisplayName("OTP 검증 성공")
+    @DisplayName("OTP 검증 성공 - StepUp 토큰 발급")
     void verifyOtp_Success() throws Exception {
         // given
         OtpVerifyDto request = new OtpVerifyDto("010-1234-5678", "123456");
-        given(otpService.verifyOtp(anyString(), anyString())).willReturn(true);
+        String stepUpToken = "test-stepup-token";
+        given(otpService.verifyOtp(anyString(), anyString()))
+                .willReturn(new OtpVerifyResult(true, stepUpToken));
 
         // when & then
         mockMvc.perform(
@@ -113,7 +116,27 @@ class OtpControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.verified").value(true));
+                .andExpect(jsonPath("$.verified").value(true))
+                .andExpect(jsonPath("$.stepUpToken").value(stepUpToken));
+    }
+
+    @Test
+    @DisplayName("OTP 검증 성공 - 미등록 사용자 (StepUp 토큰 없음)")
+    void verifyOtp_Success_NoWallet() throws Exception {
+        // given
+        OtpVerifyDto request = new OtpVerifyDto("010-1234-5678", "123456");
+        given(otpService.verifyOtp(anyString(), anyString()))
+                .willReturn(new OtpVerifyResult(true, null));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/otp/verify")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.verified").value(true))
+                .andExpect(jsonPath("$.stepUpToken").doesNotExist());
     }
 
     @Test

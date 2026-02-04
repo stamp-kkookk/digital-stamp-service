@@ -170,7 +170,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stamp-cards/{id}/history - 스탬프 히스토리 조회 성공")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getStampHistory_Success() throws Exception {
         // given
         Long walletStampCardId = 1L;
@@ -205,7 +205,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stamp-cards/{id}/history - 유효성 검증 실패 (page < 0)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getStampHistory_Fail_InvalidPageParameter() throws Exception {
         // given
         Long walletStampCardId = 1L;
@@ -223,7 +223,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stamp-cards/{id}/history - 유효성 검증 실패 (size > 100)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getStampHistory_Fail_InvalidSizeParameter() throws Exception {
         // given
         Long walletStampCardId = 1L;
@@ -241,7 +241,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stamp-cards/{id}/history - 권한 없음 (403)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getStampHistory_Fail_AccessDenied() throws Exception {
         // given
         Long walletStampCardId = 1L;
@@ -264,7 +264,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stamp-cards/{id}/history - 스탬프카드 없음 (404)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getStampHistory_Fail_NotFound() throws Exception {
         // given
         Long walletStampCardId = 999L;
@@ -287,7 +287,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/redeem-history - 리워드 사용 히스토리 조회 성공")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getRedeemHistory_Success() throws Exception {
         // given
         StoreInfo storeInfo = new StoreInfo(10L, "꾹꾹 카페");
@@ -317,7 +317,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/redeem-history - 빈 목록 조회")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getRedeemHistory_EmptyList() throws Exception {
         // given
         PageInfo pageInfo = new PageInfo(0, 20, 0, 0, true);
@@ -339,7 +339,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/redeem-history - 유효성 검증 실패 (page < 0)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getRedeemHistory_Fail_InvalidPageParameter() throws Exception {
         // when & then
         mockMvc.perform(
@@ -352,7 +352,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/redeem-history - 유효성 검증 실패 (size > 100)")
-    @WithMockCustomer
+    @WithMockCustomer(stepUp = true)
     void getRedeemHistory_Fail_InvalidSizeParameter() throws Exception {
         // when & then
         mockMvc.perform(

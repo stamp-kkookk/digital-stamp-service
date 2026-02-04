@@ -38,7 +38,14 @@ public interface OtpApi {
     @PostMapping("/request")
     ResponseEntity<OtpRequestResponse> requestOtp(@Valid @RequestBody OtpRequestDto request);
 
-    @Operation(summary = "OTP 검증", description = "전화번호와 OTP 코드를 검증합니다. 최대 3회 시도 가능합니다.")
+    @Operation(
+            summary = "OTP 검증",
+            description =
+                    """
+            전화번호와 OTP 코드를 검증합니다. 최대 3회 시도 가능합니다.
+            검증 성공 시 StepUp 토큰(10분 TTL)이 발급되며, 이 토큰은 민감 기능
+            (리딤, 스탬프 내역 조회, 마이그레이션 등) 접근 시 필요합니다.
+            """)
     @ApiResponses(
             value = {
                 @ApiResponse(

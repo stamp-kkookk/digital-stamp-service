@@ -51,13 +51,17 @@ public interface CustomerWalletApi {
                     StampCardSortType sortBy);
 
     @Operation(
-            summary = "스탬프 적립 히스토리 조회 (JWT 인증 필요)",
-            description = "특정 스탬프카드의 적립 이력을 페이징하여 조회합니다. SMS 인증 후 발급된 JWT 토큰이 필요합니다.")
+            summary = "스탬프 적립 히스토리 조회 (StepUp 토큰 필수)",
+            description =
+                    """
+            특정 스탬프카드의 적립 이력을 페이징하여 조회합니다.
+            OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
+            """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 페이징 파라미터"),
         @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)"),
-        @ApiResponse(responseCode = "403", description = "권한 없음 (다른 고객의 스탬프카드)"),
+        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요 또는 권한 없음"),
         @ApiResponse(responseCode = "404", description = "WalletStampCard를 찾을 수 없음")
     })
     @SecurityRequirement(name = "bearerAuth")
@@ -75,12 +79,17 @@ public interface CustomerWalletApi {
                     int size);
 
     @Operation(
-            summary = "리워드 사용 히스토리 조회 (JWT 인증 필요)",
-            description = "인증된 고객의 리워드 사용 이력을 페이징하여 조회합니다. SMS 인증 후 발급된 JWT 토큰이 필요합니다.")
+            summary = "리워드 사용 히스토리 조회 (StepUp 토큰 필수)",
+            description =
+                    """
+            인증된 고객의 리워드 사용 이력을 페이징하여 조회합니다.
+            OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
+            """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 페이징 파라미터"),
-        @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)")
+        @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)"),
+        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요")
     })
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/api/customer/wallet/redeem-history")

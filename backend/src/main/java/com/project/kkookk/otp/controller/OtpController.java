@@ -27,7 +27,7 @@ public class OtpController implements OtpApi {
 
     @Override
     public ResponseEntity<OtpVerifyResponse> verifyOtp(@Valid @RequestBody OtpVerifyDto request) {
-        boolean verified = otpService.verifyOtp(request.phone(), request.code());
-        return ResponseEntity.ok(new OtpVerifyResponse(verified));
+        var result = otpService.verifyOtp(request.phone(), request.code());
+        return ResponseEntity.ok(OtpVerifyResponse.success(result.stepUpToken()));
     }
 }
