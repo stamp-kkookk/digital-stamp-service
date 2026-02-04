@@ -10,6 +10,8 @@ import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
 import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendingException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
+import com.project.kkookk.store.domain.Store;
+import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
@@ -42,9 +44,14 @@ public class CustomerIssuanceService {
     @Transactional
     public IssuanceRequestResult createIssuanceRequest(
             Long walletId, CreateIssuanceRequest request) {
-        // 1. 매장 존재 확인
-        if (!storeRepository.existsById(request.storeId())) {
-            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        // 1. 매장 조회 및 상태 확인
+        Store store =
+                storeRepository
+                        .findById(request.storeId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+
+        if (store.getStatus() != StoreStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
         // 2. 지갑 스탬프카드 조회
