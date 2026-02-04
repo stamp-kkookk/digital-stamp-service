@@ -1,7 +1,6 @@
 package com.project.kkookk.global.config;
 
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
@@ -50,7 +50,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/customer/**")
                                         .hasRole("CUSTOMER")
                                         .requestMatchers("/api/terminal/**")
-                                        .hasRole("OWNER")
+                                        .hasRole("TERMINAL")
                                         .requestMatchers("/api/owner/**")
                                         .hasRole("OWNER")
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
@@ -63,33 +63,31 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // TODO: 프로덕션 배포 전 CORS 제한 설정 필요
+    //  - AllowedOrigins: 실제 프론트엔드 도메인만 허용
+    //  - AllowedMethods: 필요한 메서드만 허용 (GET, POST, PUT, PATCH, DELETE)
+    //  - AllowedHeaders: 필요한 헤더만 허용 (Content-Type, Authorization, Accept)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 Origin (프론트엔드 개발 서버)
-        configuration.setAllowedOrigins(
-                Arrays.asList(
-                        "http://localhost:5173",
-                        "http://localhost:3000",
-                        "http://127.0.0.1:5173",
-                        "http://127.0.0.1:3000"));
+        // 모든 Origin 허용 (개발용)
+        configuration.setAllowedOriginPatterns(List.of("*"));
 
-        // 허용할 HTTP 메서드
-        configuration.setAllowedMethods(
-                Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        // 모든 HTTP 메서드 허용
+        configuration.setAllowedMethods(List.of("*"));
 
-        // 허용할 헤더
+        // 모든 헤더 허용
         configuration.setAllowedHeaders(List.of("*"));
 
-        // Credentials 허용 (쿠키, Authorization 헤더 등)
+        // Credentials 허용
         configuration.setAllowCredentials(true);
 
         // Preflight 요청 캐시 시간 (1시간)
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }

@@ -1,5 +1,6 @@
 package com.project.kkookk.wallet.controller.customer;
 
+import com.project.kkookk.global.security.CustomerPrincipal;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
@@ -43,12 +44,12 @@ public class CustomerWalletController implements CustomerWalletApi {
 
     @Override
     public ResponseEntity<StampEventHistoryResponse> getStampHistory(
-            Long walletStampCardId, @Min(0) int page, @Min(1) @Max(100) int size) {
+            CustomerPrincipal principal,
+            Long walletStampCardId,
+            @Min(0) int page,
+            @Min(1) @Max(100) int size) {
 
-        // TODO: JWT 인증 구현 후 SecurityContext에서 walletId 추출
-        // Long walletId = CustomerSecurityUtils.getCurrentCustomerWalletId();
-        // 임시로 하드코딩 (실제 구현 시 삭제 필요)
-        Long walletId = 1L;
+        Long walletId = principal.getWalletId();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("occurredAt").descending());
         StampEventHistoryResponse response =
@@ -59,12 +60,9 @@ public class CustomerWalletController implements CustomerWalletApi {
 
     @Override
     public ResponseEntity<RedeemEventHistoryResponse> getRedeemHistory(
-            @Min(0) int page, @Min(1) @Max(100) int size) {
+            CustomerPrincipal principal, @Min(0) int page, @Min(1) @Max(100) int size) {
 
-        // TODO: JWT 인증 구현 후 SecurityContext에서 walletId 추출
-        // Long walletId = CustomerSecurityUtils.getCurrentCustomerWalletId();
-        // 임시로 하드코딩 (실제 구현 시 삭제 필요)
-        Long walletId = 1L;
+        Long walletId = principal.getWalletId();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("occurredAt").descending());
         RedeemEventHistoryResponse response =

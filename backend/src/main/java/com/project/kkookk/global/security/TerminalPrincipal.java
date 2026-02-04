@@ -9,26 +9,23 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
-public class CustomerPrincipal implements UserDetails {
+public class TerminalPrincipal implements UserDetails {
 
-    private final Long walletId;
-    private final boolean stepUp;
+    private final Long ownerId;
+    private final String email;
+    private final Long storeId;
     private final Collection<? extends GrantedAuthority> authorities;
 
     @Builder
-    private CustomerPrincipal(Long walletId, boolean stepUp) {
-        this.walletId = walletId;
-        this.stepUp = stepUp;
-        this.authorities =
-                stepUp
-                        ? List.of(
-                                new SimpleGrantedAuthority("ROLE_CUSTOMER"),
-                                new SimpleGrantedAuthority("ROLE_STEPUP"))
-                        : List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+    private TerminalPrincipal(Long ownerId, String email, Long storeId) {
+        this.ownerId = ownerId;
+        this.email = email;
+        this.storeId = storeId;
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_TERMINAL"));
     }
 
-    public static CustomerPrincipal of(Long walletId, boolean stepUp) {
-        return CustomerPrincipal.builder().walletId(walletId).stepUp(stepUp).build();
+    public static TerminalPrincipal of(Long ownerId, String email, Long storeId) {
+        return TerminalPrincipal.builder().ownerId(ownerId).email(email).storeId(storeId).build();
     }
 
     @Override
@@ -43,7 +40,7 @@ public class CustomerPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return String.valueOf(walletId);
+        return email;
     }
 
     @Override

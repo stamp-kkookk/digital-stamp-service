@@ -43,7 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
             org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration.class
         })
 @Import(TestSecurityConfig.class)
-@WithMockCustomer(walletId = 1L, phone = "010-1234-5678")
+@WithMockCustomer(walletId = 1L)
 class CustomerIssuanceControllerTest {
 
     @Autowired private MockMvc mockMvc;

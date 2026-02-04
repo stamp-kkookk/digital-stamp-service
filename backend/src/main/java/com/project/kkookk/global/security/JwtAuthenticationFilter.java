@@ -1,7 +1,6 @@
 package com.project.kkookk.global.security;
 
 import com.project.kkookk.global.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -55,11 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void authenticateUser(String token, HttpServletRequest request) {
-        Claims claims = jwtUtil.parseToken(token);
-        Long ownerId = Long.parseLong(claims.getSubject());
-        String email = claims.get("email", String.class);
+        TokenType tokenType = jwtUtil.getTokenType(token);
+        if (tokenType == null) {
+            log.warn("Token type is missing, rejecting authentication");
+            return;
+        }
 
-        OwnerPrincipal principal = OwnerPrincipal.of(ownerId, email);
+        UserDetails principal = createPrincipal(token, tokenType);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
@@ -68,5 +70,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private UserDetails createPrincipal(String token, TokenType tokenType) {
+        Long subjectId = jwtUtil.getSubjectId(token);
+
+        return switch (tokenType) {
+            case OWNER -> {
+                String email = jwtUtil.getEmail(token);
+                yield OwnerPrincipal.of(subjectId, email);
+            }
+            case TERMINAL -> {
+                String email = jwtUtil.getEmail(token);
+                Long storeId = jwtUtil.getStoreId(token);
+                yield TerminalPrincipal.of(subjectId, email, storeId);
+            }
+            case CUSTOMER -> CustomerPrincipal.of(subjectId, false);
+            case STEPUP -> CustomerPrincipal.of(subjectId, true);
+        };
     }
 }

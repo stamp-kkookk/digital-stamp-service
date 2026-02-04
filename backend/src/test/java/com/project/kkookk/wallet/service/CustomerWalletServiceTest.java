@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -98,8 +97,7 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
-        given(jwtUtil.generateCustomerAccessToken(anyLong(), anyString()))
-                .willReturn(expectedToken);
+        given(jwtUtil.generateCustomerToken(anyLong())).willReturn(expectedToken);
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -114,7 +112,7 @@ class CustomerWalletServiceTest {
 
         verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
         verify(customerWalletRepository, times(1)).save(any(CustomerWallet.class));
-        verify(jwtUtil, times(1)).generateCustomerAccessToken(1L, "010-1234-5678");
+        verify(jwtUtil, times(1)).generateCustomerToken(1L);
     }
 
     @Test
@@ -134,7 +132,7 @@ class CustomerWalletServiceTest {
 
         verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
         verify(customerWalletRepository, never()).save(any(CustomerWallet.class));
-        verify(jwtUtil, never()).generateCustomerAccessToken(anyLong(), anyString());
+        verify(jwtUtil, never()).generateCustomerToken(anyLong());
     }
 
     @Test
@@ -156,7 +154,7 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
-        given(jwtUtil.generateCustomerAccessToken(anyLong(), anyString())).willReturn("mock.token");
+        given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -187,15 +185,14 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
-        given(jwtUtil.generateCustomerAccessToken(99L, "010-5555-6666"))
-                .willReturn("token.with.walletId.and.phone");
+        given(jwtUtil.generateCustomerToken(99L)).willReturn("token.with.walletId");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
 
         // then
-        assertThat(response.accessToken()).isEqualTo("token.with.walletId.and.phone");
-        verify(jwtUtil, times(1)).generateCustomerAccessToken(99L, "010-5555-6666");
+        assertThat(response.accessToken()).isEqualTo("token.with.walletId");
+        verify(jwtUtil, times(1)).generateCustomerToken(99L);
     }
 
     @Test

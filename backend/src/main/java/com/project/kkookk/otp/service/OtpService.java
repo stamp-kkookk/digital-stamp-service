@@ -22,7 +22,8 @@ public class OtpService {
             new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public void requestOtp(String phone) {
+    // TODO: 시연용 - 프로덕션 배포 시 반환값 제거하고 void로 변경 필요
+    public String requestOtp(String phone) {
         // Rate limit 체크
         LocalDateTime lastRequestTime = rateLimitStore.get(phone);
         if (lastRequestTime != null
@@ -38,9 +39,14 @@ public class OtpService {
         otpStore.put(phone, otpData);
         rateLimitStore.put(phone, LocalDateTime.now());
 
-        // 콘솔 출력 (DEV/PROD)
-        log.info("[OTP] phone={}, code={}", phone, otpCode);
-        System.out.println(String.format("[OTP] phone=%s, code=%s", phone, otpCode));
+        // OTP 발송 로그 (코드 노출 금지)
+        log.debug("[OTP] OTP requested for phone={}", maskPhone(phone));
+
+        // TODO: 실제 SMS 발송 서비스 연동 필요
+        // smsService.sendOtp(phone, otpCode);
+
+        // TODO: 시연용 - 프로덕션 배포 시 이 반환문 제거
+        return otpCode;
     }
 
     public boolean verifyOtp(String phone, String code) {
@@ -86,6 +92,13 @@ public class OtpService {
     private String generateOtpCode() {
         int otp = secureRandom.nextInt(1000000); // 0 ~ 999999
         return String.format("%06d", otp);
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.length() < 4) {
+            return "****";
+        }
+        return phone.substring(0, phone.length() - 4) + "****";
     }
 
     record OtpData(String code, LocalDateTime createdAt, int attempts) {

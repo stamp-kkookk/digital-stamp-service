@@ -17,11 +17,12 @@ public class OtpController implements OtpApi {
 
     private final OtpService otpService;
 
+    // TODO: 시연용 - 프로덕션 배포 시 devOtpCode 응답 제거 필요
     @Override
     public ResponseEntity<OtpRequestResponse> requestOtp(
             @Valid @RequestBody OtpRequestDto request) {
-        otpService.requestOtp(request.phone());
-        return ResponseEntity.ok(new OtpRequestResponse(true));
+        String otpCode = otpService.requestOtp(request.phone());
+        return ResponseEntity.ok(new OtpRequestResponse(true, otpCode));
     }
 
     @Override
