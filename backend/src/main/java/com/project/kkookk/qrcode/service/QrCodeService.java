@@ -2,7 +2,6 @@ package com.project.kkookk.qrcode.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
-import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +32,8 @@ public class QrCodeService {
     }
 
     private void validateStoreOwner(Long storeId, Long ownerId) {
-        Store store =
-                storeRepository
-                        .findById(storeId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
-
-        // TODO: Store 엔티티에 ownerId 필드 또는 연관 관계 추가 후, 아래 주석 로직 활성화 필요
-        // if (!store.getOwnerId().equals(ownerId)) {
-        //     throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        // }
+        storeRepository
+                .findByIdAndOwnerAccountId(storeId, ownerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 }

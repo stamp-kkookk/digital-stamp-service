@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.owner.controller.config.WithMockOwner;
 import com.project.kkookk.qrcode.service.QrCodeService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@WithMockOwner
 class QrCodeControllerTest {
 
     @Autowired private MockMvc mockMvc;

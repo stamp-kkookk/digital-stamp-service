@@ -4,6 +4,7 @@ import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
+import com.project.kkookk.global.security.CustomerPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,6 +63,7 @@ public interface CustomerWalletApi {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/api/customer/wallet/stamp-cards/{walletStampCardId}/history")
     ResponseEntity<StampEventHistoryResponse> getStampHistory(
+            @AuthenticationPrincipal CustomerPrincipal principal,
             @Parameter(description = "지갑 스탬프카드 ID", required = true) @PathVariable
                     Long walletStampCardId,
             @Parameter(description = "페이지 번호 (0-based)") @RequestParam(defaultValue = "0") @Min(0)
@@ -82,6 +85,7 @@ public interface CustomerWalletApi {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/api/customer/wallet/redeem-history")
     ResponseEntity<RedeemEventHistoryResponse> getRedeemHistory(
+            @AuthenticationPrincipal CustomerPrincipal principal,
             @Parameter(description = "페이지 번호 (0-based)") @RequestParam(defaultValue = "0") @Min(0)
                     int page,
             @Parameter(description = "페이지 크기 (1~100)")

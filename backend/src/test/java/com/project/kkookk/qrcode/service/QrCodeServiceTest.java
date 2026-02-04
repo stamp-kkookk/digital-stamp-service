@@ -48,7 +48,8 @@ class QrCodeServiceTest {
         byte[] qrImage = new byte[] {1, 2, 3, 4, 5};
         String expectedBase64 = Base64.getEncoder().encodeToString(qrImage);
 
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(mock(Store.class)));
+        when(storeRepository.findByIdAndOwnerAccountId(storeId, ownerId))
+                .thenReturn(Optional.of(mock(Store.class)));
         when(qrCodeGenerator.generateQrCode(anyString(), anyInt(), anyInt())).thenReturn(qrImage);
 
         // when
@@ -66,10 +67,25 @@ class QrCodeServiceTest {
         // given
         long storeId = 999L;
         long ownerId = 1L;
-        when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+        when(storeRepository.findByIdAndOwnerAccountId(storeId, ownerId)).thenReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> qrCodeService.getQrCodeBase64(storeId, ownerId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("QR 코드 Base64 조회 실패: 다른 사장님의 매장인 경우")
+    void getQrCodeBase64_shouldFail_whenNotOwner() {
+        // given
+        long storeId = 1L;
+        long wrongOwnerId = 999L;
+        when(storeRepository.findByIdAndOwnerAccountId(storeId, wrongOwnerId))
+                .thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> qrCodeService.getQrCodeBase64(storeId, wrongOwnerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_NOT_FOUND);
     }
