@@ -11,6 +11,9 @@ import com.project.kkookk.redeem.domain.RedeemSession;
 import com.project.kkookk.redeem.domain.RedeemSessionStatus;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.redeem.repository.RedeemSessionRepository;
+import com.project.kkookk.store.domain.Store;
+import com.project.kkookk.store.domain.StoreStatus;
+import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
 import java.time.LocalDateTime;
@@ -28,6 +31,7 @@ public class CustomerRedeemService {
     private final RedeemSessionRepository redeemSessionRepository;
     private final RedeemEventRepository redeemEventRepository;
     private final WalletRewardRepository walletRewardRepository;
+    private final StoreRepository storeRepository;
 
     @Transactional
     public RedeemSessionResponse createRedeemSession(
@@ -38,12 +42,22 @@ public class CustomerRedeemService {
                         .findByIdAndWalletId(request.walletRewardId(), walletId)
                         .orElseThrow(() -> new BusinessException(ErrorCode.REWARD_NOT_FOUND));
 
-        // 2. AVAILABLE 상태 검증
+        // 2. 매장 상태 확인
+        Store store =
+                storeRepository
+                        .findById(reward.getStoreId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+
+        if (store.getStatus() != StoreStatus.ACTIVE) {
+            throw new BusinessException(ErrorCode.STORE_INACTIVE);
+        }
+
+        // 3. AVAILABLE 상태 검증
         if (!reward.isAvailable()) {
             throw new BusinessException(ErrorCode.REWARD_NOT_AVAILABLE);
         }
 
-        // 3. 중복 PENDING 세션 검증
+        // 4. 중복 PENDING 세션 검증
         boolean hasPendingSession =
                 redeemSessionRepository.existsByWalletRewardIdAndStatus(
                         request.walletRewardId(), RedeemSessionStatus.PENDING);
@@ -51,10 +65,10 @@ public class CustomerRedeemService {
             throw new BusinessException(ErrorCode.REDEEM_SESSION_ALREADY_EXISTS);
         }
 
-        // 4. WalletReward 상태 변경 (AVAILABLE → REDEEMING)
+        // 5. WalletReward 상태 변경 (AVAILABLE → REDEEMING)
         reward.startRedeeming();
 
-        // 5. RedeemSession 생성
+        // 6. RedeemSession 생성
         RedeemSession session =
                 RedeemSession.builder()
                         .walletRewardId(request.walletRewardId())
