@@ -2,7 +2,6 @@ package com.project.kkookk.otp.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,7 +53,7 @@ class OtpControllerTest {
     void requestOtp_Success() throws Exception {
         // given
         OtpRequestDto request = new OtpRequestDto("010-1234-5678");
-        doNothing().when(otpService).requestOtp(anyString());
+        given(otpService.requestOtp(anyString())).willReturn("123456");
 
         // when & then
         mockMvc.perform(
@@ -63,7 +62,8 @@ class OtpControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.devOtpCode").value("123456"));
     }
 
     @Test
@@ -86,9 +86,8 @@ class OtpControllerTest {
     void requestOtp_Fail_RateLimitExceeded() throws Exception {
         // given
         OtpRequestDto request = new OtpRequestDto("010-1234-5678");
-        doThrow(new BusinessException(ErrorCode.OTP_RATE_LIMIT_EXCEEDED))
-                .when(otpService)
-                .requestOtp(anyString());
+        given(otpService.requestOtp(anyString()))
+                .willThrow(new BusinessException(ErrorCode.OTP_RATE_LIMIT_EXCEEDED));
 
         // when & then
         mockMvc.perform(
