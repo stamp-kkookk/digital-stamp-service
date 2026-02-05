@@ -39,11 +39,12 @@ class IssuanceRequestTest {
                         .build();
 
         // when
-        request.approve();
+        request.approve(1);
 
         // then
         assertThat(request.getStatus()).isEqualTo(IssuanceRequestStatus.APPROVED);
         assertThat(request.getApprovedAt()).isNotNull();
+        assertThat(request.getRewardsIssued()).isEqualTo(1);
         assertThat(request.isPending()).isFalse();
     }
 
@@ -98,10 +99,10 @@ class IssuanceRequestTest {
                         .walletStampCardId(1L)
                         .expiresAt(LocalDateTime.now().plusMinutes(5))
                         .build();
-        request.approve();
+        request.approve(0);
 
         // when & then
-        assertThatThrownBy(request::approve)
+        assertThatThrownBy(() -> request.approve(0))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Only PENDING requests can be approved");
     }
@@ -120,7 +121,7 @@ class IssuanceRequestTest {
         request.reject();
 
         // when & then
-        assertThatThrownBy(request::approve)
+        assertThatThrownBy(() -> request.approve(0))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Only PENDING requests can be approved");
     }

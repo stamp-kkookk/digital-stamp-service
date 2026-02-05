@@ -29,6 +29,7 @@ import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.CustomerWalletStatus;
 import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
@@ -241,7 +242,10 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.findByPhoneAndName(phone, name))
                 .willReturn(Optional.of(wallet));
-        given(walletStampCardRepository.findByCustomerWalletIdOrderByLastStampedAtDesc(walletId))
+        given(
+                        walletStampCardRepository
+                                .findByCustomerWalletIdAndStatusOrderByLastStampedAtDesc(
+                                        walletId, WalletStampCardStatus.ACTIVE))
                 .willReturn(List.of(walletStampCard));
         given(stampCardRepository.findAllById(anyCollection())).willReturn(List.of(stampCard));
         given(storeRepository.findAllById(anyCollection())).willReturn(List.of(store));
@@ -261,7 +265,9 @@ class CustomerWalletServiceTest {
         assertThat(response.stampCards().get(0).progressPercentage()).isEqualTo(70);
 
         verify(customerWalletRepository).findByPhoneAndName(phone, name);
-        verify(walletStampCardRepository).findByCustomerWalletIdOrderByLastStampedAtDesc(walletId);
+        verify(walletStampCardRepository)
+                .findByCustomerWalletIdAndStatusOrderByLastStampedAtDesc(
+                        walletId, WalletStampCardStatus.ACTIVE);
     }
 
     @Test
@@ -334,7 +340,10 @@ class CustomerWalletServiceTest {
 
         given(customerWalletRepository.findByPhoneAndName(phone, name))
                 .willReturn(Optional.of(wallet));
-        given(walletStampCardRepository.findByCustomerWalletIdOrderByCreatedAtDesc(walletId))
+        given(
+                        walletStampCardRepository
+                                .findByCustomerWalletIdAndStatusOrderByCreatedAtDesc(
+                                        walletId, WalletStampCardStatus.ACTIVE))
                 .willReturn(List.of());
         given(stampCardRepository.findAllById(anyCollection())).willReturn(List.of());
         given(storeRepository.findAllById(anyCollection())).willReturn(List.of());
@@ -346,7 +355,9 @@ class CustomerWalletServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        verify(walletStampCardRepository).findByCustomerWalletIdOrderByCreatedAtDesc(walletId);
+        verify(walletStampCardRepository)
+                .findByCustomerWalletIdAndStatusOrderByCreatedAtDesc(
+                        walletId, WalletStampCardStatus.ACTIVE);
     }
 
     @Test
