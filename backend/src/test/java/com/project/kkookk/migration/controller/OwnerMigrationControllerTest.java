@@ -78,7 +78,7 @@ class OwnerMigrationControllerTest {
                             1L,
                             "010-1234-5678",
                             "홍길동",
-                            "https://storage.example.com/1.jpg",
+                            5,
                             "SUBMITTED",
                             requestedAt);
 
@@ -92,6 +92,7 @@ class OwnerMigrationControllerTest {
                     .andExpect(jsonPath("$.migrations[0].id").value(1))
                     .andExpect(jsonPath("$.migrations[0].customerPhone").value("010-1234-5678"))
                     .andExpect(jsonPath("$.migrations[0].customerName").value("홍길동"))
+                    .andExpect(jsonPath("$.migrations[0].claimedStampCount").value(5))
                     .andExpect(jsonPath("$.migrations[0].status").value("SUBMITTED"));
         }
 
@@ -130,7 +131,7 @@ class OwnerMigrationControllerTest {
                             "010-1234-5678",
                             "홍길동",
                             "https://storage.example.com/1.jpg",
-                            null, // requestedStampCount (BE2 추가 예정)
+                            5,
                             "SUBMITTED",
                             null,
                             null,
@@ -149,6 +150,7 @@ class OwnerMigrationControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(migrationId))
                     .andExpect(jsonPath("$.customerPhone").value("010-1234-5678"))
+                    .andExpect(jsonPath("$.claimedStampCount").value(5))
                     .andExpect(jsonPath("$.status").value("SUBMITTED"));
         }
 

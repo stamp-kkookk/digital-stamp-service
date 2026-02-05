@@ -87,8 +87,8 @@ class OwnerMigrationServiceTest {
             assertThat(response.migrations()).hasSize(1);
             assertThat(response.migrations().get(0).customerPhone()).isEqualTo("010-1234-5678");
             assertThat(response.migrations().get(0).customerName()).isEqualTo("홍길동");
+            assertThat(response.migrations().get(0).claimedStampCount()).isEqualTo(5);
             assertThat(response.migrations().get(0).status()).isEqualTo("SUBMITTED");
-            assertThat(response.migrations().get(0).imageUrl()).isNull(); // 목록에서 이미지 제외
         }
 
         @Test
@@ -143,6 +143,7 @@ class OwnerMigrationServiceTest {
             assertThat(response.id()).isEqualTo(migrationId);
             assertThat(response.customerPhone()).isEqualTo("010-1234-5678");
             assertThat(response.customerName()).isEqualTo("홍길동");
+            assertThat(response.claimedStampCount()).isEqualTo(5);
             assertThat(response.status()).isEqualTo("SUBMITTED");
         }
 

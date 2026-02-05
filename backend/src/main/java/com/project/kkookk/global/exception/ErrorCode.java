@@ -71,19 +71,6 @@ public enum ErrorCode {
     ISSUANCE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "ISSUANCE_ALREADY_PROCESSED", "이미 처리된 요청입니다"),
     ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
 
-    // Wallet
-    WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "WALLET_NOT_FOUND", "지갑을 찾을 수 없습니다"),
-
-    // Migration
-    MIGRATION_REQUEST_NOT_FOUND(
-            HttpStatus.NOT_FOUND, "MIGRATION_REQUEST_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),
-    MIGRATION_ALREADY_PENDING(
-            HttpStatus.CONFLICT, "MIGRATION_ALREADY_PENDING", "이미 처리 중인 마이그레이션 요청이 있습니다"),
-    MIGRATION_ACCESS_DENIED(
-            HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
-    MIGRATION_IMAGE_TOO_LARGE(
-            HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)"),
-
     // Redeem
     STEPUP_REQUIRED(HttpStatus.FORBIDDEN, "STEPUP_REQUIRED", "OTP 인증이 필요합니다"),
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
@@ -95,10 +82,19 @@ public enum ErrorCode {
     REDEEM_SESSION_NOT_PENDING(
             HttpStatus.BAD_REQUEST, "REDEEM_SESSION_NOT_PENDING", "처리 대기 중인 세션이 아닙니다"),
     REDEEM_SESSION_EXPIRED(HttpStatus.GONE, "REDEEM_SESSION_EXPIRED", "사용 세션이 만료되었습니다"),
+
     // Migration
     MIGRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MIGRATION_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),
+    MIGRATION_ALREADY_PENDING(
+            HttpStatus.CONFLICT, "MIGRATION_ALREADY_PENDING", "이미 처리 중인 마이그레이션 요청이 있습니다"),
     MIGRATION_ALREADY_PROCESSED(
             HttpStatus.CONFLICT, "MIGRATION_ALREADY_PROCESSED", "이미 처리된 마이그레이션 요청입니다"),
+    MIGRATION_ACCESS_DENIED(
+            HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
+    MIGRATION_IMAGE_TOO_LARGE(
+            HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)"),
+
+    // StampCard (additional)
     NO_ACTIVE_STAMP_CARD(HttpStatus.CONFLICT, "NO_ACTIVE_STAMP_CARD", "활성 스탬프 카드가 없습니다");
 
     private final HttpStatus status;

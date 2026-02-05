@@ -6,6 +6,6 @@ import com.project.kkookk.global.exception.ErrorCode;
 public class MigrationRequestNotFoundException extends BusinessException {
 
     public MigrationRequestNotFoundException() {
-        super(ErrorCode.MIGRATION_REQUEST_NOT_FOUND);
+        super(ErrorCode.MIGRATION_NOT_FOUND);
     }
 }

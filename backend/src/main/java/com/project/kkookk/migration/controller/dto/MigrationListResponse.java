@@ -13,10 +13,7 @@ public record MigrationListResponse(
             @Schema(description = "요청 ID", example = "1") Long id,
             @Schema(description = "고객 전화번호", example = "010-1234-5678") String customerPhone,
             @Schema(description = "고객 이름", example = "홍길동") String customerName,
-            @Schema(
-                            description = "이미지 URL",
-                            example = "https://storage.example.com/migrations/1.jpg")
-                    String imageUrl,
+            @Schema(description = "고객이 주장한 스탬프 수", example = "5") Integer claimedStampCount,
             @Schema(description = "상태", example = "SUBMITTED") String status,
             @Schema(description = "요청 시간", example = "2026-01-30T14:30:00")
                     LocalDateTime requestedAt) {}

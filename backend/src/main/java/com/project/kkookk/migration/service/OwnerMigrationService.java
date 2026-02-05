@@ -82,7 +82,7 @@ public class OwnerMigrationService {
                                             m.getId(),
                                             wallet != null ? wallet.getPhone() : null,
                                             wallet != null ? wallet.getName() : null,
-                                            null, // 목록에서는 이미지 제외 (성능/보안)
+                                            m.getClaimedStampCount(),
                                             m.getStatus().name(),
                                             m.getRequestedAt());
                                 })
@@ -98,16 +98,13 @@ public class OwnerMigrationService {
         CustomerWallet wallet =
                 customerWalletRepository.findById(migration.getCustomerWalletId()).orElse(null);
 
-        // requestedStampCount는 BE2에서 추가 예정, 현재는 null
-        Integer requestedStampCount = null;
-
         return new MigrationDetailResponse(
                 migration.getId(),
                 migration.getCustomerWalletId(),
                 wallet != null ? wallet.getPhone() : null,
                 wallet != null ? wallet.getName() : null,
                 migration.getImageData(),
-                requestedStampCount,
+                migration.getClaimedStampCount(),
                 migration.getStatus().name(),
                 migration.getApprovedStampCount(),
                 migration.getRejectReason(),
