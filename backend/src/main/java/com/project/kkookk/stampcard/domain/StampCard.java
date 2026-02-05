@@ -43,6 +43,10 @@ public class StampCard extends BaseTimeEntity {
     @Column(name = "expire_days")
     private Integer expireDays;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "design_type", nullable = false, length = 20)
+    private StampCardDesignType designType;
+
     @Column(name = "design_json", columnDefinition = "TEXT")
     private String designJson;
 
@@ -57,6 +61,8 @@ public class StampCard extends BaseTimeEntity {
         this.rewardName = builder.rewardName;
         this.rewardQuantity = builder.rewardQuantity;
         this.expireDays = builder.expireDays;
+        this.designType =
+                builder.designType != null ? builder.designType : StampCardDesignType.COLOR;
         this.designJson = builder.designJson;
     }
 
@@ -100,6 +106,10 @@ public class StampCard extends BaseTimeEntity {
         return expireDays;
     }
 
+    public StampCardDesignType getDesignType() {
+        return designType;
+    }
+
     public String getDesignJson() {
         return designJson;
     }
@@ -123,6 +133,7 @@ public class StampCard extends BaseTimeEntity {
             String rewardName,
             Integer rewardQuantity,
             Integer expireDays,
+            StampCardDesignType designType,
             String designJson) {
         this.title = title;
         this.goalStampCount = goalStampCount;
@@ -130,11 +141,13 @@ public class StampCard extends BaseTimeEntity {
         this.rewardName = rewardName;
         this.rewardQuantity = rewardQuantity;
         this.expireDays = expireDays;
+        this.designType = designType != null ? designType : this.designType;
         this.designJson = designJson;
     }
 
-    public void updatePartial(String title, String designJson) {
+    public void updatePartial(String title, StampCardDesignType designType, String designJson) {
         this.title = title;
+        this.designType = designType != null ? designType : this.designType;
         this.designJson = designJson;
     }
 
@@ -147,6 +160,7 @@ public class StampCard extends BaseTimeEntity {
         private String rewardName;
         private Integer rewardQuantity;
         private Integer expireDays;
+        private StampCardDesignType designType;
         private String designJson;
 
         public Builder storeId(Long storeId) {
@@ -181,6 +195,11 @@ public class StampCard extends BaseTimeEntity {
 
         public Builder expireDays(Integer expireDays) {
             this.expireDays = expireDays;
+            return this;
+        }
+
+        public Builder designType(StampCardDesignType designType) {
+            this.designType = designType;
             return this;
         }
 
