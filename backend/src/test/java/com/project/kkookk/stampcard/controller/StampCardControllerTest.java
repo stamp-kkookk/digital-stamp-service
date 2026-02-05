@@ -24,6 +24,7 @@ import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardSummary;
 import com.project.kkookk.stampcard.controller.dto.UpdateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.UpdateStampCardStatusRequest;
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.service.StampCardService;
 import com.project.kkookk.stampcard.service.exception.StampCardAlreadyActiveException;
@@ -76,7 +77,14 @@ class StampCardControllerTest {
         Long storeId = 1L;
         CreateStampCardRequest request =
                 new CreateStampCardRequest(
-                        "커피 스탬프 카드", 10, 10, "아메리카노 1잔 무료", 1, 30, "{\"theme\": \"coffee\"}");
+                        "커피 스탬프 카드",
+                        10,
+                        10,
+                        "아메리카노 1잔 무료",
+                        1,
+                        30,
+                        StampCardDesignType.COLOR,
+                        "{\"theme\": \"coffee\"}");
 
         StampCardResponse response =
                 new StampCardResponse(
@@ -88,6 +96,7 @@ class StampCardControllerTest {
                         "아메리카노 1잔 무료",
                         1,
                         30,
+                        StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
                         LocalDateTime.now(),
@@ -113,7 +122,8 @@ class StampCardControllerTest {
         // given
         Long storeId = 1L;
         CreateStampCardRequest request =
-                new CreateStampCardRequest(null, 10, 10, "리워드", 1, 30, null);
+                new CreateStampCardRequest(
+                        null, 10, 10, "리워드", 1, 30, StampCardDesignType.COLOR, null);
 
         // when & then
         mockMvc.perform(
@@ -130,7 +140,8 @@ class StampCardControllerTest {
         // given
         Long storeId = 1L;
         CreateStampCardRequest request =
-                new CreateStampCardRequest("카드", null, 10, "리워드", 1, 30, null);
+                new CreateStampCardRequest(
+                        "카드", null, 10, "리워드", 1, 30, StampCardDesignType.COLOR, null);
 
         // when & then
         mockMvc.perform(
@@ -153,6 +164,7 @@ class StampCardControllerTest {
                         StampCardStatus.ACTIVE,
                         10,
                         "아메리카노 1잔 무료",
+                        StampCardDesignType.COLOR,
                         LocalDateTime.now());
 
         StampCardListResponse response =
@@ -180,6 +192,7 @@ class StampCardControllerTest {
                         StampCardStatus.ACTIVE,
                         10,
                         "아메리카노 1잔 무료",
+                        StampCardDesignType.COLOR,
                         LocalDateTime.now());
 
         StampCardListResponse response =
@@ -212,6 +225,7 @@ class StampCardControllerTest {
                         "아메리카노 1잔 무료",
                         1,
                         30,
+                        StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
                         LocalDateTime.now(),
@@ -250,7 +264,14 @@ class StampCardControllerTest {
         Long cardId = 1L;
         UpdateStampCardRequest request =
                 new UpdateStampCardRequest(
-                        "수정된 카드 이름", 15, 15, "수정된 리워드", 2, 60, "{\"theme\": \"new\"}");
+                        "수정된 카드 이름",
+                        15,
+                        15,
+                        "수정된 리워드",
+                        2,
+                        60,
+                        StampCardDesignType.IMAGE,
+                        "{\"theme\": \"new\"}");
 
         StampCardResponse response =
                 new StampCardResponse(
@@ -262,6 +283,7 @@ class StampCardControllerTest {
                         "수정된 리워드",
                         2,
                         60,
+                        StampCardDesignType.IMAGE,
                         "{\"theme\": \"new\"}",
                         storeId,
                         LocalDateTime.now(),
@@ -299,6 +321,7 @@ class StampCardControllerTest {
                         "아메리카노 1잔 무료",
                         1,
                         30,
+                        StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
                         LocalDateTime.now(),

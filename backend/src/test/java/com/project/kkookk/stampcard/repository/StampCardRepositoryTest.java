@@ -3,6 +3,7 @@ package com.project.kkookk.stampcard.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -198,7 +199,15 @@ class StampCardRepositoryTest {
         StampCard saved = stampCardRepository.save(stampCard);
 
         // when
-        saved.update("수정된 카드", 15, 15, "수정된 리워드", 2, 60, "{\"theme\": \"new\"}");
+        saved.update(
+                "수정된 카드",
+                15,
+                15,
+                "수정된 리워드",
+                2,
+                60,
+                StampCardDesignType.IMAGE,
+                "{\"theme\": \"new\"}");
         stampCardRepository.flush();
 
         // then

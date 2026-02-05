@@ -46,6 +46,7 @@ public class StampCardService {
                         .rewardName(request.rewardName())
                         .rewardQuantity(request.rewardQuantity())
                         .expireDays(request.expireDays())
+                        .designType(request.designType())
                         .designJson(request.designJson())
                         .build();
 
@@ -77,7 +78,7 @@ public class StampCardService {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
         if (stampCard.isActive()) {
-            stampCard.updatePartial(request.title(), request.designJson());
+            stampCard.updatePartial(request.title(), request.designType(), request.designJson());
             log.info("Partially updated active stamp card: {}", id);
         } else if (stampCard.isDraft() || stampCard.getStatus() == StampCardStatus.PAUSED) {
             stampCard.update(
@@ -87,6 +88,7 @@ public class StampCardService {
                     request.rewardName(),
                     request.rewardQuantity(),
                     request.expireDays(),
+                    request.designType(),
                     request.designJson());
             log.info("Fully updated stamp card: {}", id);
         } else {

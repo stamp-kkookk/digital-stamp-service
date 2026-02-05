@@ -1,6 +1,7 @@
 package com.project.kkookk.stampcard.controller.dto;
 
 import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ public record StampCardSummary(
         @Schema(description = "상태", example = "ACTIVE") StampCardStatus status,
         @Schema(description = "목표 스탬프 수", example = "10") Integer goalStampCount,
         @Schema(description = "리워드 명", example = "아메리카노 1잔 무료") String rewardName,
+        @Schema(description = "디자인 타입", example = "COLOR") StampCardDesignType designType,
         @Schema(description = "생성 시각") LocalDateTime createdAt) {
 
     public static StampCardSummary from(StampCard entity) {
@@ -21,6 +23,7 @@ public record StampCardSummary(
                 entity.getStatus(),
                 entity.getGoalStampCount(),
                 entity.getRewardName(),
+                entity.getDesignType(),
                 entity.getCreatedAt());
     }
 }

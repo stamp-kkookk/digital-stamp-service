@@ -1,5 +1,6 @@
 package com.project.kkookk.stampcard.controller.dto;
 
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,6 +32,7 @@ public record UpdateStampCardRequest(
         @Schema(description = "리워드 유효기간(일)", example = "30")
                 @Min(value = 1, message = "리워드 유효기간은 1 이상이어야 합니다")
                 Integer expireDays,
+        @Schema(description = "디자인 타입", example = "COLOR") StampCardDesignType designType,
         @Schema(
                         description = "카드 디자인 정보(JSON)",
                         example = "{\"theme\": \"coffee\", \"color\": \"#8B4513\"}")

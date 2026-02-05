@@ -1,6 +1,7 @@
 package com.project.kkookk.stampcard.controller.dto;
 
 import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public record StampCardResponse(
         @Schema(description = "리워드 명", example = "아메리카노 1잔 무료") String rewardName,
         @Schema(description = "리워드 수량", example = "1") Integer rewardQuantity,
         @Schema(description = "리워드 유효기간(일)", example = "30") Integer expireDays,
+        @Schema(description = "디자인 타입", example = "COLOR") StampCardDesignType designType,
         @Schema(description = "카드 디자인 정보(JSON)") String designJson,
         @Schema(description = "소속 매장 ID", example = "100") Long storeId,
         @Schema(description = "생성 시각") LocalDateTime createdAt,
@@ -30,6 +32,7 @@ public record StampCardResponse(
                 entity.getRewardName(),
                 entity.getRewardQuantity(),
                 entity.getExpireDays(),
+                entity.getDesignType(),
                 entity.getDesignJson(),
                 entity.getStoreId(),
                 entity.getCreatedAt(),
