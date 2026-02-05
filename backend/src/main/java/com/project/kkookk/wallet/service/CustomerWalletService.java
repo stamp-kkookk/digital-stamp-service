@@ -16,6 +16,7 @@ import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.domain.WalletRewardStatus;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.PageInfo;
@@ -276,13 +277,18 @@ public class CustomerWalletService {
     private List<WalletStampCard> getWalletStampCardsSorted(
             Long walletId, StampCardSortType sortType) {
 
+        // ACTIVE 상태의 WalletStampCard만 조회 (COMPLETED 제외)
         return switch (sortType) {
             case LAST_STAMPED ->
-                    walletStampCardRepository.findByCustomerWalletIdOrderByLastStampedAtDesc(
-                            walletId);
+                    walletStampCardRepository
+                            .findByCustomerWalletIdAndStatusOrderByLastStampedAtDesc(
+                                    walletId, WalletStampCardStatus.ACTIVE);
             case CREATED ->
-                    walletStampCardRepository.findByCustomerWalletIdOrderByCreatedAtDesc(walletId);
-            case PROGRESS -> walletStampCardRepository.findByCustomerWalletId(walletId);
+                    walletStampCardRepository.findByCustomerWalletIdAndStatusOrderByCreatedAtDesc(
+                            walletId, WalletStampCardStatus.ACTIVE);
+            case PROGRESS ->
+                    walletStampCardRepository.findByCustomerWalletIdAndStatus(
+                            walletId, WalletStampCardStatus.ACTIVE);
         };
     }
 

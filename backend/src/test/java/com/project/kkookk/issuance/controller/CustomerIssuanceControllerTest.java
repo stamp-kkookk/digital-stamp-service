@@ -75,7 +75,13 @@ class CustomerIssuanceControllerTest {
             LocalDateTime now = LocalDateTime.now();
             IssuanceRequestResponse response =
                     new IssuanceRequestResponse(
-                            1L, IssuanceRequestStatus.PENDING, now.plusSeconds(120), 120L, 3, now);
+                            1L,
+                            IssuanceRequestStatus.PENDING,
+                            now.plusSeconds(120),
+                            120L,
+                            3,
+                            null,
+                            now);
 
             given(
                             customerIssuanceService.createIssuanceRequest(
@@ -103,7 +109,13 @@ class CustomerIssuanceControllerTest {
             LocalDateTime now = LocalDateTime.now();
             IssuanceRequestResponse response =
                     new IssuanceRequestResponse(
-                            1L, IssuanceRequestStatus.PENDING, now.plusSeconds(60), 60L, 3, now);
+                            1L,
+                            IssuanceRequestStatus.PENDING,
+                            now.plusSeconds(60),
+                            60L,
+                            3,
+                            null,
+                            now);
 
             given(
                             customerIssuanceService.createIssuanceRequest(
@@ -269,6 +281,7 @@ class CustomerIssuanceControllerTest {
                             now.plusSeconds(60),
                             60L,
                             3,
+                            null,
                             now);
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);
@@ -293,7 +306,8 @@ class CustomerIssuanceControllerTest {
                             IssuanceRequestStatus.APPROVED,
                             now.plusSeconds(60),
                             60L,
-                            3,
+                            4,
+                            1,
                             now);
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);
@@ -301,7 +315,8 @@ class CustomerIssuanceControllerTest {
             // when & then
             mockMvc.perform(get("/api/customer/issuance-requests/{id}", requestId))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value("APPROVED"));
+                    .andExpect(jsonPath("$.status").value("APPROVED"))
+                    .andExpect(jsonPath("$.rewardsIssued").value(1));
         }
 
         @Test
@@ -317,6 +332,7 @@ class CustomerIssuanceControllerTest {
                             now.minusSeconds(60),
                             0L,
                             3,
+                            null,
                             now.minusSeconds(120));
 
             given(customerIssuanceService.getIssuanceRequest(requestId, 1L)).willReturn(response);

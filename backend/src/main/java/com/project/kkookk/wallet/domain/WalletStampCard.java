@@ -3,6 +3,8 @@ package com.project.kkookk.wallet.domain;
 import com.project.kkookk.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,8 +38,15 @@ public class WalletStampCard extends BaseTimeEntity {
     @Column(name = "stamp_count", nullable = false)
     private Integer stampCount;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private WalletStampCardStatus status;
+
     @Column(name = "last_stamped_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime lastStampedAt;
+
+    @Column(name = "completed_at", columnDefinition = "DATETIME(6)")
+    private LocalDateTime completedAt;
 
     @Version private Long version;
 
@@ -48,6 +57,7 @@ public class WalletStampCard extends BaseTimeEntity {
         this.storeId = storeId;
         this.stampCardId = stampCardId;
         this.stampCount = stampCount != null ? stampCount : 0;
+        this.status = WalletStampCardStatus.ACTIVE;
     }
 
     public void addStamps(int delta) {
@@ -55,7 +65,21 @@ public class WalletStampCard extends BaseTimeEntity {
         this.lastStampedAt = LocalDateTime.now();
     }
 
+    public void setStampCount(int count) {
+        this.stampCount = count;
+        this.lastStampedAt = LocalDateTime.now();
+    }
+
     public void resetStamps() {
         this.stampCount = 0;
+    }
+
+    public void complete() {
+        this.status = WalletStampCardStatus.COMPLETED;
+        this.completedAt = LocalDateTime.now();
+    }
+
+    public boolean isActive() {
+        return this.status == WalletStampCardStatus.ACTIVE;
     }
 }

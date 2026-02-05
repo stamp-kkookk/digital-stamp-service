@@ -1,5 +1,7 @@
 package com.project.kkookk.issuance.service;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestItem;
@@ -13,11 +15,16 @@ import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundExce
 import com.project.kkookk.stamp.domain.StampEvent;
 import com.project.kkookk.stamp.domain.StampEventType;
 import com.project.kkookk.stamp.repository.StampEventRepository;
+import com.project.kkookk.stamp.service.StampRewardService;
+import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardStatus;
+import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
 import com.project.kkookk.store.service.exception.TerminalAccessDeniedException;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundException;
@@ -45,6 +52,8 @@ public class TerminalApprovalService {
     private final CustomerWalletRepository customerWalletRepository;
     private final WalletStampCardRepository walletStampCardRepository;
     private final StampEventRepository stampEventRepository;
+    private final StampCardRepository stampCardRepository;
+    private final StampRewardService stampRewardService;
 
     /** 승인 대기 목록 조회 (터미널 Polling용) */
     public PendingIssuanceRequestListResponse getPendingRequests(Long storeId, Long ownerId) {
@@ -96,23 +105,34 @@ public class TerminalApprovalService {
         validateRequestBelongsToStore(request, storeId);
         validateRequestCanBeProcessed(request);
 
-        // 상태 변경
-        request.approve();
+        // ACTIVE 스탬프카드 조회
+        StampCard stampCard =
+                stampCardRepository
+                        .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                storeId, StampCardStatus.ACTIVE)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
 
-        // 스탬프 적립 (비관적 락으로 동시성 제어)
+        // 고객의 ACTIVE WalletStampCard 조회 (비관적 락으로 동시성 제어)
         WalletStampCard walletStampCard =
                 walletStampCardRepository
-                        .findByIdWithLock(request.getWalletStampCardId())
+                        .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
+                                request.getWalletId(), storeId, WalletStampCardStatus.ACTIVE)
                         .orElseThrow(WalletStampCardNotFoundException::new);
 
-        walletStampCard.addStamps(STAMP_DELTA);
+        // 스탬프 적립 및 리워드 발급 처리
+        StampRewardService.StampAccumulationResult result =
+                stampRewardService.processStampAccumulation(
+                        walletStampCard, stampCard, STAMP_DELTA);
+
+        // 상태 변경 (발급된 리워드 개수 포함)
+        request.approve(result.rewardCount());
 
         // 원장 기록
         StampEvent stampEvent =
                 StampEvent.builder()
                         .storeId(storeId)
-                        .stampCardId(walletStampCard.getStampCardId())
-                        .walletStampCardId(walletStampCard.getId())
+                        .stampCardId(stampCard.getId())
+                        .walletStampCardId(result.currentWalletStampCard().getId())
                         .type(StampEventType.ISSUED)
                         .delta(STAMP_DELTA)
                         .reason("터미널 승인")
@@ -123,18 +143,20 @@ public class TerminalApprovalService {
         stampEventRepository.save(stampEvent);
 
         log.info(
-                "Issuance approved: requestId={}, storeId={}, walletId={}, newStampCount={}",
+                "Issuance approved: requestId={}, storeId={}, walletId={}, newStampCount={}, "
+                        + "rewardsIssued={}",
                 requestId,
                 storeId,
                 request.getWalletId(),
-                walletStampCard.getStampCount());
+                result.currentWalletStampCard().getStampCount(),
+                result.rewardCount());
 
         return new IssuanceApprovalResponse(
                 request.getId(),
                 request.getStatus(),
                 request.getApprovedAt(),
                 STAMP_DELTA,
-                walletStampCard.getStampCount());
+                result.currentWalletStampCard().getStampCount());
     }
 
     /** 적립 요청 거절 */

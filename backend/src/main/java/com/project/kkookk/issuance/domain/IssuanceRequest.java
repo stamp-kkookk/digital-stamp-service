@@ -54,6 +54,9 @@ public class IssuanceRequest extends BaseTimeEntity {
     @Column(name = "approved_at", columnDefinition = "DATETIME(6)")
     private LocalDateTime approvedAt;
 
+    @Column(name = "rewards_issued")
+    private Integer rewardsIssued;
+
     @Builder
     private IssuanceRequest(
             Long storeId,
@@ -78,12 +81,13 @@ public class IssuanceRequest extends BaseTimeEntity {
                 || LocalDateTime.now().isAfter(expiresAt);
     }
 
-    public void approve() {
+    public void approve(int rewardsIssued) {
         if (!isPending()) {
             throw new IllegalStateException("Only PENDING requests can be approved");
         }
         this.status = IssuanceRequestStatus.APPROVED;
         this.approvedAt = LocalDateTime.now();
+        this.rewardsIssued = rewardsIssued;
     }
 
     public void reject() {

@@ -74,13 +74,7 @@ class OwnerMigrationControllerTest {
             LocalDateTime requestedAt = LocalDateTime.now();
 
             MigrationSummary summary =
-                    new MigrationSummary(
-                            1L,
-                            "010-1234-5678",
-                            "홍길동",
-                            5,
-                            "SUBMITTED",
-                            requestedAt);
+                    new MigrationSummary(1L, "010-1234-5678", "홍길동", 5, "SUBMITTED", requestedAt);
 
             MigrationListResponse response = new MigrationListResponse(List.of(summary));
 

@@ -19,6 +19,8 @@ import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
 import com.project.kkookk.stamp.domain.StampEvent;
 import com.project.kkookk.stamp.repository.StampEventRepository;
+import com.project.kkookk.stamp.service.StampRewardService;
+import com.project.kkookk.stamp.service.StampRewardService.StampAccumulationResult;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
@@ -27,6 +29,7 @@ import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import java.lang.reflect.Field;
@@ -55,6 +58,7 @@ class OwnerMigrationServiceTest {
     @Mock private StampCardRepository stampCardRepository;
     @Mock private StampEventRepository stampEventRepository;
     @Mock private StoreRepository storeRepository;
+    @Mock private StampRewardService stampRewardService;
 
     @Nested
     @DisplayName("목록 조회")
@@ -198,9 +202,12 @@ class OwnerMigrationServiceTest {
                                     storeId, StampCardStatus.ACTIVE))
                     .willReturn(Optional.of(activeCard));
             given(
-                            walletStampCardRepository.findByCustomerWalletIdAndStoreIdWithLock(
-                                    walletId, storeId))
+                            walletStampCardRepository
+                                    .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
+                                            walletId, storeId, WalletStampCardStatus.ACTIVE))
                     .willReturn(Optional.of(walletStampCard));
+            given(stampRewardService.processStampAccumulation(any(), any(), any(Integer.class)))
+                    .willReturn(new StampAccumulationResult(List.of(), walletStampCard));
             given(stampEventRepository.save(any(StampEvent.class)))
                     .willAnswer(i -> i.getArgument(0));
 
@@ -240,8 +247,9 @@ class OwnerMigrationServiceTest {
                                     storeId, StampCardStatus.ACTIVE))
                     .willReturn(Optional.of(activeCard));
             given(
-                            walletStampCardRepository.findByCustomerWalletIdAndStoreIdWithLock(
-                                    walletId, storeId))
+                            walletStampCardRepository
+                                    .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
+                                            walletId, storeId, WalletStampCardStatus.ACTIVE))
                     .willReturn(Optional.empty());
 
             MigrationApproveRequest request = new MigrationApproveRequest(3);
