@@ -21,10 +21,11 @@ public class OtpService {
     private static final int OTP_LENGTH = 6;
     private static final int OTP_TTL_MINUTES = 3;
     private static final int RATE_LIMIT_SECONDS = 60;
+    private static final int RATE_LIMIT_MAX_REQUESTS = 2;
     private static final int MAX_ATTEMPTS = 3;
 
     private final ConcurrentHashMap<String, OtpData> otpStore = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, LocalDateTime> rateLimitStore =
+    private final ConcurrentHashMap<String, RateLimitData> rateLimitStore =
             new ConcurrentHashMap<>();
     private final SecureRandom secureRandom = new SecureRandom();
 
@@ -34,10 +35,19 @@ public class OtpService {
     // TODO: 시연용 - 프로덕션 배포 시 반환값 제거하고 void로 변경 필요
     public String requestOtp(String phone) {
         // Rate limit 체크
-        LocalDateTime lastRequestTime = rateLimitStore.get(phone);
-        if (lastRequestTime != null
-                && LocalDateTime.now().isBefore(lastRequestTime.plusSeconds(RATE_LIMIT_SECONDS))) {
-            throw new BusinessException(ErrorCode.OTP_RATE_LIMIT_EXCEEDED);
+        RateLimitData rateLimitData = rateLimitStore.get(phone);
+        if (rateLimitData != null && !rateLimitData.isExpired()) {
+            if (rateLimitData.requestCount() >= RATE_LIMIT_MAX_REQUESTS) {
+                throw new BusinessException(ErrorCode.OTP_RATE_LIMIT_EXCEEDED);
+            }
+            // 요청 횟수 증가
+            rateLimitStore.put(
+                    phone,
+                    new RateLimitData(
+                            rateLimitData.firstRequestAt(), rateLimitData.requestCount() + 1));
+        } else {
+            // 새로운 rate limit 시작
+            rateLimitStore.put(phone, new RateLimitData(LocalDateTime.now(), 1));
         }
 
         // OTP 생성 (6자리 랜덤 숫자)
@@ -46,7 +56,6 @@ public class OtpService {
         // In-memory 저장
         OtpData otpData = new OtpData(otpCode, LocalDateTime.now(), 0);
         otpStore.put(phone, otpData);
-        rateLimitStore.put(phone, LocalDateTime.now());
 
         // OTP 발송 로그 (코드 노출 금지)
         log.debug("[OTP] OTP requested for phone={}", maskPhone(phone));
@@ -136,6 +145,12 @@ public class OtpService {
 
         boolean isAttemptsExceeded() {
             return attempts >= MAX_ATTEMPTS;
+        }
+    }
+
+    record RateLimitData(LocalDateTime firstRequestAt, int requestCount) {
+        boolean isExpired() {
+            return LocalDateTime.now().isAfter(firstRequestAt.plusSeconds(RATE_LIMIT_SECONDS));
         }
     }
 }

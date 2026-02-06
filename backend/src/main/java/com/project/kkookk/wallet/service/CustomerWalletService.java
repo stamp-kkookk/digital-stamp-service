@@ -264,7 +264,15 @@ public class CustomerWalletService {
 
                             return RegisteredStampCardInfo.from(saved, stampCard, store);
                         })
-                .orElse(null);
+                .orElseGet(
+                        () -> {
+                            log.warn(
+                                    "[WalletStampCard Skip] No ACTIVE StampCard found for "
+                                            + "walletId={}, storeId={}",
+                                    walletId,
+                                    storeId);
+                            return null;
+                        });
     }
 
     public WalletStampCardListResponse getMyStampCards(Long walletId, StampCardSortType sortType) {

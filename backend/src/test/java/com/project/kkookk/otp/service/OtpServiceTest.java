@@ -148,13 +148,14 @@ class OtpServiceTest {
     }
 
     @Test
-    @DisplayName("Rate Limit 테스트 - 1분 내 재요청 차단")
+    @DisplayName("Rate Limit 테스트 - 1분 내 2회까지 허용, 3회째 차단")
     void requestOtp_Fail_RateLimitExceeded() {
         // given
         String phone = "010-7777-6666";
-        otpService.requestOtp(phone);
+        otpService.requestOtp(phone); // 1회
+        otpService.requestOtp(phone); // 2회 (허용)
 
-        // when & then - 1분 내 재요청 시도
+        // when & then - 3회째 요청 시 차단
         assertThatThrownBy(() -> otpService.requestOtp(phone))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.OTP_RATE_LIMIT_EXCEEDED);
