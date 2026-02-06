@@ -135,7 +135,7 @@ public class TerminalApprovalService {
                         .walletStampCardId(result.currentWalletStampCard().getId())
                         .type(StampEventType.ISSUED)
                         .delta(STAMP_DELTA)
-                        .reason("터미널 승인")
+                        .reason("현장 승인")
                         .occurredAt(LocalDateTime.now())
                         .issuanceRequestId(requestId)
                         .build();

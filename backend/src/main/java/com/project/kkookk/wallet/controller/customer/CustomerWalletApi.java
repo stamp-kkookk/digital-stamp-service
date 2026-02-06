@@ -27,8 +27,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "Customer Wallet", description = "고객 지갑 관련 API")
 public interface CustomerWalletApi {
 
+    @Operation(summary = "내 스탬프카드 목록 조회 (JWT 인증 필요)", description = "로그인된 고객의 보유 스탬프카드 목록을 조회합니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "조회 성공"),
+        @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/api/customer/wallet/my-stamp-cards")
+    ResponseEntity<WalletStampCardListResponse> getMyStampCards(
+            @AuthenticationPrincipal CustomerPrincipal principal,
+            @Parameter(description = "정렬 기준 (기본값: LAST_STAMPED)")
+                    @RequestParam(defaultValue = "LAST_STAMPED")
+                    StampCardSortType sortBy);
+
     @Operation(
-            summary = "고객 지갑 홈 - 보유 스탬프카드 목록 조회 (인증 불필요)",
+            summary = "고객 지갑 홈 - 보유 스탬프카드 목록 조회 (인증 불필요, Deprecated)",
             description = "전화번호와 이름으로 고객 지갑을 조회하고, 보유한 스탬프카드 목록을 반환합니다.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -56,22 +69,21 @@ public interface CustomerWalletApi {
             summary = "스탬프 적립 히스토리 조회 (StepUp 토큰 필수)",
             description =
                     """
-            특정 스탬프카드의 적립 이력을 페이징하여 조회합니다.
+            특정 매장의 스탬프 적립 이력을 페이징하여 조회합니다.
             OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
             """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 페이징 파라미터"),
         @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)"),
-        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요 또는 권한 없음"),
-        @ApiResponse(responseCode = "404", description = "WalletStampCard를 찾을 수 없음")
+        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요"),
+        @ApiResponse(responseCode = "404", description = "해당 매장의 스탬프카드를 찾을 수 없음")
     })
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/api/customer/wallet/stamp-cards/{walletStampCardId}/history")
+    @GetMapping("/api/customer/wallet/stores/{storeId}/stamp-history")
     ResponseEntity<StampEventHistoryResponse> getStampHistory(
             @AuthenticationPrincipal CustomerPrincipal principal,
-            @Parameter(description = "지갑 스탬프카드 ID", required = true) @PathVariable
-                    Long walletStampCardId,
+            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "페이지 번호 (0-based)") @RequestParam(defaultValue = "0") @Min(0)
                     int page,
             @Parameter(description = "페이지 크기 (1~100)")
@@ -84,19 +96,21 @@ public interface CustomerWalletApi {
             summary = "리워드 사용 히스토리 조회 (StepUp 토큰 필수)",
             description =
                     """
-            인증된 고객의 리워드 사용 이력을 페이징하여 조회합니다.
+            특정 매장의 리워드 사용 이력을 페이징하여 조회합니다.
             OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
             """)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공"),
         @ApiResponse(responseCode = "400", description = "잘못된 페이징 파라미터"),
         @ApiResponse(responseCode = "401", description = "인증 필요 (JWT 토큰 없음/만료)"),
-        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요")
+        @ApiResponse(responseCode = "403", description = "StepUp 인증 필요"),
+        @ApiResponse(responseCode = "404", description = "해당 매장의 스탬프카드를 찾을 수 없음")
     })
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/api/customer/wallet/redeem-history")
+    @GetMapping("/api/customer/wallet/stores/{storeId}/redeem-history")
     ResponseEntity<RedeemEventHistoryResponse> getRedeemHistory(
             @AuthenticationPrincipal CustomerPrincipal principal,
+            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "페이지 번호 (0-based)") @RequestParam(defaultValue = "0") @Min(0)
                     int page,
             @Parameter(description = "페이지 크기 (1~100)")

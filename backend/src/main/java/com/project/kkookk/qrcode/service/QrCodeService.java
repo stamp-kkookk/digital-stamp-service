@@ -24,7 +24,7 @@ public class QrCodeService {
     public String getQrCodeBase64(Long storeId, Long ownerId) {
         validateStoreOwner(storeId, ownerId);
 
-        String qrContent = qrBaseUrl + storeId;
+        String qrContent = qrBaseUrl + "/stores/" + storeId + "/customer";
         byte[] qrCodeImage =
                 qrCodeGenerator.generateQrCode(qrContent, QR_CODE_WIDTH, QR_CODE_HEIGHT);
 

@@ -1,5 +1,6 @@
 package com.project.kkookk.wallet.dto.response;
 
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.wallet.domain.WalletRewardStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -13,4 +14,6 @@ public record WalletRewardItem(
         @Schema(description = "리워드 상태") WalletRewardStatus status,
         @Schema(description = "발급일시") LocalDateTime issuedAt,
         @Schema(description = "만료일시") LocalDateTime expiresAt,
-        @Schema(description = "사용일시 (사용한 경우)") LocalDateTime redeemedAt) {}
+        @Schema(description = "사용일시 (사용한 경우)") LocalDateTime redeemedAt,
+        @Schema(description = "스탬프카드 디자인 타입") StampCardDesignType designType,
+        @Schema(description = "스탬프카드 디자인 JSON") String designJson) {}

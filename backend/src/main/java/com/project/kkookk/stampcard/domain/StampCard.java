@@ -47,7 +47,7 @@ public class StampCard extends BaseTimeEntity {
     @Column(name = "design_type", nullable = false, length = 20)
     private StampCardDesignType designType;
 
-    @Column(name = "design_json", columnDefinition = "TEXT")
+    @Column(name = "design_json", columnDefinition = "MEDIUMTEXT")
     private String designJson;
 
     protected StampCard() {}

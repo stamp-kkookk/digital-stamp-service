@@ -28,7 +28,7 @@ spring:
 app:
   storage:
     local-path: ${java.io.tmpdir}/kkookk-test-storage
-  qr-base-url: "http://localhost/test-qr/"
+  qr-base-url: "http://localhost:5176"
 
 logging:
   level:

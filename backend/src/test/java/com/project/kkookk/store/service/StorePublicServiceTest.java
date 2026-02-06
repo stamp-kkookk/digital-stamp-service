@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.project.kkookk.stampcard.domain.StampCardStatus;
-import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.dto.response.StorePublicInfoResponse;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreInactiveException;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
+import com.project.kkookk.wallet.domain.WalletStampCardStatus;
+import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ class StorePublicServiceTest {
 
     @Mock private StoreRepository storeRepository;
 
-    @Mock private StampCardRepository stampCardRepository;
+    @Mock private WalletStampCardRepository walletStampCardRepository;
 
     @Test
     @DisplayName("매장 공개 정보 조회 성공")
@@ -41,8 +41,10 @@ class StorePublicServiceTest {
         ReflectionTestUtils.setField(store, "id", storeId);
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
-        given(stampCardRepository.countByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
-                .willReturn(3);
+        given(
+                        walletStampCardRepository.countByStoreIdAndStatus(
+                                storeId, WalletStampCardStatus.ACTIVE))
+                .willReturn(150);
 
         // when
         StorePublicInfoResponse response = storePublicService.getStorePublicInfo(storeId);
@@ -51,10 +53,11 @@ class StorePublicServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.storeId()).isEqualTo(storeId);
         assertThat(response.storeName()).isEqualTo("꾹꾹 카페");
-        assertThat(response.activeStampCardCount()).isEqualTo(3);
+        assertThat(response.activeStampCardCount()).isEqualTo(150);
 
         verify(storeRepository).findById(storeId);
-        verify(stampCardRepository).countByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
+        verify(walletStampCardRepository)
+                .countByStoreIdAndStatus(storeId, WalletStampCardStatus.ACTIVE);
     }
 
     @Test
@@ -93,7 +96,7 @@ class StorePublicServiceTest {
     }
 
     @Test
-    @DisplayName("매장 공개 정보 조회 - 활성 스탬프카드 0개")
+    @DisplayName("매장 공개 정보 조회 - 발급된 스탬프카드 0개")
     void getStorePublicInfo_ZeroActiveCards() {
         // given
         Long storeId = 1L;
@@ -101,7 +104,9 @@ class StorePublicServiceTest {
         ReflectionTestUtils.setField(store, "id", storeId);
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
-        given(stampCardRepository.countByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
+        given(
+                        walletStampCardRepository.countByStoreIdAndStatus(
+                                storeId, WalletStampCardStatus.ACTIVE))
                 .willReturn(0);
 
         // when
@@ -112,6 +117,7 @@ class StorePublicServiceTest {
         assertThat(response.activeStampCardCount()).isEqualTo(0);
 
         verify(storeRepository).findById(storeId);
-        verify(stampCardRepository).countByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
+        verify(walletStampCardRepository)
+                .countByStoreIdAndStatus(storeId, WalletStampCardStatus.ACTIVE);
     }
 }

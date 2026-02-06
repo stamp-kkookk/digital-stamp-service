@@ -21,6 +21,7 @@ import com.project.kkookk.stamp.domain.StampEvent;
 import com.project.kkookk.stamp.domain.StampEventType;
 import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.domain.StoreStatus;
@@ -39,7 +40,6 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
-import com.project.kkookk.wallet.service.exception.WalletStampCardAccessDeniedException;
 import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,7 +80,8 @@ class CustomerWalletServiceTest {
     @DisplayName("지갑 생성 성공")
     void register_Success() {
         // given
-        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
 
         CustomerWallet savedWallet =
                 CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
@@ -120,7 +121,8 @@ class CustomerWalletServiceTest {
     @DisplayName("지갑 생성 실패 - 전화번호 중복")
     void register_Fail_PhoneDuplicated() {
         // given
-        WalletRegisterRequest request = new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이");
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(true);
 
@@ -140,7 +142,8 @@ class CustomerWalletServiceTest {
     @DisplayName("생성된 지갑의 기본 상태는 ACTIVE")
     void register_DefaultStatus_Active() {
         // given
-        WalletRegisterRequest request = new WalletRegisterRequest("010-9999-8888", "김철수", "철수");
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-9999-8888", "김철수", "철수", null);
 
         CustomerWallet savedWallet =
                 CustomerWallet.builder().phone("010-9999-8888").name("김철수").nickname("철수").build();
@@ -171,7 +174,8 @@ class CustomerWalletServiceTest {
     @DisplayName("JWT 토큰에 walletId와 phone이 포함됨")
     void register_JwtToken_ContainsWalletIdAndPhone() {
         // given
-        WalletRegisterRequest request = new WalletRegisterRequest("010-5555-6666", "이영희", "영희");
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-5555-6666", "이영희", "영희", null);
 
         CustomerWallet savedWallet =
                 CustomerWallet.builder().phone("010-5555-6666").name("이영희").nickname("영희").build();
@@ -194,6 +198,91 @@ class CustomerWalletServiceTest {
         // then
         assertThat(response.accessToken()).isEqualTo("token.with.walletId");
         verify(jwtUtil, times(1)).generateCustomerToken(99L);
+    }
+
+    @Test
+    @DisplayName("지갑 생성 성공 - storeId와 함께 생성 시 WalletStampCard 자동 발급")
+    void register_Success_WithStoreId_CreatesWalletStampCard() {
+        // given
+        Long storeId = 10L;
+        Long stampCardId = 100L;
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1111-2222", "박영수", "영수", storeId);
+
+        CustomerWallet savedWallet =
+                CustomerWallet.builder().phone("010-1111-2222").name("박영수").nickname("영수").build();
+        ReflectionTestUtils.setField(savedWallet, "id", 1L);
+
+        StampCard stampCard =
+                StampCard.builder().storeId(storeId).title("아메리카노 10잔").goalStampCount(10).build();
+        ReflectionTestUtils.setField(stampCard, "id", stampCardId);
+
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        ReflectionTestUtils.setField(store, "id", storeId);
+
+        WalletStampCard savedWalletStampCard =
+                WalletStampCard.builder()
+                        .customerWalletId(1L)
+                        .storeId(storeId)
+                        .stampCardId(stampCardId)
+                        .stampCount(0)
+                        .build();
+        ReflectionTestUtils.setField(savedWalletStampCard, "id", 50L);
+
+        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
+        given(
+                        stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                storeId, StampCardStatus.ACTIVE))
+                .willReturn(Optional.of(stampCard));
+        given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
+        given(walletStampCardRepository.save(any(WalletStampCard.class)))
+                .willReturn(savedWalletStampCard);
+        given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
+
+        // when
+        WalletRegisterResponse response = customerWalletService.register(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.stampCard()).isNotNull();
+        assertThat(response.stampCard().walletStampCardId()).isEqualTo(50L);
+        assertThat(response.stampCard().title()).isEqualTo("아메리카노 10잔");
+        assertThat(response.stampCard().storeName()).isEqualTo("꾹꾹 카페");
+        verify(stampCardRepository)
+                .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE);
+        verify(walletStampCardRepository).save(any(WalletStampCard.class));
+    }
+
+    @Test
+    @DisplayName("지갑 생성 성공 - storeId가 있지만 ACTIVE 스탬프카드 없음")
+    void register_Success_WithStoreId_NoActiveStampCard() {
+        // given
+        Long storeId = 10L;
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-3333-4444", "최민수", "민수", storeId);
+
+        CustomerWallet savedWallet =
+                CustomerWallet.builder().phone("010-3333-4444").name("최민수").nickname("민수").build();
+        ReflectionTestUtils.setField(savedWallet, "id", 1L);
+
+        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
+        given(
+                        stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                storeId, StampCardStatus.ACTIVE))
+                .willReturn(Optional.empty());
+        given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
+
+        // when
+        WalletRegisterResponse response = customerWalletService.register(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.stampCard()).isNull();
+        verify(stampCardRepository)
+                .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE);
+        verify(walletStampCardRepository, never()).save(any(WalletStampCard.class));
     }
 
     @Test
@@ -361,24 +450,26 @@ class CustomerWalletServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 적립 히스토리 조회 성공")
-    void getStampHistory_Success() {
+    @DisplayName("스탬프 적립 히스토리 조회 성공 (storeId 기준)")
+    void getStampHistoryByStore_Success() {
         // given
-        Long walletStampCardId = 1L;
+        Long storeId = 1L;
         Long walletId = 10L;
+        Long walletStampCardId = 1L;
         Pageable pageable = PageRequest.of(0, 20);
 
         WalletStampCard walletStampCard =
                 WalletStampCard.builder()
                         .customerWalletId(walletId)
-                        .storeId(1L)
+                        .storeId(storeId)
                         .stampCardId(100L)
                         .stampCount(5)
                         .build();
+        ReflectionTestUtils.setField(walletStampCard, "id", walletStampCardId);
 
         StampEvent event1 =
                 StampEvent.builder()
-                        .storeId(1L)
+                        .storeId(storeId)
                         .stampCardId(100L)
                         .walletStampCardId(walletStampCardId)
                         .type(StampEventType.ISSUED)
@@ -389,16 +480,14 @@ class CustomerWalletServiceTest {
 
         Page<StampEvent> eventPage = new PageImpl<>(List.of(event1), pageable, 1);
 
-        given(walletStampCardRepository.findByIdAndCustomerWalletId(walletStampCardId, walletId))
-                .willReturn(Optional.of(walletStampCard));
-        given(
-                        stampEventRepository.findByWalletStampCardIdOrderByOccurredAtDesc(
-                                walletStampCardId, pageable))
+        given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
+                .willReturn(true);
+        given(stampEventRepository.findByStoreIdAndWalletId(storeId, walletId, pageable))
                 .willReturn(eventPage);
 
         // when
         StampEventHistoryResponse response =
-                customerWalletService.getStampHistory(walletStampCardId, walletId, pageable);
+                customerWalletService.getStampHistoryByStore(storeId, walletId, pageable);
 
         // then
         assertThat(response).isNotNull();
@@ -407,63 +496,38 @@ class CustomerWalletServiceTest {
         assertThat(response.events().get(0).delta()).isEqualTo(2);
         assertThat(response.pageInfo().totalElements()).isEqualTo(1);
 
-        verify(walletStampCardRepository).findByIdAndCustomerWalletId(walletStampCardId, walletId);
-        verify(stampEventRepository)
-                .findByWalletStampCardIdOrderByOccurredAtDesc(walletStampCardId, pageable);
+        verify(walletStampCardRepository).existsByCustomerWalletIdAndStoreId(walletId, storeId);
+        verify(stampEventRepository).findByStoreIdAndWalletId(storeId, walletId, pageable);
     }
 
     @Test
-    @DisplayName("스탬프 적립 히스토리 조회 실패 - 다른 고객의 스탬프카드")
-    void getStampHistory_Fail_AccessDenied() {
+    @DisplayName("스탬프 적립 히스토리 조회 실패 - 해당 매장의 스탬프카드 없음")
+    void getStampHistoryByStore_Fail_NotFound() {
         // given
-        Long walletStampCardId = 1L;
+        Long storeId = 1L;
         Long walletId = 10L;
         Pageable pageable = PageRequest.of(0, 20);
 
-        given(walletStampCardRepository.findByIdAndCustomerWalletId(walletStampCardId, walletId))
-                .willReturn(Optional.empty());
-        given(walletStampCardRepository.existsById(walletStampCardId)).willReturn(true);
+        given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
+                .willReturn(false);
 
         // when & then
         assertThatThrownBy(
                         () ->
-                                customerWalletService.getStampHistory(
-                                        walletStampCardId, walletId, pageable))
-                .isInstanceOf(WalletStampCardAccessDeniedException.class)
-                .hasMessageContaining("다른 고객의 스탬프카드에 접근할 수 없습니다");
-
-        verify(walletStampCardRepository).findByIdAndCustomerWalletId(walletStampCardId, walletId);
-    }
-
-    @Test
-    @DisplayName("스탬프 적립 히스토리 조회 실패 - 스탬프카드 없음")
-    void getStampHistory_Fail_NotFound() {
-        // given
-        Long walletStampCardId = 1L;
-        Long walletId = 10L;
-        Pageable pageable = PageRequest.of(0, 20);
-
-        given(walletStampCardRepository.findByIdAndCustomerWalletId(walletStampCardId, walletId))
-                .willReturn(Optional.empty());
-        given(walletStampCardRepository.existsById(walletStampCardId)).willReturn(false);
-
-        // when & then
-        assertThatThrownBy(
-                        () ->
-                                customerWalletService.getStampHistory(
-                                        walletStampCardId, walletId, pageable))
+                                customerWalletService.getStampHistoryByStore(
+                                        storeId, walletId, pageable))
                 .isInstanceOf(WalletStampCardNotFoundException.class)
-                .hasMessageContaining("해당 지갑 스탬프카드를 찾을 수 없습니다");
+                .hasMessageContaining("해당 매장의 스탬프카드를 찾을 수 없습니다");
 
-        verify(walletStampCardRepository).findByIdAndCustomerWalletId(walletStampCardId, walletId);
+        verify(walletStampCardRepository).existsByCustomerWalletIdAndStoreId(walletId, storeId);
     }
 
     @Test
-    @DisplayName("리워드 사용 히스토리 조회 성공")
-    void getRedeemHistory_Success() {
+    @DisplayName("리워드 사용 히스토리 조회 성공 (storeId 기준)")
+    void getRedeemHistoryByStore_Success() {
         // given
-        Long walletId = 1L;
         Long storeId = 10L;
+        Long walletId = 1L;
         Pageable pageable = PageRequest.of(0, 20);
 
         RedeemEvent event1 =
@@ -481,13 +545,17 @@ class CustomerWalletServiceTest {
         Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
 
-        given(redeemEventRepository.findByWalletIdOrderByOccurredAtDesc(walletId, pageable))
+        given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
+                .willReturn(true);
+        given(
+                        redeemEventRepository.findByStoreIdAndWalletIdOrderByOccurredAtDesc(
+                                storeId, walletId, pageable))
                 .willReturn(eventPage);
-        given(storeRepository.findAllById(anyCollection())).willReturn(List.of(store));
+        given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
 
         // when
         RedeemEventHistoryResponse response =
-                customerWalletService.getRedeemHistory(walletId, pageable);
+                customerWalletService.getRedeemHistoryByStore(storeId, walletId, pageable);
 
         // then
         assertThat(response).isNotNull();
@@ -497,32 +565,31 @@ class CustomerWalletServiceTest {
         assertThat(response.events().get(0).store().storeName()).isEqualTo("꾹꾹 카페");
         assertThat(response.pageInfo().totalElements()).isEqualTo(1);
 
-        verify(redeemEventRepository).findByWalletIdOrderByOccurredAtDesc(walletId, pageable);
-        verify(storeRepository).findAllById(anyCollection());
+        verify(walletStampCardRepository).existsByCustomerWalletIdAndStoreId(walletId, storeId);
+        verify(redeemEventRepository)
+                .findByStoreIdAndWalletIdOrderByOccurredAtDesc(storeId, walletId, pageable);
+        verify(storeRepository).findById(storeId);
     }
 
     @Test
-    @DisplayName("리워드 사용 히스토리 조회 - 빈 목록")
-    void getRedeemHistory_EmptyList() {
+    @DisplayName("리워드 사용 히스토리 조회 실패 - 해당 매장의 스탬프카드 없음")
+    void getRedeemHistoryByStore_Fail_NotFound() {
         // given
+        Long storeId = 10L;
         Long walletId = 1L;
         Pageable pageable = PageRequest.of(0, 20);
 
-        Page<RedeemEvent> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
+                .willReturn(false);
 
-        given(redeemEventRepository.findByWalletIdOrderByOccurredAtDesc(walletId, pageable))
-                .willReturn(emptyPage);
-        given(storeRepository.findAllById(anyCollection())).willReturn(List.of());
+        // when & then
+        assertThatThrownBy(
+                        () ->
+                                customerWalletService.getRedeemHistoryByStore(
+                                        storeId, walletId, pageable))
+                .isInstanceOf(WalletStampCardNotFoundException.class)
+                .hasMessageContaining("해당 매장의 스탬프카드를 찾을 수 없습니다");
 
-        // when
-        RedeemEventHistoryResponse response =
-                customerWalletService.getRedeemHistory(walletId, pageable);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.events()).isEmpty();
-        assertThat(response.pageInfo().totalElements()).isEqualTo(0);
-
-        verify(redeemEventRepository).findByWalletIdOrderByOccurredAtDesc(walletId, pageable);
+        verify(walletStampCardRepository).existsByCustomerWalletIdAndStoreId(walletId, storeId);
     }
 }
