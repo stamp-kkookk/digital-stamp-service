@@ -36,7 +36,7 @@ class QrCodeServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(qrCodeService, "qrBaseUrl", "http://localhost:8080/c/s/");
+        ReflectionTestUtils.setField(qrCodeService, "qrBaseUrl", "http://localhost:5176");
     }
 
     @Test
@@ -58,7 +58,10 @@ class QrCodeServiceTest {
         // then
         assertThat(resultBase64).isEqualTo(expectedBase64);
         verify(qrCodeGenerator, times(1))
-                .generateQrCode(eq("http://localhost:8080/c/s/" + storeId), eq(300), eq(300));
+                .generateQrCode(
+                        eq("http://localhost:5176/stores/" + storeId + "/customer"),
+                        eq(300),
+                        eq(300));
     }
 
     @Test

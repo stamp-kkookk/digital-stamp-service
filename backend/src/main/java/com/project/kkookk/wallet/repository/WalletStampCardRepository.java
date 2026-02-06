@@ -41,6 +41,9 @@ public interface WalletStampCardRepository extends JpaRepository<WalletStampCard
     /** 매장별 고객 지갑 스탬프카드 조회 */
     Optional<WalletStampCard> findByCustomerWalletIdAndStoreId(Long customerWalletId, Long storeId);
 
+    /** 매장별 고객 지갑 스탬프카드 존재 여부 확인 */
+    boolean existsByCustomerWalletIdAndStoreId(Long customerWalletId, Long storeId);
+
     /** 매장별 고객 지갑 ACTIVE 스탬프카드 조회 */
     Optional<WalletStampCard> findByCustomerWalletIdAndStoreIdAndStatus(
             Long customerWalletId, Long storeId, WalletStampCardStatus status);
@@ -64,4 +67,7 @@ public interface WalletStampCardRepository extends JpaRepository<WalletStampCard
             @Param("customerWalletId") Long customerWalletId,
             @Param("storeId") Long storeId,
             @Param("status") WalletStampCardStatus status);
+
+    /** 매장별 발급된 WalletStampCard 개수 조회 */
+    int countByStoreIdAndStatus(Long storeId, WalletStampCardStatus status);
 }

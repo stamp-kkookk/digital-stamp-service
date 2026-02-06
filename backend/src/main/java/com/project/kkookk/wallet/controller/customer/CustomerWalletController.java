@@ -31,6 +31,17 @@ public class CustomerWalletController implements CustomerWalletApi {
     private final CustomerWalletService customerWalletService;
 
     @Override
+    public ResponseEntity<WalletStampCardListResponse> getMyStampCards(
+            CustomerPrincipal principal, StampCardSortType sortBy) {
+
+        Long walletId = principal.getWalletId();
+        WalletStampCardListResponse response =
+                customerWalletService.getMyStampCards(walletId, sortBy);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<WalletStampCardListResponse> getStampCardsByPhoneAndName(
             @NotBlank(message = "전화번호는 필수입니다")
                     @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다")
@@ -49,7 +60,7 @@ public class CustomerWalletController implements CustomerWalletApi {
     @Override
     public ResponseEntity<StampEventHistoryResponse> getStampHistory(
             CustomerPrincipal principal,
-            Long walletStampCardId,
+            Long storeId,
             @Min(0) int page,
             @Min(1) @Max(100) int size) {
 
@@ -62,14 +73,17 @@ public class CustomerWalletController implements CustomerWalletApi {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("occurredAt").descending());
         StampEventHistoryResponse response =
-                customerWalletService.getStampHistory(walletStampCardId, walletId, pageable);
+                customerWalletService.getStampHistoryByStore(storeId, walletId, pageable);
 
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<RedeemEventHistoryResponse> getRedeemHistory(
-            CustomerPrincipal principal, @Min(0) int page, @Min(1) @Max(100) int size) {
+            CustomerPrincipal principal,
+            Long storeId,
+            @Min(0) int page,
+            @Min(1) @Max(100) int size) {
 
         // StepUp 인증 필수
         if (!principal.isStepUp()) {
@@ -80,7 +94,7 @@ public class CustomerWalletController implements CustomerWalletApi {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("occurredAt").descending());
         RedeemEventHistoryResponse response =
-                customerWalletService.getRedeemHistory(walletId, pageable);
+                customerWalletService.getRedeemHistoryByStore(storeId, walletId, pageable);
 
         return ResponseEntity.ok(response);
     }

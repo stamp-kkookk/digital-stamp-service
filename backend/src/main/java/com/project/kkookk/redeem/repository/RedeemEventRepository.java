@@ -13,6 +13,10 @@ public interface RedeemEventRepository extends JpaRepository<RedeemEvent, Long> 
 
     Page<RedeemEvent> findByWalletIdOrderByOccurredAtDesc(Long walletId, Pageable pageable);
 
+    /** 고객의 특정 매장 리워드 사용 이벤트 조회 */
+    Page<RedeemEvent> findByStoreIdAndWalletIdOrderByOccurredAtDesc(
+            Long storeId, Long walletId, Pageable pageable);
+
     @Query(
             """
             SELECT COUNT(e) FROM RedeemEvent e

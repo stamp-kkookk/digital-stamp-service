@@ -51,4 +51,35 @@ public interface StampEventRepository extends JpaRepository<StampEvent, Long> {
             @Param("storeId") Long storeId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    @Query(
+            """
+            SELECT e.id as id,
+                   e.walletStampCardId as walletStampCardId,
+                   w.name as customerName,
+                   w.phone as customerPhone,
+                   e.type as type,
+                   e.delta as delta,
+                   e.reason as reason,
+                   e.occurredAt as occurredAt
+            FROM StampEvent e
+            JOIN WalletStampCard wsc ON e.walletStampCardId = wsc.id
+            JOIN CustomerWallet w ON wsc.customerWalletId = w.id
+            WHERE e.storeId = :storeId
+            ORDER BY e.occurredAt DESC
+            """)
+    Page<StampEventProjection> findByStoreIdWithCustomerInfo(
+            @Param("storeId") Long storeId, Pageable pageable);
+
+    /** 고객의 특정 매장 전체 스탬프 이벤트 조회 (ACTIVE + COMPLETED 카드 모두 포함) */
+    @Query(
+            """
+            SELECT e FROM StampEvent e
+            JOIN WalletStampCard wsc ON e.walletStampCardId = wsc.id
+            WHERE e.storeId = :storeId
+            AND wsc.customerWalletId = :walletId
+            ORDER BY e.occurredAt DESC
+            """)
+    Page<StampEvent> findByStoreIdAndWalletId(
+            @Param("storeId") Long storeId, @Param("walletId") Long walletId, Pageable pageable);
 }

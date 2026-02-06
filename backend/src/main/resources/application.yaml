@@ -29,7 +29,7 @@ logging:
 # Custom App Configuration
 # ===============================
 app:
-  qr-base-url: "https://kkookk.com/c/s/"
+  qr-base-url: "http://localhost:5176"
   storage:
     local-path: "storage" # 로컬 파일 저장소 경로
 

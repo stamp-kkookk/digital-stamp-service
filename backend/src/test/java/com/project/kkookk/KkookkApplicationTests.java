@@ -8,7 +8,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(
         properties = {
             "app.storage.local-path=build/test-storage",
-            "app.qr-base-url=http://localhost:8080/c/s/"
+            "app.qr-base-url=http://localhost:5176"
         })
 class KkookkApplicationTests {
 
