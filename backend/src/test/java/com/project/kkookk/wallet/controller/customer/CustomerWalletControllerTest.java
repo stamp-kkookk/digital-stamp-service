@@ -328,7 +328,8 @@ class CustomerWalletControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/customer/wallet/stores/{storeId}/redeem-history - 유효성 검증 실패 (size > 100)")
+    @DisplayName(
+            "GET /api/customer/wallet/stores/{storeId}/redeem-history - 유효성 검증 실패 (size > 100)")
     @WithMockCustomer(stepUp = true)
     void getRedeemHistory_Fail_InvalidSizeParameter() throws Exception {
         // given

@@ -81,7 +81,5 @@ public interface StampEventRepository extends JpaRepository<StampEvent, Long> {
             ORDER BY e.occurredAt DESC
             """)
     Page<StampEvent> findByStoreIdAndWalletId(
-            @Param("storeId") Long storeId,
-            @Param("walletId") Long walletId,
-            Pageable pageable);
+            @Param("storeId") Long storeId, @Param("walletId") Long walletId, Pageable pageable);
 }

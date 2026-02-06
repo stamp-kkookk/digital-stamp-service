@@ -197,14 +197,24 @@ public class CustomerWalletService {
         // 현재 매장 카드를 첫 번째로 정렬
         walletCards.sort(
                 (a, b) -> {
-                    boolean aIsCurrentStore = a.getStoreId().equals(currentStoreId);
-                    boolean bIsCurrentStore = b.getStoreId().equals(currentStoreId);
-                    if (aIsCurrentStore && !bIsCurrentStore) return -1;
-                    if (!aIsCurrentStore && bIsCurrentStore) return 1;
+                    boolean firstIsCurrentStore = a.getStoreId().equals(currentStoreId);
+                    boolean secondIsCurrentStore = b.getStoreId().equals(currentStoreId);
+                    if (firstIsCurrentStore && !secondIsCurrentStore) {
+                        return -1;
+                    }
+                    if (!firstIsCurrentStore && secondIsCurrentStore) {
+                        return 1;
+                    }
                     // 같은 경우 최근 적립 순
-                    if (a.getLastStampedAt() == null && b.getLastStampedAt() == null) return 0;
-                    if (a.getLastStampedAt() == null) return 1;
-                    if (b.getLastStampedAt() == null) return -1;
+                    if (a.getLastStampedAt() == null && b.getLastStampedAt() == null) {
+                        return 0;
+                    }
+                    if (a.getLastStampedAt() == null) {
+                        return 1;
+                    }
+                    if (b.getLastStampedAt() == null) {
+                        return -1;
+                    }
                     return b.getLastStampedAt().compareTo(a.getLastStampedAt());
                 });
 
@@ -245,7 +255,8 @@ public class CustomerWalletService {
                             WalletStampCard saved = walletStampCardRepository.save(walletStampCard);
 
                             log.info(
-                                    "[WalletStampCard Created] walletId={}, storeId={}, stampCardId={}, walletStampCardId={}",
+                                    "[WalletStampCard Created] walletId={}, storeId={}, "
+                                            + "stampCardId={}, walletStampCardId={}",
                                     walletId,
                                     storeId,
                                     stampCard.getId(),
