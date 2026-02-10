@@ -15,9 +15,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,31 +33,6 @@ public interface CustomerWalletApi {
     @GetMapping("/api/customer/wallet/my-stamp-cards")
     ResponseEntity<WalletStampCardListResponse> getMyStampCards(
             @AuthenticationPrincipal CustomerPrincipal principal,
-            @Parameter(description = "정렬 기준 (기본값: LAST_STAMPED)")
-                    @RequestParam(defaultValue = "LAST_STAMPED")
-                    StampCardSortType sortBy);
-
-    @Operation(
-            summary = "고객 지갑 홈 - 보유 스탬프카드 목록 조회 (인증 불필요, Deprecated)",
-            description = "전화번호와 이름으로 고객 지갑을 조회하고, 보유한 스탬프카드 목록을 반환합니다.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "조회 성공"),
-        @ApiResponse(responseCode = "400", description = "유효성 검증 실패 (잘못된 전화번호 형식, 이름 등)"),
-        @ApiResponse(responseCode = "404", description = "해당 전화번호와 이름으로 지갑을 찾을 수 없음"),
-        @ApiResponse(responseCode = "403", description = "지갑이 차단됨 (BLOCKED 상태)")
-    })
-    @GetMapping("/api/customer/wallet/stamp-cards")
-    ResponseEntity<WalletStampCardListResponse> getStampCardsByPhoneAndName(
-            @Parameter(description = "고객 전화번호 (형식: 010-1234-5678)", required = true)
-                    @RequestParam
-                    @NotBlank(message = "전화번호는 필수입니다")
-                    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다")
-                    String phone,
-            @Parameter(description = "고객 이름", required = true)
-                    @RequestParam
-                    @NotBlank(message = "이름은 필수입니다")
-                    @Size(min = 2, max = 50, message = "이름은 2~50자 이내여야 합니다")
-                    String name,
             @Parameter(description = "정렬 기준 (기본값: LAST_STAMPED)")
                     @RequestParam(defaultValue = "LAST_STAMPED")
                     StampCardSortType sortBy);
