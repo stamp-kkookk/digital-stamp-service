@@ -21,6 +21,18 @@ $ARGUMENTS
 
 ---
 
+## 참조 문서 (작업 전 확인)
+
+- `docs/api-reference.md` - API 엔드포인트 확인
+- `docs/utility-registry.md` (Frontend 섹션) - 기존 코드 중복 방지
+- `docs/feature-specs/{feature}.md` - 해당 피처 명세
+- `frontend/src/lib/api/endpoints.ts` - API_ENDPOINTS & QUERY_KEYS
+- `frontend/src/types/api.ts` - API DTO 타입
+- `.claude/skills/frontend-core/SKILL.md` - Page/Container/View 패턴
+- `.claude/skills/design-system/SKILL.md` - 페이지 타입별 가이드 (Owner/Customer/Terminal)
+
+---
+
 ## Output 요구사항
 
 ### 1. 페이지 컴포넌트 구조
@@ -30,70 +42,49 @@ $ARGUMENTS
 └── {PageName}View.tsx (프레젠테이션)
 ```
 
-### 2. Loading/Empty/Error 상태 처리
+### 2. Loading / Empty / Error 상태 처리
 - **Loading**: 스켈레톤 UI 또는 스피너
 - **Empty**: 데이터 없을 때 안내 메시지 + CTA
 - **Error**: 에러 메시지 + 재시도 버튼
 
 ### 3. 데이터 fetching 로직
-- TanStack Query `useQuery` 훅 사용
-- Query key 네이밍 규칙 준수
-- Stale time / Cache time 설정 (필요시)
+- TanStack Query `useQuery` 사용
+- QUERY_KEYS 기준 캐시 키 설정
+- staleTime / refetchInterval 설정 (필요시)
 
-### 4. 구현 코드
-- TypeScript 타입 정의
-- 컴포넌트 구현
-- API 호출 함수
+### 4. 라우팅 설정 등록
+- React Router 설정에 페이지 + 경로 등록
+- Route Grouping: `/c/*` (customer), `/o/*` (owner), `/t/*` (terminal)
 
----
-
-## 라우트 그룹 규칙
-
-| Prefix | 용도 | Layout |
-|--------|------|--------|
-| `/c/*` | Customer (고객) | Mobile-first |
-| `/o/*` | Owner (점주 백오피스) | Desktop-first |
-| `/t/*` | Terminal (매장 단말) | Always-on |
-
----
-
-## 사용 예시
-
-```
-/fe-page StampCardListPage
-
-라우트 경로: /o/stores/:storeId/stamp-cards
-
-UI 목 디자인: ./mocks/stampcard-list.png
-
-사용할 API:
-- GET /api/owner/stores/{storeId}/stamp-cards
-- DELETE /api/owner/stamp-cards/{stampCardId}
-```
+### 5. 페이지 타입별 레이아웃
+- **Customer**: 모바일 퍼스트, 하단 고정 CTA
+- **Owner**: 데스크톱 퍼스트, 2-3 컬럼 그리드
+- **Terminal**: 센터 정렬, 큰 요소, 승인/거절 병렬
 
 ---
 
 ## 생성되는 파일 구조
 
 ```
-src/features/stampcard/
+src/features/{feature}/
 ├── pages/
-│   └── StampCardListPage.tsx
+│   └── {PageName}Page.tsx
 ├── components/
-│   ├── StampCardListContainer.tsx
-│   └── StampCardListView.tsx
+│   ├── {PageName}Container.tsx
+│   └── {PageName}View.tsx
 ├── hooks/
-│   └── useStampCards.ts
+│   └── use{DataName}.ts
 └── api/
-    └── stampCardApi.ts
+    └── {feature}Api.ts
 ```
 
 ---
 
 ## 체크리스트
 
-- [ ] Loading 상태 UI 구현
-- [ ] Empty 상태 UI 구현
-- [ ] Error 상태 + 재시도 CTA 구현
-- [ ] 키보드 네비게이션 가능
-- [ ] 모바일/데스크톱 반응형 확인
+- [ ] Loading / Empty / Error 상태 존재
+- [ ] 키보드 네비게이션 동작
+- [ ] 페이지 타입(Customer/Owner/Terminal)에 맞는 레이아웃
+- [ ] 불필요한 re-render / infinite loop 없음
+- [ ] API 에러 핸들링 존재
+- [ ] `docs/utility-registry.md`에 등록된 기존 코드와 중복 없음

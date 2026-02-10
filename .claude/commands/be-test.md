@@ -5,6 +5,12 @@
 
 ---
 
+중요: Spring Boot 3.4+ 최신 규격 준수
+- **Mock 객체 선언 시 반드시 `@MockitoBean`을 사용합니다.** (기존 `@MockBean` 사용 금지)
+- **Spy 객체 선언 시 반드시 `@MockitoSpyBean`을 사용합니다.** (기존 `@SpyBean` 사용 금지)
+
+---
+
 ## Input 필수 항목
 
 ### 1. 테스트 대상
@@ -28,7 +34,7 @@ class StampCardControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private StampCardService stampCardService;
 
     @Test

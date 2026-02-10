@@ -22,6 +22,14 @@ description: Write and review backend tests with JUnit5, MockMvc, and Spring Boo
 
 ---
 
+## Mandatory Rules
+
+- **Mocking Annotation:** Do NOT use `@MockBean`. You MUST use **`@MockitoBean`** when replacing a bean in the Spring Test Context.
+- **Spying Annotation:** Do NOT use `@SpyBean`. Use **`@MockitoSpyBean`** instead.
+- **Best Practices:** Do not recommend or include `@MockBean` in any test examples, guides, or code reviews within this project.
+
+---
+
 ## Minimum Requirements
 
 Each endpoint requires:

@@ -2,26 +2,23 @@
 -- KKOOKK Database Initialization Script
 -- ============================================
 -- This script runs automatically when the MySQL container is first created.
--- It grants necessary permissions to the application user.
 
--- Grant all privileges on kkookkdb to the application user
--- Note: MYSQL_USER is automatically created by MySQL Docker image
--- with access to MYSQL_DATABASE, but we ensure explicit grants here.
+-- ============================================
+-- User & Permissions
+-- ============================================
+-- Create user if not exists
+CREATE USER IF NOT EXISTS 'kkookkuser'@'localhost' IDENTIFIED BY 'kkookkpass';
+CREATE USER IF NOT EXISTS 'kkookkuser'@'%' IDENTIFIED BY 'kkookkpass';
 
-GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'%';
+-- Grant all privileges on kkookkdb database
 GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'localhost';
+GRANT ALL PRIVILEGES ON kkookkdb.* TO 'kkookkuser'@'%';
 
+-- Flush privileges to apply changes
 FLUSH PRIVILEGES;
 
 -- ============================================
 -- Schema Definition
 -- ============================================
--- Add your domain table definitions below.
--- Example:
---
--- CREATE TABLE IF NOT EXISTS example_table (
---     id BIGINT AUTO_INCREMENT PRIMARY KEY,
---     name VARCHAR(255) NOT NULL,
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- StampCard Table

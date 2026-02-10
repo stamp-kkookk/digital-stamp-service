@@ -11,7 +11,7 @@ description: Design and implement backend APIs, services, JPA entities, and secu
 - Designing DTOs, entities, or database schema
 - Implementing service layer business logic
 - Adding security (OTP, rate limiting, audit logging)
-- Working with files under `server/`
+- Working with files under `backend/`
 
 ---
 
@@ -65,46 +65,60 @@ Log issuance/redeem/migration events with:
 ### Package Strategy (Feature-based)
 
 ```
-com.yourteam.kkoookk
-  global/
+com.project.kkookk
+  global/              # Cross-cutting concerns
     config/
-    security/
+    dto/
+    entity/
     exception/
-    response/
+    security/
     util/
-  controller/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  service/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  repository/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
-  domain/
-    owner/
-    store/
-    stampcard/
-    wallet/
-    issuance/
-    redeem/
-    migration/
+  owner/               # 사장님 관리
+    controller/
+    domain/
+    repository/
+    service/
+  store/               # 매장 관리
+    controller/
+    domain/
+    dto/
+    repository/
+    service/
+  stampcard/           # 스탬프 카드 관리
+    controller/
+    domain/
+    repository/
+    service/
+  wallet/              # 고객 지갑
+    controller/
+    domain/
+    dto/
+    repository/
+    service/
+  issuance/            # 적립 프로세스
+    controller/
+    domain/
+    repository/
+    service/
+  redeem/              # 사용 프로세스 (domain layer only)
+    domain/
+    repository/
+  migration/           # 종이 스탬프 마이그레이션 (domain layer only)
+    domain/
+  qrcode/              # QR 코드 생성/관리 (no domain/repository)
+    controller/
+    exception/
+    service/
+  otp/                 # OTP 인증 (no domain/repository)
+    controller/
+    dto/
+    service/
+  stamp/               # 스탬프 엔티티 (domain layer only)
+    domain/
+    repository/
 ```
+
+**Note:** Not all packages have complete layers. Some features only contain domain models or service logic without full controller/service/repository layers.
 
 ### Layer Responsibilities
 - **Controller:** HTTP + DTO mapping + validation

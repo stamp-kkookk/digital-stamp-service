@@ -1,74 +1,27 @@
-# Claude Guide (Client)
+# Frontend Guide
 
-## 1) Stack
+Stack: React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query, React Hook Form + Zod
 
-- React + TypeScript (Vite)
-- Tailwind CSS
-- React Router
-- TanStack Query (server state)
-- Axios (HTTP client)
-- React Hook Form + Zod (forms & validation)
-- Vitest + React Testing Library (unit tests)
-
-> Rule files live in `.claude/rules/frontend/*`.
-
-## 2) Product contexts (KKOOKK)
-
-Client UI targets 3 modes:
-
-1. **Customer**: Wallet → stamp progress → request issuance (polling) → redeem (OTP + confirm + TTL)
-2. **Owner Backoffice**: manage stores, stamp cards, rules, logs, migration requests
-3. **Store Terminal**: issuance approval list (polling) + redeem verification support
-
-## 3) Do / Don't
-
-✅ Do
-
-- Implement **loading / empty / error** states for every page.
-- Keep components small: `Page` → `Container` → `Presentational` split.
-- Use accessible markup (labels, aria attributes, focus rings).
-- Prefer Tailwind utilities; extract repeated patterns into small components.
-
-❌ Don't
-
-- Don't introduce new libraries without explaining why.
-- Don't build a global state store unless required.
-- Don't do complex animation unless requested.
-
-## 4) Folder structure (recommended)
-
-```
-frontend/src/
-  app/                # app entry / router
-  pages/              # route pages
-  features/           # feature modules (wallet, issuance, redeem, ...)
-  components/         # reusable UI components
-  lib/                # api client, utils
-  hooks/
-  types/
-```
-
-## 5) API integration rules
-
-- All API calls go through `src/lib/api/*`.
-- Use TanStack Query for server data.
-- Prefer typed DTOs in `src/types/*`.
-
-## 6) Local commands
-
+## Commands
 ```bash
-pnpm i
-pnpm dev
-pnpm test
-pnpm lint
+pnpm install                   # 의존성 설치
+pnpm dev                       # 개발 서버 (port 5173, /api -> :8080 프록시)
+pnpm build                     # 프로덕션 빌드
+pnpm lint                      # 린트 검사
 ```
 
-## 7) Prompting guide for Claude
+## Architecture
+3 사용자 모드: Customer (`/customer/*`), Owner (`/owner/*`), Terminal (`/terminal/*`)
+패턴: Page -> Container (데이터) -> View (프레젠테이션)
+피처: `src/features/{domain}/`, 공통 UI: `src/components/`
 
-When asking for a page or component, always provide:
+## Must-Know Patterns
+- API 클라이언트: `src/lib/api/client.ts` (getRaw, postRaw, putRaw, patchRaw, delRaw)
+- 엔드포인트: `src/lib/api/endpoints.ts` (API_ENDPOINTS + QUERY_KEYS)
+- 토큰 관리: `src/lib/api/tokenManager.ts` (auth + stepUp 토큰)
+- 클래스 병합: `cn()` from `src/lib/utils/cn.ts`
+- 포맷팅: `src/lib/utils/format.ts` (formatDate, formatTime 등)
 
-- purpose (what user should do)
-- data flow (fetch/mutate, success/failure)
-- states (loading/empty/error)
-- constraints (mobile-first, a11y)
-- expected files (page + components split)
+## Before Coding
+`docs/api-reference.md`와 `docs/utility-registry.md`를 읽고 기존 코드 중복 방지.
+Skills: `.claude/skills/frontend-core/`, `.claude/skills/design-system/`
