@@ -29,7 +29,7 @@ logging:
 # Custom App Configuration
 # ===============================
 app:
-  qr-base-url: "http://localhost:5176"
+  qr-base-url: "https://stamp-kkookk.vercel.app"
   storage:
     local-path: "storage" # 로컬 파일 저장소 경로
 

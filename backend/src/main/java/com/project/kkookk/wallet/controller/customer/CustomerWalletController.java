@@ -12,9 +12,6 @@ import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
 import com.project.kkookk.wallet.service.CustomerWalletService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,22 +34,6 @@ public class CustomerWalletController implements CustomerWalletApi {
         Long walletId = principal.getWalletId();
         WalletStampCardListResponse response =
                 customerWalletService.getMyStampCards(walletId, sortBy);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Override
-    public ResponseEntity<WalletStampCardListResponse> getStampCardsByPhoneAndName(
-            @NotBlank(message = "전화번호는 필수입니다")
-                    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다")
-                    String phone,
-            @NotBlank(message = "이름은 필수입니다")
-                    @Size(min = 2, max = 50, message = "이름은 2~50자 이내여야 합니다")
-                    String name,
-            StampCardSortType sortBy) {
-
-        WalletStampCardListResponse response =
-                customerWalletService.getStampCardsByPhoneAndName(phone, name, sortBy);
 
         return ResponseEntity.ok(response);
     }

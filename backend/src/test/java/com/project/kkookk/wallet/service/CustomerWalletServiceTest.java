@@ -3,7 +3,6 @@ package com.project.kkookk.wallet.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -28,18 +27,13 @@ import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.CustomerWalletStatus;
-import com.project.kkookk.wallet.domain.StampCardSortType;
 import com.project.kkookk.wallet.domain.WalletStampCard;
-import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.StampEventHistoryResponse;
-import com.project.kkookk.wallet.dto.response.WalletStampCardListResponse;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
-import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
-import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -283,170 +277,6 @@ class CustomerWalletServiceTest {
         verify(stampCardRepository)
                 .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(storeId, StampCardStatus.ACTIVE);
         verify(walletStampCardRepository, never()).save(any(WalletStampCard.class));
-    }
-
-    @Test
-    @DisplayName("전화번호와 이름으로 지갑 홈 조회 성공")
-    void getStampCardsByPhoneAndName_Success() {
-        // given
-        String phone = "010-1234-5678";
-        String name = "홍길동";
-        Long walletId = 1L;
-        Long storeId = 10L;
-        Long stampCardId = 100L;
-
-        CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone(phone)
-                        .name(name)
-                        .nickname("길동이")
-                        .status(CustomerWalletStatus.ACTIVE)
-                        .build();
-        ReflectionTestUtils.setField(wallet, "id", walletId);
-
-        WalletStampCard walletStampCard =
-                WalletStampCard.builder()
-                        .customerWalletId(walletId)
-                        .storeId(storeId)
-                        .stampCardId(stampCardId)
-                        .stampCount(7)
-                        .build();
-        ReflectionTestUtils.setField(walletStampCard, "id", 1L);
-        ReflectionTestUtils.setField(walletStampCard, "createdAt", LocalDateTime.now());
-
-        StampCard stampCard =
-                StampCard.builder()
-                        .storeId(storeId)
-                        .title("아메리카노 10잔 쿠폰")
-                        .goalStampCount(10)
-                        .requiredStamps(10)
-                        .rewardName("아메리카노 1잔")
-                        .rewardQuantity(1)
-                        .expireDays(30)
-                        .build();
-        ReflectionTestUtils.setField(stampCard, "id", stampCardId);
-
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
-        ReflectionTestUtils.setField(store, "id", storeId);
-
-        given(customerWalletRepository.findByPhoneAndName(phone, name))
-                .willReturn(Optional.of(wallet));
-        given(
-                        walletStampCardRepository
-                                .findByCustomerWalletIdAndStatusOrderByLastStampedAtDesc(
-                                        walletId, WalletStampCardStatus.ACTIVE))
-                .willReturn(List.of(walletStampCard));
-        given(stampCardRepository.findAllById(anyCollection())).willReturn(List.of(stampCard));
-        given(storeRepository.findAllById(anyCollection())).willReturn(List.of(store));
-
-        // when
-        WalletStampCardListResponse response =
-                customerWalletService.getStampCardsByPhoneAndName(
-                        phone, name, StampCardSortType.LAST_STAMPED);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.customerName()).isEqualTo(name);
-        assertThat(response.stampCards()).hasSize(1);
-        assertThat(response.stampCards().get(0).title()).isEqualTo("아메리카노 10잔 쿠폰");
-        assertThat(response.stampCards().get(0).currentStampCount()).isEqualTo(7);
-        assertThat(response.stampCards().get(0).goalStampCount()).isEqualTo(10);
-        assertThat(response.stampCards().get(0).progressPercentage()).isEqualTo(70);
-
-        verify(customerWalletRepository).findByPhoneAndName(phone, name);
-        verify(walletStampCardRepository)
-                .findByCustomerWalletIdAndStatusOrderByLastStampedAtDesc(
-                        walletId, WalletStampCardStatus.ACTIVE);
-    }
-
-    @Test
-    @DisplayName("전화번호와 이름으로 지갑 조회 실패 - 지갑 없음")
-    void getStampCardsByPhoneAndName_Fail_WalletNotFound() {
-        // given
-        String phone = "010-1234-5678";
-        String name = "홍길동";
-
-        given(customerWalletRepository.findByPhoneAndName(phone, name))
-                .willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(
-                        () ->
-                                customerWalletService.getStampCardsByPhoneAndName(
-                                        phone, name, StampCardSortType.LAST_STAMPED))
-                .isInstanceOf(CustomerWalletNotFoundException.class)
-                .hasMessageContaining("해당 전화번호와 이름으로 지갑을 찾을 수 없습니다");
-
-        verify(customerWalletRepository).findByPhoneAndName(phone, name);
-    }
-
-    @Test
-    @DisplayName("전화번호와 이름으로 지갑 조회 실패 - BLOCKED 상태")
-    void getStampCardsByPhoneAndName_Fail_WalletBlocked() {
-        // given
-        String phone = "010-1234-5678";
-        String name = "홍길동";
-
-        CustomerWallet blockedWallet =
-                CustomerWallet.builder()
-                        .phone(phone)
-                        .name(name)
-                        .nickname("길동이")
-                        .status(CustomerWalletStatus.BLOCKED)
-                        .build();
-
-        given(customerWalletRepository.findByPhoneAndName(phone, name))
-                .willReturn(Optional.of(blockedWallet));
-
-        // when & then
-        assertThatThrownBy(
-                        () ->
-                                customerWalletService.getStampCardsByPhoneAndName(
-                                        phone, name, StampCardSortType.LAST_STAMPED))
-                .isInstanceOf(CustomerWalletBlockedException.class)
-                .hasMessageContaining("차단된 지갑입니다");
-
-        verify(customerWalletRepository).findByPhoneAndName(phone, name);
-    }
-
-    @Test
-    @DisplayName("생성순 정렬로 지갑 홈 조회 성공")
-    void getStampCardsByPhoneAndName_Success_SortByCreated() {
-        // given
-        String phone = "010-1234-5678";
-        String name = "홍길동";
-        Long walletId = 1L;
-
-        CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone(phone)
-                        .name(name)
-                        .nickname("길동이")
-                        .status(CustomerWalletStatus.ACTIVE)
-                        .build();
-
-        ReflectionTestUtils.setField(wallet, "id", walletId);
-
-        given(customerWalletRepository.findByPhoneAndName(phone, name))
-                .willReturn(Optional.of(wallet));
-        given(
-                        walletStampCardRepository
-                                .findByCustomerWalletIdAndStatusOrderByCreatedAtDesc(
-                                        walletId, WalletStampCardStatus.ACTIVE))
-                .willReturn(List.of());
-        given(stampCardRepository.findAllById(anyCollection())).willReturn(List.of());
-        given(storeRepository.findAllById(anyCollection())).willReturn(List.of());
-
-        // when
-        WalletStampCardListResponse response =
-                customerWalletService.getStampCardsByPhoneAndName(
-                        phone, name, StampCardSortType.CREATED);
-
-        // then
-        assertThat(response).isNotNull();
-        verify(walletStampCardRepository)
-                .findByCustomerWalletIdAndStatusOrderByCreatedAtDesc(
-                        walletId, WalletStampCardStatus.ACTIVE);
     }
 
     @Test

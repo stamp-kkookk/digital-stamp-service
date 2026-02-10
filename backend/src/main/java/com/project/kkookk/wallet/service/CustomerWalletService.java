@@ -291,27 +291,6 @@ public class CustomerWalletService {
         return buildStampCardListResponse(wallet, sortType);
     }
 
-    public WalletStampCardListResponse getStampCardsByPhoneAndName(
-            String phone, String name, StampCardSortType sortType) {
-
-        // Step 1: 전화번호와 이름으로 CustomerWallet 조회
-        CustomerWallet wallet =
-                customerWalletRepository
-                        .findByPhoneAndName(phone, name)
-                        .orElseThrow(
-                                () ->
-                                        new CustomerWalletNotFoundException(
-                                                "해당 전화번호와 이름으로 지갑을 찾을 수 없습니다"));
-
-        // Step 2: BLOCKED 상태 체크
-        if (wallet.isBlocked()) {
-            throw new CustomerWalletBlockedException("차단된 지갑입니다");
-        }
-
-        // Step 3: 스탬프카드 목록 조회 및 Response 생성
-        return buildStampCardListResponse(wallet, sortType);
-    }
-
     private WalletStampCardListResponse buildStampCardListResponse(
             CustomerWallet wallet, StampCardSortType sortType) {
 
