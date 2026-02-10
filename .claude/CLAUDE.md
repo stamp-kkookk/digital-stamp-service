@@ -9,6 +9,11 @@ POS 미연동. 승인 기반: Customer 요청 -> Terminal 승인.
 - frontend/ : React 19, TypeScript, Vite, Tailwind CSS 4 (port 5173)
 - docs/ : PRD, API 레퍼런스, 아키텍처, 피처 명세
 
+## 컨텍스트 로딩 (권장)
+코드 작업 전 컨텍스트 로더 실행을 권장한다.
+사용자가 컨텍스트 로더 없이 작업을 요청하면, 어떤 컨텍스트를 로드할지 질문한다:
+- /work-on-backend, /work-on-frontend, /work-on-fullstack, 또는 건너뛰기
+
 ## AI Workflow (필수)
 1. 설계 (2-3 옵션) -> 2. 리뷰 -> 3. 구현 -> 4. 테스트
 코드 작성 전 반드시 설계 단계를 거친다.

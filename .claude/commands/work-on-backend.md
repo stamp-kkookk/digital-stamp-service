@@ -12,10 +12,3 @@
 참고 파일:
 - `backend/src/main/java/com/project/kkookk/global/exception/ErrorCode.java` - 에러 코드 목록
 - `backend/src/main/java/com/project/kkookk/global/config/SecurityConfig.java` - 보안 URL 패턴
-
-워크플로우:
-1. `/be-design` - 서비스 로직 설계 (2-3 옵션)
-2. `/be-api` - API 인터페이스 설계
-3. `/be-impl` - 구현
-4. `/be-test` - 테스트 작성
-5. `/be-review` - 리뷰

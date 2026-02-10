@@ -9,9 +9,3 @@
 참고 Skills:
 - `.claude/skills/frontend-core/SKILL.md` - 아키텍처, 코드 스타일, TanStack Query 패턴
 - `.claude/skills/design-system/SKILL.md` - Tailwind, 컬러 시스템, 접근성
-
-워크플로우:
-1. `/fe-feature` - 피처 전체 설계
-2. `/fe-page` - 페이지 생성
-3. `/fe-component` - 컴포넌트 생성
-4. `/fe-form` - 폼 생성
