@@ -1,68 +1,37 @@
-# Claude Project Guide (Root)
+# KKOOKK Project Guide
 
-> This is the **thin** project-level Claude guide.
-> Keep this file short. Put detailed skills into `.claude/skills/**`.
+## Product
+디지털 스탬프/리워드 SaaS. 3 사용자: Customer(모바일 지갑), Owner(백오피스), Terminal(승인 태블릿).
+POS 미연동. 승인 기반: Customer 요청 -> Terminal 승인.
 
-## 1) Project scope
+## Stack
+- backend/ : Spring Boot 3.5, Java 17, JPA, MySQL 8.0 (port 8080)
+- frontend/ : React 19, TypeScript, Vite, Tailwind CSS 4 (port 5173)
+- docs/ : PRD, API 레퍼런스, 아키텍처, 피처 명세
 
-This repository contains:
-- `backend/` : Spring Boot 3.4+ API (Java 17, Swagger 2.7.0, MySQL)
+## AI Workflow (필수)
+1. 설계 (2-3 옵션) -> 2. 리뷰 -> 3. 구현 -> 4. 테스트
+코드 작성 전 반드시 설계 단계를 거친다.
 
-Product: **KKOOKK** (digital stamp / reward SaaS).
-- **No POS integration**: approval-based system (owner terminal confirms)
-- **3 User Types**: Customer (wallet), Owner (backoffice), Terminal (approval screen)
-- **Key Flows**:
-  - Issuance: Customer request → Terminal approval → Polling completion
-  - Redeem: OTP step-up → 2-step confirm modal → TTL expiry
-  - Migration: Paper stamp photo → Manual approval → Stamp reflection
+## Definition of Done
+- 테스트 통과 (백엔드: @MockitoBean 사용, @MockBean 금지)
+- 린트 통과 (백엔드: spotlessApply / 프론트: pnpm lint)
+- 변경 파일에 TODO 없음
+- 예상 실패에 대한 에러 핸들링 존재
+- 기존 API 호환성 유지 (명시적 변경 제외)
 
+## 작업 전 참조 문서 (온디맨드 읽기)
+- docs/api-reference.md     : 전체 API 엔드포인트
+- docs/utility-registry.md  : 재사용 코드 (중복 생성 금지)
+- docs/architecture.md      : 시스템 아키텍처
+- docs/feature-specs/{기능}.md : 피처별 명세
 
+## Commands
+- /work-on-backend, /work-on-frontend, /work-on-fullstack : 작업 전 컨텍스트 로딩
+- /be-design, /be-api, /be-impl, /be-review, /be-test : 백엔드 워크플로우
+- /fe-feature, /fe-page, /fe-component, /fe-form : 프론트엔드 워크플로우
 
-## 2) Repo layout
-
-```
-repo-root/
-├─ .claude/
-│  ├─ CLAUDE.md
-│  ├─ skills/
-│  │  ├─ backend-core/SKILL.md       # Always needed for backend
-│  │  └─ backend-testing/SKILL.md    # Optional: tests
-│  └─ commands/
-│     ├─ be-api.md
-│     ├─ be-design.md
-│     ├─ be-impl.md
-│     ├─ be-review.md
-│     └─ be-test.md
-├─ backend/
-│  └─ CLAUDE.md
-└─ .github/
-   └─ pull_request_template.md
-```
-
-## 3) Mandatory AI workflow (Design → Review → Implement → Test)
-
-**Never jump straight into code.**
-
-1) Propose **2–3 design options**
-2) Compare trade-offs + risks
-3) Recommend **1 option** (team chooses)
-4) Implement as **file-by-file diff**
-5) Provide **tests + verification checklist** (Must use `@MockitoBean` for backend tests)
-
-Tip: split big tasks into phases and reset context between phases (e.g., `/clear`).
-
-
-## 4) Definition of Done (Checklist)
-
-- [ ] Spotless and Checkstyle checks pass
-- [ ] All tests pass
-- [ ] No TODO in changed files
-- [ ] Error handling for expected failures exists
-- [ ] API contracts documented (DTO + status codes)
-- [ ] No breaking changes in existing APIs (unless explicitly stated)
-- [ ] Update related docs when behavior changes (docs/ or README)
-
-
-## 5) Useful command prompts
-
-See `.claude/commands/*` for reusable prompt templates.
+## 문서 유지보수
+API 엔드포인트 추가/수정 시 docs/api-reference.md 업데이트.
+유틸리티 추가 시 docs/utility-registry.md 업데이트.
+피처 변경 시 docs/feature-specs/{기능}.md 업데이트.

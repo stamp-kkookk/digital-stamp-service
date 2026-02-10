@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "@playwright/mcp@latest"]
+    },
+    "kkookk-openapi": {
+      "disabled": false,
+      "timeout": 60,
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "awslabs.openapi-mcp-server@latest",
+        "awslabs.openapi-mcp-server.exe"
+      ],
+      "env": {
+        "API_NAME": "kkookk-local",
+        "API_BASE_URL": "http://localhost:8080",
+        "API_SPEC_URL": "http://localhost:8080/v3/api-docs",
+        "LOG_LEVEL": "ERROR",
+        "ENABLE_PROMETHEUS": "false",
+        "ENABLE_OPERATION_PROMPTS": "true"
+      }
+    }
+  }
+}
