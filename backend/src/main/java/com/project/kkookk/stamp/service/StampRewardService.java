@@ -3,7 +3,7 @@ package com.project.kkookk.stamp.service;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.domain.WalletStampCard;
-import com.project.kkookk.wallet.repository.WalletRewardRepository;
+import com.project.kkookk.wallet.repository.WalletRewardBatchRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class StampRewardService {
 
-    private final WalletRewardRepository walletRewardRepository;
+    private final WalletRewardBatchRepository walletRewardBatchRepository;
     private final WalletStampCardRepository walletStampCardRepository;
 
     /**
@@ -59,7 +59,7 @@ public class StampRewardService {
                 issuedRewards.add(reward);
             }
 
-            walletRewardRepository.saveAll(issuedRewards);
+            walletRewardBatchRepository.batchInsert(issuedRewards);
 
             // 기존 WalletStampCard 완료 처리
             walletStampCard.setStampCount(goalStampCount); // 목표 달성 상태로
