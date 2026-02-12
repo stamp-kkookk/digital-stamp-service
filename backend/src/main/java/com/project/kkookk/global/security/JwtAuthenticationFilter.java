@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UserDetails principal = createPrincipal(token, tokenType);
 
+        MDC.put("tokenType", tokenType.name());
+        MDC.put("userId", formatUserId(tokenType, jwtUtil.getSubjectId(token)));
+
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         principal, null, principal.getAuthorities());
@@ -70,6 +74,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    private String formatUserId(TokenType tokenType, Long subjectId) {
+        return switch (tokenType) {
+            case OWNER -> "owner:" + subjectId;
+            case TERMINAL -> "terminal:" + subjectId;
+            case CUSTOMER, STEPUP -> "wallet:" + subjectId;
+        };
     }
 
     private UserDetails createPrincipal(String token, TokenType tokenType) {

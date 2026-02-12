@@ -8,9 +8,11 @@ import com.project.kkookk.store.controller.owner.dto.StoreUpdateRequest;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class StoreService {
@@ -32,6 +34,11 @@ public class StoreService {
                         ownerId);
 
         final Store savedStore = storeRepository.save(store);
+        log.info(
+                "[Store] Created id={} ownerId={} name={}",
+                savedStore.getId(),
+                ownerId,
+                request.name());
         return StoreResponse.from(savedStore);
     }
 
@@ -51,6 +58,7 @@ public class StoreService {
             final Long ownerId, final Long storeId, final StoreUpdateRequest request) {
         final Store store = findStoreByIdAndOwnerId(storeId, ownerId);
         store.update(request.name(), request.address(), request.phone(), request.status());
+        log.info("[Store] Updated id={}", storeId);
         return StoreResponse.from(store);
     }
 
@@ -58,6 +66,7 @@ public class StoreService {
     public void deleteStore(final Long ownerId, final Long storeId) {
         final Store store = findStoreByIdAndOwnerId(storeId, ownerId);
         storeRepository.delete(store);
+        log.info("[Store] Deleted id={}", storeId);
     }
 
     private Store findStoreByIdAndOwnerId(final Long storeId, final Long ownerId) {

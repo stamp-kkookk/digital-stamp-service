@@ -34,6 +34,9 @@ public class TerminalAuthService {
                         .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
 
         if (!passwordEncoder.matches(request.password(), owner.getPasswordHash())) {
+            log.warn(
+                    "[Auth] Terminal login failed storeId={} reason=invalid_password",
+                    request.storeId());
             throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
         }
 

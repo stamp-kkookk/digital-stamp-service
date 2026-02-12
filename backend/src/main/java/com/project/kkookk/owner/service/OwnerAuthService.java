@@ -10,10 +10,12 @@ import com.project.kkookk.owner.controller.dto.OwnerSignupResponse;
 import com.project.kkookk.owner.domain.OwnerAccount;
 import com.project.kkookk.owner.repository.OwnerAccountRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,6 +38,7 @@ public class OwnerAuthService {
                         .build();
 
         OwnerAccount savedOwnerAccount = ownerAccountRepository.save(ownerAccount);
+        log.info("[Auth] Owner signup email={}", request.email());
 
         return OwnerSignupResponse.from(savedOwnerAccount);
     }
@@ -47,11 +50,13 @@ public class OwnerAuthService {
                         .orElseThrow(() -> new BusinessException(ErrorCode.OWNER_LOGIN_FAILED));
 
         if (!passwordEncoder.matches(request.password(), ownerAccount.getPasswordHash())) {
+            log.warn("[Auth] Owner login failed email={}", request.email());
             throw new BusinessException(ErrorCode.OWNER_LOGIN_FAILED);
         }
 
         String accessToken =
                 jwtUtil.generateAccessToken(ownerAccount.getId(), ownerAccount.getEmail());
+        log.info("[Auth] Owner login success ownerId={}", ownerAccount.getId());
 
         return OwnerLoginResponse.of(accessToken, ownerAccount);
     }
