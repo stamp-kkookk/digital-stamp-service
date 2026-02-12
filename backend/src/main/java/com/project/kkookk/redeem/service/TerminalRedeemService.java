@@ -24,9 +24,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -125,6 +127,7 @@ public class TerminalRedeemService {
                         .filter(Objects::nonNull)
                         .toList();
 
+        log.info("[Redeem] Pending sessions fetched storeId={} count={}", storeId, items.size());
         return PendingRedeemSessionListResponse.of(items);
     }
 }

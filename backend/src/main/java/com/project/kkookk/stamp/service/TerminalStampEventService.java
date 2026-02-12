@@ -5,12 +5,14 @@ import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.stamp.controller.owner.dto.StampEventResponse;
 import com.project.kkookk.stamp.repository.StampEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,8 +29,11 @@ public class TerminalStampEventService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        return stampEventRepository
-                .findByStoreIdWithCustomerInfo(requestedStoreId, pageable)
-                .map(StampEventResponse::from);
+        Page<StampEventResponse> result =
+                stampEventRepository
+                        .findByStoreIdWithCustomerInfo(requestedStoreId, pageable)
+                        .map(StampEventResponse::from);
+        log.info("[StampEvent] Terminal queried storeId={} page={}", requestedStoreId, page);
+        return result;
     }
 }

@@ -2,6 +2,7 @@ package com.project.kkookk.redeem.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.redeem.controller.dto.CreateRedeemSessionRequest;
 import com.project.kkookk.redeem.controller.dto.RedeemSessionResponse;
 import com.project.kkookk.redeem.domain.RedeemEvent;
@@ -18,9 +19,11 @@ import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -82,6 +85,13 @@ public class CustomerRedeemService {
 
         redeemSessionRepository.save(session);
 
+        FlowMdc.setRedeemFlow(session.getId());
+        log.info(
+                "[Redeem] Session created id={} walletRewardId={} expiresAt={}",
+                session.getId(),
+                request.walletRewardId(),
+                session.getExpiresAt());
+
         return RedeemSessionResponse.from(session);
     }
 
@@ -109,11 +119,14 @@ public class CustomerRedeemService {
         if (session.isExpired()) {
             session.expire();
             reward.cancelRedeeming();
+            log.info("[Redeem] Session expired id={} (rollback to AVAILABLE)", sessionId);
             throw new BusinessException(ErrorCode.REDEEM_SESSION_EXPIRED);
         }
 
         // 5. 상태 전이
         session.complete();
+        FlowMdc.setRedeemFlow(sessionId);
+        log.info("[Redeem] Session completed id={}", sessionId);
         reward.completeRedeem();
 
         // 6. 원장 적재

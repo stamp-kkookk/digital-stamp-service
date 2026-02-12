@@ -2,6 +2,7 @@ package com.project.kkookk.issuance.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestItem;
@@ -89,6 +90,8 @@ public class TerminalApprovalService {
                                                 now))
                         .toList();
 
+        log.info("[Issuance] Pending requests fetched storeId={} count={}", storeId, items.size());
+
         return new PendingIssuanceRequestListResponse(items, items.size());
     }
 
@@ -101,6 +104,8 @@ public class TerminalApprovalService {
                 issuanceRequestRepository
                         .findByIdWithLock(requestId)
                         .orElseThrow(IssuanceRequestNotFoundException::new);
+
+        FlowMdc.setIssuanceFlow(requestId);
 
         validateRequestBelongsToStore(request, storeId);
         validateRequestCanBeProcessed(request);
@@ -168,6 +173,8 @@ public class TerminalApprovalService {
                 issuanceRequestRepository
                         .findByIdWithLock(requestId)
                         .orElseThrow(IssuanceRequestNotFoundException::new);
+
+        FlowMdc.setIssuanceFlow(requestId);
 
         validateRequestBelongsToStore(request, storeId);
         validateRequestCanBeProcessed(request);

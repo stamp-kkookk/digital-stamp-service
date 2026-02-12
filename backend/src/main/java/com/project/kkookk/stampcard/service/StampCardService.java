@@ -14,18 +14,16 @@ import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedE
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
 import com.project.kkookk.stampcard.service.exception.StampCardUpdateNotAllowedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class StampCardService {
-
-    private static final Logger log = LoggerFactory.getLogger(StampCardService.class);
 
     private final StampCardRepository stampCardRepository;
 
@@ -118,7 +116,7 @@ public class StampCardService {
         }
 
         stampCard.updateStatus(newStatus);
-        log.info("Updated stamp card {} status from {} to {}", id, currentStatus, newStatus);
+        log.info("[StampCard] Status transition id={} from={} to={}", id, currentStatus, newStatus);
 
         return StampCardResponse.from(stampCard);
     }
