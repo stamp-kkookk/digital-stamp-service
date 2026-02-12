@@ -53,6 +53,8 @@ public class SecurityConfig {
                                         .hasRole("TERMINAL")
                                         .requestMatchers("/api/owner/**")
                                         .hasRole("OWNER")
+                                        .requestMatchers("/actuator/**")
+                                        .permitAll()
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
                                         .permitAll()
                                         .anyRequest()

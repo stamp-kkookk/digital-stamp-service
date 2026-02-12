@@ -9,7 +9,6 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: true
         default_batch_fetch_size: 100
 
 server:
@@ -23,17 +22,23 @@ server:
 logging:
   level:
     root: INFO
-    com.project.kkookk: DEBUG
 
 # ===============================
-# Custom App Configuration
+# Actuator & Metrics
 # ===============================
-app:
-  qr-base-url: "https://stamp-kkookk.vercel.app"
-  storage:
-    local-path: "storage" # 로컬 파일 저장소 경로
-
-jwt:
-  secret: ${JWT_SECRET}
-  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}
-  stepup-token-expiration: ${JWT_STEPUP_TOKEN_EXPIRATION:600000}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
