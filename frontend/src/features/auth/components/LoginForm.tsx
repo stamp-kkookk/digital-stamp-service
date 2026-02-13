@@ -12,22 +12,21 @@ interface LoginFormProps {
   onSubmit: (email: string, password: string) => void;
   onSwitchToSignup: () => void;
   isLoading?: boolean;
+  error?: string;
 }
 
 export function LoginForm({
   onSubmit,
   onSwitchToSignup,
   isLoading = false,
+  error,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      alert("이메일과 비밀번호를 입력해주세요.");
-      return;
-    }
+    if (!email || !password) return;
     onSubmit(email, password);
   };
 
@@ -57,6 +56,12 @@ export function LoginForm({
         autoComplete="current-password"
         className="focus:border-indigo-600!"
       />
+
+      {error && (
+        <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center">
+          {error}
+        </div>
+      )}
 
       <Button
         type="submit"

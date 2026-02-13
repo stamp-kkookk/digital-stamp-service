@@ -29,12 +29,14 @@ public class OwnerAuthService {
     public OwnerSignupResponse signup(OwnerSignupRequest request) {
         validateEmailNotDuplicated(request.email());
 
+        String normalizedPhone = request.phoneNumber().replaceAll("[^0-9]", "");
+
         OwnerAccount ownerAccount =
                 OwnerAccount.builder()
                         .email(request.email())
                         .passwordHash(passwordEncoder.encode(request.password()))
                         .name(request.name())
-                        .phoneNumber(request.phoneNumber())
+                        .phoneNumber(normalizedPhone)
                         .build();
 
         OwnerAccount savedOwnerAccount = ownerAccountRepository.save(ownerAccount);

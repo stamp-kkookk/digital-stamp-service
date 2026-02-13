@@ -10,27 +10,35 @@ import { Input } from '@/components/ui/Input';
 
 interface PhoneVerificationProps {
   phone: string;
+  devOtpCode?: string;
   onVerify: (code: string) => void;
   onResend: () => void;
   onBack: () => void;
   isLoading?: boolean;
+  error?: string;
+  success?: string;
 }
 
 export function PhoneVerification({
   phone,
+  devOtpCode,
   onVerify,
   onResend,
   onBack,
   isLoading = false,
+  error,
+  success,
 }: PhoneVerificationProps) {
   const [verificationCode, setVerificationCode] = useState('');
+  const [codeError, setCodeError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationCode) {
-      alert('인증번호를 입력해주세요.');
+      setCodeError('인증번호를 입력해주세요.');
       return;
     }
+    setCodeError('');
     onVerify(verificationCode);
   };
 
@@ -47,20 +55,40 @@ export function PhoneVerification({
         <p className="text-xs text-kkookk-steel">
           위 번호로 인증번호를 보냈습니다.
         </p>
+        {devOtpCode && (
+          <p className="mt-2 text-xs font-mono text-indigo-600 bg-indigo-50 rounded-lg py-1 px-2 inline-block">
+            [개발용] 인증번호: {devOtpCode}
+          </p>
+        )}
       </div>
 
       <Input
         type="text"
         label="인증번호"
         value={verificationCode}
-        onChange={(e) => setVerificationCode(e.target.value)}
+        onChange={(e) => {
+          setVerificationCode(e.target.value);
+          if (codeError) setCodeError('');
+        }}
         placeholder="123456"
         icon={<KeyRound size={18} />}
+        error={codeError}
         className="tracking-widest font-mono focus:border-indigo-600!"
         maxLength={6}
         inputMode="numeric"
         autoComplete="one-time-code"
       />
+
+      {error && (
+        <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 text-sm text-center">
+          {success}
+        </div>
+      )}
 
       <Button
         type="submit"

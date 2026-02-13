@@ -30,6 +30,35 @@ function isPasswordValid(password: string) {
   return PASSWORD_RULES.every((rule) => rule.test(password));
 }
 
+const PHONE_REGEX = /^01[0-9]-\d{3,4}-\d{4}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function formatPhone(value: string): string {
+  const digits = value.replace(/[^0-9]/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}
+
+function getNameError(name: string, touched: boolean) {
+  if (!touched) return undefined;
+  if (!name.trim()) return "이름을 입력해주세요";
+  if (name.trim().length < 2 || name.trim().length > 20) return "이름은 2~20자여야 합니다";
+  return undefined;
+}
+
+function getPhoneError(phone: string, touched: boolean) {
+  if (!touched || !phone) return undefined;
+  if (!PHONE_REGEX.test(phone)) return "올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)";
+  return undefined;
+}
+
+function getEmailError(email: string, touched: boolean) {
+  if (!touched || !email) return undefined;
+  if (!EMAIL_REGEX.test(email)) return "올바른 이메일 형식이 아닙니다";
+  return undefined;
+}
+
 export function SignupForm({
   onSubmit,
   onSwitchToLogin,
@@ -40,6 +69,9 @@ export function SignupForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordTouched, setPasswordTouched] = useState(false);
+  const [nameTouched, setNameTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
 
   const passwordValid = isPasswordValid(password);
 
@@ -59,9 +91,11 @@ export function SignupForm({
         label="이름"
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onBlur={() => setNameTouched(true)}
         placeholder="홍길동"
         icon={<User size={18} />}
         autoComplete="name"
+        error={getNameError(name, nameTouched)}
         className="focus:border-indigo-600!"
       />
 
@@ -69,10 +103,12 @@ export function SignupForm({
         type="tel"
         label="휴대폰 번호 (인증필요)"
         value={phone}
-        onChange={(e) => setPhone(e.target.value)}
+        onChange={(e) => setPhone(formatPhone(e.target.value))}
+        onBlur={() => setPhoneTouched(true)}
         placeholder="010-0000-0000"
         icon={<Smartphone size={18} />}
         autoComplete="tel"
+        error={getPhoneError(phone, phoneTouched)}
         className="focus:border-indigo-600!"
       />
 
@@ -81,9 +117,11 @@ export function SignupForm({
         label="이메일 주소"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onBlur={() => setEmailTouched(true)}
         placeholder="boss@partner.com"
         icon={<Mail size={18} />}
         autoComplete="email"
+        error={getEmailError(email, emailTouched)}
         className="focus:border-indigo-600!"
       />
 

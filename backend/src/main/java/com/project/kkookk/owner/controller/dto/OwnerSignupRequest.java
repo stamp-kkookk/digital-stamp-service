@@ -20,8 +20,9 @@ public record OwnerSignupRequest(
                         regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]+$",
                         message = "비밀번호는 영문, 숫자, 특수문자를 포함해야 합니다")
                 String password,
-        @Schema(description = "이름 (선택)", example = "홍길동")
-                @Size(max = 100, message = "이름은 100자 이하여야 합니다")
+        @Schema(description = "이름", example = "홍길동")
+                @NotBlank(message = "이름은 필수입니다")
+                @Size(min = 2, max = 20, message = "이름은 2~20자여야 합니다")
                 String name,
         @Schema(description = "전화번호", example = "010-1234-5678")
                 @NotBlank(message = "전화번호는 필수입니다")
