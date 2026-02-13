@@ -306,7 +306,7 @@ WalletReward.isAvailable() = status == AVAILABLE && (expiresAt == null || now < 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `phone` | String | Yes | 전화번호 |
-| `name` | String | Yes | 이름 |
+| `nickname` | String | Yes | 닉네임 |
 | `storeId` | Long | Yes | 매장 ID |
 
 ### CustomerLoginResponse (Backend -> Customer)
@@ -463,7 +463,7 @@ WalletReward.isAvailable() = status == AVAILABLE && (expiresAt == null || now < 
 |----------|-------------|------------|---------|
 | 이미 등록된 전화번호로 회원가입 | 409 | `WALLET_001` | 이미 등록된 전화번호입니다 |
 | 이미 사용 중인 닉네임으로 회원가입 | 409 | `WALLET_002` | 이미 사용 중인 닉네임입니다 |
-| 전화번호+이름으로 지갑 미발견 (로그인) | 404 | `CUSTOMER_WALLET_NOT_FOUND` | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 |
+| 전화번호+닉네임으로 지갑 미발견 (로그인) | 404 | `CUSTOMER_WALLET_NOT_FOUND` | 해당 전화번호와 닉네임으로 지갑을 찾을 수 없습니다 |
 | 차단된(BLOCKED) 지갑으로 로그인 | 403 | `CUSTOMER_WALLET_BLOCKED` | 차단된 지갑입니다 |
 | 차단된(BLOCKED) 지갑으로 카드 목록 조회 | 403 | `CUSTOMER_WALLET_BLOCKED` | 차단된 지갑입니다 |
 | Step-Up 미인증으로 히스토리/리워드 조회 | 403 | `STEPUP_REQUIRED` | OTP 인증이 필요합니다 |

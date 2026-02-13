@@ -12,9 +12,9 @@ public record CustomerLoginRequest(
                 @NotBlank(message = "전화번호는 필수입니다")
                 @Pattern(regexp = "^01[0-9]-?\\d{3,4}-?\\d{4}$", message = "올바른 전화번호 형식이 아닙니다")
                 String phone,
-        @Schema(description = "이름", example = "홍길동")
-                @NotBlank(message = "이름은 필수입니다")
-                @Size(max = 50, message = "이름은 50자 이하여야 합니다")
-                String name,
+        @Schema(description = "닉네임", example = "길동이")
+                @NotBlank(message = "닉네임은 필수입니다")
+                @Size(max = 50, message = "닉네임은 50자 이하여야 합니다")
+                String nickname,
         @Schema(description = "매장 ID", example = "1") @NotNull(message = "매장 ID는 필수입니다")
                 Long storeId) {}

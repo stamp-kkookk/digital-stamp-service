@@ -1,6 +1,6 @@
 /**
  * CustomerLoginForm 컴포넌트
- * 기존 고객을 위한 이름 + 휴대폰 번호 간편 로그인 폼
+ * 기존 고객을 위한 닉네임 + 휴대폰 번호 간편 로그인 폼
  */
 
 import { useState } from 'react';
@@ -16,13 +16,13 @@ export function CustomerLoginForm() {
   const navigate = useNavigate();
   const { storeId, customerNavigate } = useCustomerNavigate();
   const { refreshAuthState } = useAuth();
-  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const loginMutation = useWalletLogin();
 
-  const isFormValid = name.trim() !== '' && phone.trim() !== '' && !!storeId;
+  const isFormValid = nickname.trim() !== '' && phone.trim() !== '' && !!storeId;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,7 @@ export function CustomerLoginForm() {
     if (!isFormValid) return;
 
     loginMutation.mutate(
-      { phone, name, storeId: Number(storeId) },
+      { phone, nickname, storeId: Number(storeId) },
       {
         onSuccess: () => {
           if (storeId) saveOriginStoreId(storeId);
@@ -68,11 +68,11 @@ export function CustomerLoginForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
           type="text"
-          label="이름"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="홍길동"
-          autoComplete="name"
+          label="닉네임"
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="길동이"
+          autoComplete="nickname"
         />
 
         <Input

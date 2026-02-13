@@ -17,7 +17,7 @@ export interface SignupData {
 }
 
 export interface CustomerLoginData {
-  name: string;
+  nickname: string;
   phone: string;
 }
 

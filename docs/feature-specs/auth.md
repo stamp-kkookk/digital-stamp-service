@@ -519,7 +519,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
 | Field | Type | Required | Validation | Example |
 |-------|------|----------|------------|---------|
 | phone | String | Yes | @NotBlank, @Pattern | "010-1234-5678" |
-| name | String | Yes | @NotBlank, @Size(max=50) | "홍길동" |
+| nickname | String | Yes | @NotBlank, @Size(max=50) | "길동이" |
 | storeId | Long | Yes | @NotNull | 1 |
 
 ### 6.7 CustomerLoginResponse DTO
@@ -670,7 +670,7 @@ HTTP Request
 | OTP_ATTEMPTS_EXCEEDED | 401 | OTP_004 | OTP 시도 횟수를 초과했습니다 | 3회 실패 |
 | WALLET_PHONE_DUPLICATED | 409 | WALLET_001 | 이미 등록된 전화번호입니다 | 지갑 등록 시 전화번호 중복 |
 | WALLET_NICKNAME_DUPLICATED | 409 | WALLET_002 | 이미 사용 중인 닉네임입니다 | 지갑 등록 시 닉네임 중복 |
-| CUSTOMER_WALLET_NOT_FOUND | 404 | CUSTOMER_WALLET_NOT_FOUND | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 | 고객 로그인 실패 |
+| CUSTOMER_WALLET_NOT_FOUND | 404 | CUSTOMER_WALLET_NOT_FOUND | 해당 전화번호와 닉네임으로 지갑을 찾을 수 없습니다 | 고객 로그인 실패 |
 | CUSTOMER_WALLET_BLOCKED | 403 | CUSTOMER_WALLET_BLOCKED | 차단된 지갑입니다 | 차단 상태 지갑 접근 |
 | UNAUTHORIZED | 401 | UNAUTHORIZED | 인증이 필요합니다 | 토큰 없이 인증 필요 엔드포인트 접근 |
 | ACCESS_DENIED | 403 | ACCESS_DENIED | 접근 권한이 없습니다 | 역할 불일치 |
@@ -729,7 +729,7 @@ frontend/src/features/auth/
 ├── components/
 │   ├── LoginForm.tsx          # Owner login form
 │   ├── SignupForm.tsx         # Owner signup form
-│   ├── CustomerLoginForm.tsx  # Customer phone+name login
+│   ├── CustomerLoginForm.tsx  # Customer phone+nickname login
 │   ├── CustomerSignupForm.tsx # Customer registration
 │   └── PhoneVerification.tsx  # OTP request + verify UI
 ├── hooks/
@@ -829,7 +829,7 @@ API_ENDPOINTS.TERMINAL.LOGIN          = '/api/public/terminal/login'
      |                +--[token exists (returning user)]--> stepUpToken stored
      |                                                      for later sensitive ops
      |
-     +--[Yes]--> [Login] --> POST /api/public/wallet/login {phone, name, storeId}
+     +--[Yes]--> [Login] --> POST /api/public/wallet/login {phone, nickname, storeId}
                      |
                      v
                 accessToken (CUSTOMER) issued

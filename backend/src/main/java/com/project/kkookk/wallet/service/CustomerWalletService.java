@@ -135,14 +135,14 @@ public class CustomerWalletService {
 
     @Transactional
     public CustomerLoginResponse login(CustomerLoginRequest request) {
-        // 1. 전화번호와 이름으로 CustomerWallet 조회
+        // 1. 전화번호와 닉네임으로 CustomerWallet 조회
         CustomerWallet wallet =
                 customerWalletRepository
-                        .findByPhoneAndName(request.phone(), request.name())
+                        .findByPhoneAndNickname(request.phone(), request.nickname())
                         .orElseThrow(
                                 () ->
                                         new CustomerWalletNotFoundException(
-                                                "해당 전화번호와 이름으로 지갑을 찾을 수 없습니다"));
+                                                "해당 전화번호와 닉네임으로 지갑을 찾을 수 없습니다"));
 
         // 2. BLOCKED 상태 체크
         if (wallet.isBlocked()) {
