@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     WALLET_LOGIN: '/api/public/wallet/login',
     STORE_INFO: (storeId: number) => `/api/public/stores/${storeId}`,
     STORES: '/api/public/stores',
+    CHECK_NICKNAME: '/api/public/wallet/check-nickname',
   },
 
   // ==========================================================================

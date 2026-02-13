@@ -9,8 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { useCustomerNavigate, saveOriginStoreId } from "@/hooks/useCustomerNavigate";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useOtpRequest, useOtpVerify, useWalletRegister } from "@/features/auth/hooks/useAuth";
+import { checkNickname } from "@/features/auth/api/authApi";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
+import type { AxiosError } from "axios";
+import type { ErrorResponse } from "@/types/api";
 
 type SignupStep = "input" | "otp" | "success";
 
@@ -24,6 +27,7 @@ export function CustomerSignupForm() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [nicknameError, setNicknameError] = useState<string | null>(null);
 
   const otpRequest = useOtpRequest();
   const otpVerify = useOtpVerify();
@@ -34,9 +38,22 @@ export function CustomerSignupForm() {
     name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "";
   const isOtpValid = otp.trim().length === 6;
 
+  const handleNicknameBlur = async () => {
+    if (!nickname.trim()) return;
+    setNicknameError(null);
+    try {
+      const result = await checkNickname(nickname.trim());
+      if (!result.available) {
+        setNicknameError("이미 사용 중인 닉네임입니다");
+      }
+    } catch {
+      // 네트워크 에러 시 무시 (서버에서 최종 차단)
+    }
+  };
+
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isBasicInfoValid) return;
+    if (!isBasicInfoValid || nicknameError) return;
     setError(null);
 
     otpRequest.mutate(
@@ -78,8 +95,15 @@ export function CustomerSignupForm() {
                 refreshAuthState();
                 setStep("success");
               },
-              onError: () => {
-                setError("이미 등록된 번호입니다.");
+              onError: (err) => {
+                const axiosError = err as AxiosError<ErrorResponse>;
+                const errorCode = axiosError?.response?.data?.code;
+                if (errorCode === 'WALLET_002') {
+                  setNicknameError("이미 사용 중인 닉네임입니다");
+                  setStep("input");
+                } else {
+                  setError("이미 등록된 번호입니다.");
+                }
               },
             }
           );
@@ -132,6 +156,7 @@ export function CustomerSignupForm() {
         <button
           onClick={() => {
             setError(null);
+            setNicknameError(null);
             if (step === "otp") {
               setStep("input");
               setOtp("");
@@ -167,8 +192,13 @@ export function CustomerSignupForm() {
             type="text"
             label="닉네임 (매장에서 불릴 이름)"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setNickname(e.target.value);
+              if (nicknameError) setNicknameError(null);
+            }}
+            onBlur={handleNicknameBlur}
             placeholder="길동이"
+            error={nicknameError ?? undefined}
           />
 
           <Input
@@ -188,7 +218,7 @@ export function CustomerSignupForm() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid || otpRequest.isPending}
+            disabled={!isBasicInfoValid || !!nicknameError || otpRequest.isPending}
             isLoading={otpRequest.isPending}
             className="mt-4"
           >

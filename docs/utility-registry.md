@@ -96,6 +96,7 @@
 | 401 | OTP_INVALID | OTP | OTP가 일치하지 않습니다 |
 | 401 | OTP_ATTEMPTS_EXCEEDED | OTP | OTP 시도 횟수를 초과했습니다 |
 | 409 | WALLET_PHONE_DUPLICATED | Wallet | 이미 등록된 전화번호입니다 |
+| 409 | WALLET_NICKNAME_DUPLICATED | Wallet | 이미 사용 중인 닉네임입니다 |
 | 404 | CUSTOMER_WALLET_NOT_FOUND | Wallet | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 |
 | 403 | CUSTOMER_WALLET_BLOCKED | Wallet | 차단된 지갑입니다 |
 | 404 | WALLET_STAMP_CARD_NOT_FOUND | Wallet | 해당 지갑 스탬프카드를 찾을 수 없습니다 |

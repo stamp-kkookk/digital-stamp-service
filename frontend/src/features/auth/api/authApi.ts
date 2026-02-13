@@ -10,6 +10,7 @@ import type {
   OtpRequestResponse,
   OtpVerifyDto,
   OtpVerifyResponse,
+  NicknameCheckResponse,
   WalletRegisterRequest,
   WalletRegisterResponse,
   WalletLoginRequest,
@@ -36,6 +37,17 @@ export async function verifyOtp(data: OtpVerifyDto): Promise<OtpVerifyResponse> 
   return postRaw<OtpVerifyResponse, OtpVerifyDto>(
     API_ENDPOINTS.PUBLIC.OTP_VERIFY,
     data
+  );
+}
+
+// =============================================================================
+// Public API - Nickname Check
+// =============================================================================
+
+export async function checkNickname(nickname: string): Promise<NicknameCheckResponse> {
+  return getRaw<NicknameCheckResponse>(
+    API_ENDPOINTS.PUBLIC.CHECK_NICKNAME,
+    { nickname }
   );
 }
 

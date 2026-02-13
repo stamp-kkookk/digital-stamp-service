@@ -419,7 +419,7 @@ WalletReward.isAvailable() = status == AVAILABLE && (expiresAt == null || now < 
 | `id` | Long (PK) | AUTO_INCREMENT | 지갑 ID |
 | `phone` | VARCHAR(30) | NOT NULL, UNIQUE | 전화번호 |
 | `name` | VARCHAR(50) | NOT NULL | 이름 |
-| `nickname` | VARCHAR(50) | NOT NULL | 닉네임 |
+| `nickname` | VARCHAR(50) | NOT NULL, UNIQUE | 닉네임 |
 | `status` | VARCHAR(20) | NOT NULL, ENUM | ACTIVE / BLOCKED |
 | `created_at` | DATETIME(6) | NOT NULL | 생성 시각 |
 | `modified_at` | DATETIME(6) | NOT NULL | 수정 시각 |
@@ -462,6 +462,7 @@ WalletReward.isAvailable() = status == AVAILABLE && (expiresAt == null || now < 
 | Scenario | HTTP Status | Error Code | Message |
 |----------|-------------|------------|---------|
 | 이미 등록된 전화번호로 회원가입 | 409 | `WALLET_001` | 이미 등록된 전화번호입니다 |
+| 이미 사용 중인 닉네임으로 회원가입 | 409 | `WALLET_002` | 이미 사용 중인 닉네임입니다 |
 | 전화번호+이름으로 지갑 미발견 (로그인) | 404 | `CUSTOMER_WALLET_NOT_FOUND` | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 |
 | 차단된(BLOCKED) 지갑으로 로그인 | 403 | `CUSTOMER_WALLET_BLOCKED` | 차단된 지갑입니다 |
 | 차단된(BLOCKED) 지갑으로 카드 목록 조회 | 403 | `CUSTOMER_WALLET_BLOCKED` | 차단된 지갑입니다 |

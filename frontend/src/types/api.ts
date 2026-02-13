@@ -62,6 +62,10 @@ export interface OtpVerifyResponse {
 // Wallet Types
 // =============================================================================
 
+export interface NicknameCheckResponse {
+  available: boolean;
+}
+
 export interface WalletRegisterRequest {
   phone: string;
   name: string;

@@ -43,6 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -91,6 +92,7 @@ class CustomerWalletServiceTest {
         String expectedToken = "mock.jwt.token";
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn(expectedToken);
 
@@ -106,6 +108,7 @@ class CustomerWalletServiceTest {
         assertThat(response.nickname()).isEqualTo("길동이");
 
         verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
+        verify(customerWalletRepository, times(1)).existsByNickname(request.nickname());
         verify(customerWalletRepository, times(1)).save(any(CustomerWallet.class));
         verify(jwtUtil, times(1)).generateCustomerToken(1L);
     }
@@ -150,6 +153,7 @@ class CustomerWalletServiceTest {
         }
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
 
@@ -182,6 +186,7 @@ class CustomerWalletServiceTest {
         }
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(99L)).willReturn("token.with.walletId");
 
@@ -223,6 +228,7 @@ class CustomerWalletServiceTest {
         ReflectionTestUtils.setField(savedWalletStampCard, "id", 50L);
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(
                         stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
@@ -260,6 +266,7 @@ class CustomerWalletServiceTest {
         ReflectionTestUtils.setField(savedWallet, "id", 1L);
 
         given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(
                         stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
@@ -418,5 +425,81 @@ class CustomerWalletServiceTest {
                 .hasMessageContaining("해당 매장의 스탬프카드를 찾을 수 없습니다");
 
         verify(walletStampCardRepository).existsByCustomerWalletIdAndStoreId(walletId, storeId);
+    }
+
+    @Test
+    @DisplayName("지갑 생성 실패 - 닉네임 중복")
+    void register_Fail_NicknameDuplicated() {
+        // given
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+
+        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> customerWalletService.register(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.WALLET_NICKNAME_DUPLICATED.getMessage())
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.WALLET_NICKNAME_DUPLICATED);
+
+        verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
+        verify(customerWalletRepository, times(1)).existsByNickname(request.nickname());
+        verify(customerWalletRepository, never()).save(any(CustomerWallet.class));
+    }
+
+    @Test
+    @DisplayName("지갑 생성 실패 - 닉네임 중복 (Race condition: DB 유니크 제약 위반)")
+    void register_Fail_NicknameDuplicated_RaceCondition() {
+        // given
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+
+        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        // 첫 번째 호출(사전 체크): false, 두 번째 호출(catch 블록 재검사): true
+        given(customerWalletRepository.existsByNickname(request.nickname()))
+                .willReturn(false)
+                .willReturn(true);
+        given(customerWalletRepository.save(any(CustomerWallet.class)))
+                .willThrow(new DataIntegrityViolationException("Duplicate entry for nickname"));
+
+        // when & then
+        assertThatThrownBy(() -> customerWalletService.register(request))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.WALLET_NICKNAME_DUPLICATED.getMessage())
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.WALLET_NICKNAME_DUPLICATED);
+
+        verify(customerWalletRepository, times(1)).save(any(CustomerWallet.class));
+        verify(customerWalletRepository, times(2)).existsByNickname(request.nickname());
+    }
+
+    @Test
+    @DisplayName("닉네임 사용 가능 여부 체크 - 사용 가능")
+    void checkNicknameAvailable_Available() {
+        // given
+        given(customerWalletRepository.existsByNickname("새닉네임")).willReturn(false);
+
+        // when
+        boolean available = customerWalletService.checkNicknameAvailable("새닉네임");
+
+        // then
+        assertThat(available).isTrue();
+        verify(customerWalletRepository).existsByNickname("새닉네임");
+    }
+
+    @Test
+    @DisplayName("닉네임 사용 가능 여부 체크 - 이미 사용 중")
+    void checkNicknameAvailable_Duplicated() {
+        // given
+        given(customerWalletRepository.existsByNickname("길동이")).willReturn(true);
+
+        // when
+        boolean available = customerWalletService.checkNicknameAvailable("길동이");
+
+        // then
+        assertThat(available).isFalse();
+        verify(customerWalletRepository).existsByNickname("길동이");
     }
 }
