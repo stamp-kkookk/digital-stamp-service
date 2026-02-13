@@ -27,6 +27,7 @@ export function CustomerSignupForm() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
 
   const otpRequest = useOtpRequest();
@@ -53,7 +54,7 @@ export function CustomerSignupForm() {
 
   const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isBasicInfoValid || nicknameError) return;
+    if (!isBasicInfoValid || nameError || nicknameError) return;
     setError(null);
 
     otpRequest.mutate(
@@ -98,8 +99,13 @@ export function CustomerSignupForm() {
               onError: (err) => {
                 const axiosError = err as AxiosError<ErrorResponse>;
                 const errorCode = axiosError?.response?.data?.code;
+                const fieldErrors = axiosError?.response?.data?.errors;
                 if (errorCode === 'WALLET_002') {
                   setNicknameError("이미 사용 중인 닉네임입니다");
+                  setStep("input");
+                } else if (errorCode === 'INVALID_INPUT_VALUE' && fieldErrors?.some(e => e.field === 'name')) {
+                  const nameFieldError = fieldErrors.find(e => e.field === 'name');
+                  setNameError(nameFieldError?.message ?? "이름에는 숫자를 입력할 수 없어요.");
                   setStep("input");
                 } else {
                   setError("이미 등록된 번호입니다.");
@@ -156,6 +162,7 @@ export function CustomerSignupForm() {
         <button
           onClick={() => {
             setError(null);
+            setNameError(null);
             setNicknameError(null);
             if (step === "otp") {
               setStep("input");
@@ -183,9 +190,18 @@ export function CustomerSignupForm() {
             type="text"
             label="이름"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setName(value);
+              if (/[0-9]/.test(value)) {
+                setNameError("이름에는 숫자를 입력할 수 없어요.");
+              } else {
+                setNameError(null);
+              }
+            }}
             placeholder="홍길동"
             autoComplete="name"
+            error={nameError ?? undefined}
           />
 
           <Input
@@ -218,7 +234,7 @@ export function CustomerSignupForm() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid || !!nicknameError || otpRequest.isPending}
+            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || otpRequest.isPending}
             isLoading={otpRequest.isPending}
             className="mt-4"
           >
