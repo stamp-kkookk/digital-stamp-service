@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Search, Loader2 } from 'lucide-react';
 import { useCreateStore } from '@/features/store-management/hooks/useStore';
 import { STORE_CATEGORIES } from '@/lib/constants/mockData';
+import { kkookkToast } from '@/components/ui/Toast';
 
 interface StoreFormData {
   name: string;
@@ -52,10 +53,11 @@ export function StoreCreatePage() {
       },
       {
         onSuccess: () => {
+          kkookkToast.success('매장이 등록되었습니다');
           navigate('/owner/stores');
         },
         onError: (error) => {
-          alert(`매장 등록 실패: ${error.message}`);
+          kkookkToast.error('매장 등록 실패', { description: error.message });
         },
       }
     );

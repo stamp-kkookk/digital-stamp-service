@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { useNavigate } from "react-router-dom";
 import { useCustomerNavigate, saveOriginStoreId } from "@/hooks/useCustomerNavigate";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { kkookkToast } from "@/components/ui/Toast";
 import { useOtpRequest, useOtpVerify, useWalletRegister } from "@/features/auth/hooks/useAuth";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
@@ -76,6 +77,7 @@ export function CustomerSignupForm() {
               onSuccess: () => {
                 if (storeId) saveOriginStoreId(storeId);
                 refreshAuthState();
+                kkookkToast.success("회원가입이 완료되었습니다");
                 setStep("success");
               },
               onError: () => {

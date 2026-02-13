@@ -13,6 +13,7 @@ import {
 import type { UpdateStampCardRequest } from '@/types/api';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
+import { kkookkToast } from '@/components/ui/Toast';
 
 export function StampCardEditPage() {
   const navigate = useNavigate();
@@ -72,10 +73,11 @@ export function StampCardEditPage() {
       { storeId: storeIdNum, stampCardId: cardIdNum, data },
       {
         onSuccess: () => {
+          kkookkToast.success('스탬프 카드가 수정되었습니다');
           navigate(`/owner/stores/${storeId}`);
         },
         onError: (err) => {
-          alert(`수정 실패: ${err.message}`);
+          kkookkToast.error('스탬프 카드 수정 실패', { description: err.message });
         },
       }
     );

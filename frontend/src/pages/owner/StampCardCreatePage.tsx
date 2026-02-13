@@ -9,6 +9,7 @@ import { StampCardCreateForm } from '@/features/store-management/components';
 import { useStore } from '@/features/store-management/hooks/useStore';
 import { useCreateStampCard } from '@/features/store-management/hooks/useStampCard';
 import type { CreateStampCardRequest } from '@/types/api';
+import { kkookkToast } from '@/components/ui/Toast';
 
 export function StampCardCreatePage() {
   const navigate = useNavigate();
@@ -47,10 +48,11 @@ export function StampCardCreatePage() {
       { storeId: storeIdNum, data },
       {
         onSuccess: () => {
+          kkookkToast.success('스탬프 카드가 생성되었습니다');
           navigate(`/owner/stores/${storeId}`);
         },
         onError: (err) => {
-          alert(`스탬프 카드 생성 실패: ${err.message}`);
+          kkookkToast.error('스탬프 카드 생성 실패', { description: err.message });
         },
       }
     );
