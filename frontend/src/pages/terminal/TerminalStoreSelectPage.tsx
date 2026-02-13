@@ -9,6 +9,7 @@ import { useTerminalLogin } from "@/features/terminal/hooks/useTerminal";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { getTerminalCredentials, clearTerminalCredentials } from "./TerminalLoginPage";
 import { AlertCircle, Loader2, LogOut, MapPin, Store } from "lucide-react";
+import { kkookkToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -50,6 +51,7 @@ export function TerminalStoreSelectPage() {
         onError: () => {
           setSelectingId(null);
           setLoginError("터미널 인증에 실패했습니다. 다시 로그인해주세요.");
+          kkookkToast.error("터미널 인증 실패", { description: "다시 로그인해주세요." });
         },
       }
     );

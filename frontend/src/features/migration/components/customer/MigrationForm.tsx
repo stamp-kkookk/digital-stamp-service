@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/Input';
 import { StepUpVerify } from '@/components/shared/StepUpVerify';
 import { isStepUpValid } from '@/lib/api/tokenManager';
 import { useCreateMigration, useMigrationList } from '@/features/migration/hooks/useMigration';
+import { kkookkToast } from '@/components/ui/Toast';
 import { useWalletStampCards } from '@/features/wallet/hooks/useWallet';
 
 /** File → Base64 data URI */
@@ -69,6 +70,7 @@ export function MigrationForm() {
         },
         {
           onSuccess: () => {
+            kkookkToast.success('전환 신청이 접수되었습니다');
             customerNavigate('/migrations');
           },
           onError: (error) => {

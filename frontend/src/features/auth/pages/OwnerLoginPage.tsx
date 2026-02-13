@@ -11,6 +11,7 @@ import { PhoneVerification } from "../components/PhoneVerification";
 import { SignupForm } from "../components/SignupForm";
 import { useOwnerLogin, useOwnerSignup, useOtpRequest, useOtpVerify } from "../hooks/useAuth";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { kkookkToast } from "@/components/ui/Toast";
 import type { AuthMode } from "../types";
 
 interface OwnerLoginPageProps {
@@ -80,6 +81,7 @@ export function OwnerLoginPage({
       { email, password },
       {
         onSuccess: () => {
+          kkookkToast.success("로그인 성공");
           onLoginSuccessWithCredentials?.(email, password);
           handleLoginSuccess();
         },
@@ -136,6 +138,7 @@ export function OwnerLoginPage({
               },
               {
                 onSuccess: () => {
+                  kkookkToast.success("회원가입이 완료되었습니다", { description: "로그인해주세요." });
                   setSuccessMessage("회원가입이 완료되었습니다. 로그인해주세요.");
                   setDevOtpCode("");
                   setAuthMode("login");

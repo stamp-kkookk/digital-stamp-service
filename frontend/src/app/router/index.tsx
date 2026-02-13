@@ -58,6 +58,7 @@ export const router = createBrowserRouter([
     element: <LauncherPage />,
   },
 
+
   // 고객 매장 선택 (시뮬레이션 진입점)
   {
     path: "/customer/stores",

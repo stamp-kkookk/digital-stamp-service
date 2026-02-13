@@ -11,6 +11,7 @@ import { TTLCountdown } from './TTLCountdown';
 import { StaffConfirmModal } from './StaffConfirmModal';
 import { RedeemResultView } from './RedeemResultView';
 import { Button } from '@/components/ui/Button';
+import { kkookkToast } from '@/components/ui/Toast';
 import { useCreateRedeemSession, useCompleteRedeemSession } from '../hooks/useRedeem';
 
 type RedeemState = 'loading' | 'confirming' | 'completing' | 'success' | 'failed';
@@ -41,6 +42,7 @@ export function RedeemScreen() {
         },
         onError: () => {
           setRedeemState('failed');
+          kkookkToast.error('리워드 사용 세션 생성에 실패했습니다');
         },
       }
     );
@@ -73,9 +75,11 @@ export function RedeemScreen() {
     completeSession.mutate(sessionId, {
       onSuccess: () => {
         setRedeemState('success');
+        kkookkToast.success('리워드가 사용 처리되었습니다');
       },
       onError: () => {
         setRedeemState('failed');
+        kkookkToast.error('리워드 사용 처리에 실패했습니다');
       },
     });
   }, [sessionId, completeSession]);
