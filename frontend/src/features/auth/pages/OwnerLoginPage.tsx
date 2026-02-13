@@ -63,10 +63,19 @@ export function OwnerLoginPage({
     email: string;
     password: string;
   } | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [devOtpCode, setDevOtpCode] = useState("");
 
   const isLoading = ownerLogin.isPending || ownerSignup.isPending || otpRequest.isPending || otpVerify.isPending;
 
+  const clearMessages = () => {
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
+
   const handleLogin = (email: string, password: string) => {
+    clearMessages();
     ownerLogin.mutate(
       { email, password },
       {
@@ -74,9 +83,8 @@ export function OwnerLoginPage({
           onLoginSuccessWithCredentials?.(email, password);
           handleLoginSuccess();
         },
-        onError: (error) => {
-          alert("로그인 실패: 이메일 또는 비밀번호를 확인해주세요.");
-          console.error("Login error:", error);
+        onError: () => {
+          setErrorMessage("로그인 실패: 이메일 또는 비밀번호를 확인해주세요.");
         },
       }
     );
@@ -88,6 +96,7 @@ export function OwnerLoginPage({
     email: string;
     password: string;
   }) => {
+    clearMessages();
     setPhone(data.phone);
     setSignupData(data);
 
@@ -98,14 +107,11 @@ export function OwnerLoginPage({
         onSuccess: (response) => {
           setAuthMode("verify");
           if (response.devOtpCode) {
-            alert(`[개발용 인증번호]\n${data.phone}로 인증번호 ${response.devOtpCode}을 보냈습니다.`);
-          } else {
-            alert(`인증번호가 ${data.phone}로 발송되었습니다.`);
+            setDevOtpCode(response.devOtpCode);
           }
         },
-        onError: (error) => {
-          alert("인증번호 발송 실패. 잠시 후 다시 시도해주세요.");
-          console.error("OTP request error:", error);
+        onError: () => {
+          setErrorMessage("인증번호 발송 실패. 잠시 후 다시 시도해주세요.");
         },
       }
     );
@@ -113,6 +119,7 @@ export function OwnerLoginPage({
 
   const handleVerify = (code: string) => {
     if (!signupData) return;
+    clearMessages();
 
     otpVerify.mutate(
       { phone, code },
@@ -129,44 +136,49 @@ export function OwnerLoginPage({
               },
               {
                 onSuccess: () => {
-                  alert("회원가입이 완료되었습니다. 로그인해주세요.");
+                  setSuccessMessage("회원가입이 완료되었습니다. 로그인해주세요.");
+                  setDevOtpCode("");
                   setAuthMode("login");
                   setSignupData(null);
                 },
-                onError: (error) => {
-                  alert("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
-                  console.error("Signup error:", error);
+                onError: () => {
+                  setErrorMessage("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
                 },
               }
             );
           } else {
-            alert("인증번호가 일치하지 않습니다.");
+            setErrorMessage("인증번호가 일치하지 않습니다.");
           }
         },
-        onError: (error) => {
-          alert("인증 실패. 인증번호를 확인해주세요.");
-          console.error("OTP verify error:", error);
+        onError: () => {
+          setErrorMessage("인증 실패. 인증번호를 확인해주세요.");
         },
       }
     );
   };
 
   const handleResend = () => {
+    clearMessages();
     otpRequest.mutate(
       { phone },
       {
         onSuccess: (response) => {
           if (response.devOtpCode) {
-            alert(`[개발용 인증번호]\n${phone}로 인증번호 ${response.devOtpCode}을 재발송했습니다.`);
-          } else {
-            alert(`인증번호가 ${phone}로 재발송되었습니다.`);
+            setDevOtpCode(response.devOtpCode);
           }
+          setSuccessMessage(`인증번호가 ${phone}로 재발송되었습니다.`);
         },
         onError: () => {
-          alert("인증번호 재발송 실패. 1분 후 다시 시도해주세요.");
+          setErrorMessage("인증번호 재발송 실패. 1분 후 다시 시도해주세요.");
         },
       }
     );
+  };
+
+  const handleSwitchMode = (mode: AuthMode) => {
+    clearMessages();
+    setDevOtpCode("");
+    setAuthMode(mode);
   };
 
   return (
@@ -181,18 +193,30 @@ export function OwnerLoginPage({
           {subtitle && <p className="text-sm text-kkookk-steel">{subtitle}</p>}
         </div>
 
+        {errorMessage && authMode === "signup" && (
+          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && authMode !== "verify" && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-50 text-emerald-600 text-sm text-center">
+            {successMessage}
+          </div>
+        )}
+
         {authMode === "login" && (
           <LoginForm
             onSubmit={handleLogin}
-            onSwitchToSignup={() => setAuthMode("signup")}
+            onSwitchToSignup={() => handleSwitchMode("signup")}
             isLoading={isLoading}
+            error={errorMessage}
           />
         )}
 
         {authMode === "signup" && (
           <SignupForm
             onSubmit={handleSignup}
-            onSwitchToLogin={() => setAuthMode("login")}
+            onSwitchToLogin={() => handleSwitchMode("login")}
             isLoading={isLoading}
           />
         )}
@@ -200,10 +224,13 @@ export function OwnerLoginPage({
         {authMode === "verify" && (
           <PhoneVerification
             phone={phone}
+            devOtpCode={devOtpCode}
             onVerify={handleVerify}
             onResend={handleResend}
-            onBack={() => setAuthMode("signup")}
+            onBack={() => handleSwitchMode("signup")}
             isLoading={isLoading}
+            error={errorMessage}
+            success={successMessage}
           />
         )}
       </div>
