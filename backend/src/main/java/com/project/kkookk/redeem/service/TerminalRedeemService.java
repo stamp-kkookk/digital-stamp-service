@@ -17,8 +17,12 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,43 +54,76 @@ public class TerminalRedeemService {
                 redeemSessionRepository.findByStoreIdAndStatus(
                         storeId, RedeemSessionStatus.PENDING);
 
-        // 3. 만료되지 않은 세션만 필터링하고 DTO로 변환
+        // 3. 만료되지 않은 세션만 필터링
         LocalDateTime now = LocalDateTime.now();
-        List<PendingRedeemSessionItem> items = new ArrayList<>();
+        List<RedeemSession> validSessions =
+                pendingSessions.stream()
+                        .filter(session -> !now.isAfter(session.getExpiresAt()))
+                        .toList();
 
-        for (RedeemSession session : pendingSessions) {
-            // 만료된 세션 스킵
-            if (now.isAfter(session.getExpiresAt())) {
-                continue;
-            }
-
-            // 관련 정보 조회
-            WalletReward reward =
-                    walletRewardRepository.findById(session.getWalletRewardId()).orElse(null);
-            if (reward == null) {
-                continue;
-            }
-
-            CustomerWallet wallet =
-                    customerWalletRepository.findById(reward.getWalletId()).orElse(null);
-            if (wallet == null) {
-                continue;
-            }
-
-            StampCard stampCard =
-                    stampCardRepository.findById(reward.getStampCardId()).orElse(null);
-
-            String rewardName = stampCard != null ? stampCard.getRewardName() : "리워드";
-            long remainingSeconds = Duration.between(now, session.getExpiresAt()).getSeconds();
-
-            items.add(
-                    new PendingRedeemSessionItem(
-                            session.getId(),
-                            wallet.getNickname(),
-                            rewardName,
-                            Math.max(0, remainingSeconds),
-                            session.getCreatedAt()));
+        if (validSessions.isEmpty()) {
+            return PendingRedeemSessionListResponse.of(List.of());
         }
+
+        // 4. 배치 로딩: WalletReward 조회 (N+1 방지)
+        Set<Long> rewardIds =
+                validSessions.stream()
+                        .map(RedeemSession::getWalletRewardId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, WalletReward> rewardMap =
+                walletRewardRepository.findAllById(rewardIds).stream()
+                        .collect(Collectors.toMap(WalletReward::getId, Function.identity()));
+
+        // 5. 2차 배치 로딩: CustomerWallet, StampCard 조회
+        Set<Long> walletIds =
+                rewardMap.values().stream()
+                        .map(WalletReward::getWalletId)
+                        .collect(Collectors.toSet());
+        Set<Long> stampCardIds =
+                rewardMap.values().stream()
+                        .map(WalletReward::getStampCardId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, CustomerWallet> walletMap =
+                customerWalletRepository.findAllByIds(walletIds).stream()
+                        .collect(Collectors.toMap(CustomerWallet::getId, Function.identity()));
+        Map<Long, StampCard> stampCardMap =
+                stampCardRepository.findAllById(stampCardIds).stream()
+                        .collect(Collectors.toMap(StampCard::getId, Function.identity()));
+
+        // 6. DTO 변환 (추가 쿼리 없음)
+        List<PendingRedeemSessionItem> items =
+                validSessions.stream()
+                        .map(
+                                session -> {
+                                    WalletReward reward =
+                                            rewardMap.get(session.getWalletRewardId());
+                                    if (reward == null) {
+                                        return null;
+                                    }
+
+                                    CustomerWallet wallet = walletMap.get(reward.getWalletId());
+                                    if (wallet == null) {
+                                        return null;
+                                    }
+
+                                    StampCard stampCard = stampCardMap.get(reward.getStampCardId());
+                                    String rewardName =
+                                            stampCard != null ? stampCard.getRewardName() : "리워드";
+                                    long remainingSeconds =
+                                            Duration.between(now, session.getExpiresAt())
+                                                    .getSeconds();
+
+                                    return new PendingRedeemSessionItem(
+                                            session.getId(),
+                                            wallet.getNickname(),
+                                            rewardName,
+                                            Math.max(0, remainingSeconds),
+                                            session.getCreatedAt());
+                                })
+                        .filter(Objects::nonNull)
+                        .toList();
 
         return PendingRedeemSessionListResponse.of(items);
     }
