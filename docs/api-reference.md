@@ -93,8 +93,7 @@
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/customer/redeem-sessions` | `CustomerRedeemController.createRedeemSession()` | 리딤 세션 생성 (TTL: 60s, StepUp 필수) |
-| POST | `/api/customer/redeem-sessions/{id}/complete` | `CustomerRedeemController.completeRedeemSession()` | 리딤 세션 완료 처리 |
+| POST | `/api/customer/redeems` | `CustomerRedeemController.redeemReward()` | 리워드 즉시 사용 (StepUp 필수) |
 
 ### 마이그레이션 (Migration) - StepUp 필요
 
@@ -184,12 +183,6 @@
 | POST | `/api/terminal/{storeId}/issuance-requests/{id}/approve` | `TerminalApprovalController.approveRequest()` | 적립 승인 (스탬프 + 원장 생성) |
 | POST | `/api/terminal/{storeId}/issuance-requests/{id}/reject` | `TerminalApprovalController.rejectRequest()` | 적립 거절 |
 
-### 리딤 확인
-
-| Method | Path | Handler | Description |
-|--------|------|---------|-------------|
-| GET | `/api/terminal/{storeId}/redeem-sessions` | `TerminalRedeemController.getPendingRedeemSessions()` | 대기 중 리딤 세션 목록 |
-
 ### 이력 조회
 
 | Method | Path | Handler | Description |
@@ -201,7 +194,7 @@
 ## StepUp 토큰 필요 엔드포인트 요약
 
 다음 엔드포인트는 OTP 인증 후 발급된 StepUp 토큰이 필요하다:
-- `POST /api/customer/redeem-sessions`
+- `POST /api/customer/redeems`
 - `POST /api/customer/migrations`
 - `GET /api/customer/migrations/{id}`
 - `GET /api/customer/migrations`

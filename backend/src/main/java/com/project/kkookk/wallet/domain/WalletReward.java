@@ -72,26 +72,12 @@ public class WalletReward extends BaseTimeEntity {
                 || expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
     }
 
-    public void startRedeeming() {
+    public void redeem() {
         if (!isAvailable()) {
             throw new IllegalStateException("Only AVAILABLE rewards can be redeemed");
         }
-        this.status = WalletRewardStatus.REDEEMING;
-    }
-
-    public void completeRedeem() {
-        if (this.status != WalletRewardStatus.REDEEMING) {
-            throw new IllegalStateException("Only REDEEMING rewards can be completed");
-        }
         this.status = WalletRewardStatus.REDEEMED;
         this.redeemedAt = LocalDateTime.now();
-    }
-
-    public void cancelRedeeming() {
-        if (this.status != WalletRewardStatus.REDEEMING) {
-            throw new IllegalStateException("Only REDEEMING rewards can be canceled");
-        }
-        this.status = WalletRewardStatus.AVAILABLE;
     }
 
     public void expire() {

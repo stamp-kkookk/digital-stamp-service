@@ -2,8 +2,8 @@ package com.project.kkookk.redeem.controller;
 
 import com.project.kkookk.global.exception.ErrorResponse;
 import com.project.kkookk.global.security.CustomerPrincipal;
-import com.project.kkookk.redeem.controller.dto.CreateRedeemSessionRequest;
-import com.project.kkookk.redeem.controller.dto.RedeemSessionResponse;
+import com.project.kkookk.redeem.controller.dto.RedeemRewardRequest;
+import com.project.kkookk.redeem.controller.dto.RedeemRewardResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,52 +15,36 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Customer Redeem", description = "고객 리워드 사용 API")
 @SecurityRequirement(name = "bearerAuth")
 public interface CustomerRedeemApi {
 
-    @Operation(summary = "리워드 사용 세션 생성", description = "리워드 사용을 위한 세션을 생성합니다. TTL 60초")
+    @Operation(summary = "리워드 사용", description = "리워드를 즉시 사용 처리합니다. StepUp 인증 필수")
     @ApiResponses({
         @ApiResponse(
-                responseCode = "201",
-                description = "세션 생성 성공",
-                content = @Content(schema = @Schema(implementation = RedeemSessionResponse.class))),
+                responseCode = "200",
+                description = "리워드 사용 성공",
+                content = @Content(schema = @Schema(implementation = RedeemRewardResponse.class))),
+        @ApiResponse(
+                responseCode = "403",
+                description = "StepUp 인증 필요",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
                 description = "리워드 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "409",
-                description = "리워드 사용 불가 또는 이미 진행 중인 세션 존재",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    ResponseEntity<RedeemSessionResponse> createRedeemSession(
-            @Valid @RequestBody CreateRedeemSessionRequest request,
-            @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
-
-    @Operation(summary = "리워드 사용 세션 완료", description = "리워드 사용 세션을 완료 처리합니다")
-    @ApiResponses({
-        @ApiResponse(
-                responseCode = "200",
-                description = "세션 완료 성공",
-                content = @Content(schema = @Schema(implementation = RedeemSessionResponse.class))),
-        @ApiResponse(
-                responseCode = "400",
-                description = "처리 대기 중인 세션이 아님",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(
-                responseCode = "404",
-                description = "세션 또는 리워드 없음",
+                description = "리워드 사용 불가",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "410",
-                description = "세션 만료됨",
+                description = "리워드 만료됨",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    ResponseEntity<RedeemSessionResponse> completeRedeemSession(
-            @Parameter(description = "세션 ID", required = true) @PathVariable Long id,
+    ResponseEntity<RedeemRewardResponse> redeemReward(
+            @Valid @RequestBody RedeemRewardRequest request,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 }
