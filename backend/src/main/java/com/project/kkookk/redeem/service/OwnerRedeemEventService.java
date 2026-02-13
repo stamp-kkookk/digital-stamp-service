@@ -7,12 +7,14 @@ import com.project.kkookk.redeem.repository.RedeemEventProjection;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,6 +30,12 @@ public class OwnerRedeemEventService {
         Pageable pageable = PageRequest.of(page, size);
         Page<RedeemEventProjection> events =
                 redeemEventRepository.findCompletedByStoreId(storeId, pageable);
+
+        log.info(
+                "[Redeem] Events queried storeId={} page={} resultCount={}",
+                storeId,
+                page,
+                events.getTotalElements());
 
         return events.map(RedeemEventResponse::from);
     }

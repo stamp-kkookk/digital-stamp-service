@@ -1,5 +1,6 @@
 package com.project.kkookk.migration.service;
 
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
@@ -18,9 +19,11 @@ import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedExceptio
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -72,10 +75,18 @@ public class CustomerMigrationService {
 
         StampMigrationRequest savedRequest = migrationRequestRepository.save(migrationRequest);
 
+        FlowMdc.setMigrationFlow(savedRequest.getId());
+        log.info(
+                "[Migration] Request created id={} walletId={} storeId={}",
+                savedRequest.getId(),
+                customerWalletId,
+                request.storeId());
+
         return MigrationRequestResponse.from(savedRequest);
     }
 
     public MigrationRequestResponse getMigrationRequest(Long customerWalletId, Long migrationId) {
+        FlowMdc.setMigrationFlow(migrationId);
 
         // 본인 소유의 마이그레이션 요청만 조회 가능
         StampMigrationRequest migrationRequest =

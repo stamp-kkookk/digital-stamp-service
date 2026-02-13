@@ -2,6 +2,7 @@ package com.project.kkookk.issuance.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.issuance.controller.dto.CreateIssuanceRequest;
 import com.project.kkookk.issuance.controller.dto.IssuanceRequestResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRequestResult;
@@ -19,10 +20,12 @@ import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundExcept
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -106,6 +109,13 @@ public class CustomerIssuanceService {
             throw new IssuanceRequestAlreadyPendingException();
         }
 
+        FlowMdc.setIssuanceFlow(newRequest.getId());
+        log.info(
+                "[Issuance] Request created id={} walletStampCardId={} storeId={}",
+                newRequest.getId(),
+                request.walletStampCardId(),
+                request.storeId());
+
         return new IssuanceRequestResult(
                 IssuanceRequestResponse.from(newRequest, walletStampCard.getStampCount()), true);
     }
@@ -129,9 +139,12 @@ public class CustomerIssuanceService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
+        FlowMdc.setIssuanceFlow(id);
+
         // Lazy Expiration: 조회 시점에 만료 처리
         if (request.isPending() && request.isExpired()) {
             request.expire();
+            log.info("[Issuance] Request expired id={}", id);
         }
 
         WalletStampCard walletStampCard =

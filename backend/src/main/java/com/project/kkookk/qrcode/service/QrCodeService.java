@@ -5,9 +5,11 @@ import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.store.repository.StoreRepository;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QrCodeService {
@@ -28,6 +30,7 @@ public class QrCodeService {
         byte[] qrCodeImage =
                 qrCodeGenerator.generateQrCode(qrContent, QR_CODE_WIDTH, QR_CODE_HEIGHT);
 
+        log.info("[QR] Generated storeId={}", storeId);
         return Base64.getEncoder().encodeToString(qrCodeImage);
     }
 

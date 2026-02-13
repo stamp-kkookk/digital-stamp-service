@@ -1,0 +1,80 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: kkookk-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: kkookk-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./docker/monitoring/grafana/provisioning/alerting/policies.yml:/etc/grafana/provisioning/alerting/policies.yml
+      - ./docker/monitoring/grafana/provisioning/alerting/rules.yml:/etc/grafana/provisioning/alerting/rules.yml
+      - ./docker/monitoring/grafana/provisioning/alerting/contactpoints.yml:/tmp/contactpoints-template.yml
+      - ./docker/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_UNIFIED_ALERTING_ENABLED=true
+      - SLACK_WEBHOOK_CRITICAL=${SLACK_WEBHOOK_CRITICAL:-https://hooks.slack.com/services/CHANGE_ME}
+      - SLACK_WEBHOOK_WARNING=${SLACK_WEBHOOK_WARNING:-https://hooks.slack.com/services/CHANGE_ME}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sed "s|SLACK_WEBHOOK_CRITICAL_PLACEHOLDER|$$SLACK_WEBHOOK_CRITICAL|g; s|SLACK_WEBHOOK_WARNING_PLACEHOLDER|$$SLACK_WEBHOOK_WARNING|g" /tmp/contactpoints-template.yml > /etc/grafana/provisioning/alerting/contactpoints.yml
+        exec /run.sh
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: kkookk-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./docker/monitoring/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: kkookk-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./docker/monitoring/alertmanager/alertmanager.yml.template:/etc/alertmanager/alertmanager.yml.template
+    environment:
+      - SLACK_WEBHOOK_CRITICAL=${SLACK_WEBHOOK_CRITICAL:-https://hooks.slack.com/services/CHANGE_ME}
+      - SLACK_WEBHOOK_WARNING=${SLACK_WEBHOOK_WARNING:-https://hooks.slack.com/services/CHANGE_ME}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sed "s|SLACK_WEBHOOK_CRITICAL_PLACEHOLDER|$$SLACK_WEBHOOK_CRITICAL|g; s|SLACK_WEBHOOK_WARNING_PLACEHOLDER|$$SLACK_WEBHOOK_WARNING|g" /etc/alertmanager/alertmanager.yml.template > /etc/alertmanager/alertmanager.yml
+        /bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:
+  loki-data:

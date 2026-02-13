@@ -2,6 +2,7 @@ package com.project.kkookk.migration.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
 import com.project.kkookk.migration.controller.dto.MigrationApproveResponse;
 import com.project.kkookk.migration.controller.dto.MigrationDetailResponse;
@@ -125,6 +126,8 @@ public class OwnerMigrationService {
         validateStoreOwnership(storeId, ownerId);
         StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
 
+        FlowMdc.setMigrationFlow(migrationId);
+
         if (!migration.isSubmitted()) {
             throw new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED);
         }
@@ -197,6 +200,9 @@ public class OwnerMigrationService {
         }
 
         migration.reject(request.rejectReason());
+
+        FlowMdc.setMigrationFlow(migrationId);
+        log.info("[Migration] Rejected id={} reason={}", migrationId, request.rejectReason());
 
         return new MigrationRejectResponse(
                 migration.getId(),
