@@ -27,6 +27,8 @@ logging:
 # Actuator & Metrics
 # ===============================
 management:
+  server:
+    port: 7070
   endpoints:
     web:
       exposure:

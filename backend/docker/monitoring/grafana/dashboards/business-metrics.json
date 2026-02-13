@@ -1,0 +1,138 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "Issuance Requests (hourly)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 20, "drawStyle": "bars" }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/customer/issuance-requests\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Created", "refId": "A" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/terminal/approval/pending-requests/.*/approve\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Approved", "refId": "B" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\".*issuance.*\",status=\"410\"}[1h]))", "legendFormat": "Expired", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Redeem Sessions (hourly)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 20, "drawStyle": "bars" }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/customer/redeem-sessions\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Created", "refId": "A" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/terminal/redeem/sessions/.*/complete\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Completed", "refId": "B" }
+      ]
+    },
+    {
+      "title": "Migration Requests (hourly)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 20, "drawStyle": "bars" }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/customer/migrations\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Created", "refId": "A" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/owner/migrations/.*/approve\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Approved", "refId": "B" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/owner/migrations/.*/reject\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Rejected", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Issuance Approval Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "green", "value": 0.8 }] } }, "overrides": [] },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{uri=~\".*approve.*\",method=\"POST\",status=~\"2..\"}[1h])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/customer/issuance-requests\",method=\"POST\",status=~\"2..\"}[1h]))", "refId": "A" }]
+    },
+    {
+      "title": "Issuance Expire Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.2 }, { "color": "red", "value": 0.3 }] } }, "overrides": [] },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{uri=~\".*issuance.*\",status=\"410\"}[1h])) / sum(rate(http_server_requests_seconds_count{uri=~\".*issuance.*\"}[1h]))", "refId": "A" }]
+    },
+    {
+      "title": "OTP Results (hourly)",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\".*otp.*\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Success", "refId": "A" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\".*otp.*\",method=\"POST\",status=\"429\"}[1h]))", "legendFormat": "Rate Limited", "refId": "B" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\".*otp.*\",method=\"POST\",status=~\"4..\",status!=\"429\"}[1h]))", "legendFormat": "Failed", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Auth Logins (hourly)",
+      "type": "timeseries",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 15, "drawStyle": "bars" }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/owner/auth/login\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Owner", "refId": "A" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/terminal/auth/login\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Terminal", "refId": "B" },
+        { "expr": "sum(increase(http_server_requests_seconds_count{uri=~\"/api/customer/wallet/login\",method=\"POST\",status=~\"2..\"}[1h]))", "legendFormat": "Customer", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Issuance Logs",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\"} |= \"[Issuance]\"", "refId": "A" }]
+    },
+    {
+      "title": "Redeem Logs",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\"} |= \"[Redeem]\"", "refId": "A" }]
+    },
+    {
+      "title": "Auth Logs (failures)",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\"} |= \"[Auth]\" |= \"failed\"", "refId": "A" }]
+    },
+    {
+      "title": "Migration Logs",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\"} |= \"[Migration]\"", "refId": "A" }]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["kkookk", "business"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "KKOOKK - Business Metrics",
+  "uid": "kkookk-business",
+  "version": 2
+}
