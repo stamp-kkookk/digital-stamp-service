@@ -2,6 +2,7 @@ package com.project.kkookk.otp.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.health.OtpStoreAccessor;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OtpService {
+public class OtpService implements OtpStoreAccessor {
 
     private static final int OTP_LENGTH = 6;
     private static final int OTP_TTL_MINUTES = 3;
@@ -125,6 +126,16 @@ public class OtpService {
 
     /** OTP 검증 결과 */
     public record OtpVerifyResult(boolean verified, String stepUpToken) {}
+
+    @Override
+    public int getOtpStoreSize() {
+        return otpStore.size();
+    }
+
+    @Override
+    public int getRateLimitStoreSize() {
+        return rateLimitStore.size();
+    }
 
     private String generateOtpCode() {
         int otp = secureRandom.nextInt(1000000); // 0 ~ 999999

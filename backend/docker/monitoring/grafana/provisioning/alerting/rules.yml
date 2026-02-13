@@ -1,0 +1,283 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: loki-error-alerts
+    folder: Log Alerts
+    interval: 1m
+    rules:
+      # 1. ERROR 로그 급증 (5분간 10회 초과)
+      - uid: error-log-spike
+        title: ErrorLogSpike
+        condition: C
+        for: 3m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "ERROR log spike detected"
+          description: "{{ $values.B.Value }} ERROR logs in the last 5 minutes. Check Grafana Explore with: {application=\"kkookk\",level=\"ERROR\"}"
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk",level="ERROR"}[5m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 10
+
+      # 2. 인증 실패 급증 (5분간 10회 초과)
+      - uid: auth-failure-spike
+        title: AuthFailureSpike
+        condition: C
+        for: 5m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "Authentication failure spike detected"
+          description: "{{ $values.B.Value }} auth failures in 5 minutes. Check: {application=\"kkookk\"} |= \"[Auth]\" |= \"failed\""
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk"} |= "[Auth]" |= "failed"[5m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 10
+
+      # 3. 적립 요청 만료 급증 (15분간 5회 초과)
+      - uid: issuance-expired-spike
+        title: IssuanceExpiredSpike
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "Issuance request expiration spike"
+          description: "{{ $values.B.Value }} issuance expirations in 15 minutes. Check: {application=\"kkookk\"} |= \"[Issuance]\" |= \"expired\""
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk"} |= "[Issuance]" |= "expired"[15m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 5
+
+      # 4. 리딤 세션 만료 급증 (15분간 5회 초과)
+      - uid: redeem-expired-spike
+        title: RedeemExpiredSpike
+        condition: C
+        for: 10m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "Redeem session expiration spike"
+          description: "{{ $values.B.Value }} redeem session expirations in 15 minutes. Check: {application=\"kkookk\"} |= \"[Redeem]\" |= \"expired\""
+        labels:
+          severity: warning
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk"} |= "[Redeem]" |= "expired"[15m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 1200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 5
+
+      # 5. 비즈니스 외 예외 발생 (BusinessException 제외)
+      - uid: unhandled-exception
+        title: UnhandledException
+        condition: C
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "Unhandled exception detected"
+          description: "{{ $values.B.Value }} unhandled exceptions in 5 minutes. Check: {application=\"kkookk\",level=\"ERROR\"} |= \"Exception\" != \"BusinessException\""
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk",level="ERROR"} |= "Exception" != "BusinessException"[5m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0
+
+      # 6. DB 커넥션 에러 감지
+      - uid: db-connection-error
+        title: DBConnectionError
+        condition: C
+        for: 1m
+        noDataState: OK
+        execErrState: Error
+        annotations:
+          summary: "Database connection error detected"
+          description: "{{ $values.B.Value }} DB connection errors in 5 minutes. Check: {application=\"kkookk\",level=\"ERROR\"} |~ \"HikariPool|jdbc|connection\""
+        labels:
+          severity: critical
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: loki
+            model:
+              refId: A
+              expr: 'sum(count_over_time({application="kkookk",level="ERROR"} |~ "HikariPool|jdbc|connection"[5m]))'
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: reduce
+              expression: A
+              reducer: last
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator:
+                    type: gt
+                    params:
+                      - 0

@@ -1,0 +1,120 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "SLO Targets",
+      "type": "text",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "| Group | P99 Target | Availability |\n|-------|-----------|-------------|\n| Polling (GET pending/issuance/redeem) | < 100ms | 99.9% |\n| Approval (POST approve/reject/complete) | < 200ms | 99.95% |\n| Auth (login/otp/signup) | < 300ms | 99.9% |\n| Read (wallet/history/statistics) | < 500ms | 99.0% |\n| Mutation (POST issuance/redeem/migration) | < 500ms | 99.5% |"
+      }
+    },
+    {
+      "title": "Polling P99 (Target: 100ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10, "thresholdsStyle": { "mode": "line" } }, "unit": "s", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.1 }] } },
+        "overrides": []
+      },
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/.*(pending|issuance-requests/\\\\d+|redeem-sessions/\\\\d+)\",method=\"GET\"}[5m])) by (le))", "legendFormat": "Polling P99", "refId": "A" }]
+    },
+    {
+      "title": "Approval P99 (Target: 200ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10, "thresholdsStyle": { "mode": "line" } }, "unit": "s", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.2 }] } },
+        "overrides": []
+      },
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/.*(approve|reject|complete)\",method=\"POST\"}[5m])) by (le))", "legendFormat": "Approval P99", "refId": "A" }]
+    },
+    {
+      "title": "Auth P99 (Target: 300ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 3 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10, "thresholdsStyle": { "mode": "line" } }, "unit": "s", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 0.3 }] } },
+        "overrides": []
+      },
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/.*(login|otp|signup)\",method=\"POST\"}[5m])) by (le))", "legendFormat": "Auth P99", "refId": "A" }]
+    },
+    {
+      "title": "Polling Availability (24h)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.999 }, { "color": "green", "value": 0.9995 }] } }, "overrides": [] },
+      "targets": [{ "expr": "1 - (sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(pending|issuance-requests/\\\\d+|redeem-sessions/\\\\d+)\",method=\"GET\",status=~\"5..\"}[24h])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(pending|issuance-requests/\\\\d+|redeem-sessions/\\\\d+)\",method=\"GET\"}[24h])))", "refId": "A" }]
+    },
+    {
+      "title": "Approval Availability (24h)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.9995 }, { "color": "green", "value": 0.9998 }] } }, "overrides": [] },
+      "targets": [{ "expr": "1 - (sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(approve|reject|complete)\",method=\"POST\",status=~\"5..\"}[24h])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(approve|reject|complete)\",method=\"POST\"}[24h])))", "refId": "A" }]
+    },
+    {
+      "title": "Latency SLO: Polling <100ms",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.99 }, { "color": "green", "value": 0.999 }] } }, "overrides": [] },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/.*(pending|issuance-requests/\\\\d+|redeem-sessions/\\\\d+)\",method=\"GET\",le=\"0.1\"}[24h])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(pending|issuance-requests/\\\\d+|redeem-sessions/\\\\d+)\",method=\"GET\"}[24h]))", "refId": "A" }]
+    },
+    {
+      "title": "Latency SLO: Approval <200ms",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.99 }, { "color": "green", "value": 0.999 }] } }, "overrides": [] },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/.*(approve|reject|complete)\",method=\"POST\",le=\"0.2\"}[24h])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/.*(approve|reject|complete)\",method=\"POST\"}[24h]))", "refId": "A" }]
+    },
+    {
+      "title": "Error Budget Burn Rate (SLO 99.9%)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10, "thresholdsStyle": { "mode": "line" } }, "unit": "short", "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2 }, { "color": "red", "value": 10 }] } },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "(sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"5..\"}[1h])) / sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[1h]))) / (1 - 0.999)", "legendFormat": "Burn Rate (1h)", "refId": "A" },
+        { "expr": "(sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"5..\"}[6h])) / sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[6h]))) / (1 - 0.999)", "legendFormat": "Burn Rate (6h)", "refId": "B" }
+      ]
+    },
+    {
+      "title": "Error Budget Remaining (30d)",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 0.25 }, { "color": "green", "value": 0.5 }] } }, "overrides": [] },
+      "targets": [{ "expr": "1 - (sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"5..\"}[30d])) / sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[30d]))) / (1 - 0.999)", "refId": "A" }]
+    },
+    {
+      "title": "Recent 5xx Error Logs",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 23 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\",level=\"ERROR\"}", "refId": "A" }]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["kkookk", "slo"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "KKOOKK - SLO Tracking",
+  "uid": "kkookk-slo",
+  "version": 2
+}
