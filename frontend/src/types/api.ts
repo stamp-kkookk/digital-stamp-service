@@ -184,14 +184,12 @@ export interface WalletRewardListResponse {
   pageInfo: PageInfo;
 }
 
-export type CustomerRedeemEventType = 'REQUESTED' | 'COMPLETED';
 export type CustomerRedeemEventResult = 'SUCCESS' | 'FAILED';
 
 export interface RedeemHistoryItem {
   id: number;
-  redeemSessionId: number;
+  walletRewardId: number;
   store: WalletStampCardStore;
-  type: CustomerRedeemEventType;
   result: CustomerRedeemEventResult;
   occurredAt: string;
 }
@@ -227,19 +225,15 @@ export interface IssuanceRequestResponse {
 // Redeem Types
 // =============================================================================
 
-export interface CreateRedeemSessionRequest {
+export interface RedeemRewardRequest {
   walletRewardId: number;
 }
 
-export type RedeemSessionStatus = 'PENDING' | 'COMPLETED' | 'EXPIRED';
-
-export interface RedeemSessionResponse {
-  sessionId: number;
+export interface RedeemRewardResponse {
   walletRewardId: number;
-  status: RedeemSessionStatus;
-  expiresAt: string;
-  remainingSeconds: number;
-  createdAt: string;
+  redeemEventId: number;
+  rewardName: string;
+  redeemedAt: string;
 }
 
 // =============================================================================
@@ -508,16 +502,14 @@ export interface StampEventResponse {
 // Redeem Events Types (Owner)
 // =============================================================================
 
-export type OwnerRedeemEventType = 'REQUESTED' | 'COMPLETED';
 export type OwnerRedeemEventResult = 'SUCCESS' | 'FAILED';
 
 export interface RedeemEventResponse {
   id: number;
-  redeemSessionId: number;
+  walletRewardId: number;
   customerNickname: string;
   rewardName: string;
   stampCardTitle: string;
-  type: OwnerRedeemEventType;
   result: OwnerRedeemEventResult;
   occurredAt: string;
 }
@@ -570,18 +562,6 @@ export interface IssuanceRejectionResponse {
   processedAt: string;
 }
 
-export interface PendingRedeemSessionItem {
-  sessionId: number;
-  customerNickname: string;
-  rewardName: string;
-  remainingSeconds: number;
-  createdAt: string;
-}
-
-export interface PendingRedeemSessionListResponse {
-  sessions: PendingRedeemSessionItem[];
-  totalCount: number;
-}
 
 // =============================================================================
 // Enums (Wallet Reward)

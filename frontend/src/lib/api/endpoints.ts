@@ -32,9 +32,7 @@ export const API_ENDPOINTS = {
     ISSUANCE_REQUEST: (id: number) => `/api/customer/issuance-requests/${id}`,
 
     // Redeem
-    REDEEM_SESSIONS: '/api/customer/redeem-sessions',
-    REDEEM_SESSION_COMPLETE: (sessionId: number) =>
-      `/api/customer/redeem-sessions/${sessionId}/complete`,
+    REDEEMS: '/api/customer/redeems',
 
     // Migration
     MIGRATIONS: '/api/customer/migrations',
@@ -87,7 +85,6 @@ export const API_ENDPOINTS = {
       `/api/terminal/${storeId}/issuance-requests/${requestId}/approve`,
     REJECT_ISSUANCE: (storeId: number, requestId: number) =>
       `/api/terminal/${storeId}/issuance-requests/${requestId}/reject`,
-    REDEEM_SESSIONS: (storeId: number) => `/api/terminal/${storeId}/redeem-sessions`,
     STAMP_EVENTS: (storeId: number) => `/api/terminal/stores/${storeId}/stamp-events`,
   },
 } as const;
@@ -127,9 +124,6 @@ export const QUERY_KEYS = {
   // Terminal
   pendingIssuanceRequests: (storeId: number) =>
     ['terminal', storeId, 'pendingIssuances'] as const,
-  pendingRedeemSessions: (storeId: number) =>
-    ['terminal', storeId, 'pendingRedeems'] as const,
-
   // Public
   storePublicInfo: (storeId: number) => ['public', 'store', storeId] as const,
   publicStores: () => ['public', 'stores'] as const,

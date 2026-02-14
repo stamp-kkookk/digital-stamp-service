@@ -132,7 +132,7 @@ class CustomerWalletControllerTest {
         Long storeId = 10L;
         StoreInfo storeInfo = new StoreInfo(storeId, "꾹꾹 카페");
         RedeemEventSummary eventSummary =
-                new RedeemEventSummary(100L, 200L, storeInfo, null, null, LocalDateTime.now());
+                new RedeemEventSummary(100L, 200L, storeInfo, null, LocalDateTime.now());
 
         PageInfo pageInfo = new PageInfo(0, 20, 1, 1, true);
 

@@ -9,7 +9,6 @@ import {
   getPendingIssuanceRequests,
   approveIssuanceRequest,
   rejectIssuanceRequest,
-  getPendingRedeemSessions,
   getTerminalStampEvents,
 } from '../api/terminalApi';
 import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
@@ -121,43 +120,6 @@ export function useRejectIssuance() {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.pendingIssuanceRequests(storeId),
       });
-    },
-  });
-}
-
-// =============================================================================
-// Pending Redeem Sessions Hook (with Polling)
-// =============================================================================
-
-export function usePendingRedeemSessions(
-  storeId: number | undefined,
-  options?: {
-    enabled?: boolean;
-    pollingEnabled?: boolean;
-  }
-) {
-  const enabled = options?.enabled ?? true;
-  const pollingEnabled = options?.pollingEnabled ?? true;
-
-  return useQuery({
-    queryKey: QUERY_KEYS.pendingRedeemSessions(storeId ?? 0),
-    queryFn: () => getPendingRedeemSessions(storeId!),
-    enabled: !!storeId && enabled,
-    refetchInterval: (query) => {
-      if (query.state.error) {
-        const err = query.state.error as { response?: { status?: number } };
-        if (err.response?.status === 403 || err.response?.status === 401) {
-          return false;
-        }
-      }
-      return pollingEnabled ? POLLING_INTERVAL_MS : false;
-    },
-    retry: (failureCount, error) => {
-      const err = error as { response?: { status?: number } };
-      if (err.response?.status === 403 || err.response?.status === 401) {
-        return false;
-      }
-      return failureCount < 3;
     },
   });
 }

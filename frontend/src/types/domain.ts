@@ -153,23 +153,6 @@ export interface AuthFormData {
 }
 
 // =============================================================================
-// Redeem Session Types
-// =============================================================================
-
-export type RedeemSessionStatus = 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'CANCELLED';
-
-export interface RedeemSession {
-  id: string;
-  rewardId: string;
-  walletId: string;
-  storeId: string;
-  status: RedeemSessionStatus;
-  ttlSeconds: number;
-  createdAt: Date;
-  expiresAt: Date;
-}
-
-// =============================================================================
 // Design/Template Types (for Stamp Card Creation)
 // =============================================================================
 

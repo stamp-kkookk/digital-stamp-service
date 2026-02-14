@@ -78,7 +78,6 @@ OwnerAccount
      ├─ StampCard (1:N, max 1 ACTIVE per Store)
      │   └─ designType: COLOR | IMAGE | PUZZLE
      ├─ IssuanceRequest (via WalletStampCard)
-     ├─ RedeemSession (via WalletReward)
      └─ StampMigration (via WalletStampCard)
 
 CustomerWallet
@@ -95,9 +94,8 @@ CustomerWallet
 |------|---|------|
 | StampCardStatus | `DRAFT → ACTIVE → PAUSED → ARCHIVED` | ARCHIVED는 최종 상태 |
 | IssuanceRequestStatus | `PENDING → APPROVED / REJECTED / EXPIRED` | 120s TTL |
-| RedeemSessionStatus | `PENDING → COMPLETED / EXPIRED` | 60s TTL |
 | StampMigrationStatus | `SUBMITTED → APPROVED / REJECTED / CANCELED` | 수동 승인 |
-| WalletRewardStatus | `AVAILABLE → REDEEMING → REDEEMED / EXPIRED` | 리워드 라이프사이클 |
+| WalletRewardStatus | `AVAILABLE → REDEEMED / EXPIRED` | 리워드 라이프사이클 |
 | WalletStampCardStatus | `ACTIVE → COMPLETED` | 목표 도달 시 완료 |
 | StoreStatus | `ACTIVE / INACTIVE / DELETED` | Soft delete |
 
@@ -136,28 +134,23 @@ Customer                Backend                Terminal
 ### 2. Redeem (리딤)
 
 ```
-Customer                Backend                Terminal
-   │                       │                       │
-   ├─POST /otp/request────>│                       │
-   │<─OTP 코드─────────────│                       │
-   ├─POST /otp/verify─────>│                       │
-   │<─StepUp 토큰──────────│                       │
-   │                        │                       │
-   ├─POST /redeem-sessions─>│                      │
-   │ (walletRewardId,       │                       │
-   │  StepUp 헤더)          ├─Create PENDING────────>│
-   │                        │ (TTL: 60s)            │
-   │<─201 {id, PENDING}────│                       │
-   │                        │                       │
-   │ [확인 모달 표시]         │                       │
-   │ "되돌릴 수 없는 작업"    │                       │
-   │ 매장 직원 확인 후       │                       │
-   │                        │                       │
-   ├─POST /redeem-sessions/{id}/complete──>│        │
-   │                        ├─Mark COMPLETED        │
-   │                        ├─Reward→REDEEMED       │
-   │                        ├─Create RedeemEvent    │
-   │<─200 {COMPLETED}──────│                       │
+Customer                Backend
+   │                       │
+   ├─POST /otp/request────>│
+   │<─OTP 코드─────────────│
+   ├─POST /otp/verify─────>│
+   │<─StepUp 토큰──────────│
+   │                        │
+   │ [리워드 정보 표시]       │
+   │ [사장님 확인 모달]       │
+   │ "되돌릴 수 없는 작업"    │
+   │ 사장님/직원 확인 후      │
+   │                        │
+   ├─POST /redeems─────────>│
+   │ (walletRewardId,       │
+   │  StepUp 헤더)          ├─Reward→REDEEMED
+   │                        ├─Create RedeemEvent
+   │<─200 {redeemed}───────│
 ```
 
 ### 3. Migration (마이그레이션)
@@ -217,7 +210,7 @@ Controller (@Valid request)
 | Issuance | ISSUANCE_REQUEST_NOT_FOUND, ISSUANCE_REQUEST_EXPIRED | 404, 410 |
 | OTP | OTP_RATE_LIMIT_EXCEEDED, OTP_INVALID, OTP_EXPIRED | 429, 401 |
 | Wallet | CUSTOMER_WALLET_NOT_FOUND, CUSTOMER_WALLET_BLOCKED | 404, 403 |
-| Redeem | STEPUP_REQUIRED, REWARD_NOT_FOUND, REDEEM_SESSION_EXPIRED | 403, 404, 410 |
+| Redeem | STEPUP_REQUIRED, REWARD_NOT_FOUND, REWARD_EXPIRED | 403, 404, 410 |
 | Migration | MIGRATION_NOT_FOUND, MIGRATION_IMAGE_TOO_LARGE | 404, 413 |
 
 ## Feature Package Convention

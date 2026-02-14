@@ -49,9 +49,8 @@
 |------|--------|---|------|
 | StampCardStatus | `stampcard/domain/` | DRAFT, ACTIVE, PAUSED, ARCHIVED | DRAFT→(ACTIVE\|ARCHIVED); ACTIVE→(PAUSED\|ARCHIVED); PAUSED→(ACTIVE\|ARCHIVED); ARCHIVED→(없음) |
 | IssuanceRequestStatus | `issuance/domain/` | PENDING, APPROVED, REJECTED, EXPIRED | PENDING→(APPROVED\|REJECTED) or EXPIRED |
-| RedeemSessionStatus | `redeem/domain/` | PENDING, COMPLETED, EXPIRED | PENDING→(COMPLETED\|EXPIRED) |
 | StampMigrationStatus | `migration/domain/` | SUBMITTED, APPROVED, REJECTED, CANCELED | SUBMITTED→(APPROVED\|REJECTED\|CANCELED) |
-| WalletRewardStatus | `wallet/domain/` | AVAILABLE, REDEEMING, REDEEMED, EXPIRED | AVAILABLE→REDEEMING→REDEEMED or EXPIRED |
+| WalletRewardStatus | `wallet/domain/` | AVAILABLE, REDEEMED, EXPIRED | AVAILABLE→REDEEMED or EXPIRED |
 | WalletStampCardStatus | `wallet/domain/` | ACTIVE, COMPLETED | ACTIVE→COMPLETED |
 | StoreStatus | `store/domain/` | ACTIVE, INACTIVE, DELETED | 유연 전이 |
 | CustomerWalletStatus | `wallet/domain/` | ACTIVE, BLOCKED | ACTIVE↔BLOCKED |
@@ -61,7 +60,6 @@
 | Enum | 패키지 | 값 | 용도 |
 |------|--------|---|------|
 | StampEventType | `stamp/domain/` | ISSUED, MIGRATED, MANUAL_ADJUST | 스탬프 이력 분류 |
-| RedeemEventType | `redeem/domain/` | REQUESTED, COMPLETED | 리딤 이벤트 분류 |
 | StampCardDesignType | `stampcard/domain/` | COLOR, IMAGE, PUZZLE | 카드 디자인 템플릿 |
 | StampCardSortType | `wallet/domain/` | LAST_STAMPED, CREATED, PROGRESS | 지갑 카드 정렬 |
 | TokenType | `global/security/` | OWNER, TERMINAL, CUSTOMER, STEPUP | JWT 토큰 분류 |
@@ -106,10 +104,6 @@
 | 404 | REWARD_NOT_FOUND | Redeem | 리워드를 찾을 수 없습니다 |
 | 409 | REWARD_NOT_AVAILABLE | Redeem | 사용 가능한 리워드가 아닙니다 |
 | 410 | REWARD_EXPIRED | Redeem | 리워드 유효기간이 만료되었습니다 |
-| 409 | REDEEM_SESSION_ALREADY_EXISTS | Redeem | 이미 진행 중인 사용 요청이 있습니다 |
-| 404 | REDEEM_SESSION_NOT_FOUND | Redeem | 사용 세션을 찾을 수 없습니다 |
-| 400 | REDEEM_SESSION_NOT_PENDING | Redeem | 처리 대기 중인 세션이 아닙니다 |
-| 410 | REDEEM_SESSION_EXPIRED | Redeem | 사용 세션이 만료되었습니다 |
 | 404 | MIGRATION_NOT_FOUND | Migration | 마이그레이션 요청을 찾을 수 없습니다 |
 | 409 | MIGRATION_ALREADY_PENDING | Migration | 이미 처리 중인 마이그레이션 요청이 있습니다 |
 | 409 | MIGRATION_ALREADY_PROCESSED | Migration | 이미 처리된 마이그레이션 요청입니다 |
