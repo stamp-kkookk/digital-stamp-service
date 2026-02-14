@@ -75,10 +75,10 @@ class CustomerWalletServiceTest {
     void register_Success() {
         // given
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+                new WalletRegisterRequest("01012345678", "홍길동", "길동이", null);
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder().phone("010-1234-5678").name("홍길동").nickname("길동이").build();
+                CustomerWallet.builder().phone("01012345678").name("홍길동").nickname("길동이").build();
 
         // Reflection을 사용하여 ID 설정
         try {
@@ -91,7 +91,7 @@ class CustomerWalletServiceTest {
 
         String expectedToken = "mock.jwt.token";
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01012345678")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn(expectedToken);
@@ -103,11 +103,11 @@ class CustomerWalletServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.accessToken()).isEqualTo(expectedToken);
         assertThat(response.walletId()).isEqualTo(1L);
-        assertThat(response.phone()).isEqualTo("010-1234-5678");
+        assertThat(response.phone()).isEqualTo("01012345678");
         assertThat(response.name()).isEqualTo("홍길동");
         assertThat(response.nickname()).isEqualTo("길동이");
 
-        verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
+        verify(customerWalletRepository, times(1)).existsByPhone("01012345678");
         verify(customerWalletRepository, times(1)).existsByNickname(request.nickname());
         verify(customerWalletRepository, times(1)).save(any(CustomerWallet.class));
         verify(jwtUtil, times(1)).generateCustomerToken(1L);
@@ -118,9 +118,9 @@ class CustomerWalletServiceTest {
     void register_Fail_PhoneDuplicated() {
         // given
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+                new WalletRegisterRequest("01012345678", "홍길동", "길동이", null);
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(true);
+        given(customerWalletRepository.existsByPhone("01012345678")).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> customerWalletService.register(request))
@@ -129,7 +129,7 @@ class CustomerWalletServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.WALLET_PHONE_DUPLICATED);
 
-        verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
+        verify(customerWalletRepository, times(1)).existsByPhone("01012345678");
         verify(customerWalletRepository, never()).save(any(CustomerWallet.class));
         verify(jwtUtil, never()).generateCustomerToken(anyLong());
     }
@@ -138,11 +138,10 @@ class CustomerWalletServiceTest {
     @DisplayName("생성된 지갑의 기본 상태는 ACTIVE")
     void register_DefaultStatus_Active() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-9999-8888", "김철수", "철수", null);
+        WalletRegisterRequest request = new WalletRegisterRequest("01099998888", "김철수", "철수", null);
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder().phone("010-9999-8888").name("김철수").nickname("철수").build();
+                CustomerWallet.builder().phone("01099998888").name("김철수").nickname("철수").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -152,7 +151,7 @@ class CustomerWalletServiceTest {
             throw new RuntimeException(e);
         }
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01099998888")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
@@ -171,11 +170,10 @@ class CustomerWalletServiceTest {
     @DisplayName("JWT 토큰에 walletId와 phone이 포함됨")
     void register_JwtToken_ContainsWalletIdAndPhone() {
         // given
-        WalletRegisterRequest request =
-                new WalletRegisterRequest("010-5555-6666", "이영희", "영희", null);
+        WalletRegisterRequest request = new WalletRegisterRequest("01055556666", "이영희", "영희", null);
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder().phone("010-5555-6666").name("이영희").nickname("영희").build();
+                CustomerWallet.builder().phone("01055556666").name("이영희").nickname("영희").build();
 
         try {
             java.lang.reflect.Field idField = CustomerWallet.class.getDeclaredField("id");
@@ -185,7 +183,7 @@ class CustomerWalletServiceTest {
             throw new RuntimeException(e);
         }
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01055556666")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(99L)).willReturn("token.with.walletId");
@@ -205,10 +203,10 @@ class CustomerWalletServiceTest {
         Long storeId = 10L;
         Long stampCardId = 100L;
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1111-2222", "박영수", "영수", storeId);
+                new WalletRegisterRequest("01011112222", "박영수", "영수", storeId);
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder().phone("010-1111-2222").name("박영수").nickname("영수").build();
+                CustomerWallet.builder().phone("01011112222").name("박영수").nickname("영수").build();
         ReflectionTestUtils.setField(savedWallet, "id", 1L);
 
         StampCard stampCard =
@@ -227,7 +225,7 @@ class CustomerWalletServiceTest {
                         .build();
         ReflectionTestUtils.setField(savedWalletStampCard, "id", 50L);
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01011112222")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(
@@ -259,13 +257,13 @@ class CustomerWalletServiceTest {
         // given
         Long storeId = 10L;
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-3333-4444", "최민수", "민수", storeId);
+                new WalletRegisterRequest("01033334444", "최민수", "민수", storeId);
 
         CustomerWallet savedWallet =
-                CustomerWallet.builder().phone("010-3333-4444").name("최민수").nickname("민수").build();
+                CustomerWallet.builder().phone("01033334444").name("최민수").nickname("민수").build();
         ReflectionTestUtils.setField(savedWallet, "id", 1L);
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01033334444")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(
@@ -432,9 +430,9 @@ class CustomerWalletServiceTest {
     void register_Fail_NicknameDuplicated() {
         // given
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+                new WalletRegisterRequest("01012345678", "홍길동", "길동이", null);
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01012345678")).willReturn(false);
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(true);
 
         // when & then
@@ -444,7 +442,7 @@ class CustomerWalletServiceTest {
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.WALLET_NICKNAME_DUPLICATED);
 
-        verify(customerWalletRepository, times(1)).existsByPhone(request.phone());
+        verify(customerWalletRepository, times(1)).existsByPhone("01012345678");
         verify(customerWalletRepository, times(1)).existsByNickname(request.nickname());
         verify(customerWalletRepository, never()).save(any(CustomerWallet.class));
     }
@@ -454,9 +452,9 @@ class CustomerWalletServiceTest {
     void register_Fail_NicknameDuplicated_RaceCondition() {
         // given
         WalletRegisterRequest request =
-                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+                new WalletRegisterRequest("01012345678", "홍길동", "길동이", null);
 
-        given(customerWalletRepository.existsByPhone(request.phone())).willReturn(false);
+        given(customerWalletRepository.existsByPhone("01012345678")).willReturn(false);
         // 첫 번째 호출(사전 체크): false, 두 번째 호출(catch 블록 재검사): true
         given(customerWalletRepository.existsByNickname(request.nickname()))
                 .willReturn(false)

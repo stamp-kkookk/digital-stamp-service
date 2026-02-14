@@ -38,7 +38,7 @@ class OtpServiceTest {
     @DisplayName("OTP 요청 성공")
     void requestOtp_Success() {
         // given
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
 
         // when
         String otpCode = otpService.requestOtp(phone);
@@ -51,7 +51,7 @@ class OtpServiceTest {
     @DisplayName("OTP 검증 성공 - StepUp 토큰 발급")
     void verifyOtp_Success_WithStepUpToken() throws Exception {
         // given
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String stepUpToken = "test-stepup-token";
         Long walletId = 1L;
 
@@ -82,7 +82,7 @@ class OtpServiceTest {
     @DisplayName("OTP 검증 성공 - 미등록 사용자 (StepUp 토큰 없음)")
     void verifyOtp_Success_NoWallet() throws Exception {
         // given
-        String phone = "010-9876-5432";
+        String phone = "01098765432";
         otpService.requestOtp(phone);
         String code = extractOtpCode(phone);
 
@@ -100,7 +100,7 @@ class OtpServiceTest {
     @DisplayName("OTP 검증 실패 - 존재하지 않는 OTP")
     void verifyOtp_Fail_NotFound() {
         // given
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         String wrongCode = "123456";
 
         // when & then
@@ -113,7 +113,7 @@ class OtpServiceTest {
     @DisplayName("OTP 검증 실패 - 잘못된 코드")
     void verifyOtp_Fail_InvalidCode() {
         // given
-        String phone = "010-1234-5678";
+        String phone = "01012345678";
         otpService.requestOtp(phone);
         String wrongCode = "999999";
 
@@ -127,7 +127,7 @@ class OtpServiceTest {
     @DisplayName("OTP 검증 실패 - 3회 시도 초과")
     void verifyOtp_Fail_AttemptsExceeded() {
         // given
-        String phone = "010-9999-8888";
+        String phone = "01099998888";
         otpService.requestOtp(phone);
         String wrongCode = "999999";
 
@@ -151,7 +151,7 @@ class OtpServiceTest {
     @DisplayName("Rate Limit 테스트 - 1분 내 2회까지 허용, 3회째 차단")
     void requestOtp_Fail_RateLimitExceeded() {
         // given
-        String phone = "010-7777-6666";
+        String phone = "01077776666";
         otpService.requestOtp(phone); // 1회
         otpService.requestOtp(phone); // 2회 (허용)
 
@@ -165,7 +165,7 @@ class OtpServiceTest {
     @DisplayName("OTP 만료 테스트")
     void verifyOtp_Fail_Expired() throws Exception {
         // given
-        String phone = "010-5555-4444";
+        String phone = "01055554444";
         otpService.requestOtp(phone);
 
         // OTP 생성 시간을 4분 전으로 변경 (3분 TTL 초과)
