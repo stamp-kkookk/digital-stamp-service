@@ -3,6 +3,7 @@ package com.project.kkookk.wallet.controller;
 import com.project.kkookk.wallet.dto.CustomerLoginRequest;
 import com.project.kkookk.wallet.dto.CustomerLoginResponse;
 import com.project.kkookk.wallet.dto.NicknameCheckResponse;
+import com.project.kkookk.wallet.dto.PhoneCheckResponse;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.service.CustomerWalletService;
@@ -38,5 +39,11 @@ public class WalletController implements WalletApi {
     public ResponseEntity<NicknameCheckResponse> checkNickname(@RequestParam String nickname) {
         boolean available = customerWalletService.checkNicknameAvailable(nickname);
         return ResponseEntity.ok(new NicknameCheckResponse(available));
+    }
+
+    @Override
+    public ResponseEntity<PhoneCheckResponse> checkPhone(@RequestParam String phone) {
+        boolean available = customerWalletService.checkPhoneAvailable(phone);
+        return ResponseEntity.ok(new PhoneCheckResponse(available));
     }
 }

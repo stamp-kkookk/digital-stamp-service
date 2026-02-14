@@ -65,6 +65,7 @@
 | POST | `/api/public/wallet/register` | `WalletController.register()` | 신규 고객 지갑 등록 (OTP 인증 후) |
 | POST | `/api/public/wallet/login` | `WalletController.login()` | 고객 로그인 (전화번호 + 이름, 자동 스탬프카드 발급) |
 | GET | `/api/public/wallet/check-nickname?nickname={nickname}` | `WalletController.checkNickname()` | 닉네임 중복 체크 |
+| GET | `/api/public/wallet/check-phone?phone={phone}` | `WalletController.checkPhone()` | 전화번호 중복 체크 |
 
 ### 공개 매장 정보
 

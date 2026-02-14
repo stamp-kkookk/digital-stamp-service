@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     STORE_INFO: (storeId: number) => `/api/public/stores/${storeId}`,
     STORES: '/api/public/stores',
     CHECK_NICKNAME: '/api/public/wallet/check-nickname',
+    CHECK_PHONE: '/api/public/wallet/check-phone',
   },
 
   // ==========================================================================

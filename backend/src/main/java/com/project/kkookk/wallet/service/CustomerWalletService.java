@@ -75,6 +75,10 @@ public class CustomerWalletService {
         return !customerWalletRepository.existsByNickname(nickname);
     }
 
+    public boolean checkPhoneAvailable(String phone) {
+        return !customerWalletRepository.existsByPhone(normalizePhone(phone));
+    }
+
     @Transactional
     public WalletRegisterResponse register(WalletRegisterRequest request) {
         String phone = normalizePhone(request.phone());

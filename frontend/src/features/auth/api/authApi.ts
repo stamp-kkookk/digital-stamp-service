@@ -11,6 +11,7 @@ import type {
   OtpVerifyDto,
   OtpVerifyResponse,
   NicknameCheckResponse,
+  PhoneCheckResponse,
   WalletRegisterRequest,
   WalletRegisterResponse,
   WalletLoginRequest,
@@ -48,6 +49,13 @@ export async function checkNickname(nickname: string): Promise<NicknameCheckResp
   return getRaw<NicknameCheckResponse>(
     API_ENDPOINTS.PUBLIC.CHECK_NICKNAME,
     { nickname }
+  );
+}
+
+export async function checkPhone(phone: string): Promise<PhoneCheckResponse> {
+  return getRaw<PhoneCheckResponse>(
+    API_ENDPOINTS.PUBLIC.CHECK_PHONE,
+    { phone }
   );
 }
 

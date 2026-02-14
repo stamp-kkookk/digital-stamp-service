@@ -3,6 +3,7 @@ package com.project.kkookk.wallet.controller;
 import com.project.kkookk.wallet.dto.CustomerLoginRequest;
 import com.project.kkookk.wallet.dto.CustomerLoginResponse;
 import com.project.kkookk.wallet.dto.NicknameCheckResponse;
+import com.project.kkookk.wallet.dto.PhoneCheckResponse;
 import com.project.kkookk.wallet.dto.WalletRegisterRequest;
 import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,4 +80,20 @@ public interface WalletApi {
     @GetMapping("/check-nickname")
     ResponseEntity<NicknameCheckResponse> checkNickname(
             @Parameter(description = "확인할 닉네임", example = "길동이") @RequestParam String nickname);
+
+    @Operation(summary = "전화번호 중복 체크", description = "전화번호 사용 가능 여부를 확인합니다.")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "조회 성공",
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(implementation = PhoneCheckResponse.class)))
+            })
+    @GetMapping("/check-phone")
+    ResponseEntity<PhoneCheckResponse> checkPhone(
+            @Parameter(description = "확인할 전화번호", example = "01012345678") @RequestParam
+                    String phone);
 }

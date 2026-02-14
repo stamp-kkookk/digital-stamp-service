@@ -24,7 +24,9 @@ export function CustomerLoginForm() {
 
   const loginMutation = useWalletLogin();
 
-  const isFormValid = name.trim() !== '' && phone.trim() !== '' && !phoneError && !!storeId;
+  const phoneDigitCount = stripPhoneToDigits(phone).length;
+  const isPhoneComplete = phoneDigitCount >= 10 && phoneDigitCount <= 11;
+  const isFormValid = name.trim() !== '' && isPhoneComplete && !phoneError && !!storeId;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;

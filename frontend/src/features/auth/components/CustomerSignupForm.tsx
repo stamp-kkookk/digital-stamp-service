@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useCustomerNavigate, saveOriginStoreId } from "@/hooks/useCustomerNavigate";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useOtpRequest, useOtpVerify, useWalletRegister } from "@/features/auth/hooks/useAuth";
-import { checkNickname } from "@/features/auth/api/authApi";
+import { checkNickname, checkPhone } from "@/features/auth/api/authApi";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
 import type { AxiosError } from "axios";
@@ -32,13 +32,17 @@ export function CustomerSignupForm() {
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
 
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
+
   const otpRequest = useOtpRequest();
   const otpVerify = useOtpVerify();
   const walletRegister = useWalletRegister();
 
   // 폼 유효성 검사
+  const phoneDigitCount = stripPhoneToDigits(phone).length;
+  const isPhoneComplete = phoneDigitCount >= 10 && phoneDigitCount <= 11;
   const isBasicInfoValid =
-    name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "" && !phoneError;
+    name.trim() !== "" && nickname.trim() !== "" && isPhoneComplete && !phoneError;
   const isOtpValid = otp.trim().length === 6;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,24 +68,47 @@ export function CustomerSignupForm() {
     }
   };
 
-  const handleRequestOtp = (e: React.FormEvent) => {
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isBasicInfoValid || nameError || nicknameError) return;
     setError(null);
+    setPhoneError(null);
     const phoneDigits = stripPhoneToDigits(phone);
 
+    // 1. 전화번호 중복 체크 (OTP 요청 전 선행)
+    setIsCheckingPhone(true);
+    try {
+      const result = await checkPhone(phoneDigits);
+      if (!result.available) {
+        setPhoneError("이미 등록된 번호입니다");
+        setIsCheckingPhone(false);
+        return;
+      }
+    } catch {
+      // 네트워크 에러 시 서버에서 최종 차단하므로 진행 허용
+    }
+    setIsCheckingPhone(false);
+
+    // 2. OTP 요청
     otpRequest.mutate(
       { phone: phoneDigits },
       {
         onSuccess: (response) => {
           setStep("otp");
-          // Dev convenience: auto-fill OTP code in dev mode
           if (response.devOtpCode) {
             setOtp(response.devOtpCode);
           }
         },
-        onError: () => {
-          setError("1분 후 다시 시도해주세요.");
+        onError: (err) => {
+          const axiosError = err as AxiosError<ErrorResponse>;
+          const status = axiosError?.response?.status;
+          if (status === 429) {
+            setError("1분 후 다시 시도해주세요.");
+          } else if (status === 400) {
+            setPhoneError("올바른 전화번호를 입력해주세요");
+          } else {
+            setError("인증번호 요청에 실패했습니다. 다시 시도해주세요.");
+          }
         },
       }
     );
@@ -251,8 +278,8 @@ export function CustomerSignupForm() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || !!phoneError || otpRequest.isPending}
-            isLoading={otpRequest.isPending}
+            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || !!phoneError || isCheckingPhone || otpRequest.isPending}
+            isLoading={isCheckingPhone || otpRequest.isPending}
             className="mt-4"
           >
             인증번호 받기
