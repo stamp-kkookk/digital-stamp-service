@@ -94,7 +94,7 @@ export interface WalletRegisterResponse {
 
 export interface WalletLoginRequest {
   phone: string;
-  nickname: string;
+  name: string;
   storeId: number;
 }
 
