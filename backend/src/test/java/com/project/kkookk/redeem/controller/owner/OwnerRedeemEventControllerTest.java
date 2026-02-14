@@ -67,6 +67,7 @@ class OwnerRedeemEventControllerTest {
                         1L,
                         100L,
                         "커피러버",
+                        "010-1234-5678",
                         "아메리카노 1잔",
                         "커피전문점 스탬프카드",
                         RedeemEventType.COMPLETED,

@@ -53,7 +53,7 @@ class TerminalStampEventServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).customerName()).isEqualTo("홍길동");
+        assertThat(result.getContent().get(0).customerNickname()).isEqualTo("길동이");
     }
 
     @Test
@@ -87,8 +87,8 @@ class TerminalStampEventServiceTest {
             }
 
             @Override
-            public String getCustomerName() {
-                return "홍길동";
+            public String getCustomerNickname() {
+                return "길동이";
             }
 
             @Override

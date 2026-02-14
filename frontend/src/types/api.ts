@@ -496,7 +496,7 @@ export type StampEventType = 'ISSUED' | 'MIGRATED' | 'MANUAL_ADJUST';
 export interface StampEventResponse {
   id: number;
   walletStampCardId: number;
-  customerName: string;
+  customerNickname: string;
   customerPhone: string;
   type: StampEventType;
   delta: number;
@@ -515,6 +515,7 @@ export interface RedeemEventResponse {
   id: number;
   redeemSessionId: number;
   customerNickname: string;
+  customerPhone: string;
   rewardName: string;
   stampCardTitle: string;
   type: OwnerRedeemEventType;
