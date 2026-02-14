@@ -140,6 +140,9 @@
 | format.ts | `formatFullDateTime()` | Date/string/number | "2월 10일 14:30" | 날짜+시간 (long) |
 | format.ts | `formatShortDate()` | Date/string/number | "2026.02.10" | YYYY.MM.DD |
 | format.ts | `maskPhone()` | string | "010-\*\*\*\*-5678" | 전화번호 마스킹 |
+| format.ts | `stripPhoneToDigits()` | string | "01012345678" | 전화번호에서 숫자만 추출 |
+| format.ts | `formatPhoneNumber()` | string | "010-1234-5678" | 전화번호 자동 포맷 (3-4-4) |
+| format.ts | `hasInvalidPhoneChars()` | string | boolean | 전화번호 입력에 잘못된 문자 포함 여부 |
 | format.ts | `formatCountdown()` | number (seconds) | "05:30" | MM:SS 카운트다운 |
 | format.ts | `formatRelativeTime()` | Date/string/number | "2시간 전" | 상대 시간 |
 | format.ts | `formatNumber()` | number | "1,234,567" | 천단위 구분 |

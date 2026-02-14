@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCustomerNavigate, saveOriginStoreId } from '@/hooks/useCustomerNavigate';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useWalletLogin } from '@/features/auth/hooks/useAuth';
+import { formatPhoneNumber, hasInvalidPhoneChars, stripPhoneToDigits } from '@/lib/utils/format';
 
 export function CustomerLoginForm() {
   const navigate = useNavigate();
@@ -19,10 +20,21 @@ export function CustomerLoginForm() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const loginMutation = useWalletLogin();
 
-  const isFormValid = name.trim() !== '' && phone.trim() !== '' && !!storeId;
+  const isFormValid = name.trim() !== '' && phone.trim() !== '' && !phoneError && !!storeId;
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    if (hasInvalidPhoneChars(rawValue)) {
+      setPhoneError("숫자만 입력해주세요");
+    } else {
+      setPhoneError(null);
+    }
+    setPhone(formatPhoneNumber(rawValue));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +42,7 @@ export function CustomerLoginForm() {
     if (!isFormValid) return;
 
     loginMutation.mutate(
-      { phone, name, storeId: Number(storeId) },
+      { phone: stripPhoneToDigits(phone), name, storeId: Number(storeId) },
       {
         onSuccess: () => {
           if (storeId) saveOriginStoreId(storeId);
@@ -79,9 +91,11 @@ export function CustomerLoginForm() {
           type="tel"
           label="휴대폰 번호"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={handlePhoneChange}
           placeholder="010-0000-0000"
           autoComplete="tel"
+          maxLength={13}
+          error={phoneError ?? undefined}
         />
 
         {error && (

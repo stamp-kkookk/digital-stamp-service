@@ -14,6 +14,7 @@ import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
 import type { AxiosError } from "axios";
 import type { ErrorResponse } from "@/types/api";
+import { formatPhoneNumber, hasInvalidPhoneChars, stripPhoneToDigits } from "@/lib/utils/format";
 
 type SignupStep = "input" | "otp" | "success";
 
@@ -29,6 +30,7 @@ export function CustomerSignupForm() {
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const otpRequest = useOtpRequest();
   const otpVerify = useOtpVerify();
@@ -36,8 +38,18 @@ export function CustomerSignupForm() {
 
   // 폼 유효성 검사
   const isBasicInfoValid =
-    name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "";
+    name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "" && !phoneError;
   const isOtpValid = otp.trim().length === 6;
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    if (hasInvalidPhoneChars(rawValue)) {
+      setPhoneError("숫자만 입력해주세요");
+    } else {
+      setPhoneError(null);
+    }
+    setPhone(formatPhoneNumber(rawValue));
+  };
 
   const handleNicknameBlur = async () => {
     if (!nickname.trim()) return;
@@ -56,9 +68,10 @@ export function CustomerSignupForm() {
     e.preventDefault();
     if (!isBasicInfoValid || nameError || nicknameError) return;
     setError(null);
+    const phoneDigits = stripPhoneToDigits(phone);
 
     otpRequest.mutate(
-      { phone },
+      { phone: phoneDigits },
       {
         onSuccess: (response) => {
           setStep("otp");
@@ -78,9 +91,10 @@ export function CustomerSignupForm() {
     e.preventDefault();
     if (!otp) return;
     setError(null);
+    const phoneDigits = stripPhoneToDigits(phone);
 
     otpVerify.mutate(
-      { phone, code: otp },
+      { phone: phoneDigits, code: otp },
       {
         onSuccess: (response) => {
           if (!response.verified) {
@@ -89,7 +103,7 @@ export function CustomerSignupForm() {
           }
           // OTP verified → register wallet
           walletRegister.mutate(
-            { phone, name, nickname, storeId: storeId ? Number(storeId) : undefined },
+            { phone: phoneDigits, name, nickname, storeId: storeId ? Number(storeId) : undefined },
             {
               onSuccess: () => {
                 if (storeId) saveOriginStoreId(storeId);
@@ -164,6 +178,7 @@ export function CustomerSignupForm() {
             setError(null);
             setNameError(null);
             setNicknameError(null);
+            setPhoneError(null);
             if (step === "otp") {
               setStep("input");
               setOtp("");
@@ -221,9 +236,11 @@ export function CustomerSignupForm() {
             type="tel"
             label="휴대폰 번호"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={handlePhoneChange}
             placeholder="010-0000-0000"
             autoComplete="tel"
+            maxLength={13}
+            error={phoneError ?? undefined}
           />
 
           {error && (
@@ -234,7 +251,7 @@ export function CustomerSignupForm() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || otpRequest.isPending}
+            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || !!phoneError || otpRequest.isPending}
             isLoading={otpRequest.isPending}
             className="mt-4"
           >

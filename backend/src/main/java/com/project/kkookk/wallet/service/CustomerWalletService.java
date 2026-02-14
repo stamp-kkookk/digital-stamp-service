@@ -67,14 +67,20 @@ public class CustomerWalletService {
     private final RedeemEventRepository redeemEventRepository;
     private final JwtUtil jwtUtil;
 
+    private String normalizePhone(String phone) {
+        return phone.replaceAll("[^0-9]", "");
+    }
+
     public boolean checkNicknameAvailable(String nickname) {
         return !customerWalletRepository.existsByNickname(nickname);
     }
 
     @Transactional
     public WalletRegisterResponse register(WalletRegisterRequest request) {
+        String phone = normalizePhone(request.phone());
+
         // 1. 전화번호 중복 체크
-        if (customerWalletRepository.existsByPhone(request.phone())) {
+        if (customerWalletRepository.existsByPhone(phone)) {
             throw new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED);
         }
 
@@ -83,10 +89,10 @@ public class CustomerWalletService {
             throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
         }
 
-        // 3. CustomerWallet 생성
+        // 3. CustomerWallet 생성 (정규화된 전화번호 저장)
         CustomerWallet wallet =
                 CustomerWallet.builder()
-                        .phone(request.phone())
+                        .phone(phone)
                         .name(request.name())
                         .nickname(request.nickname())
                         .build();
@@ -100,7 +106,7 @@ public class CustomerWalletService {
             if (customerWalletRepository.existsByNickname(request.nickname())) {
                 throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
             }
-            if (customerWalletRepository.existsByPhone(request.phone())) {
+            if (customerWalletRepository.existsByPhone(phone)) {
                 throw new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED);
             }
             throw e;
@@ -135,10 +141,12 @@ public class CustomerWalletService {
 
     @Transactional
     public CustomerLoginResponse login(CustomerLoginRequest request) {
+        String phone = normalizePhone(request.phone());
+
         // 1. 전화번호와 이름으로 CustomerWallet 조회
         CustomerWallet wallet =
                 customerWalletRepository
-                        .findByPhoneAndName(request.phone(), request.name())
+                        .findByPhoneAndName(phone, request.name())
                         .orElseThrow(
                                 () ->
                                         new CustomerWalletNotFoundException(
