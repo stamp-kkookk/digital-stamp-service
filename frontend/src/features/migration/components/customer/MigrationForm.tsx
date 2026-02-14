@@ -181,13 +181,29 @@ export function MigrationForm() {
             >
               종이 쿠폰 사진 첨부 <span className="text-kkookk-orange-500">*</span>
             </label>
+            <p className="text-xs text-kkookk-steel mb-2">
+              <span className="text-rose-600">• 파일 크기: 3MB 이하</span>
+            </p>
             <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-kkookk-sand/30 hover:bg-kkookk-sand cursor-pointer transition-colors relative">
               <input
                 id="photo-upload"
                 type="file"
                 accept="image/*"
                 className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const selectedFile = e.target.files?.[0];
+                  if (!selectedFile) return;
+
+                  // 파일 크기 제한: 3MB
+                  const maxSize = 3 * 1024 * 1024;
+                  if (selectedFile.size > maxSize) {
+                    alert('파일 크기가 너무 큽니다.\n3MB 이하의 이미지를 선택해주세요.');
+                    e.target.value = '';
+                    return;
+                  }
+
+                  setFile(selectedFile);
+                }}
                 disabled={hasPending}
               />
               <div className="flex flex-col items-center text-kkookk-steel">

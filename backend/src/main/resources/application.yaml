@@ -13,6 +13,8 @@ spring:
 
 server:
   port: 8080
+  tomcat:
+    max-http-post-size: 5MB  # 이미지 포함 API 요청 크기 제한
   servlet:
     encoding:
       charset: UTF-8

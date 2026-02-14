@@ -53,16 +53,28 @@ export function StampCardCreateForm({
     key: "backgroundImage" | "stampImage",
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setDesign((prev) => ({
-          ...prev,
-          [key]: event.target?.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // 파일 크기 제한: 배경 이미지 3MB, 도장 이미지 500KB
+    const maxSize = key === "backgroundImage" ? 3 * 1024 * 1024 : 500 * 1024;
+    const maxSizeText = key === "backgroundImage" ? "3MB" : "500KB";
+
+    if (file.size > maxSize) {
+      alert(
+        `파일 크기가 너무 큽니다.\n${maxSizeText} 이하의 이미지를 선택해주세요.`,
+      );
+      e.target.value = ""; // 파일 선택 초기화
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setDesign((prev) => ({
+        ...prev,
+        [key]: event.target?.result as string,
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = () => {
@@ -253,6 +265,7 @@ export function StampCardCreateForm({
                     )}
                     <div className="mt-2 text-xs text-kkookk-steel">
                       <p>권장 사이즈: 800x480px (5:3 비율)</p>
+                      <p className="text-rose-600">• 파일 크기: 3MB 이하</p>
                     </div>
                   </div>
 
@@ -281,6 +294,7 @@ export function StampCardCreateForm({
                       <div className="text-xs text-kkookk-steel">
                         <p>PNG, JPG (투명 배경 권장)</p>
                         <p>권장 사이즈: 100x100px</p>
+                        <p className="text-rose-600">• 파일 크기: 500KB 이하</p>
                       </div>
                     </div>
                   </div>
