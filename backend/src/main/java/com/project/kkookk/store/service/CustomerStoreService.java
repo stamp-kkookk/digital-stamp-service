@@ -9,7 +9,6 @@ import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.controller.customer.dto.StampCardInfo;
 import com.project.kkookk.store.controller.customer.dto.StoreStampCardSummaryResponse;
 import com.project.kkookk.store.domain.Store;
-import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class CustomerStoreService {
                         .findById(storeId)
                         .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-        if (store.getStatus() != StoreStatus.ACTIVE) {
+        if (!store.getStatus().isOperational()) {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
