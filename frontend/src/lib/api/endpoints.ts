@@ -73,6 +73,19 @@ export const API_ENDPOINTS = {
       `/api/owner/stores/${storeId}/migrations/${migrationId}/approve`,
     STORE_MIGRATION_REJECT: (storeId: number, migrationId: number) =>
       `/api/owner/stores/${storeId}/migrations/${migrationId}/reject`,
+
+    // Place Search
+    PLACE_SEARCH: '/api/owner/places/search',
+  },
+
+  // ==========================================================================
+  // Admin API (Admin Token 필요)
+  // ==========================================================================
+  ADMIN: {
+    STORES: '/api/admin/stores',
+    STORE: (storeId: number) => `/api/admin/stores/${storeId}`,
+    STORE_STATUS: (storeId: number) => `/api/admin/stores/${storeId}/status`,
+    STORE_AUDIT_LOGS: (storeId: number) => `/api/admin/stores/${storeId}/audit-logs`,
   },
 
   // ==========================================================================
@@ -127,4 +140,9 @@ export const QUERY_KEYS = {
   // Public
   storePublicInfo: (storeId: number) => ['public', 'store', storeId] as const,
   publicStores: () => ['public', 'stores'] as const,
+
+  // Admin
+  adminStores: (status?: string) => ['admin', 'stores', { status }] as const,
+  adminStore: (storeId: number) => ['admin', 'store', storeId] as const,
+  adminAuditLogs: (storeId: number) => ['admin', 'store', storeId, 'auditLogs'] as const,
 } as const;

@@ -9,11 +9,12 @@ import {
   useStampCards,
   useUpdateStampCardStatus,
 } from "@/features/store-management/hooks/useStampCard";
-import { useStore } from "@/features/store-management/hooks/useStore";
+import { useStore, useDeleteStore } from "@/features/store-management/hooks/useStore";
 import type { StampCardDesignType, StampCardStatus } from "@/types/api";
 import { isAxiosError } from "axios";
 import {
   AlertCircle,
+  AlertTriangle,
   BarChart3,
   ChevronLeft,
   Coffee,
@@ -21,12 +22,15 @@ import {
   Loader2,
   MapPin,
   Pause,
+  Pencil,
   Play,
   Plus,
   Trash2,
+  CheckCircle,
+  X,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 type TabType = "cards" | "history" | "migrations";
 
@@ -125,8 +129,11 @@ function ActiveCardPreview({
 
 export function StoreDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { storeId } = useParams<{ storeId: string }>();
   const [storeDetailTab, setStoreDetailTab] = useState<TabType>("cards");
+  const locationMessage = (location.state as { message?: string } | null)?.message ?? null;
+  const [successMessage, setSuccessMessage] = useState<string | null>(locationMessage);
 
   const storeIdNum = Number(storeId);
 
@@ -141,6 +148,16 @@ export function StoreDetailPage() {
   });
   const deleteStampCard = useDeleteStampCard();
   const updateStatus = useUpdateStampCardStatus();
+  const deleteStore = useDeleteStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // 성공 메시지 자동 숨김 + history state 정리
+  useEffect(() => {
+    if (!successMessage) return;
+    window.history.replaceState({}, "");
+    const timer = setTimeout(() => setSuccessMessage(null), 5000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   const stampCards = stampCardsData?.content ?? [];
   const activeCard = stampCards.find((c) => c.status === "ACTIVE");
@@ -278,26 +295,96 @@ export function StoreDetailPage() {
     navigate(`/owner/stores/${storeId}/stamp-cards/${stampCardId}/edit`);
   };
 
+  const handleDeleteStore = () => {
+    deleteStore.mutate(storeIdNum, {
+      onSuccess: () => {
+        navigate("/owner/stores", {
+          state: { message: "매장이 삭제되었습니다." },
+        });
+      },
+      onError: () => {
+        setShowDeleteConfirm(false);
+      },
+    });
+  };
+
   return (
     <div className="flex flex-col h-full">
+      {/* 성공 메시지 토스트 */}
+      {successMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-3 shadow-lg">
+          <CheckCircle size={18} className="shrink-0 text-green-600" />
+          <span className="text-sm font-medium text-green-800">{successMessage}</span>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="shrink-0 text-green-400 hover:text-green-600"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
       {/* 헤더 */}
       <div className="px-8 py-6 bg-white border-b border-slate-200">
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate("/owner/stores")}
-            className="p-2 -ml-2 transition-colors rounded-full text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-50"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <div>
-            <h2 className="text-2xl font-bold text-kkookk-navy">
-              {store.name}
-            </h2>
-            <p className="flex items-center gap-1 text-sm text-kkookk-steel">
-              <MapPin size={12} /> {store.address || "주소 미등록"}
-            </p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/owner/stores")}
+              className="p-2 -ml-2 transition-colors rounded-full text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-50"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-kkookk-navy">
+                  {store.name}
+                </h2>
+                {!store.placeRef && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-200">
+                    장소 미연동
+                  </span>
+                )}
+              </div>
+              <p className="flex items-center gap-1 text-sm text-kkookk-steel">
+                <MapPin size={12} /> {store.address || "주소 미등록"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {store.status !== "SUSPENDED" && store.status !== "DELETED" && (
+              <button
+                onClick={() => navigate(`/owner/stores/${storeId}/edit`)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50 transition-colors"
+              >
+                <Pencil size={16} /> 매장 정보 수정
+              </button>
+            )}
+            {store.status !== "DELETED" && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 size={16} /> 삭제
+              </button>
+            )}
           </div>
         </div>
+
+        {/* Store Status Banner */}
+        {store.status === "DRAFT" && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 text-sm border rounded-lg bg-gray-50 border-gray-200 text-gray-700">
+            <AlertCircle size={18} />
+            <div>
+              <p className="font-bold">승인 대기 중</p>
+              <p className="text-xs text-gray-500">운영팀에 문의하여 매장 승인을 요청하세요.</p>
+            </div>
+          </div>
+        )}
+        {store.status === "SUSPENDED" && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 text-sm border rounded-lg bg-red-50 border-red-200 text-red-700">
+            <AlertCircle size={18} />
+            <p className="font-bold">관리자에 의해 정지된 매장입니다</p>
+          </div>
+        )}
 
         {/* 탭 */}
         <div className="flex gap-1">
@@ -550,6 +637,42 @@ export function StoreDetailPage() {
           </>
         )}
       </div>
+
+      {/* 매장 삭제 확인 모달 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={22} className="mt-0.5 shrink-0 text-red-500" />
+              <div>
+                <h3 className="font-bold text-kkookk-navy">
+                  매장을 삭제하시겠습니까?
+                </h3>
+                <p className="mt-1.5 text-sm text-kkookk-steel">
+                  삭제된 매장은 복구할 수 없으며, 관련 스탬프 카드도 더 이상 운영되지 않습니다.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteStore.isPending}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-kkookk-steel hover:bg-slate-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDeleteStore}
+                disabled={deleteStore.isPending}
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleteStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleteStore.isPending ? "삭제 중..." : "삭제"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
