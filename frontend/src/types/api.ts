@@ -209,7 +209,7 @@ export interface CreateIssuanceRequest {
   idempotencyKey: string;
 }
 
-export type IssuanceRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
+export type IssuanceRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
 
 export interface IssuanceRequestResponse {
   id: number;

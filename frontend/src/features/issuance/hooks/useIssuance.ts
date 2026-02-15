@@ -4,7 +4,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createIssuanceRequest, getIssuanceRequest } from '../api/issuanceApi';
+import { createIssuanceRequest, getIssuanceRequest, cancelIssuanceRequest } from '../api/issuanceApi';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
 import type { CreateIssuanceRequest } from '@/types/api';
 
@@ -54,6 +54,21 @@ export function useIssuanceRequestStatus(
       }
 
       return false;
+    },
+  });
+}
+
+// =============================================================================
+// Cancel Issuance Request Hook
+// =============================================================================
+
+export function useCancelIssuanceRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (requestId: number) => cancelIssuanceRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['issuance'] });
     },
   });
 }

@@ -90,6 +90,7 @@
 |--------|------|---------|-------------|
 | POST | `/api/customer/issuance-requests` | `CustomerIssuanceController.createIssuanceRequest()` | 적립 요청 생성 (TTL: 120s, idempotent key) |
 | GET | `/api/customer/issuance-requests/{id}` | `CustomerIssuanceController.getIssuanceRequest()` | 적립 요청 상태 조회 (폴링용, 2-3초 간격) |
+| POST | `/api/customer/issuance-requests/{id}/cancel` | `CustomerIssuanceController.cancelIssuanceRequest()` | 적립 요청 취소 (PENDING만 가능, 409 on conflict) |
 
 ### 리딤 (Redeem) - StepUp 필요
 

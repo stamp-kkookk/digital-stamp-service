@@ -4,5 +4,6 @@ public enum IssuanceRequestStatus {
     PENDING,
     APPROVED,
     REJECTED,
-    EXPIRED
+    EXPIRED,
+    CANCELLED
 }
