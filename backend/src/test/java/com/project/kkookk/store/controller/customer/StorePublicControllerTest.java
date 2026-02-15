@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -25,7 +25,7 @@ class StorePublicControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private StorePublicService storePublicService;
+    @MockitoBean private StorePublicService storePublicService;
 
     @Test
     @DisplayName("GET /api/public/stores/{storeId} - 매장 정보 조회 성공")

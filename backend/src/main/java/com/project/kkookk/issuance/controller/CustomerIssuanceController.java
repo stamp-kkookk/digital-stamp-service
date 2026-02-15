@@ -48,4 +48,15 @@ public class CustomerIssuanceController implements CustomerIssuanceApi {
 
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<IssuanceRequestResponse> cancelIssuanceRequest(
+            @PathVariable Long id, @AuthenticationPrincipal CustomerPrincipal principal) {
+
+        IssuanceRequestResponse response =
+                customerIssuanceService.cancelIssuanceRequest(id, principal.getWalletId());
+
+        return ResponseEntity.ok(response);
+    }
 }

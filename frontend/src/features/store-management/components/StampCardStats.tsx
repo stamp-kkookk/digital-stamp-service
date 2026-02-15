@@ -9,9 +9,9 @@ import {
   Calendar,
   Check,
   ChevronLeft,
+  CreditCard,
   Gift,
   TrendingUp,
-  Users,
 } from "lucide-react";
 
 interface StampCardStatsProps {
@@ -43,7 +43,9 @@ export function StampCardStats({
     return (
       <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
         <AlertCircle className="w-12 h-12 text-red-500" />
-        <p className="mt-4 text-kkookk-steel">통계 데이터를 불러올 수 없습니다.</p>
+        <p className="mt-4 text-kkookk-steel">
+          통계 데이터를 불러올 수 없습니다.
+        </p>
         <button
           onClick={onBack}
           className="px-4 py-2 mt-4 font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50"
@@ -77,10 +79,10 @@ export function StampCardStats({
       color: "bg-green-50 text-green-600",
     },
     {
-      title: "활성 이용자",
+      title: "활성 스탬프 카드",
       value: formatNumber(stats.activeUsers),
-      unit: "명",
-      icon: <Users size={20} />,
+      unit: "장",
+      icon: <CreditCard size={20} />,
       color: "bg-purple-50 text-purple-600",
     },
   ];
@@ -113,7 +115,8 @@ export function StampCardStats({
           </div>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white border rounded-lg border-slate-200 text-kkookk-steel">
-          <Calendar size={16} /> {formatDateRange(stats.startDate, stats.endDate)}
+          <Calendar size={16} />{" "}
+          {formatDateRange(stats.startDate, stats.endDate)}
         </button>
       </div>
 
@@ -143,9 +146,7 @@ export function StampCardStats({
       {/* 일별 적립 추이 차트 */}
       <div className="flex flex-col flex-1 min-h-0 p-6 bg-white border shadow-sm rounded-2xl border-slate-200">
         <div className="flex items-center justify-between mb-6">
-          <h4 className="text-lg font-bold text-kkookk-navy">
-            일별 적립 추이
-          </h4>
+          <h4 className="text-lg font-bold text-kkookk-navy">일별 적립 추이</h4>
           <div className="flex items-center gap-1.5 text-xs text-kkookk-steel">
             <div className="w-2.5 h-2.5 bg-kkookk-indigo rounded-full" />
             스탬프 적립
@@ -154,7 +155,9 @@ export function StampCardStats({
 
         {recentDays.length === 0 ? (
           <div className="flex items-center justify-center flex-1">
-            <p className="text-kkookk-steel">조회 기간 내 적립 데이터가 없습니다.</p>
+            <p className="text-kkookk-steel">
+              조회 기간 내 적립 데이터가 없습니다.
+            </p>
           </div>
         ) : (
           <div className="flex items-end justify-between gap-4 px-2 flex-1 min-h-[200px]">

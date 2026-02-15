@@ -3,7 +3,7 @@
  * 사장님 매장 목록 페이지
  */
 
-import { QRPosterModal } from "@/features/store-management/components";
+import { QRPosterModal, StoreStatusBadge } from "@/features/store-management/components";
 import { useStores, useStoreQR } from "@/features/store-management/hooks/useStore";
 import type { StoreResponse } from "@/types/api";
 import {
@@ -37,7 +37,6 @@ export function StoreListPage() {
 
   const handleDownloadQR = () => {
     if (qrData?.qrCodeBase64) {
-      // Create download link for QR image
       const link = document.createElement("a");
       link.href = `data:image/png;base64,${qrData.qrCodeBase64}`;
       link.download = `${qrModalStore?.name}_QR.png`;
@@ -123,21 +122,26 @@ export function StoreListPage() {
               className="flex items-center justify-between p-6 transition-shadow bg-white border cursor-pointer rounded-2xl border-slate-200 hover:shadow-md group"
             >
               <div className="flex items-center gap-6">
-                <div className="flex items-center justify-center w-16 h-16 bg-slate-100 rounded-xl text-slate-400">
-                  <StoreIcon size={32} />
+                <div className="flex items-center justify-center w-16 h-16 bg-slate-100 rounded-xl text-slate-400 overflow-hidden">
+                  {store.iconImageBase64 ? (
+                    <img
+                      src={`data:image/png;base64,${store.iconImageBase64}`}
+                      alt={store.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <StoreIcon size={32} />
+                  )}
                 </div>
                 <div>
                   <h3 className="flex items-center gap-2 text-lg font-bold text-kkookk-navy">
                     {store.name}
-                    <span
-                      className={`text-[10px] px-2 py-0.5 rounded-full ${
-                        store.status === "ACTIVE"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      {store.status === "ACTIVE" ? "영업중" : "영업종료"}
-                    </span>
+                    <StoreStatusBadge status={store.status} />
+                    {!store.placeRef && (
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-200">
+                        장소 미연동
+                      </span>
+                    )}
                   </h3>
                   <p className="flex items-center gap-1 mt-1 text-sm text-kkookk-steel">
                     <MapPin size={14} /> {store.address || "주소 미등록"}
@@ -145,24 +149,18 @@ export function StoreListPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-8">
-                <div className="text-right">
-                  <p className="text-xs text-kkookk-steel">상태</p>
-                  <p className="text-lg font-bold text-kkookk-navy">
-                    {store.status === "ACTIVE" ? "활성" : "비활성"}
-                  </p>
-                </div>
-                <div className="flex gap-2">
+              <div className="flex items-center gap-4">
+                {store.status === 'LIVE' && (
                   <button
                     onClick={(e) => handleQRClick(e, store)}
                     className="flex items-center gap-2 px-4 py-2 font-bold border rounded-lg border-slate-200 text-kkookk-steel hover:bg-slate-50 hover:text-kkookk-navy"
                   >
                     <QrCode size={16} /> QR 포스터
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 font-bold rounded-lg bg-blue-50 text-kkookk-indigo hover:bg-blue-100">
-                    관리 <ArrowRight size={16} />
-                  </button>
-                </div>
+                )}
+                <button className="flex items-center gap-2 px-4 py-2 font-bold rounded-lg bg-blue-50 text-kkookk-indigo hover:bg-blue-100">
+                  관리 <ArrowRight size={16} />
+                </button>
               </div>
             </div>
           ))}

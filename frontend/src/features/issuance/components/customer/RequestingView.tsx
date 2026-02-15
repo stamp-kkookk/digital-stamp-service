@@ -9,6 +9,8 @@ import { formatCountdown } from '@/lib/utils/format';
 interface RequestingViewProps {
   requestId: string;
   remainingSeconds?: number;
+  onCancel?: () => void;
+  isCancelling?: boolean;
   /** 개발 시뮬레이션 전용 */
   onSimulateApprove?: () => void;
   onSimulateReject?: () => void;
@@ -18,6 +20,8 @@ interface RequestingViewProps {
 export function RequestingView({
   requestId,
   remainingSeconds = 118,
+  onCancel,
+  isCancelling = false,
   onSimulateApprove,
   onSimulateReject,
   showDevControls = true,
@@ -59,6 +63,16 @@ export function RequestingView({
             실제로는 매장 태블릿에서 누르는 버튼입니다.
           </p>
         </div>
+      )}
+
+      {onCancel && (
+        <button
+          onClick={onCancel}
+          disabled={isCancelling}
+          className="mt-auto mb-4 py-3 text-white/60 hover:text-white text-sm font-medium transition-colors disabled:opacity-40"
+        >
+          {isCancelling ? '취소 중...' : '취소하기'}
+        </button>
       )}
     </div>
   );

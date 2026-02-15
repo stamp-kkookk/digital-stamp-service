@@ -58,8 +58,9 @@ class TerminalAuthServiceTest {
                         .build();
         ReflectionTestUtils.setField(owner, "id", ownerId);
 
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, ownerId);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, ownerId);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         given(ownerAccountRepository.findByEmail(email)).willReturn(Optional.of(owner));
         given(passwordEncoder.matches(password, "hashedPassword")).willReturn(true);

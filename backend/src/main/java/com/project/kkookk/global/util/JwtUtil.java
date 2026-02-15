@@ -20,14 +20,16 @@ public class JwtUtil {
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_STORE_ID = "storeId";
+    private static final String CLAIM_ADMIN = "admin";
 
     private final JwtProperties jwtProperties;
 
     /** Owner 백오피스용 토큰 생성 */
-    public String generateOwnerToken(Long ownerId, String email) {
+    public String generateOwnerToken(Long ownerId, String email, boolean isAdmin) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.OWNER.name());
         claims.put(CLAIM_EMAIL, email);
+        claims.put(CLAIM_ADMIN, isAdmin);
 
         return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
     }
@@ -100,6 +102,13 @@ public class JwtUtil {
         return claims.get(CLAIM_STORE_ID, Long.class);
     }
 
+    /** 토큰에서 Admin 여부 추출 (Owner용) */
+    public boolean getIsAdmin(String token) {
+        Claims claims = parseToken(token);
+        Boolean admin = claims.get(CLAIM_ADMIN, Boolean.class);
+        return admin != null && admin;
+    }
+
     public Claims parseToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -125,11 +134,11 @@ public class JwtUtil {
     // ========== 하위 호환용 메서드 (Deprecated) ==========
 
     /**
-     * @deprecated Use {@link #generateOwnerToken(Long, String)} instead
+     * @deprecated Use {@link #generateOwnerToken(Long, String, boolean)} instead
      */
     @Deprecated
     public String generateAccessToken(Long ownerId, String email) {
-        return generateOwnerToken(ownerId, email);
+        return generateOwnerToken(ownerId, email, false);
     }
 
     /**

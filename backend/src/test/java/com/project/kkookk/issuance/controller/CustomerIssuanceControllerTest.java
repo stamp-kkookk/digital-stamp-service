@@ -19,6 +19,7 @@ import com.project.kkookk.issuance.controller.dto.IssuanceRequestResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRequestResult;
 import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
 import com.project.kkookk.issuance.service.CustomerIssuanceService;
+import com.project.kkookk.issuance.service.exception.IssuanceAlreadyProcessedException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendingException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
@@ -372,6 +373,67 @@ class CustomerIssuanceControllerTest {
             mockMvc.perform(get("/api/customer/issuance-requests/{id}", requestId))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/customer/issuance-requests/{id}/cancel")
+    class CancelIssuanceRequestTest {
+
+        @Test
+        @DisplayName("적립 요청 취소 성공 - 200 OK")
+        void cancelIssuanceRequest_Success() throws Exception {
+            // given
+            Long requestId = 1L;
+            LocalDateTime now = LocalDateTime.now();
+            IssuanceRequestResponse response =
+                    new IssuanceRequestResponse(
+                            requestId,
+                            IssuanceRequestStatus.CANCELLED,
+                            now.plusSeconds(60),
+                            60L,
+                            3,
+                            null,
+                            now);
+
+            given(customerIssuanceService.cancelIssuanceRequest(requestId, 1L))
+                    .willReturn(response);
+
+            // when & then
+            mockMvc.perform(post("/api/customer/issuance-requests/{id}/cancel", requestId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(requestId))
+                    .andExpect(jsonPath("$.status").value("CANCELLED"));
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 실패 - 이미 처리된 요청 (409)")
+        void cancelIssuanceRequest_Fail_AlreadyProcessed() throws Exception {
+            // given
+            Long requestId = 1L;
+
+            given(customerIssuanceService.cancelIssuanceRequest(requestId, 1L))
+                    .willThrow(new IssuanceAlreadyProcessedException());
+
+            // when & then
+            mockMvc.perform(post("/api/customer/issuance-requests/{id}/cancel", requestId))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.code").value("ISSUANCE_ALREADY_PROCESSED"));
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 실패 - 요청 없음 (404)")
+        void cancelIssuanceRequest_Fail_NotFound() throws Exception {
+            // given
+            Long requestId = 999L;
+
+            given(customerIssuanceService.cancelIssuanceRequest(requestId, 1L))
+                    .willThrow(new IssuanceRequestNotFoundException());
+
+            // when & then
+            mockMvc.perform(post("/api/customer/issuance-requests/{id}/cancel", requestId))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.code").value("ISSUANCE_REQUEST_NOT_FOUND"));
         }
     }
 }

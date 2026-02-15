@@ -30,11 +30,10 @@ export const API_ENDPOINTS = {
     // Issuance
     ISSUANCE_REQUESTS: '/api/customer/issuance-requests',
     ISSUANCE_REQUEST: (id: number) => `/api/customer/issuance-requests/${id}`,
+    ISSUANCE_REQUEST_CANCEL: (id: number) => `/api/customer/issuance-requests/${id}/cancel`,
 
     // Redeem
-    REDEEM_SESSIONS: '/api/customer/redeem-sessions',
-    REDEEM_SESSION_COMPLETE: (sessionId: number) =>
-      `/api/customer/redeem-sessions/${sessionId}/complete`,
+    REDEEMS: '/api/customer/redeems',
 
     // Migration
     MIGRATIONS: '/api/customer/migrations',
@@ -75,6 +74,19 @@ export const API_ENDPOINTS = {
       `/api/owner/stores/${storeId}/migrations/${migrationId}/approve`,
     STORE_MIGRATION_REJECT: (storeId: number, migrationId: number) =>
       `/api/owner/stores/${storeId}/migrations/${migrationId}/reject`,
+
+    // Place Search
+    PLACE_SEARCH: '/api/owner/places/search',
+  },
+
+  // ==========================================================================
+  // Admin API (Admin Token 필요)
+  // ==========================================================================
+  ADMIN: {
+    STORES: '/api/admin/stores',
+    STORE: (storeId: number) => `/api/admin/stores/${storeId}`,
+    STORE_STATUS: (storeId: number) => `/api/admin/stores/${storeId}/status`,
+    STORE_AUDIT_LOGS: (storeId: number) => `/api/admin/stores/${storeId}/audit-logs`,
   },
 
   // ==========================================================================
@@ -87,7 +99,6 @@ export const API_ENDPOINTS = {
       `/api/terminal/${storeId}/issuance-requests/${requestId}/approve`,
     REJECT_ISSUANCE: (storeId: number, requestId: number) =>
       `/api/terminal/${storeId}/issuance-requests/${requestId}/reject`,
-    REDEEM_SESSIONS: (storeId: number) => `/api/terminal/${storeId}/redeem-sessions`,
     STAMP_EVENTS: (storeId: number) => `/api/terminal/stores/${storeId}/stamp-events`,
   },
 } as const;
@@ -127,10 +138,12 @@ export const QUERY_KEYS = {
   // Terminal
   pendingIssuanceRequests: (storeId: number) =>
     ['terminal', storeId, 'pendingIssuances'] as const,
-  pendingRedeemSessions: (storeId: number) =>
-    ['terminal', storeId, 'pendingRedeems'] as const,
-
   // Public
   storePublicInfo: (storeId: number) => ['public', 'store', storeId] as const,
   publicStores: () => ['public', 'stores'] as const,
+
+  // Admin
+  adminStores: (status?: string) => ['admin', 'stores', { status }] as const,
+  adminStore: (storeId: number) => ['admin', 'store', storeId] as const,
+  adminAuditLogs: (storeId: number) => ['admin', 'store', storeId, 'auditLogs'] as const,
 } as const;
