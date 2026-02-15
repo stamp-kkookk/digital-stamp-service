@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -36,7 +36,7 @@ class CustomerWalletControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private CustomerWalletService customerWalletService;
+    @MockitoBean private CustomerWalletService customerWalletService;
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/stamp-history - 스탬프 히스토리 조회 성공")
