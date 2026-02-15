@@ -8,6 +8,7 @@ import { useParams, useBlocker } from 'react-router-dom';
 import { QrCode, Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/Button';
+import { kkookkToast } from '@/components/ui/Toast';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { useWalletStampCards } from '@/features/wallet/hooks/useWallet';
 import { useCreateIssuanceRequest, useIssuanceRequestStatus, useCancelIssuanceRequest, generateIdempotencyKey } from '@/features/issuance/hooks/useIssuance';
@@ -104,7 +105,7 @@ export function RequestStampButton() {
           setRequestState('pending');
         },
         onError: (error) => {
-          alert(`적립 요청 실패: ${error.message}`);
+          kkookkToast.error('적립 요청 실패', { description: error.message });
         },
       }
     );

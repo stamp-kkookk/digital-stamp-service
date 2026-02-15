@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { useNavigate } from 'react-router-dom';
 import { useCustomerNavigate, saveOriginStoreId } from '@/hooks/useCustomerNavigate';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { kkookkToast } from '@/components/ui/Toast';
 import { useWalletLogin } from '@/features/auth/hooks/useAuth';
 
 export function CustomerLoginForm() {
@@ -35,6 +36,7 @@ export function CustomerLoginForm() {
         onSuccess: () => {
           if (storeId) saveOriginStoreId(storeId);
           refreshAuthState();
+          kkookkToast.success('로그인 성공');
           navigate('/customer/wallet');
         },
         onError: () => {

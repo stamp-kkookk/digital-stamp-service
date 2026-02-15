@@ -10,6 +10,7 @@ import { useCreateStore } from '@/features/store-management/hooks/useStore';
 import { PlaceSearchInput, IconUpload } from '@/features/store-management/components';
 import type { ErrorResponse, PlaceSearchResult } from '@/types/api';
 import type { AxiosError } from 'axios';
+import { kkookkToast } from '@/components/ui/Toast';
 
 interface StoreFormData {
   name: string;
@@ -88,6 +89,7 @@ export function StoreCreatePage() {
       },
       {
         onSuccess: (newStore) => {
+          kkookkToast.success('매장이 등록되었습니다');
           navigate(`/owner/stores/${newStore.id}/stamp-cards/new?initial=true`);
         },
         onError: (error) => {

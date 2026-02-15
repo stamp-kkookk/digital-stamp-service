@@ -14,6 +14,7 @@ import {
   useUpdateStampCardStatus,
 } from '@/features/store-management/hooks/useStampCard';
 import type { CreateStampCardRequest } from '@/types/api';
+import { kkookkToast } from '@/components/ui/Toast';
 
 export function StampCardCreatePage() {
   const navigate = useNavigate();
@@ -69,26 +70,22 @@ export function StampCardCreatePage() {
               { storeId: storeIdNum, stampCardId: newCard.id, status: 'ACTIVE' },
               {
                 onSuccess: () => {
-                  navigate(`/owner/stores/${storeId}`, {
-                    state: { message: '매장과 스탬프 카드가 성공적으로 등록되었습니다!' },
-                  });
+                  kkookkToast.success('매장과 스탬프 카드가 성공적으로 등록되었습니다!');
+                  navigate(`/owner/stores/${storeId}`);
                 },
                 onError: () => {
-                  navigate(`/owner/stores/${storeId}`, {
-                    state: {
-                      message:
-                        '스탬프 카드가 생성되었습니다. 활성화는 카드 상세에서 진행해주세요.',
-                    },
-                  });
+                  kkookkToast.warning('스탬프 카드가 생성되었습니다. 활성화는 카드 상세에서 진행해주세요.');
+                  navigate(`/owner/stores/${storeId}`);
                 },
               }
             );
           } else {
+            kkookkToast.success('스탬프 카드가 생성되었습니다');
             navigate(`/owner/stores/${storeId}`);
           }
         },
         onError: (err) => {
-          alert(`스탬프 카드 생성 실패: ${err.message}`);
+          kkookkToast.error('스탬프 카드 생성 실패', { description: err.message });
         },
       }
     );
