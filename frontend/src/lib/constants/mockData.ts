@@ -230,15 +230,3 @@ export const MOCK_ADMIN_CARDS: AdminStampCard[] = [
 ];
 
 // =============================================================================
-// 매장 카테고리
-// =============================================================================
-
-export const STORE_CATEGORIES = [
-  "카페/베이커리",
-  "음식점",
-  "뷰티/미용",
-  "학원/교육",
-  "기타",
-] as const;
-
-export type StoreCategory = (typeof STORE_CATEGORIES)[number];

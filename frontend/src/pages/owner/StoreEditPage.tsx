@@ -1,23 +1,23 @@
 /**
- * StoreCreatePage 컴포넌트
- * 새 매장 등록 페이지
+ * StoreEditPage 컴포넌트
+ * 매장 정보 수정 페이지
  */
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Loader2, AlertTriangle, X } from 'lucide-react';
-import { useCreateStore } from '@/features/store-management/hooks/useStore';
-import { PlaceSearchInput, IconUpload } from '@/features/store-management/components';
-import type { ErrorResponse, PlaceSearchResult } from '@/types/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ChevronLeft, Loader2, AlertCircle, AlertTriangle, X } from 'lucide-react';
+import { useStore, useUpdateStore } from '@/features/store-management/hooks/useStore';
+import { IconUpload, PlaceSearchInput } from '@/features/store-management/components';
+import type { ErrorResponse, PlaceSearchResult, StoreUpdateRequest } from '@/types/api';
 import type { AxiosError } from 'axios';
 
-interface StoreFormData {
+interface StoreEditFormData {
   name: string;
   address: string;
   phone: string;
   description: string;
-  placeRef: string | null;
   iconImageBase64: string | null;
+  placeRef: string | null;
 }
 
 function formatPhone(value: string): string {
@@ -34,90 +34,145 @@ function formatPhone(value: string): string {
   return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
 }
 
-export function StoreCreatePage() {
+export function StoreEditPage() {
   const navigate = useNavigate();
-  const createStore = useCreateStore();
-  const [manualAddressMode, setManualAddressMode] = useState(false);
+  const { storeId } = useParams<{ storeId: string }>();
+  const storeIdNum = Number(storeId);
+
+  const { data: store, isLoading, error } = useStore(storeIdNum);
+  const updateStore = useUpdateStore();
+  const [formData, setFormData] = useState<StoreEditFormData | null>(null);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
-  const [formData, setFormData] = useState<StoreFormData>({
-    name: '',
-    address: '',
-    phone: '',
-    description: '',
-    placeRef: null,
-    iconImageBase64: null,
-  });
+
+  // 스토어 로드 후 폼 데이터 초기화
+  if (store && !formData) {
+    setFormData({
+      name: store.name,
+      address: store.address ?? '',
+      phone: store.phone ?? '',
+      description: store.description ?? '',
+      iconImageBase64: store.iconImageBase64,
+      placeRef: store.placeRef,
+    });
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     if (name === 'phone') {
-      setFormData((prev) => ({ ...prev, phone: formatPhone(value) }));
+      setFormData((prev) => prev ? { ...prev, phone: formatPhone(value) } : prev);
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => prev ? { ...prev, [name]: value } : prev);
     }
   };
 
   const handlePlaceSelect = (place: PlaceSearchResult) => {
-    setFormData((prev) => ({
-      ...prev,
-      name: prev.name || place.placeName,
-      address: place.roadAddress || place.address,
-      phone: place.phone ? formatPhone(place.phone) : prev.phone,
-      placeRef: place.kakaoPlaceId,
-    }));
-    setManualAddressMode(false);
+    setFormData((prev) =>
+      prev
+        ? {
+            ...prev,
+            address: place.roadAddress || place.address || prev.address,
+            phone: place.phone ? formatPhone(place.phone) : prev.phone,
+            placeRef: place.kakaoPlaceId,
+          }
+        : prev
+    );
   };
 
-  const handleManualMode = () => {
-    setManualAddressMode(true);
-    setFormData((prev) => ({ ...prev, placeRef: null }));
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
+    if (!formData) return;
     setErrorBanner(null);
-    createStore.mutate(
+    const data: StoreUpdateRequest = {
+      name: formData.name,
+      address: formData.address || undefined,
+      phone: formData.phone || undefined,
+      description: formData.description || undefined,
+      iconImageBase64: formData.iconImageBase64 || undefined,
+      placeRef: formData.placeRef || undefined,
+    };
+
+    updateStore.mutate(
+      { storeId: storeIdNum, data },
       {
-        name: formData.name,
-        address: formData.address || undefined,
-        phone: formData.phone || undefined,
-        placeRef: formData.placeRef || undefined,
-        iconImageBase64: formData.iconImageBase64 || undefined,
-        description: formData.description || undefined,
-      },
-      {
-        onSuccess: (newStore) => {
-          navigate(`/owner/stores/${newStore.id}/stamp-cards/new?initial=true`);
+        onSuccess: () => {
+          navigate(`/owner/stores/${storeId}`, {
+            state: { message: '매장 정보가 수정되었습니다.' },
+          });
         },
-        onError: (error) => {
-          const axiosError = error as AxiosError<ErrorResponse>;
+        onError: (err) => {
+          const axiosError = err as AxiosError<ErrorResponse>;
           const code = axiosError.response?.data?.code;
           if (code === 'STORE_PLACE_REF_DUPLICATED') {
             setErrorBanner(
               '이미 등록된 매장입니다. 본인 매장이라면 관리자에게 문의해주세요.'
             );
           } else {
-            const msg = axiosError.response?.data?.message || error.message;
-            setErrorBanner(`매장 등록 실패: ${msg}`);
+            const msg = axiosError.response?.data?.message || err.message;
+            setErrorBanner(`매장 수정 실패: ${msg}`);
           }
         },
       }
     );
   };
 
-  return (
-    <div className="p-8 max-w-4xl mx-auto w-full">
-      <div className="mb-8">
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 min-h-[calc(100vh-64px)]">
+        <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
+        <p className="mt-4 text-kkookk-steel">매장 정보를 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (error || !store) {
+    return (
+      <div className="p-8 text-center">
+        <AlertCircle className="w-12 h-12 mx-auto text-red-500" />
+        <p className="mt-4 text-kkookk-steel">매장을 찾을 수 없습니다.</p>
         <button
           onClick={() => navigate('/owner/stores')}
+          className="px-4 py-2 mt-4 font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50"
+        >
+          매장 목록으로
+        </button>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return null;
+  }
+
+  if (store.status === 'SUSPENDED') {
+    return (
+      <div className="p-8 max-w-4xl mx-auto w-full">
+        <button
+          onClick={() => navigate(`/owner/stores/${storeId}`)}
           className="flex items-center gap-2 text-kkookk-steel hover:text-kkookk-navy mb-4 transition-colors"
         >
           <ChevronLeft size={20} /> 돌아가기
         </button>
-        <h2 className="text-2xl font-bold text-kkookk-navy">새 매장 추가하기</h2>
+        <div className="flex items-center gap-3 px-4 py-3 text-sm border rounded-lg bg-red-50 border-red-200 text-red-700">
+          <AlertTriangle size={18} />
+          <p className="font-bold">정지된 매장은 정보를 수정할 수 없습니다.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto w-full">
+      <div className="mb-8">
+        <button
+          onClick={() => navigate(`/owner/stores/${storeId}`)}
+          className="flex items-center gap-2 text-kkookk-steel hover:text-kkookk-navy mb-4 transition-colors"
+        >
+          <ChevronLeft size={20} /> 돌아가기
+        </button>
+        <h2 className="text-2xl font-bold text-kkookk-navy">매장 정보 수정</h2>
         <p className="text-kkookk-steel text-sm mt-1">
-          매장 정보를 입력하여 서비스를 시작하세요.
+          {store.name}의 정보를 수정합니다.
         </p>
       </div>
 
@@ -131,39 +186,32 @@ export function StoreCreatePage() {
             <IconUpload
               value={formData.iconImageBase64}
               onChange={(base64) =>
-                setFormData((prev) => ({ ...prev, iconImageBase64: base64 }))
+                setFormData((prev) => prev ? { ...prev, iconImageBase64: base64 } : prev)
               }
             />
           </div>
 
-          {/* 장소 검색 */}
+          {/* 장소 연동 */}
           <div>
             <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              카카오 장소 검색
+              카카오 장소 연동
             </span>
-            {manualAddressMode ? (
-              <div className="flex items-center gap-2 p-3 border border-slate-200 rounded-xl bg-slate-50">
-                <span className="text-sm text-kkookk-steel">직접 입력 모드</span>
-                <button
-                  type="button"
-                  onClick={() => setManualAddressMode(false)}
-                  className="text-sm text-kkookk-indigo hover:underline"
-                >
-                  카카오 검색으로 전환
-                </button>
-              </div>
-            ) : (
-              <PlaceSearchInput
-                onSelect={handlePlaceSelect}
-                onManualMode={handleManualMode}
-                defaultAddress={formData.address}
-              />
-            )}
-            {manualAddressMode && (
-              <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
-                <AlertTriangle size={12} />
-                장소 연동 없이 등록하면 운영 승인 시 추가 확인이 필요할 수 있습니다
+            {formData.placeRef ? (
+              <p className="text-sm text-kkookk-steel p-3 bg-slate-50 rounded-xl border border-slate-200">
+                카카오 장소 ID: {formData.placeRef} (변경 불가)
               </p>
+            ) : (
+              <>
+                <PlaceSearchInput
+                  onSelect={handlePlaceSelect}
+                  onManualMode={() => {}}
+                  defaultAddress={formData.address}
+                />
+                <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                  <AlertTriangle size={12} />
+                  장소를 연동하면 중복 등록을 방지할 수 있습니다
+                </p>
+              </>
             )}
           </div>
 
@@ -194,26 +242,15 @@ export function StoreCreatePage() {
             >
               매장 주소
             </label>
-            {manualAddressMode ? (
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="예: 서울시 강남구 테헤란로 123"
-                className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
-              />
-            ) : formData.address ? (
-              <input
-                type="text"
-                value={formData.address}
-                readOnly
-                className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-kkookk-steel"
-              />
-            ) : (
-              <p className="text-sm text-kkookk-steel">카카오 장소 검색으로 자동 입력됩니다</p>
-            )}
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="예: 서울시 강남구 테헤란로 123"
+              className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
+            />
           </div>
 
           {/* 전화번호 */}
@@ -269,18 +306,18 @@ export function StoreCreatePage() {
 
         <div className="mt-6 pt-6 border-t border-slate-100 flex justify-end gap-3">
           <button
-            onClick={() => navigate('/owner/stores')}
+            onClick={() => navigate(`/owner/stores/${storeId}`)}
             className="px-6 py-3 border border-slate-200 text-kkookk-steel font-bold rounded-xl hover:bg-slate-50 transition-colors"
           >
             취소
           </button>
           <button
             onClick={handleSubmit}
-            disabled={createStore.isPending || !formData.name}
+            disabled={updateStore.isPending || !formData.name}
             className="px-6 py-3 bg-kkookk-navy text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {createStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-            {createStore.isPending ? '등록 중...' : '매장 등록하기'}
+            {updateStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            {updateStore.isPending ? '수정 중...' : '수정 완료'}
           </button>
         </div>
       </div>
@@ -288,4 +325,4 @@ export function StoreCreatePage() {
   );
 }
 
-export default StoreCreatePage;
+export default StoreEditPage;

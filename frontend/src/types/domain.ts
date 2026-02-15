@@ -97,7 +97,6 @@ export interface Store {
   status: StoreStatus;
   activeCards: number;
   phone?: string;
-  category?: string;
   description?: string;
 }
 
