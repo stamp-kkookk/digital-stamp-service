@@ -90,7 +90,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return switch (tokenType) {
             case OWNER -> {
                 String email = jwtUtil.getEmail(token);
-                yield OwnerPrincipal.of(subjectId, email);
+                boolean isAdmin = jwtUtil.getIsAdmin(token);
+                yield OwnerPrincipal.of(subjectId, email, isAdmin);
             }
             case TERMINAL -> {
                 String email = jwtUtil.getEmail(token);
