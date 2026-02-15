@@ -22,12 +22,12 @@
                         │  Spring Boot API   │
                         │  port 8080         │
                         │  JWT + Security    │
-                        └─────────┬──────────┘
-                                  │
-                        ┌─────────▼──────────┐
-                        │  MySQL 8.0         │
-                        │  port 3306         │
-                        └────────────────────┘
+                        └──┬──────────────┬──┘
+                           │              │
+                 ┌─────────▼──────────┐   │  ┌──────────────────┐
+                 │  MySQL 8.0         │   └──│ Kakao Place API  │
+                 │  port 3306         │      │ (장소 검색)       │
+                 └────────────────────┘      └──────────────────┘
 ```
 
 ## Authentication
@@ -37,6 +37,7 @@
 | 토큰 | Claims | TTL | 발급 경로 |
 |------|--------|-----|----------|
 | OWNER | `sub: ownerId, email, type: OWNER` | 1시간 | `/api/owner/auth/login` |
+| ADMIN | `sub: ownerId, email, admin: true, type: OWNER` | 1시간 | `/api/owner/auth/login` (admin 계정) |
 | TERMINAL | `sub: ownerId, email, storeId, type: TERMINAL` | 1시간 | `/api/public/terminal/login` |
 | CUSTOMER | `sub: walletId, type: CUSTOMER` | 1시간 | `/api/public/wallet/login` |
 | STEPUP | `sub: walletId, type: STEPUP` | 10분 | `/api/public/otp/verify` |
@@ -57,7 +58,7 @@ Request → JwtAuthenticationFilter
 | Principal | Fields | Roles |
 |-----------|--------|-------|
 | CustomerPrincipal | `walletId`, `stepUp` | `ROLE_CUSTOMER`, `ROLE_STEPUP` (조건부) |
-| OwnerPrincipal | `ownerId`, `email` | `ROLE_OWNER` |
+| OwnerPrincipal | `ownerId`, `email`, `admin` | `ROLE_OWNER`, `ROLE_ADMIN` (조건부: admin=true) |
 | TerminalPrincipal | `ownerId`, `email`, `storeId` | `ROLE_TERMINAL` |
 
 ### Security URL Patterns
@@ -67,16 +68,19 @@ Request → JwtAuthenticationFilter
 /api/public/**       → PERMIT_ALL (OTP, 지갑, 매장 공개)
 /api/customer/**     → hasRole("CUSTOMER")
 /api/terminal/**     → hasRole("TERMINAL")
+/api/admin/**        → hasRole("ADMIN")
 /api/owner/**        → hasRole("OWNER")
 ```
 
 ## Domain Relationships
 
 ```
-OwnerAccount
+OwnerAccount (admin: boolean)
  └─ Store (1:N)
+     ├─ placeRef, iconImageBase64, category, description
      ├─ StampCard (1:N, max 1 ACTIVE per Store)
      │   └─ designType: COLOR | IMAGE | PUZZLE
+     ├─ StoreAuditLog (1:N) - 상태 변경 이력
      ├─ IssuanceRequest (via WalletStampCard)
      └─ StampMigration (via WalletStampCard)
 
@@ -97,7 +101,7 @@ CustomerWallet
 | StampMigrationStatus | `SUBMITTED → APPROVED / REJECTED / CANCELED` | 수동 승인 |
 | WalletRewardStatus | `AVAILABLE → REDEEMED / EXPIRED` | 리워드 라이프사이클 |
 | WalletStampCardStatus | `ACTIVE → COMPLETED` | 목표 도달 시 완료 |
-| StoreStatus | `ACTIVE / INACTIVE / DELETED` | Soft delete |
+| StoreStatus | `DRAFT → LIVE → SUSPENDED → DELETED` | DRAFT: 생성 직후, Admin 승인→LIVE, LIVE↔SUSPENDED, DELETED: 소프트 삭제(최종) |
 
 ## Core Flows
 
@@ -206,7 +210,9 @@ Controller (@Valid request)
 | Common | INVALID_INPUT_VALUE, INTERNAL_SERVER_ERROR | 400, 500 |
 | Auth | UNAUTHORIZED, ACCESS_DENIED, OWNER_LOGIN_FAILED | 401, 403 |
 | StampCard | STAMP_CARD_NOT_FOUND, STAMP_CARD_ALREADY_ACTIVE | 404, 409 |
-| Store | STORE_NOT_FOUND, STORE_INACTIVE | 404, 403 |
+| Store | STORE_NOT_FOUND, STORE_INACTIVE, STORE_NOT_OPERATIONAL, STORE_STATUS_TRANSITION_INVALID, STORE_PLACE_REF_DUPLICATED, STORE_ICON_TOO_LARGE, STORE_PHONE_INVALID | 404, 403, 409, 400, 413 |
+| Admin | ADMIN_ACCESS_DENIED | 403 |
+| External | KAKAO_API_ERROR | 500 |
 | Issuance | ISSUANCE_REQUEST_NOT_FOUND, ISSUANCE_REQUEST_EXPIRED | 404, 410 |
 | OTP | OTP_RATE_LIMIT_EXCEEDED, OTP_INVALID, OTP_EXPIRED | 429, 401 |
 | Wallet | CUSTOMER_WALLET_NOT_FOUND, CUSTOMER_WALLET_BLOCKED | 404, 403 |
@@ -223,7 +229,8 @@ backend/src/main/java/com/project/kkookk/
 │   ├── entity/          # BaseTimeEntity
 │   ├── exception/       # ErrorCode, BusinessException, GlobalExceptionHandler
 │   ├── security/        # JwtAuthenticationFilter, *Principal
-│   └── util/            # JwtUtil
+│   └── util/            # JwtUtil, PhoneValidator
+├── admin/               # 관리자 (매장 승인/정지, Audit Log)
 ├── issuance/            # 적립 요청/승인
 ├── migration/           # 종이 스탬프 이전
 ├── otp/                 # OTP 인증
@@ -245,6 +252,7 @@ backend/src/main/java/com/project/kkookk/
 ```
 /customer/*          → 고객 지갑 (모바일 퍼스트)
 /owner/*             → 사장님 백오피스 (데스크톱 퍼스트)
+/admin/*             → 관리자 (매장 승인/관리, 데스크톱)
 /terminal/*          → 매장 터미널 (태블릿, 센터 정렬)
 /stores/:storeId/customer → QR 스캔 진입 (로그인 전)
 ```

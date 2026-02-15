@@ -8,14 +8,15 @@
 
 | 클래스 | 패키지 | 용도 | 주요 메서드 |
 |--------|--------|------|------------|
-| JwtUtil | `global/util/` | JWT 토큰 생성/파싱/검증 | `generateOwnerToken()`, `generateTerminalToken()`, `generateCustomerToken()`, `generateStepUpToken()`, `getTokenType()`, `getSubjectId()`, `validateToken()` |
+| JwtUtil | `global/util/` | JWT 토큰 생성/파싱/검증 | `generateOwnerToken(id, email, isAdmin)`, `generateTerminalToken()`, `generateCustomerToken()`, `generateStepUpToken()`, `getTokenType()`, `getSubjectId()`, `validateToken()` |
+| PhoneValidator | `global/util/` | 전화번호 유효성 검증 | `validate(phone)` - 한국 휴대폰 번호 형식 검증 |
 
 ### Principal 타입 (Security)
 
 | 클래스 | Fields | Roles | 용도 |
 |--------|--------|-------|------|
 | CustomerPrincipal | `walletId`, `stepUp` | ROLE_CUSTOMER, ROLE_STEPUP(조건부) | 고객 지갑 요청 |
-| OwnerPrincipal | `ownerId`, `email` | ROLE_OWNER | 백오피스 작업 |
+| OwnerPrincipal | `ownerId`, `email`, `admin` | ROLE_OWNER, ROLE_ADMIN(조건부: admin=true) | 백오피스 작업 + 관리자 |
 | TerminalPrincipal | `ownerId`, `email`, `storeId` | ROLE_TERMINAL | 매장 터미널 승인 |
 
 ### Base Entity
@@ -52,7 +53,7 @@
 | StampMigrationStatus | `migration/domain/` | SUBMITTED, APPROVED, REJECTED, CANCELED | SUBMITTED→(APPROVED\|REJECTED\|CANCELED) |
 | WalletRewardStatus | `wallet/domain/` | AVAILABLE, REDEEMED, EXPIRED | AVAILABLE→REDEEMED or EXPIRED |
 | WalletStampCardStatus | `wallet/domain/` | ACTIVE, COMPLETED | ACTIVE→COMPLETED |
-| StoreStatus | `store/domain/` | ACTIVE, INACTIVE, DELETED | 유연 전이 |
+| StoreStatus | `store/domain/` | DRAFT, LIVE, SUSPENDED, DELETED | DRAFT→LIVE(Admin 승인), LIVE↔SUSPENDED, →DELETED(소프트 삭제, 최종) |
 | CustomerWalletStatus | `wallet/domain/` | ACTIVE, BLOCKED | ACTIVE↔BLOCKED |
 
 #### 이벤트/타입 Enum
@@ -62,6 +63,8 @@
 | StampEventType | `stamp/domain/` | ISSUED, MIGRATED, MANUAL_ADJUST | 스탬프 이력 분류 |
 | StampCardDesignType | `stampcard/domain/` | COLOR, IMAGE, PUZZLE | 카드 디자인 템플릿 |
 | StampCardSortType | `wallet/domain/` | LAST_STAMPED, CREATED, PROGRESS | 지갑 카드 정렬 |
+| StoreAuditAction | `store/domain/` | CREATED, STATUS_CHANGED, UPDATED, DELETED | 매장 감사 로그 액션 |
+| PerformerType | `store/domain/` | OWNER, ADMIN, SYSTEM | 감사 로그 수행자 유형 |
 | TokenType | `global/security/` | OWNER, TERMINAL, CUSTOMER, STEPUP | JWT 토큰 분류 |
 
 ### ErrorCode (전체 목록)
@@ -110,6 +113,13 @@
 | 403 | MIGRATION_ACCESS_DENIED | Migration | 다른 고객의 마이그레이션 요청에 접근할 수 없습니다 |
 | 413 | MIGRATION_IMAGE_TOO_LARGE | Migration | 이미지 크기가 너무 큽니다 (최대 5MB) |
 | 409 | NO_ACTIVE_STAMP_CARD | StampCard | 활성 스탬프 카드가 없습니다 |
+| 400 | STORE_STATUS_TRANSITION_INVALID | Store | 유효하지 않은 매장 상태 전이입니다 |
+| 409 | STORE_PLACE_REF_DUPLICATED | Store | 이미 등록된 장소 참조입니다 |
+| 413 | STORE_ICON_TOO_LARGE | Store | 아이콘 이미지가 너무 큽니다 |
+| 400 | STORE_PHONE_INVALID | Store | 매장 전화번호 형식이 올바르지 않습니다 |
+| 403 | STORE_NOT_OPERATIONAL | Store | 매장이 운영 중이 아닙니다 |
+| 403 | ADMIN_ACCESS_DENIED | Admin | 관리자 접근 권한이 없습니다 |
+| 500 | KAKAO_API_ERROR | External | 카카오 API 호출 중 오류가 발생했습니다 |
 
 ---
 
@@ -190,6 +200,10 @@
 | `useStore()` | `features/store-management/hooks/` | 매장 CRUD |
 | `useStampCard()` | `features/stampcard/hooks/` | 스탬프카드 CRUD |
 | `useTerminal()` | `features/terminal/hooks/` | 터미널 승인/확인 |
+| `useAdminStores()` | `features/admin/hooks/` | 관리자 매장 목록 (status 필터) |
+| `useAdminStoreDetail()` | `features/admin/hooks/` | 관리자 매장 상세 |
+| `useAdminStoreStatusChange()` | `features/admin/hooks/` | 관리자 매장 상태 변경 |
+| `useAdminStoreAuditLogs()` | `features/admin/hooks/` | 관리자 매장 Audit Log |
 
 ### UI Components (`frontend/src/components/ui/`)
 
@@ -199,6 +213,14 @@
 | Input | - | 좌측 아이콘, 에러 메시지, 커스텀 라벨 |
 | Badge | default, primary, secondary, success, warning, destructive, navy, outline | 도트 인디케이터 |
 | Dialog | DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose | Radix 기반, 페이드/줌 애니메이션 |
+
+### Feature Components
+
+| 컴포넌트 | 패키지 | 용도 |
+|---------|--------|------|
+| StoreStatusBadge | `features/store-management/components/` | 매장 상태 뱃지 (DRAFT/LIVE/SUSPENDED/DELETED 컬러 표시) |
+| IconUpload | `features/store-management/components/` | 매장 아이콘 이미지 업로드 (Base64 변환) |
+| PlaceSearchInput | `features/store-management/components/` | 카카오 장소 검색 입력 (자동완성, placeRef 선택) |
 
 ### Shared Components (`frontend/src/components/shared/`)
 
