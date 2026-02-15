@@ -3,6 +3,7 @@ package com.project.kkookk.owner.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -117,7 +118,8 @@ class OwnerAuthServiceTest {
         given(ownerAccountRepository.findByEmail("owner@example.com"))
                 .willReturn(Optional.of(ownerAccount));
         given(passwordEncoder.matches("Password1!", "encodedPassword")).willReturn(true);
-        given(jwtUtil.generateAccessToken(anyLong(), anyString())).willReturn("mock.jwt.token");
+        given(jwtUtil.generateOwnerToken(anyLong(), anyString(), anyBoolean()))
+                .willReturn("mock.jwt.token");
 
         // when
         OwnerLoginResponse response = ownerAuthService.login(request);
@@ -131,7 +133,7 @@ class OwnerAuthServiceTest {
 
         verify(ownerAccountRepository).findByEmail("owner@example.com");
         verify(passwordEncoder).matches("Password1!", "encodedPassword");
-        verify(jwtUtil).generateAccessToken(1L, "owner@example.com");
+        verify(jwtUtil).generateOwnerToken(1L, "owner@example.com", false);
     }
 
     @Test
@@ -154,7 +156,7 @@ class OwnerAuthServiceTest {
 
         verify(ownerAccountRepository).findByEmail("notfound@example.com");
         verify(passwordEncoder, never()).matches(anyString(), anyString());
-        verify(jwtUtil, never()).generateAccessToken(anyLong(), anyString());
+        verify(jwtUtil, never()).generateOwnerToken(anyLong(), anyString(), anyBoolean());
     }
 
     @Test
@@ -187,6 +189,6 @@ class OwnerAuthServiceTest {
 
         verify(ownerAccountRepository).findByEmail("owner@example.com");
         verify(passwordEncoder).matches("WrongPassword!", "encodedPassword");
-        verify(jwtUtil, never()).generateAccessToken(anyLong(), anyString());
+        verify(jwtUtil, never()).generateOwnerToken(anyLong(), anyString(), anyBoolean());
     }
 }

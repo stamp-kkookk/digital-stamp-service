@@ -46,7 +46,12 @@ public class TerminalAuthService {
                         .findByIdAndOwnerAccountId(request.storeId(), owner.getId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.TERMINAL_ACCESS_DENIED));
 
-        // 3. Terminal 토큰 발급
+        // 3. 매장 운영 상태 확인
+        if (!store.getStatus().isOperational()) {
+            throw new BusinessException(ErrorCode.STORE_INACTIVE);
+        }
+
+        // 4. Terminal 토큰 발급
         String accessToken =
                 jwtUtil.generateTerminalToken(owner.getId(), owner.getEmail(), store.getId());
 

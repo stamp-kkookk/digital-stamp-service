@@ -34,20 +34,17 @@ public interface RedeemEventRepository extends JpaRepository<RedeemEvent, Long> 
             """
             SELECT
                 e.id as id,
-                e.redeemSessionId as redeemSessionId,
+                e.walletRewardId as walletRewardId,
                 cw.nickname as customerNickname,
                 sc.rewardName as rewardName,
                 sc.title as stampCardTitle,
-                e.type as type,
                 e.result as result,
                 e.occurredAt as occurredAt
             FROM RedeemEvent e
-            JOIN RedeemSession rs ON e.redeemSessionId = rs.id
-            JOIN WalletReward wr ON rs.walletRewardId = wr.id
+            JOIN WalletReward wr ON e.walletRewardId = wr.id
             JOIN CustomerWallet cw ON e.walletId = cw.id
             JOIN StampCard sc ON wr.stampCardId = sc.id
             WHERE e.storeId = :storeId
-            AND e.type = com.project.kkookk.redeem.domain.RedeemEventType.COMPLETED
             AND e.result = com.project.kkookk.redeem.domain.RedeemEventResult.SUCCESS
             ORDER BY e.occurredAt DESC
             """)

@@ -11,7 +11,6 @@ import type {
   PendingIssuanceRequestListResponse,
   IssuanceApprovalResponse,
   IssuanceRejectionResponse,
-  PendingRedeemSessionListResponse,
   StampEventResponse,
   PageResponse,
 } from '@/types/api';
@@ -56,18 +55,6 @@ export async function rejectIssuanceRequest(
 ): Promise<IssuanceRejectionResponse> {
   return postRaw<IssuanceRejectionResponse>(
     API_ENDPOINTS.TERMINAL.REJECT_ISSUANCE(storeId, requestId)
-  );
-}
-
-// =============================================================================
-// Redeem Sessions
-// =============================================================================
-
-export async function getPendingRedeemSessions(
-  storeId: number
-): Promise<PendingRedeemSessionListResponse> {
-  return getRaw<PendingRedeemSessionListResponse>(
-    API_ENDPOINTS.TERMINAL.REDEEM_SESSIONS(storeId)
   );
 }
 

@@ -3,6 +3,7 @@
  * 모든 앱 라우트를 위한 React Router 설정
  */
 
+import { AdminLayout } from "@/app/layouts/AdminLayout";
 import { CustomerLayout } from "@/app/layouts/CustomerLayout";
 import { OwnerLayout } from "@/app/layouts/OwnerLayout";
 import { TerminalLayout } from "@/app/layouts/TerminalLayout";
@@ -23,6 +24,10 @@ import { MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
 import { CardDetailView, WalletPage } from "@/features/wallet";
 
+// Admin 페이지
+import { AdminStoreDetailPage } from "@/pages/admin/AdminStoreDetailPage";
+import { AdminStoreListPage } from "@/pages/admin/AdminStoreListPage";
+
 // 사장님 페이지
 import { OwnerLoginPage } from "@/features/auth/pages/OwnerLoginPage";
 import {
@@ -31,6 +36,7 @@ import {
   StampCardStatsPage,
   StoreCreatePage,
   StoreDetailPage,
+  StoreEditPage,
   StoreHistoryPage,
   StoreListPage,
   StoreMigrationsPage,
@@ -109,6 +115,7 @@ export const router = createBrowserRouter([
       { path: "stores", element: <StoreListPage /> },
       { path: "stores/new", element: <StoreCreatePage /> },
       { path: "stores/:storeId", element: <StoreDetailPage /> },
+      { path: "stores/:storeId/edit", element: <StoreEditPage /> },
       { path: "stores/:storeId/history", element: <StoreHistoryPage /> },
       { path: "stores/:storeId/migrations", element: <StoreMigrationsPage /> },
       {
@@ -123,6 +130,17 @@ export const router = createBrowserRouter([
         path: "stores/:storeId/stamp-cards/:cardId/stats",
         element: <StampCardStatsPage />,
       },
+    ],
+  },
+
+  // Admin 라우트
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      { index: true, element: <Navigate to="stores" replace /> },
+      { path: "stores", element: <AdminStoreListPage /> },
+      { path: "stores/:storeId", element: <AdminStoreDetailPage /> },
     ],
   },
 

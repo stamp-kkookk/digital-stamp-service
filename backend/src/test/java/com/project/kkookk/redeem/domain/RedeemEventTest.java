@@ -17,10 +17,9 @@ class RedeemEventTest {
         // when
         RedeemEvent event =
                 RedeemEvent.builder()
-                        .redeemSessionId(1L)
+                        .walletRewardId(1L)
                         .walletId(1L)
                         .storeId(1L)
-                        .type(RedeemEventType.REQUESTED)
                         .result(RedeemEventResult.SUCCESS)
                         .build();
 
@@ -40,10 +39,9 @@ class RedeemEventTest {
         // when
         RedeemEvent event =
                 RedeemEvent.builder()
-                        .redeemSessionId(1L)
+                        .walletRewardId(1L)
                         .walletId(1L)
                         .storeId(1L)
-                        .type(RedeemEventType.REQUESTED)
                         .result(RedeemEventResult.SUCCESS)
                         .occurredAt(specificTime)
                         .build();
@@ -53,38 +51,19 @@ class RedeemEventTest {
     }
 
     @Test
-    @DisplayName("REQUESTED 타입의 성공 리딤 이벤트 생성")
-    void should_CreateRequestedSuccessEvent_When_TypeIsRequestedAndResultIsSuccess() {
+    @DisplayName("성공 리딤 이벤트 생성")
+    void should_CreateSuccessEvent_When_ResultIsSuccess() {
         // given & when
         RedeemEvent event =
                 RedeemEvent.builder()
-                        .redeemSessionId(1L)
+                        .walletRewardId(1L)
                         .walletId(1L)
                         .storeId(1L)
-                        .type(RedeemEventType.REQUESTED)
                         .result(RedeemEventResult.SUCCESS)
                         .build();
 
         // then
-        assertThat(event.getType()).isEqualTo(RedeemEventType.REQUESTED);
-        assertThat(event.getResult()).isEqualTo(RedeemEventResult.SUCCESS);
-    }
-
-    @Test
-    @DisplayName("COMPLETED 타입의 성공 리딤 이벤트 생성")
-    void should_CreateCompletedSuccessEvent_When_TypeIsCompletedAndResultIsSuccess() {
-        // given & when
-        RedeemEvent event =
-                RedeemEvent.builder()
-                        .redeemSessionId(1L)
-                        .walletId(1L)
-                        .storeId(1L)
-                        .type(RedeemEventType.COMPLETED)
-                        .result(RedeemEventResult.SUCCESS)
-                        .build();
-
-        // then
-        assertThat(event.getType()).isEqualTo(RedeemEventType.COMPLETED);
+        assertThat(event.getWalletRewardId()).isEqualTo(1L);
         assertThat(event.getResult()).isEqualTo(RedeemEventResult.SUCCESS);
     }
 
@@ -94,10 +73,9 @@ class RedeemEventTest {
         // given & when
         RedeemEvent event =
                 RedeemEvent.builder()
-                        .redeemSessionId(1L)
+                        .walletRewardId(1L)
                         .walletId(1L)
                         .storeId(1L)
-                        .type(RedeemEventType.REQUESTED)
                         .result(RedeemEventResult.FAILED)
                         .build();
 

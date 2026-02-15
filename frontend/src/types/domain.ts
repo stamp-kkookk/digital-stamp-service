@@ -97,7 +97,6 @@ export interface Store {
   status: StoreStatus;
   activeCards: number;
   phone?: string;
-  category?: string;
   description?: string;
 }
 
@@ -150,23 +149,6 @@ export interface AuthFormData {
   name: string;
   phone: string;
   verificationCode: string;
-}
-
-// =============================================================================
-// Redeem Session Types
-// =============================================================================
-
-export type RedeemSessionStatus = 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'CANCELLED';
-
-export interface RedeemSession {
-  id: string;
-  rewardId: string;
-  walletId: string;
-  storeId: string;
-  status: RedeemSessionStatus;
-  ttlSeconds: number;
-  createdAt: Date;
-  expiresAt: Date;
 }
 
 // =============================================================================

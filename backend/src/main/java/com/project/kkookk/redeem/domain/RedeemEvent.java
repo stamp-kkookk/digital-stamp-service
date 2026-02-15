@@ -25,18 +25,14 @@ public class RedeemEvent extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "redeem_session_id", nullable = false)
-    private Long redeemSessionId;
+    @Column(name = "wallet_reward_id", nullable = false)
+    private Long walletRewardId;
 
     @Column(name = "wallet_id", nullable = false)
     private Long walletId;
 
     @Column(name = "store_id", nullable = false)
     private Long storeId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private RedeemEventType type;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -47,16 +43,14 @@ public class RedeemEvent extends BaseTimeEntity {
 
     @Builder
     private RedeemEvent(
-            Long redeemSessionId,
+            Long walletRewardId,
             Long walletId,
             Long storeId,
-            RedeemEventType type,
             RedeemEventResult result,
             LocalDateTime occurredAt) {
-        this.redeemSessionId = redeemSessionId;
+        this.walletRewardId = walletRewardId;
         this.walletId = walletId;
         this.storeId = storeId;
-        this.type = type;
         this.result = result;
         this.occurredAt = occurredAt != null ? occurredAt : LocalDateTime.now();
     }
