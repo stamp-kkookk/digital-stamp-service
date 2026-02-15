@@ -37,8 +37,9 @@ class StorePublicServiceTest {
     void getStorePublicInfo_Success() {
         // given
         Long storeId = 1L;
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
         given(
@@ -81,8 +82,7 @@ class StorePublicServiceTest {
     void getStorePublicInfo_Fail_StoreInactive() {
         // given
         Long storeId = 1L;
-        Store inactiveStore =
-                new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.INACTIVE, 1L);
+        Store inactiveStore = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(inactiveStore, "id", storeId);
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(inactiveStore));
@@ -100,8 +100,9 @@ class StorePublicServiceTest {
     void getStorePublicInfo_ZeroActiveCards() {
         // given
         Long storeId = 1L;
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
         given(

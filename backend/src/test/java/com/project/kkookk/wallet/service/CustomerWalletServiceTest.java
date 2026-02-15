@@ -210,8 +210,9 @@ class CustomerWalletServiceTest {
                 StampCard.builder().storeId(storeId).title("아메리카노 10잔").goalStampCount(10).build();
         ReflectionTestUtils.setField(stampCard, "id", stampCardId);
 
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         WalletStampCard savedWalletStampCard =
                 WalletStampCard.builder()
@@ -370,8 +371,9 @@ class CustomerWalletServiceTest {
 
         Page<RedeemEvent> eventPage = new PageImpl<>(List.of(event1), pageable, 1);
 
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
                 .willReturn(true);

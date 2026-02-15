@@ -64,7 +64,7 @@ class CustomerIssuanceServiceTest {
 
             WalletStampCard walletStampCard =
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -115,7 +115,7 @@ class CustomerIssuanceServiceTest {
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             IssuanceRequest existingRequest =
                     createIssuanceRequest(1L, storeId, walletId, walletStampCardId);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -164,7 +164,7 @@ class CustomerIssuanceServiceTest {
             Long storeId = 1L;
 
             CreateIssuanceRequest request = new CreateIssuanceRequest(storeId, 10L, "test-key");
-            Store inactiveStore = createStore(storeId, StoreStatus.INACTIVE);
+            Store inactiveStore = createStore(storeId, StoreStatus.DRAFT);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(inactiveStore));
 
@@ -188,7 +188,7 @@ class CustomerIssuanceServiceTest {
 
             CreateIssuanceRequest request =
                     new CreateIssuanceRequest(storeId, walletStampCardId, "test-key");
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -214,7 +214,7 @@ class CustomerIssuanceServiceTest {
 
             WalletStampCard walletStampCard =
                     createWalletStampCard(walletStampCardId, otherWalletId, storeId, 3);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -243,7 +243,7 @@ class CustomerIssuanceServiceTest {
 
             WalletStampCard walletStampCard =
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -274,7 +274,7 @@ class CustomerIssuanceServiceTest {
 
             WalletStampCard walletStampCard =
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -310,7 +310,7 @@ class CustomerIssuanceServiceTest {
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             IssuanceRequest expiredRequest =
                     createExpiredIssuanceRequest(1L, storeId, walletId, walletStampCardId);
-            Store store = createStore(storeId, StoreStatus.ACTIVE);
+            Store store = createStore(storeId, StoreStatus.LIVE);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -500,8 +500,9 @@ class CustomerIssuanceServiceTest {
     }
 
     private Store createStore(Long id, StoreStatus status) {
-        Store store = new Store("테스트 매장", "서울시 강남구", "02-1234-5678", status, 1L);
+        Store store = new Store("테스트 매장", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", id);
+        ReflectionTestUtils.setField(store, "status", status);
         return store;
     }
 }
