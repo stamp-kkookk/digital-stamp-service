@@ -1,9 +1,7 @@
 package com.project.kkookk.store.controller.owner.dto;
 
-import com.project.kkookk.store.domain.StoreStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "매장 수정 요청")
@@ -18,5 +16,9 @@ public record StoreUpdateRequest(
         @Schema(description = "매장 전화번호", example = "02-1234-5678")
                 @Size(max = 50, message = "전화번호는 50자 이하여야 합니다")
                 String phone,
-        @Schema(description = "매장 상태", example = "ACTIVE") @NotNull(message = "매장 상태는 필수입니다")
-                StoreStatus status) {}
+        @Schema(description = "매장 설명", example = "강남역 3번 출구 근처 아늑한 카페")
+                @Size(max = 500, message = "설명은 500자 이하여야 합니다")
+                String description,
+        @Schema(description = "매장 아이콘 이미지 (Base64)") String iconImageBase64,
+        @Schema(description = "카카오 장소 참조 ID") @Size(max = 100, message = "장소 참조 ID는 100자 이하여야 합니다")
+                String placeRef) {}

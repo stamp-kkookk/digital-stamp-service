@@ -12,7 +12,6 @@ import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendingException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
 import com.project.kkookk.store.domain.Store;
-import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
@@ -53,7 +52,7 @@ public class CustomerIssuanceService {
                         .findById(request.storeId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-        if (store.getStatus() != StoreStatus.ACTIVE) {
+        if (!store.getStatus().isOperational()) {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
