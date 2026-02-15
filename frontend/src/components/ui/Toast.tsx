@@ -45,7 +45,7 @@ function showSuccess(title: string, options?: ToastOptions) {
                 variant="success"
             />
         ),
-        { duration: options?.duration ?? 3000 }
+        { duration: options?.duration ?? 2000 }
     )
 }
 
@@ -61,7 +61,7 @@ function showError(title: string, options?: ToastOptions) {
                 variant="error"
             />
         ),
-        { duration: options?.duration ?? 4000 }
+        { duration: options?.duration ?? 2700 }
     )
 }
 
@@ -77,7 +77,7 @@ function showInfo(title: string, options?: ToastOptions) {
                 variant="info"
             />
         ),
-        { duration: options?.duration ?? 3000 }
+        { duration: options?.duration ?? 2000 }
     )
 }
 
@@ -93,7 +93,7 @@ function showWarning(title: string, options?: ToastOptions) {
                 variant="warning"
             />
         ),
-        { duration: options?.duration ?? 3500 }
+        { duration: options?.duration ?? 2300 }
     )
 }
 
