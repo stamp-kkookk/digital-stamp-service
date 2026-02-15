@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     // Issuance
     ISSUANCE_REQUESTS: '/api/customer/issuance-requests',
     ISSUANCE_REQUEST: (id: number) => `/api/customer/issuance-requests/${id}`,
+    ISSUANCE_REQUEST_CANCEL: (id: number) => `/api/customer/issuance-requests/${id}/cancel`,
 
     // Redeem
     REDEEMS: '/api/customer/redeems',

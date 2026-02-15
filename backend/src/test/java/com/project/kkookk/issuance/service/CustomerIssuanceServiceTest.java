@@ -15,6 +15,7 @@ import com.project.kkookk.issuance.controller.dto.IssuanceRequestResult;
 import com.project.kkookk.issuance.domain.IssuanceRequest;
 import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
 import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
+import com.project.kkookk.issuance.service.exception.IssuanceAlreadyProcessedException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendingException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
 import com.project.kkookk.store.domain.Store;
@@ -439,6 +440,182 @@ class CustomerIssuanceServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("cancelIssuanceRequest")
+    class CancelIssuanceRequestTest {
+
+        @Test
+        @DisplayName("적립 요청 취소 성공")
+        void cancelIssuanceRequest_Success() {
+            // given
+            Long requestId = 1L;
+            Long walletId = 1L;
+            Long walletStampCardId = 10L;
+
+            IssuanceRequest request =
+                    createIssuanceRequest(requestId, 1L, walletId, walletStampCardId);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, 1L, 3);
+
+            given(issuanceRequestRepository.findByIdWithLock(requestId))
+                    .willReturn(Optional.of(request));
+            given(walletStampCardRepository.findById(walletStampCardId))
+                    .willReturn(Optional.of(walletStampCard));
+
+            // when
+            IssuanceRequestResponse response =
+                    customerIssuanceService.cancelIssuanceRequest(requestId, walletId);
+
+            // then
+            assertThat(response.status()).isEqualTo(IssuanceRequestStatus.CANCELLED);
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 실패 - 요청 없음")
+        void cancelIssuanceRequest_Fail_NotFound() {
+            // given
+            Long requestId = 999L;
+            Long walletId = 1L;
+
+            given(issuanceRequestRepository.findByIdWithLock(requestId))
+                    .willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    customerIssuanceService.cancelIssuanceRequest(
+                                            requestId, walletId))
+                    .isInstanceOf(IssuanceRequestNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 실패 - 본인 요청이 아님")
+        void cancelIssuanceRequest_Fail_AccessDenied() {
+            // given
+            Long requestId = 1L;
+            Long walletId = 1L;
+            Long otherWalletId = 2L;
+
+            IssuanceRequest request = createIssuanceRequest(requestId, 1L, otherWalletId, 10L);
+
+            given(issuanceRequestRepository.findByIdWithLock(requestId))
+                    .willReturn(Optional.of(request));
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    customerIssuanceService.cancelIssuanceRequest(
+                                            requestId, walletId))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(
+                            e ->
+                                    assertThat(((BusinessException) e).getErrorCode())
+                                            .isEqualTo(ErrorCode.ACCESS_DENIED));
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 실패 - 이미 승인된 요청")
+        void cancelIssuanceRequest_Fail_AlreadyApproved() {
+            // given
+            Long requestId = 1L;
+            Long walletId = 1L;
+
+            IssuanceRequest request = createIssuanceRequest(requestId, 1L, walletId, 10L);
+            request.approve(1);
+
+            given(issuanceRequestRepository.findByIdWithLock(requestId))
+                    .willReturn(Optional.of(request));
+
+            // when & then
+            assertThatThrownBy(
+                            () ->
+                                    customerIssuanceService.cancelIssuanceRequest(
+                                            requestId, walletId))
+                    .isInstanceOf(IssuanceAlreadyProcessedException.class);
+        }
+
+        @Test
+        @DisplayName("적립 요청 취소 시 만료된 경우 EXPIRED 처리")
+        void cancelIssuanceRequest_ExpiredDuringCancel() {
+            // given
+            Long requestId = 1L;
+            Long walletId = 1L;
+            Long walletStampCardId = 10L;
+
+            IssuanceRequest request =
+                    createExpiredButPendingIssuanceRequest(
+                            requestId, 1L, walletId, walletStampCardId);
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, 1L, 3);
+
+            given(issuanceRequestRepository.findByIdWithLock(requestId))
+                    .willReturn(Optional.of(request));
+            given(walletStampCardRepository.findById(walletStampCardId))
+                    .willReturn(Optional.of(walletStampCard));
+
+            // when
+            IssuanceRequestResponse response =
+                    customerIssuanceService.cancelIssuanceRequest(requestId, walletId);
+
+            // then
+            assertThat(response.status()).isEqualTo(IssuanceRequestStatus.EXPIRED);
+        }
+    }
+
+    @Nested
+    @DisplayName("createIssuanceRequest - CANCELLED 멱등성")
+    class CancelledIdempotencyTest {
+
+        @Test
+        @DisplayName("CANCELLED 요청이 있으면 새로 생성 가능")
+        void createIssuanceRequest_Success_CancelledRequestExists() {
+            // given
+            Long walletId = 1L;
+            Long storeId = 1L;
+            Long walletStampCardId = 10L;
+            String idempotencyKey = "test-key";
+
+            CreateIssuanceRequest request =
+                    new CreateIssuanceRequest(storeId, walletStampCardId, idempotencyKey);
+
+            WalletStampCard walletStampCard =
+                    createWalletStampCard(walletStampCardId, walletId, storeId, 3);
+            IssuanceRequest cancelledRequest =
+                    createCancelledIssuanceRequest(1L, storeId, walletId, walletStampCardId);
+            Store store = createStore(storeId, StoreStatus.LIVE);
+
+            given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
+            given(walletStampCardRepository.findById(walletStampCardId))
+                    .willReturn(Optional.of(walletStampCard));
+            given(
+                            issuanceRequestRepository.findByWalletIdAndIdempotencyKey(
+                                    walletId, idempotencyKey))
+                    .willReturn(Optional.of(cancelledRequest));
+            given(
+                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                                    walletStampCardId, IssuanceRequestStatus.PENDING))
+                    .willReturn(false);
+
+            given(issuanceRequestRepository.save(any(IssuanceRequest.class)))
+                    .willAnswer(
+                            invocation -> {
+                                IssuanceRequest savedRequest = invocation.getArgument(0);
+                                ReflectionTestUtils.setField(savedRequest, "id", 2L);
+                                ReflectionTestUtils.setField(
+                                        savedRequest, "createdAt", LocalDateTime.now());
+                                return savedRequest;
+                            });
+
+            // when
+            IssuanceRequestResult result =
+                    customerIssuanceService.createIssuanceRequest(walletId, request);
+
+            // then
+            assertThat(result.newlyCreated()).isTrue();
+            verify(issuanceRequestRepository).save(any(IssuanceRequest.class));
+        }
+    }
+
     // Helper methods
     private WalletStampCard createWalletStampCard(
             Long id, Long customerWalletId, Long storeId, int stampCount) {
@@ -481,6 +658,22 @@ class CustomerIssuanceServiceTest {
         ReflectionTestUtils.setField(request, "id", id);
         ReflectionTestUtils.setField(request, "status", IssuanceRequestStatus.EXPIRED);
         ReflectionTestUtils.setField(request, "createdAt", LocalDateTime.now().minusSeconds(180));
+        return request;
+    }
+
+    private IssuanceRequest createCancelledIssuanceRequest(
+            Long id, Long storeId, Long walletId, Long walletStampCardId) {
+        IssuanceRequest request =
+                IssuanceRequest.builder()
+                        .storeId(storeId)
+                        .walletId(walletId)
+                        .walletStampCardId(walletStampCardId)
+                        .idempotencyKey("test-key")
+                        .expiresAt(LocalDateTime.now().plusSeconds(60))
+                        .build();
+        ReflectionTestUtils.setField(request, "id", id);
+        ReflectionTestUtils.setField(request, "status", IssuanceRequestStatus.CANCELLED);
+        ReflectionTestUtils.setField(request, "createdAt", LocalDateTime.now().minusSeconds(60));
         return request;
     }
 
