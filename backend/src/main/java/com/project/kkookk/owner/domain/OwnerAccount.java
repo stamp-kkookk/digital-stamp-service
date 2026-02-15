@@ -25,9 +25,6 @@ public class OwnerAccount extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = true)
-    private String loginId;
-
     @Column(nullable = false)
     private String passwordHash;
 
@@ -37,13 +34,15 @@ public class OwnerAccount extends BaseTimeEntity {
     @Column(nullable = false)
     private String phoneNumber;
 
+    @Column(nullable = false)
+    private boolean admin;
+
     @Builder
-    private OwnerAccount(
-            String email, String loginId, String passwordHash, String name, String phoneNumber) {
+    private OwnerAccount(String email, String passwordHash, String name, String phoneNumber) {
         this.email = email;
-        this.loginId = loginId;
         this.passwordHash = passwordHash;
         this.name = name;
         this.phoneNumber = phoneNumber;
+        this.admin = false;
     }
 }
