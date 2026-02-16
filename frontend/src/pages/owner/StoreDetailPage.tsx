@@ -31,8 +31,26 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { kkookkToast } from "@/components/ui/Toast";
+import { Button } from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Modal";
 
 type TabType = "cards" | "history" | "migrations";
+
+interface ConfirmDialogState {
+  open: boolean;
+  title: string;
+  description: string;
+  variant: "default" | "destructive";
+  onConfirm: () => void;
+}
 
 interface DesignData {
   color?: string;
@@ -137,6 +155,19 @@ export function StoreDetailPage() {
 
   const storeIdNum = Number(storeId);
 
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    open: false,
+    title: "",
+    description: "",
+    variant: "default",
+    onConfirm: () => {},
+  });
+
+  const openConfirm = (opts: Omit<ConfirmDialogState, "open">) =>
+    setConfirmDialog({ ...opts, open: true });
+  const closeConfirm = () =>
+    setConfirmDialog((prev) => ({ ...prev, open: false }));
+
   // API Hooks
   const {
     data: store,
@@ -238,57 +269,85 @@ export function StoreDetailPage() {
   };
 
   const handleDeleteCard = (stampCardId: number) => {
-    if (confirm("정말로 이 스탬프 카드를 삭제하시겠습니까?")) {
-      deleteStampCard.mutate({ storeId: storeIdNum, stampCardId });
-    }
+    openConfirm({
+      title: "스탬프 카드 삭제",
+      description: "정말로 이 스탬프 카드를 삭제하시겠습니까?",
+      variant: "destructive",
+      onConfirm: () => {
+        closeConfirm();
+        deleteStampCard.mutate(
+          { storeId: storeIdNum, stampCardId },
+          {
+            onSuccess: () => {
+              kkookkToast.success("스탬프 카드가 삭제되었습니다");
+            },
+            onError: (err) => {
+              kkookkToast.error("삭제 실패", { description: err.message });
+            },
+          }
+        );
+      },
+    });
   };
 
-  const handleStatusChange = async (stampCardId: number, status: StampCardStatus) => {
+  const handleStatusChange = (stampCardId: number, status: StampCardStatus) => {
     const labels: Record<string, string> = {
       ACTIVE: "게시",
       PAUSED: "일시정지",
       ARCHIVED: "보관",
       DRAFT: "초안으로 변경",
     };
-    if (!confirm(`이 스탬프 카드를 "${labels[status]}" 상태로 변경하시겠습니까?`)) {
-      return;
-    }
 
-    try {
-      await updateStatus.mutateAsync({ storeId: storeIdNum, stampCardId, status });
-    } catch (err) {
-      if (
-        status === "ACTIVE" &&
-        isAxiosError(err) &&
-        err.response?.status === 409 &&
-        activeCard
-      ) {
-        if (
-          confirm(
-            `현재 활성화된 "${activeCard.title}" 카드를 비활성화하고\n이 카드를 게시하시겠습니까?`
-          )
-        ) {
-          try {
-            await updateStatus.mutateAsync({
-              storeId: storeIdNum,
-              stampCardId: activeCard.id,
-              status: "PAUSED",
+    openConfirm({
+      title: "상태 변경",
+      description: `이 스탬프 카드를 "${labels[status]}" 상태로 변경하시겠습니까?`,
+      variant: "default",
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await updateStatus.mutateAsync({ storeId: storeIdNum, stampCardId, status });
+          kkookkToast.success(`스탬프 카드가 "${labels[status]}" 상태로 변경되었습니다`);
+        } catch (err) {
+          if (
+            status === "ACTIVE" &&
+            isAxiosError(err) &&
+            err.response?.status === 409 &&
+            activeCard
+          ) {
+            openConfirm({
+              title: "활성 카드 교체",
+              description: `현재 활성화된 "${activeCard.title}" 카드를 비활성화하고\n이 카드를 게시하시겠습니까?`,
+              variant: "default",
+              onConfirm: async () => {
+                closeConfirm();
+                try {
+                  await updateStatus.mutateAsync({
+                    storeId: storeIdNum,
+                    stampCardId: activeCard.id,
+                    status: "PAUSED",
+                  });
+                  await updateStatus.mutateAsync({
+                    storeId: storeIdNum,
+                    stampCardId,
+                    status: "ACTIVE",
+                  });
+                  kkookkToast.success("활성 카드가 교체되었습니다");
+                } catch (retryErr) {
+                  kkookkToast.error("상태 변경 실패", {
+                    description:
+                      retryErr instanceof Error ? retryErr.message : "알 수 없는 오류",
+                  });
+                }
+              },
             });
-            await updateStatus.mutateAsync({
-              storeId: storeIdNum,
-              stampCardId,
-              status: "ACTIVE",
+          } else {
+            kkookkToast.error("상태 변경 실패", {
+              description: err instanceof Error ? err.message : "알 수 없는 오류",
             });
-          } catch (retryErr) {
-            alert(
-              `상태 변경 실패: ${retryErr instanceof Error ? retryErr.message : "알 수 없는 오류"}`
-            );
           }
         }
-      } else {
-        alert(`상태 변경 실패: ${err instanceof Error ? err.message : "알 수 없는 오류"}`);
-      }
-    }
+      },
+    });
   };
 
   const handleEditCard = (stampCardId: number) => {
@@ -637,6 +696,29 @@ export function StoreDetailPage() {
           </>
         )}
       </div>
+
+      {/* 확인 다이얼로그 (상태 변경, 카드 삭제 등) */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && closeConfirm()}>
+        <DialogContent showClose={false} className="max-w-sm mx-4">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="whitespace-pre-line">
+              {confirmDialog.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeConfirm}>
+              취소
+            </Button>
+            <Button
+              variant={confirmDialog.variant === "destructive" ? "destructive" : "primary"}
+              onClick={confirmDialog.onConfirm}
+            >
+              확인
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 매장 삭제 확인 모달 */}
       {showDeleteConfirm && (

@@ -10,6 +10,7 @@ import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { StaffConfirmModal } from './StaffConfirmModal';
 import { RedeemResultView } from './RedeemResultView';
 import { Button } from '@/components/ui/Button';
+import { kkookkToast } from '@/components/ui/Toast';
 import { useRedeemReward } from '../hooks/useRedeem';
 
 type RedeemState = 'confirming' | 'completing' | 'success' | 'failed';
@@ -35,6 +36,7 @@ export function RedeemScreen() {
         },
         onError: () => {
           setRedeemState('failed');
+          kkookkToast.error('리워드 사용 처리에 실패했습니다');
         },
       }
     );

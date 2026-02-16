@@ -25,11 +25,12 @@ export function formatDate(date: Date | string | number): string {
 }
 
 /**
- * 날짜를 한국 날짜시간 형식으로 포맷 (M월 D일 HH:MM)
+ * 날짜를 한국 날짜시간 형식으로 포맷 (YYYY년 M월 D일 HH:MM)
  */
 export function formatDateTime(date: Date | string | number): string {
   const d = new Date(date);
   return d.toLocaleString('ko-KR', {
+    year: 'numeric',
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
