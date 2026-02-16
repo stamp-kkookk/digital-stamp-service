@@ -31,7 +31,7 @@ export function TerminalHistoryPage() {
     return events.map((event) => ({
       id: `stamp-${event.id}`,
       type: 'stamp' as const,
-      user: event.customerName,
+      user: event.customerNickname,
       phone: event.customerPhone,
       time: new Date(event.occurredAt),
       status: 'approved' as const,

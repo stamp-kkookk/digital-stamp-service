@@ -36,6 +36,7 @@ public interface RedeemEventRepository extends JpaRepository<RedeemEvent, Long> 
                 e.id as id,
                 e.walletRewardId as walletRewardId,
                 cw.nickname as customerNickname,
+                cw.phone as customerPhone,
                 sc.rewardName as rewardName,
                 sc.title as stampCardTitle,
                 e.result as result,

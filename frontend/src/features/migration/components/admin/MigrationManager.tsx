@@ -6,7 +6,7 @@
 import { Image as ImageIcon, RefreshCw, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { formatShortDate } from '@/lib/utils/format';
+import { formatShortDate, maskPhone } from '@/lib/utils/format';
 import type { MigrationRequest, MigrationStatus } from '@/types/domain';
 
 interface MigrationManagerProps {
@@ -99,7 +99,7 @@ export function MigrationManager({
                   </div>
                   {mig.customerPhone && (
                     <div className="text-xs text-kkookk-steel mt-0.5">
-                      {mig.customerPhone}
+                      {maskPhone(mig.customerPhone)}
                     </div>
                   )}
                 </td>
