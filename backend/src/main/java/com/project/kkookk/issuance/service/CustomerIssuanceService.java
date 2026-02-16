@@ -85,12 +85,18 @@ public class CustomerIssuanceService {
             }
         }
 
-        // 5. 동일 카드에 PENDING 요청이 있는지 확인
-        boolean hasPendingRequest =
-                issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+        // 5. 동일 카드에 PENDING 요청이 있는지 확인 (만료된 요청은 자동 EXPIRED 처리)
+        Optional<IssuanceRequest> pendingRequest =
+                issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                         request.walletStampCardId(), IssuanceRequestStatus.PENDING);
-        if (hasPendingRequest) {
-            throw new IssuanceRequestAlreadyPendingException();
+        if (pendingRequest.isPresent()) {
+            IssuanceRequest pending = pendingRequest.get();
+            if (pending.isExpired()) {
+                pending.expire();
+                log.info("[Issuance] Stale PENDING request expired id={}", pending.getId());
+            } else {
+                throw new IssuanceRequestAlreadyPendingException();
+            }
         }
 
         // 6. 새 요청 생성

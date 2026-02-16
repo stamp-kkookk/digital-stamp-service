@@ -75,9 +75,9 @@ class CustomerIssuanceServiceTest {
                                     walletId, idempotencyKey))
                     .willReturn(Optional.empty());
             given(
-                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                            issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                                     walletStampCardId, IssuanceRequestStatus.PENDING))
-                    .willReturn(false);
+                    .willReturn(Optional.empty());
 
             given(issuanceRequestRepository.save(any(IssuanceRequest.class)))
                     .willAnswer(
@@ -245,6 +245,8 @@ class CustomerIssuanceServiceTest {
             WalletStampCard walletStampCard =
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             Store store = createStore(storeId, StoreStatus.LIVE);
+            IssuanceRequest activePending =
+                    createIssuanceRequest(99L, storeId, walletId, walletStampCardId);
 
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
@@ -252,9 +254,9 @@ class CustomerIssuanceServiceTest {
             given(issuanceRequestRepository.findByWalletIdAndIdempotencyKey(walletId, "new-key"))
                     .willReturn(Optional.empty());
             given(
-                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                            issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                                     walletStampCardId, IssuanceRequestStatus.PENDING))
-                    .willReturn(true);
+                    .willReturn(Optional.of(activePending));
 
             // when & then
             assertThatThrownBy(
@@ -283,9 +285,9 @@ class CustomerIssuanceServiceTest {
             given(issuanceRequestRepository.findByWalletIdAndIdempotencyKey(walletId, "test-key"))
                     .willReturn(Optional.empty());
             given(
-                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                            issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                                     walletStampCardId, IssuanceRequestStatus.PENDING))
-                    .willReturn(false);
+                    .willReturn(Optional.empty());
             given(issuanceRequestRepository.save(any(IssuanceRequest.class)))
                     .willThrow(new DataIntegrityViolationException("Unique constraint violation"));
 
@@ -321,9 +323,9 @@ class CustomerIssuanceServiceTest {
                                     walletId, idempotencyKey))
                     .willReturn(Optional.of(expiredRequest));
             given(
-                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                            issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                                     walletStampCardId, IssuanceRequestStatus.PENDING))
-                    .willReturn(false);
+                    .willReturn(Optional.empty());
 
             given(issuanceRequestRepository.save(any(IssuanceRequest.class)))
                     .willAnswer(
@@ -592,9 +594,9 @@ class CustomerIssuanceServiceTest {
                                     walletId, idempotencyKey))
                     .willReturn(Optional.of(cancelledRequest));
             given(
-                            issuanceRequestRepository.existsByWalletStampCardIdAndStatus(
+                            issuanceRequestRepository.findByWalletStampCardIdAndStatus(
                                     walletStampCardId, IssuanceRequestStatus.PENDING))
-                    .willReturn(false);
+                    .willReturn(Optional.empty());
 
             given(issuanceRequestRepository.save(any(IssuanceRequest.class)))
                     .willAnswer(
