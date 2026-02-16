@@ -45,7 +45,7 @@ export function useIssuanceRequestStatus(
     enabled: !!requestId && enabled,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data?.status === 'PENDING' && data.remainingSeconds > 0) {
+      if (data?.status === 'PENDING') {
         return POLLING_INTERVAL_MS;
       }
 
