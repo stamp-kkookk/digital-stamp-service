@@ -33,3 +33,16 @@ export async function getIssuanceRequest(
     API_ENDPOINTS.CUSTOMER.ISSUANCE_REQUEST(requestId)
   );
 }
+
+// =============================================================================
+// Cancel Issuance Request
+// =============================================================================
+
+export async function cancelIssuanceRequest(
+  requestId: number
+): Promise<IssuanceRequestResponse> {
+  return postRaw<IssuanceRequestResponse, undefined>(
+    API_ENDPOINTS.CUSTOMER.ISSUANCE_REQUEST_CANCEL(requestId),
+    undefined
+  );
+}

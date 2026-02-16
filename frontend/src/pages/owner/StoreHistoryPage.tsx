@@ -60,7 +60,7 @@ export function StoreHistoryPage() {
     const stampHistory: HistoryItem[] = (stampEventsData?.content ?? []).map((event) => ({
       id: `stamp-${event.id}`,
       time: event.occurredAt,
-      user: event.customerName,
+      user: event.customerNickname,
       phone: event.customerPhone,
       type: 'stamp' as const,
       count: event.delta,
@@ -73,7 +73,7 @@ export function StoreHistoryPage() {
         id: `redeem-${event.id}`,
         time: event.occurredAt,
         user: event.customerNickname,
-        phone: '',
+        phone: event.customerPhone,
         type: 'reward' as const,
         content: event.rewardName || '쿠폰 사용',
       }));

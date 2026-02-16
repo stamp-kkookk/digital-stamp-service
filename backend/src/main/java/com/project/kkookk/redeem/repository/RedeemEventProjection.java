@@ -11,6 +11,8 @@ public interface RedeemEventProjection {
 
     String getCustomerNickname();
 
+    String getCustomerPhone();
+
     String getRewardName();
 
     String getStampCardTitle();

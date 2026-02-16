@@ -12,6 +12,7 @@ import {
 } from "@/features/terminal/hooks/useTerminal";
 import { useStorePublicInfo } from "@/hooks/useStorePublicInfo";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { kkookkToast } from "@/components/ui/Toast";
 import type { IssuanceRequest, StoreStatus } from "@/types/domain";
 import { useCallback, useState } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
@@ -72,12 +73,16 @@ export function TerminalLayout() {
         { storeId: storeIdNum, requestId: Number(id) },
         {
           onSuccess: () => {
+            kkookkToast.success("적립 요청을 승인했습니다");
             if (request) {
               setProcessedHistory((prev) => [
                 { ...request, status: "approved" as const, time: new Date() },
                 ...prev,
               ]);
             }
+          },
+          onError: (err) => {
+            kkookkToast.error("승인 처리 실패", { description: err.message });
           },
         }
       );
@@ -92,12 +97,16 @@ export function TerminalLayout() {
         { storeId: storeIdNum, requestId: Number(id) },
         {
           onSuccess: () => {
+            kkookkToast.warning("적립 요청을 거절했습니다");
             if (request) {
               setProcessedHistory((prev) => [
                 { ...request, status: "rejected" as const, time: new Date() },
                 ...prev,
               ]);
             }
+          },
+          onError: (err) => {
+            kkookkToast.error("거절 처리 실패", { description: err.message });
           },
         }
       );

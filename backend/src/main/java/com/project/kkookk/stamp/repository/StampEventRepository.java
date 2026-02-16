@@ -56,7 +56,7 @@ public interface StampEventRepository extends JpaRepository<StampEvent, Long> {
             """
             SELECT e.id as id,
                    e.walletStampCardId as walletStampCardId,
-                   w.name as customerName,
+                   w.nickname as customerNickname,
                    w.phone as customerPhone,
                    e.type as type,
                    e.delta as delta,

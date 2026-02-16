@@ -25,11 +25,12 @@ export function formatDate(date: Date | string | number): string {
 }
 
 /**
- * 날짜를 한국 날짜시간 형식으로 포맷 (M월 D일 HH:MM)
+ * 날짜를 한국 날짜시간 형식으로 포맷 (YYYY년 M월 D일 HH:MM)
  */
 export function formatDateTime(date: Date | string | number): string {
   const d = new Date(date);
   return d.toLocaleString('ko-KR', {
+    year: 'numeric',
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
@@ -63,10 +64,14 @@ export function formatShortDate(date: Date | string | number): string {
 }
 
 /**
- * 전화번호 마스킹 (010-1234-5678 -> 010-****-5678)
+ * 전화번호 마스킹 (010-1234-5678 -> 010-****-5678, 01012345678 -> 010-****-5678)
  */
 export function maskPhone(phone: string): string {
   if (!phone) return '010-****-0000';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length >= 10) {
+    return `${digits.slice(0, 3)}-****-${digits.slice(-4)}`;
+  }
   return phone.replace(/(\d{3})-\d{4}-(\d{4})/, '$1-****-$2');
 }
 

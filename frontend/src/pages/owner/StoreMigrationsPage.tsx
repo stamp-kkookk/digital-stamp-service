@@ -16,6 +16,7 @@ import {
 } from '@/features/migration/hooks/useOwnerMigration';
 import { getStoreMigrationDetail } from '@/features/migration/api/migrationApi';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
+import { kkookkToast } from '@/components/ui/Toast';
 import type { MigrationStatus, MigrationRequest } from '@/types/domain';
 import type { StampMigrationStatus } from '@/types/api';
 
@@ -112,17 +113,37 @@ export function StoreMigrationsPage() {
     const migrationId = Number(id);
 
     if (newStatus === 'approved' && approvedCount !== undefined) {
-      approveMutation.mutate({
-        storeId: storeIdNum,
-        migrationId,
-        data: { approvedStampCount: approvedCount },
-      });
+      approveMutation.mutate(
+        {
+          storeId: storeIdNum,
+          migrationId,
+          data: { approvedStampCount: approvedCount },
+        },
+        {
+          onSuccess: () => {
+            kkookkToast.success('전환 신청을 승인했습니다');
+          },
+          onError: (err) => {
+            kkookkToast.error('승인 처리 실패', { description: err.message });
+          },
+        }
+      );
     } else if (newStatus === 'rejected' && rejectReason) {
-      rejectMutation.mutate({
-        storeId: storeIdNum,
-        migrationId,
-        data: { rejectReason },
-      });
+      rejectMutation.mutate(
+        {
+          storeId: storeIdNum,
+          migrationId,
+          data: { rejectReason },
+        },
+        {
+          onSuccess: () => {
+            kkookkToast.success('전환 신청을 거절했습니다');
+          },
+          onError: (err) => {
+            kkookkToast.error('거절 처리 실패', { description: err.message });
+          },
+        }
+      );
     }
   };
 

@@ -8,6 +8,7 @@
 |-----------|----------|------|-----|
 | JWT (Customer) | `POST /api/public/wallet/login` | `/api/customer/**` 엔드포인트 | 1시간 |
 | JWT (Owner) | `POST /api/owner/auth/login` | `/api/owner/**` 엔드포인트 | 1시간 |
+| JWT (Admin) | `POST /api/owner/auth/login` (admin=true) | `/api/admin/**` 엔드포인트 | 1시간 |
 | JWT (Terminal) | `POST /api/public/terminal/login` | `/api/terminal/**` 엔드포인트 | 1시간 |
 | StepUp Token | `POST /api/public/otp/verify` | 민감 Customer 작업 (리딤, 마이그레이션, 히스토리) | 10분 |
 
@@ -18,6 +19,7 @@
 /api/public/**               → PERMIT_ALL
 /api/customer/**             → hasRole("CUSTOMER")
 /api/terminal/**             → hasRole("TERMINAL")
+/api/admin/**                → hasRole("ADMIN")
 /api/owner/**                → hasRole("OWNER")
 /swagger-ui/**, /v3/api-docs/** → PERMIT_ALL
 ```
@@ -69,7 +71,7 @@
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| GET | `/api/public/stores` | `StorePublicController.getAllActiveStores()` | 활성 매장 전체 목록 |
+| GET | `/api/public/stores` | `StorePublicController.getAllActiveStores()` | LIVE 매장 전체 목록 |
 | GET | `/api/public/stores/{storeId}` | `StorePublicController.getStorePublicInfo()` | 매장 공개 정보 (QR 스캔 진입 화면) |
 
 ### Terminal 인증
@@ -88,6 +90,7 @@
 |--------|------|---------|-------------|
 | POST | `/api/customer/issuance-requests` | `CustomerIssuanceController.createIssuanceRequest()` | 적립 요청 생성 (TTL: 120s, idempotent key) |
 | GET | `/api/customer/issuance-requests/{id}` | `CustomerIssuanceController.getIssuanceRequest()` | 적립 요청 상태 조회 (폴링용, 2-3초 간격) |
+| POST | `/api/customer/issuance-requests/{id}/cancel` | `CustomerIssuanceController.cancelIssuanceRequest()` | 적립 요청 취소 (PENDING만 가능, 409 on conflict) |
 
 ### 리딤 (Redeem) - StepUp 필요
 
@@ -137,11 +140,17 @@
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/owner/stores` | `StoreController.createStore()` | 매장 생성 |
-| GET | `/api/owner/stores` | `StoreController.getStores()` | 소유 매장 목록 |
+| POST | `/api/owner/stores` | `StoreController.createStore()` | 매장 생성 (항상 DRAFT 상태로 생성, Admin 승인 후 LIVE) |
+| GET | `/api/owner/stores` | `StoreController.getStores()` | 소유 매장 목록 (DELETED 제외) |
 | GET | `/api/owner/stores/{storeId}` | `StoreController.getStore()` | 매장 상세 |
 | PUT | `/api/owner/stores/{storeId}` | `StoreController.updateStore()` | 매장 정보 수정 |
-| DELETE | `/api/owner/stores/{storeId}` | `StoreController.deleteStore()` | 매장 삭제 (Soft delete) |
+| DELETE | `/api/owner/stores/{storeId}` | `StoreController.deleteStore()` | 매장 삭제 (Soft delete → DELETED 상태 전이) |
+
+### 장소 검색
+
+| Method | Path | Handler | Description |
+|--------|------|---------|-------------|
+| GET | `/api/owner/places/search?query=xxx` | `PlaceSearchController.searchPlaces()` | 카카오 장소 검색 (매장 등록 시 placeRef 연동) |
 
 ### 스탬프카드 관리
 
@@ -188,6 +197,19 @@
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
 | GET | `/api/terminal/stores/{storeId}/stamp-events` | `TerminalStampEventController.getStampEvents()` | 스탬프 적립 이벤트 이력 (페이지네이션) |
+
+---
+
+## Admin API (Bearer ownerAccessToken with admin=true, ROLE_ADMIN)
+
+### 매장 관리
+
+| Method | Path | Handler | Description |
+|--------|------|---------|-------------|
+| GET | `/api/admin/stores?status=DRAFT` | `AdminStoreController.getStores()` | 전체 매장 목록 (status 필터 가능) |
+| GET | `/api/admin/stores/{storeId}` | `AdminStoreController.getStore()` | 매장 상세 (owner 정보 포함) |
+| PATCH | `/api/admin/stores/{storeId}/status` | `AdminStoreController.changeStatus()` | 매장 상태 변경 (DRAFT→LIVE 승인, LIVE→SUSPENDED 정지 등) |
+| GET | `/api/admin/stores/{storeId}/audit-logs` | `AdminStoreController.getAuditLogs()` | 매장 Audit Log 조회 |
 
 ---
 

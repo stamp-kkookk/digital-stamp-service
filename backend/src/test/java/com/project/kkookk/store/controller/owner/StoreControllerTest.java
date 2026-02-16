@@ -65,22 +65,29 @@ class StoreControllerTest {
     private static final Long OWNER_ID = 1L;
     private static final Long STORE_ID = 1L;
 
+    private StoreResponse createStoreResponse(
+            String name, StoreStatus status, Long ownerAccountId) {
+        return new StoreResponse(
+                STORE_ID,
+                name,
+                "주소",
+                "02-1234-5678",
+                null,
+                null,
+                null,
+                status,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                ownerAccountId);
+    }
+
     @Test
     @DisplayName("매장 생성 성공 - 201 Created")
     void createStore_Success() throws Exception {
         // given
         StoreCreateRequest request =
-                new StoreCreateRequest("새 매장", "주소", "123-456", StoreStatus.ACTIVE);
-        StoreResponse response =
-                new StoreResponse(
-                        STORE_ID,
-                        "새 매장",
-                        "주소",
-                        "123-456",
-                        StoreStatus.ACTIVE,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        OWNER_ID);
+                new StoreCreateRequest("새 매장", "주소", "02-1234-5678", null, null, null);
+        StoreResponse response = createStoreResponse("새 매장", StoreStatus.DRAFT, OWNER_ID);
         given(storeService.createStore(anyLong(), any(StoreCreateRequest.class)))
                 .willReturn(response);
 
@@ -99,7 +106,7 @@ class StoreControllerTest {
     void createStore_Fail_InvalidRequest() throws Exception {
         // given
         StoreCreateRequest request =
-                new StoreCreateRequest("", "주소", "123-456", StoreStatus.ACTIVE);
+                new StoreCreateRequest("", "주소", "02-1234-5678", null, null, null);
 
         // when & then
         mockMvc.perform(
@@ -113,16 +120,7 @@ class StoreControllerTest {
     @DisplayName("매장 목록 조회 성공 - 200 OK")
     void getStores_Success() throws Exception {
         // given
-        StoreResponse response =
-                new StoreResponse(
-                        STORE_ID,
-                        "내 매장",
-                        "주소",
-                        "123-456",
-                        StoreStatus.ACTIVE,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        OWNER_ID);
+        StoreResponse response = createStoreResponse("내 매장", StoreStatus.DRAFT, OWNER_ID);
         given(storeService.getStores(OWNER_ID)).willReturn(Collections.singletonList(response));
 
         // when & then
@@ -135,16 +133,7 @@ class StoreControllerTest {
     @DisplayName("특정 매장 조회 성공 - 200 OK")
     void getStore_Success() throws Exception {
         // given
-        StoreResponse response =
-                new StoreResponse(
-                        STORE_ID,
-                        "내 매장",
-                        "주소",
-                        "123-456",
-                        StoreStatus.ACTIVE,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        OWNER_ID);
+        StoreResponse response = createStoreResponse("내 매장", StoreStatus.DRAFT, OWNER_ID);
         given(storeService.getStore(OWNER_ID, STORE_ID)).willReturn(response);
 
         // when & then
@@ -170,17 +159,8 @@ class StoreControllerTest {
     void updateStore_Success() throws Exception {
         // given
         StoreUpdateRequest request =
-                new StoreUpdateRequest("수정된 매장", "새 주소", "456-789", StoreStatus.INACTIVE);
-        StoreResponse response =
-                new StoreResponse(
-                        STORE_ID,
-                        "수정된 매장",
-                        "새 주소",
-                        "456-789",
-                        StoreStatus.INACTIVE,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        OWNER_ID);
+                new StoreUpdateRequest("수정된 매장", "새 주소", "02-4567-8901", "카페 설명", null, null);
+        StoreResponse response = createStoreResponse("수정된 매장", StoreStatus.DRAFT, OWNER_ID);
         given(storeService.updateStore(anyLong(), anyLong(), any(StoreUpdateRequest.class)))
                 .willReturn(response);
 
@@ -198,7 +178,7 @@ class StoreControllerTest {
     void updateStore_Fail_InvalidRequest() throws Exception {
         // given
         StoreUpdateRequest request =
-                new StoreUpdateRequest("", "새 주소", "456-789", StoreStatus.INACTIVE);
+                new StoreUpdateRequest("", "새 주소", "02-4567-8901", null, null, null);
 
         // when & then
         mockMvc.perform(

@@ -496,8 +496,9 @@ class OwnerMigrationServiceTest {
 
     private Store createStore(Long id, Long ownerAccountId) {
         Store store =
-                new Store("테스트 매장", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, ownerAccountId);
+                new Store("테스트 매장", "서울시 강남구", "02-1234-5678", null, null, null, ownerAccountId);
         setId(store, id);
+        store.transitionTo(StoreStatus.LIVE);
         return store;
     }
 

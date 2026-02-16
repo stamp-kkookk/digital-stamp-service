@@ -10,7 +10,6 @@ import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
-import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
@@ -42,7 +41,7 @@ public class CustomerRedeemService {
                         .findById(reward.getStoreId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-        if (store.getStatus() != StoreStatus.ACTIVE) {
+        if (!store.getStatus().isOperational()) {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 

@@ -103,4 +103,11 @@ public class IssuanceRequest extends BaseTimeEntity {
         }
         this.status = IssuanceRequestStatus.EXPIRED;
     }
+
+    public void cancel() {
+        if (!isPending()) {
+            throw new IllegalStateException("Only PENDING requests can be cancelled");
+        }
+        this.status = IssuanceRequestStatus.CANCELLED;
+    }
 }

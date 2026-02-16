@@ -8,7 +8,7 @@ public interface StampEventProjection {
 
     Long getWalletStampCardId();
 
-    String getCustomerName();
+    String getCustomerNickname();
 
     String getCustomerPhone();
 

@@ -8,11 +8,13 @@ import { ChevronLeft, ChevronRight, ShieldCheck, Clock } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { isStepUpValid, getStepUpRemainingSeconds } from '@/lib/api/tokenManager';
 import { StepUpVerify } from '@/components/shared/StepUpVerify';
+import { PrivacyPolicyModal } from '@/components/shared/PrivacyPolicyModal';
 
 export function CustomerSettingsPage() {
   const { customerNavigate } = useCustomerNavigate();
   const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
   const [showOtpFlow, setShowOtpFlow] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   const remainingSec = stepUpValid ? getStepUpRemainingSeconds() : 0;
   const remainingMin = Math.ceil(remainingSec / 60);
@@ -38,6 +40,12 @@ export function CustomerSettingsPage() {
           <div
             className="flex justify-between items-center cursor-pointer"
             onClick={() => !stepUpValid && setShowOtpFlow(!showOtpFlow)}
+            onKeyDown={(e) => {
+              if (!stepUpValid && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                setShowOtpFlow(!showOtpFlow);
+              }
+            }}
             role={stepUpValid ? undefined : 'button'}
             tabIndex={stepUpValid ? undefined : 0}
           >
@@ -78,15 +86,20 @@ export function CustomerSettingsPage() {
           </div>
         </div>
 
-        <div className="p-4 border-b border-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-50">
+        <button
+          className="w-full p-4 border-b border-slate-50 flex justify-between items-center cursor-pointer hover:bg-slate-50"
+          onClick={() => setIsPrivacyOpen(true)}
+        >
           <span className="text-kkookk-navy font-medium">개인정보 처리방침</span>
           <ChevronRight size={16} className="text-kkookk-steel" />
-        </div>
+        </button>
         <div className="p-4 flex justify-between items-center">
           <span className="text-kkookk-navy font-medium">버전 정보</span>
           <span className="text-kkookk-steel text-sm">v1.0.0</span>
         </div>
       </div>
+
+      <PrivacyPolicyModal open={isPrivacyOpen} onOpenChange={setIsPrivacyOpen} />
     </div>
   );
 }
