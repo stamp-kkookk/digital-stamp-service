@@ -99,6 +99,7 @@
 | 401 | OTP_INVALID | OTP | OTP가 일치하지 않습니다 |
 | 401 | OTP_ATTEMPTS_EXCEEDED | OTP | OTP 시도 횟수를 초과했습니다 |
 | 409 | WALLET_PHONE_DUPLICATED | Wallet | 이미 등록된 전화번호입니다 |
+| 409 | WALLET_NICKNAME_DUPLICATED | Wallet | 이미 사용 중인 닉네임입니다 |
 | 404 | CUSTOMER_WALLET_NOT_FOUND | Wallet | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 |
 | 403 | CUSTOMER_WALLET_BLOCKED | Wallet | 차단된 지갑입니다 |
 | 404 | WALLET_STAMP_CARD_NOT_FOUND | Wallet | 해당 지갑 스탬프카드를 찾을 수 없습니다 |
@@ -149,6 +150,9 @@
 | format.ts | `formatFullDateTime()` | Date/string/number | "2월 10일 14:30" | 날짜+시간 (long) |
 | format.ts | `formatShortDate()` | Date/string/number | "2026.02.10" | YYYY.MM.DD |
 | format.ts | `maskPhone()` | string | "010-\*\*\*\*-5678" | 전화번호 마스킹 |
+| format.ts | `stripPhoneToDigits()` | string | "01012345678" | 전화번호에서 숫자만 추출 |
+| format.ts | `formatPhoneNumber()` | string | "010-1234-5678" | 전화번호 자동 포맷 (3-4-4) |
+| format.ts | `hasInvalidPhoneChars()` | string | boolean | 전화번호 입력에 잘못된 문자 포함 여부 |
 | format.ts | `formatCountdown()` | number (seconds) | "05:30" | MM:SS 카운트다운 |
 | format.ts | `formatRelativeTime()` | Date/string/number | "2시간 전" | 상대 시간 |
 | format.ts | `formatNumber()` | number | "1,234,567" | 천단위 구분 |

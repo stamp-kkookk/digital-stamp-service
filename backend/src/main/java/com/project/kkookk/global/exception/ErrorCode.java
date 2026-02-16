@@ -70,6 +70,7 @@ public enum ErrorCode {
 
     // Wallet
     WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다"),
+    WALLET_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "WALLET_002", "이미 사용 중인 닉네임입니다"),
 
     // Customer Wallet
     CUSTOMER_WALLET_NOT_FOUND(

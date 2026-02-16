@@ -676,6 +676,7 @@ HTTP Request
 | OTP_INVALID | 401 | OTP_003 | OTP가 일치하지 않습니다 | 코드 불일치 또는 미존재 |
 | OTP_ATTEMPTS_EXCEEDED | 401 | OTP_004 | OTP 시도 횟수를 초과했습니다 | 3회 실패 |
 | WALLET_PHONE_DUPLICATED | 409 | WALLET_001 | 이미 등록된 전화번호입니다 | 지갑 등록 시 전화번호 중복 |
+| WALLET_NICKNAME_DUPLICATED | 409 | WALLET_002 | 이미 사용 중인 닉네임입니다 | 지갑 등록 시 닉네임 중복 |
 | CUSTOMER_WALLET_NOT_FOUND | 404 | CUSTOMER_WALLET_NOT_FOUND | 해당 전화번호와 이름으로 지갑을 찾을 수 없습니다 | 고객 로그인 실패 |
 | CUSTOMER_WALLET_BLOCKED | 403 | CUSTOMER_WALLET_BLOCKED | 차단된 지갑입니다 | 차단 상태 지갑 접근 |
 | UNAUTHORIZED | 401 | UNAUTHORIZED | 인증이 필요합니다 | 토큰 없이 인증 필요 엔드포인트 접근 |
@@ -882,7 +883,7 @@ CREATE TABLE customer_wallet (
     id         BIGINT AUTO_INCREMENT PRIMARY KEY,
     phone      VARCHAR(50) NOT NULL UNIQUE,
     name       VARCHAR(50) NOT NULL,
-    nickname   VARCHAR(50),
+    nickname   VARCHAR(50) UNIQUE,
     status     VARCHAR(20) NOT NULL,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,

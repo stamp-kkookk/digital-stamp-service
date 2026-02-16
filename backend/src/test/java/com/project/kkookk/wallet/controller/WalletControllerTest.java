@@ -2,6 +2,7 @@ package com.project.kkookk.wallet.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -317,5 +318,53 @@ class WalletControllerTest {
                                 .content(requestBody))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("지갑 생성 실패 - 닉네임 중복 (409)")
+    void register_Fail_NicknameDuplicated() throws Exception {
+        // given
+        WalletRegisterRequest request =
+                new WalletRegisterRequest("010-1234-5678", "홍길동", "길동이", null);
+
+        given(customerWalletService.register(any(WalletRegisterRequest.class)))
+                .willThrow(new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED));
+
+        // when & then
+        mockMvc.perform(
+                        post("/api/public/wallet/register")
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("WALLET_002"))
+                .andExpect(jsonPath("$.message").value("이미 사용 중인 닉네임입니다"));
+    }
+
+    @Test
+    @DisplayName("닉네임 중복 체크 - 사용 가능")
+    void checkNickname_Available() throws Exception {
+        // given
+        given(customerWalletService.checkNicknameAvailable("새닉네임")).willReturn(true);
+
+        // when & then
+        mockMvc.perform(get("/api/public/wallet/check-nickname").param("nickname", "새닉네임"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true));
+    }
+
+    @Test
+    @DisplayName("닉네임 중복 체크 - 이미 사용 중")
+    void checkNickname_Duplicated() throws Exception {
+        // given
+        given(customerWalletService.checkNicknameAvailable("길동이")).willReturn(false);
+
+        // when & then
+        mockMvc.perform(get("/api/public/wallet/check-nickname").param("nickname", "길동이"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
     }
 }

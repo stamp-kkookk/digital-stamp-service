@@ -10,8 +10,12 @@ import { useCustomerNavigate, saveOriginStoreId } from "@/hooks/useCustomerNavig
 import { useAuth } from "@/app/providers/AuthProvider";
 import { kkookkToast } from "@/components/ui/Toast";
 import { useOtpRequest, useOtpVerify, useWalletRegister } from "@/features/auth/hooks/useAuth";
+import { checkNickname, checkPhone } from "@/features/auth/api/authApi";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useState } from "react";
+import type { AxiosError } from "axios";
+import type { ErrorResponse } from "@/types/api";
+import { formatPhoneNumber, hasInvalidPhoneChars, stripPhoneToDigits } from "@/lib/utils/format";
 
 type SignupStep = "input" | "otp" | "success";
 
@@ -25,33 +29,87 @@ export function CustomerSignupForm() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [nicknameError, setNicknameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+
+  const [isCheckingPhone, setIsCheckingPhone] = useState(false);
 
   const otpRequest = useOtpRequest();
   const otpVerify = useOtpVerify();
   const walletRegister = useWalletRegister();
 
   // 폼 유효성 검사
+  const phoneDigitCount = stripPhoneToDigits(phone).length;
+  const isPhoneComplete = phoneDigitCount >= 10 && phoneDigitCount <= 11;
   const isBasicInfoValid =
-    name.trim() !== "" && nickname.trim() !== "" && phone.trim() !== "";
+    name.trim() !== "" && nickname.trim() !== "" && isPhoneComplete && !phoneError;
   const isOtpValid = otp.trim().length === 6;
 
-  const handleRequestOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isBasicInfoValid) return;
-    setError(null);
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    if (hasInvalidPhoneChars(rawValue)) {
+      setPhoneError("숫자만 입력해주세요");
+    } else {
+      setPhoneError(null);
+    }
+    setPhone(formatPhoneNumber(rawValue));
+  };
 
+  const handleNicknameBlur = async () => {
+    if (!nickname.trim()) return;
+    setNicknameError(null);
+    try {
+      const result = await checkNickname(nickname.trim());
+      if (!result.available) {
+        setNicknameError("이미 사용 중인 닉네임입니다");
+      }
+    } catch {
+      // 네트워크 에러 시 무시 (서버에서 최종 차단)
+    }
+  };
+
+  const handleRequestOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isBasicInfoValid || nameError || nicknameError) return;
+    setError(null);
+    setPhoneError(null);
+    const phoneDigits = stripPhoneToDigits(phone);
+
+    // 1. 전화번호 중복 체크 (OTP 요청 전 선행)
+    setIsCheckingPhone(true);
+    try {
+      const result = await checkPhone(phoneDigits);
+      if (!result.available) {
+        setPhoneError("이미 등록된 번호입니다");
+        setIsCheckingPhone(false);
+        return;
+      }
+    } catch {
+      // 네트워크 에러 시 서버에서 최종 차단하므로 진행 허용
+    }
+    setIsCheckingPhone(false);
+
+    // 2. OTP 요청
     otpRequest.mutate(
-      { phone },
+      { phone: phoneDigits },
       {
         onSuccess: (response) => {
           setStep("otp");
-          // Dev convenience: auto-fill OTP code in dev mode
           if (response.devOtpCode) {
             setOtp(response.devOtpCode);
           }
         },
-        onError: () => {
-          setError("1분 후 다시 시도해주세요.");
+        onError: (err) => {
+          const axiosError = err as AxiosError<ErrorResponse>;
+          const status = axiosError?.response?.status;
+          if (status === 429) {
+            setError("1분 후 다시 시도해주세요.");
+          } else if (status === 400) {
+            setPhoneError("올바른 전화번호를 입력해주세요");
+          } else {
+            setError("인증번호 요청에 실패했습니다. 다시 시도해주세요.");
+          }
         },
       }
     );
@@ -61,9 +119,10 @@ export function CustomerSignupForm() {
     e.preventDefault();
     if (!otp) return;
     setError(null);
+    const phoneDigits = stripPhoneToDigits(phone);
 
     otpVerify.mutate(
-      { phone, code: otp },
+      { phone: phoneDigits, code: otp },
       {
         onSuccess: (response) => {
           if (!response.verified) {
@@ -72,7 +131,7 @@ export function CustomerSignupForm() {
           }
           // OTP verified → register wallet
           walletRegister.mutate(
-            { phone, name, nickname, storeId: storeId ? Number(storeId) : undefined },
+            { phone: phoneDigits, name, nickname, storeId: storeId ? Number(storeId) : undefined },
             {
               onSuccess: () => {
                 if (storeId) saveOriginStoreId(storeId);
@@ -80,8 +139,20 @@ export function CustomerSignupForm() {
                 kkookkToast.success("회원가입이 완료되었습니다");
                 setStep("success");
               },
-              onError: () => {
-                setError("이미 등록된 번호입니다.");
+              onError: (err) => {
+                const axiosError = err as AxiosError<ErrorResponse>;
+                const errorCode = axiosError?.response?.data?.code;
+                const fieldErrors = axiosError?.response?.data?.errors;
+                if (errorCode === 'WALLET_002') {
+                  setNicknameError("이미 사용 중인 닉네임입니다");
+                  setStep("input");
+                } else if (errorCode === 'INVALID_INPUT_VALUE' && fieldErrors?.some(e => e.field === 'name')) {
+                  const nameFieldError = fieldErrors.find(e => e.field === 'name');
+                  setNameError(nameFieldError?.message ?? "이름에는 숫자를 입력할 수 없어요.");
+                  setStep("input");
+                } else {
+                  setError("이미 등록된 번호입니다.");
+                }
               },
             }
           );
@@ -134,6 +205,9 @@ export function CustomerSignupForm() {
         <button
           onClick={() => {
             setError(null);
+            setNameError(null);
+            setNicknameError(null);
+            setPhoneError(null);
             if (step === "otp") {
               setStep("input");
               setOtp("");
@@ -160,26 +234,42 @@ export function CustomerSignupForm() {
             type="text"
             label="이름"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setName(value);
+              if (/[0-9]/.test(value)) {
+                setNameError("이름에는 숫자를 입력할 수 없어요.");
+              } else {
+                setNameError(null);
+              }
+            }}
             placeholder="홍길동"
             autoComplete="name"
+            error={nameError ?? undefined}
           />
 
           <Input
             type="text"
             label="닉네임 (매장에서 불릴 이름)"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setNickname(e.target.value);
+              if (nicknameError) setNicknameError(null);
+            }}
+            onBlur={handleNicknameBlur}
             placeholder="길동이"
+            error={nicknameError ?? undefined}
           />
 
           <Input
             type="tel"
             label="휴대폰 번호"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={handlePhoneChange}
             placeholder="010-0000-0000"
             autoComplete="tel"
+            maxLength={13}
+            error={phoneError ?? undefined}
           />
 
           {error && (
@@ -190,8 +280,8 @@ export function CustomerSignupForm() {
             type="submit"
             variant="primary"
             size="full"
-            disabled={!isBasicInfoValid || otpRequest.isPending}
-            isLoading={otpRequest.isPending}
+            disabled={!isBasicInfoValid || !!nameError || !!nicknameError || !!phoneError || isCheckingPhone || otpRequest.isPending}
+            isLoading={isCheckingPhone || otpRequest.isPending}
             className="mt-4"
           >
             인증번호 받기

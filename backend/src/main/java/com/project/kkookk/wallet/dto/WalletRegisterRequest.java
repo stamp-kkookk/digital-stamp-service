@@ -14,6 +14,7 @@ public record WalletRegisterRequest(
         @Schema(description = "이름", example = "홍길동")
                 @NotBlank(message = "이름은 필수입니다")
                 @Size(max = 50, message = "이름은 50자 이하여야 합니다")
+                @Pattern(regexp = "^[^0-9]*$", message = "이름에는 숫자를 입력할 수 없어요")
                 String name,
         @Schema(description = "닉네임", example = "길동이")
                 @NotBlank(message = "닉네임은 필수입니다")

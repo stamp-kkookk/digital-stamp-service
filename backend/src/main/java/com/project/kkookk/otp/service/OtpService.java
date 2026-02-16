@@ -33,8 +33,13 @@ public class OtpService implements OtpStoreAccessor {
     private final JwtUtil jwtUtil;
     private final CustomerWalletRepository customerWalletRepository;
 
+    private String normalizePhone(String phone) {
+        return phone.replaceAll("[^0-9]", "");
+    }
+
     // TODO: 시연용 - 프로덕션 배포 시 반환값 제거하고 void로 변경 필요
-    public String requestOtp(String phone) {
+    public String requestOtp(String rawPhone) {
+        String phone = normalizePhone(rawPhone);
         // Rate limit 체크
         RateLimitData rateLimitData = rateLimitStore.get(phone);
         if (rateLimitData != null && !rateLimitData.isExpired()) {
@@ -75,7 +80,8 @@ public class OtpService implements OtpStoreAccessor {
      * @param code OTP 코드
      * @return 검증 결과와 StepUp 토큰이 포함된 OtpVerifyResult
      */
-    public OtpVerifyResult verifyOtp(String phone, String code) {
+    public OtpVerifyResult verifyOtp(String rawPhone, String code) {
+        String phone = normalizePhone(rawPhone);
         // OTP 조회
         OtpData otpData = otpStore.get(phone);
         if (otpData == null) {
