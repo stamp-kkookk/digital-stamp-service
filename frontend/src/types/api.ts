@@ -609,6 +609,8 @@ export interface TerminalLoginResponse {
 export interface PendingIssuanceRequestItem {
   id: number;
   customerName: string;
+  customerNickname: string;
+  maskedPhone: string;
   requestedAt: string;
   elapsedSeconds: number;
   remainingSeconds: number;

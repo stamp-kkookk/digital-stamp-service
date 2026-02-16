@@ -69,25 +69,19 @@ public class TerminalApprovalService {
         List<IssuanceRequest> validRequests =
                 pendingRequests.stream().filter(r -> !r.isExpired()).toList();
 
-        // 고객명 조회 (N+1 방지)
+        // 고객 정보 조회 (N+1 방지)
         Set<Long> walletIds =
                 validRequests.stream()
                         .map(IssuanceRequest::getWalletId)
                         .collect(Collectors.toSet());
 
-        Map<Long, String> walletNameMap =
+        Map<Long, CustomerWallet> walletMap =
                 customerWalletRepository.findAllByIds(walletIds).stream()
-                        .collect(Collectors.toMap(CustomerWallet::getId, CustomerWallet::getName));
+                        .collect(Collectors.toMap(CustomerWallet::getId, w -> w));
 
         List<PendingIssuanceRequestItem> items =
                 validRequests.stream()
-                        .map(
-                                r ->
-                                        toItem(
-                                                r,
-                                                walletNameMap.getOrDefault(
-                                                        r.getWalletId(), "알 수 없음"),
-                                                now))
+                        .map(r -> toItem(r, walletMap.get(r.getWalletId()), now))
                         .toList();
 
         log.info("[Issuance] Pending requests fetched storeId={} count={}", storeId, items.size());
@@ -221,15 +215,30 @@ public class TerminalApprovalService {
     }
 
     private PendingIssuanceRequestItem toItem(
-            IssuanceRequest request, String customerName, LocalDateTime now) {
+            IssuanceRequest request, CustomerWallet wallet, LocalDateTime now) {
         long elapsedSeconds = Duration.between(request.getCreatedAt(), now).getSeconds();
         long remainingSeconds = Duration.between(now, request.getExpiresAt()).getSeconds();
+
+        String customerName = wallet != null ? wallet.getName() : "알 수 없음";
+        String customerNickname = wallet != null ? wallet.getNickname() : "알 수 없음";
+        String maskedPhone = wallet != null ? maskPhone(wallet.getPhone()) : "010-****-0000";
 
         return new PendingIssuanceRequestItem(
                 request.getId(),
                 customerName,
+                customerNickname,
+                maskedPhone,
                 request.getCreatedAt(),
                 Math.max(0, elapsedSeconds),
                 Math.max(0, remainingSeconds));
+    }
+
+    private String maskPhone(String phone) {
+        if (phone == null || phone.isEmpty()) return "010-****-0000";
+        String digits = phone.replaceAll("\\D", "");
+        if (digits.length() >= 10) {
+            return digits.substring(0, 3) + "-****-" + digits.substring(digits.length() - 4);
+        }
+        return phone;
     }
 }
