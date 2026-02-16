@@ -39,6 +39,19 @@ public enum ErrorCode {
     // Store
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),
     STORE_INACTIVE(HttpStatus.FORBIDDEN, "STORE_INACTIVE", "해당 매장은 현재 이용할 수 없습니다"),
+    STORE_STATUS_TRANSITION_INVALID(
+            HttpStatus.BAD_REQUEST, "STORE_STATUS_TRANSITION_INVALID", "유효하지 않은 매장 상태 전이입니다"),
+    STORE_PLACE_REF_DUPLICATED(HttpStatus.CONFLICT, "STORE_PLACE_REF_DUPLICATED", "이미 등록된 장소입니다"),
+    STORE_ICON_TOO_LARGE(
+            HttpStatus.PAYLOAD_TOO_LARGE, "STORE_ICON_TOO_LARGE", "아이콘 이미지 크기가 너무 큽니다 (최대 5MB)"),
+    STORE_PHONE_INVALID(HttpStatus.BAD_REQUEST, "STORE_PHONE_INVALID", "전화번호 형식이 올바르지 않습니다"),
+    STORE_NOT_OPERATIONAL(HttpStatus.BAD_REQUEST, "STORE_NOT_OPERATIONAL", "운영 중인 매장이 아닙니다"),
+
+    // Admin
+    ADMIN_ACCESS_DENIED(HttpStatus.FORBIDDEN, "ADMIN_ACCESS_DENIED", "관리자 권한이 필요합니다"),
+
+    // Kakao
+    KAKAO_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO_API_ERROR", "카카오 API 호출 중 오류가 발생했습니다"),
 
     // Terminal
     TERMINAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "TERMINAL_ACCESS_DENIED", "단말기 접근 권한이 없습니다"),
@@ -76,12 +89,6 @@ public enum ErrorCode {
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
     REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
     REWARD_EXPIRED(HttpStatus.GONE, "REWARD_EXPIRED", "리워드 유효기간이 만료되었습니다"),
-    REDEEM_SESSION_ALREADY_EXISTS(
-            HttpStatus.CONFLICT, "REDEEM_SESSION_ALREADY_EXISTS", "이미 진행 중인 사용 요청이 있습니다"),
-    REDEEM_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "REDEEM_SESSION_NOT_FOUND", "사용 세션을 찾을 수 없습니다"),
-    REDEEM_SESSION_NOT_PENDING(
-            HttpStatus.BAD_REQUEST, "REDEEM_SESSION_NOT_PENDING", "처리 대기 중인 세션이 아닙니다"),
-    REDEEM_SESSION_EXPIRED(HttpStatus.GONE, "REDEEM_SESSION_EXPIRED", "사용 세션이 만료되었습니다"),
 
     // Migration
     MIGRATION_NOT_FOUND(HttpStatus.NOT_FOUND, "MIGRATION_NOT_FOUND", "마이그레이션 요청을 찾을 수 없습니다"),

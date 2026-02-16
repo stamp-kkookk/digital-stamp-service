@@ -3,43 +3,57 @@
  * 진행 상황 및 액션이 포함된 스탬프 카드 상세 뷰
  */
 
-import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { ChevronLeft, Check, Smartphone, Loader2, AlertCircle, History } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
-import { useWalletStampCards, useStoreSummary } from '../hooks/useWallet';
-import { parseDesignJson } from '../utils/cardDesign';
-import type { StampCard } from '@/types/domain';
+import { Button } from "@/components/ui/Button";
+import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
+import type { StampCard } from "@/types/domain";
+import {
+  AlertCircle,
+  Check,
+  ChevronLeft,
+  History,
+  Loader2,
+  Smartphone,
+} from "lucide-react";
+import { useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { useStoreSummary, useWalletStampCards } from "../hooks/useWallet";
+import { parseDesignJson } from "../utils/cardDesign";
 
 export function CardDetailView() {
   const { storeId, customerNavigate } = useCustomerNavigate();
   const { cardId } = useParams<{ cardId: string }>();
   const storeIdNum = storeId ? Number(storeId) : undefined;
 
-  const { data: walletData, isLoading: walletLoading, error: walletError } = useWalletStampCards(storeIdNum);
-  const { data: storeSummary, isLoading: summaryLoading } = useStoreSummary(storeIdNum);
+  const {
+    data: walletData,
+    isLoading: walletLoading,
+    error: walletError,
+  } = useWalletStampCards(storeIdNum);
+  const { data: storeSummary, isLoading: summaryLoading } =
+    useStoreSummary(storeIdNum);
 
   const card: StampCard | null = useMemo(() => {
     // Try to find in wallet data
-    const walletCards: StampCard[] = (walletData?.stampCards ?? []).map((apiCard) => {
-      const style = parseDesignJson(apiCard.designJson);
-      return {
-        id: String(apiCard.walletStampCardId),
-        storeId: apiCard.store.storeId,
-        storeName: apiCard.store.storeName,
-        current: apiCard.currentStampCount,
-        max: apiCard.goalStampCount,
-        reward: apiCard.nextRewardName || '리워드',
-        theme: 'orange' as const,
-        status: 'active' as const,
-        bgGradient: style.bgGradient,
-        shadowColor: style.shadowColor,
-        stampColor: style.stampColor,
-        backgroundImage: style.backgroundImage,
-        stampImage: style.stampImage,
-      };
-    });
+    const walletCards: StampCard[] = (walletData?.stampCards ?? []).map(
+      (apiCard) => {
+        const style = parseDesignJson(apiCard.designJson);
+        return {
+          id: String(apiCard.walletStampCardId),
+          storeId: apiCard.store.storeId,
+          storeName: apiCard.store.storeName,
+          current: apiCard.currentStampCount,
+          max: apiCard.goalStampCount,
+          reward: apiCard.nextRewardName || "리워드",
+          theme: "orange" as const,
+          status: "active" as const,
+          bgGradient: style.bgGradient,
+          shadowColor: style.shadowColor,
+          stampColor: style.stampColor,
+          backgroundImage: style.backgroundImage,
+          stampImage: style.stampImage,
+        };
+      },
+    );
 
     const matched = walletCards.find((c) => c.id === cardId);
     if (matched) return matched;
@@ -53,9 +67,9 @@ export function CardDetailView() {
         storeName: storeSummary.storeName,
         current: 0,
         max: summaryCard.goalStampCount,
-        reward: summaryCard.rewardName || '리워드',
-        theme: 'orange' as const,
-        status: 'active' as const,
+        reward: summaryCard.rewardName || "리워드",
+        theme: "orange" as const,
+        status: "active" as const,
         bgGradient: summaryStyle.bgGradient,
         shadowColor: summaryStyle.shadowColor,
         stampColor: summaryStyle.stampColor,
@@ -86,7 +100,7 @@ export function CardDetailView() {
       <div className="h-full bg-white flex flex-col pt-12">
         <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center">
           <button
-            onClick={() => customerNavigate('/wallet')}
+            onClick={() => customerNavigate("/wallet")}
             className="p-2 -ml-2 text-kkookk-steel"
             aria-label="뒤로 가기"
           >
@@ -95,8 +109,12 @@ export function CardDetailView() {
         </div>
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           <AlertCircle className="w-12 h-12 text-red-500" />
-          <p className="mt-4 text-lg font-medium text-kkookk-navy">카드 정보를 불러올 수 없습니다</p>
-          <p className="mt-1 text-sm text-kkookk-steel">잠시 후 다시 시도해주세요</p>
+          <p className="mt-4 text-lg font-medium text-kkookk-navy">
+            카드 정보를 불러올 수 없습니다
+          </p>
+          <p className="mt-1 text-sm text-kkookk-steel">
+            잠시 후 다시 시도해주세요
+          </p>
         </div>
       </div>
     );
@@ -107,7 +125,7 @@ export function CardDetailView() {
       <div className="h-full bg-white flex flex-col pt-12">
         <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center">
           <button
-            onClick={() => customerNavigate('/wallet')}
+            onClick={() => customerNavigate("/wallet")}
             className="p-2 -ml-2 text-kkookk-steel"
             aria-label="뒤로 가기"
           >
@@ -115,8 +133,12 @@ export function CardDetailView() {
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <p className="text-lg font-medium text-kkookk-navy">카드를 찾을 수 없습니다</p>
-          <p className="mt-1 text-sm text-kkookk-steel">지갑으로 돌아가서 다시 시도해주세요</p>
+          <p className="text-lg font-medium text-kkookk-navy">
+            카드를 찾을 수 없습니다
+          </p>
+          <p className="mt-1 text-sm text-kkookk-steel">
+            지갑으로 돌아가서 다시 시도해주세요
+          </p>
         </div>
       </div>
     );
@@ -130,7 +152,7 @@ export function CardDetailView() {
       <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-between">
         <div className="flex items-center">
           <button
-            onClick={() => customerNavigate('/wallet')}
+            onClick={() => customerNavigate("/wallet")}
             className="p-2 -ml-2 text-kkookk-steel"
             aria-label="뒤로 가기"
           >
@@ -172,17 +194,23 @@ export function CardDetailView() {
                 key={i}
                 className={`aspect-square rounded-full flex items-center justify-center text-xs font-bold transition-all duration-500 ${
                   isActive
-                    ? `${card.stampColor || 'bg-kkookk-orange-500'} text-white shadow-md scale-100`
-                    : 'bg-kkookk-sand text-kkookk-steel opacity-50 scale-90'
+                    ? `${card.stampColor || "bg-kkookk-orange-500"} text-white shadow-md scale-100`
+                    : "bg-kkookk-sand text-kkookk-steel opacity-50 scale-90"
                 }`}
               >
                 {isActive ? (
                   card.stampImage ? (
-                    <img src={card.stampImage} alt="stamp" className="w-full h-full object-cover rounded-full" />
+                    <img
+                      src={card.stampImage}
+                      alt="stamp"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   ) : (
                     <Check size={14} strokeWidth={4} />
                   )
-                ) : i + 1}
+                ) : (
+                  i + 1
+                )}
               </div>
             );
           })}
@@ -190,8 +218,6 @@ export function CardDetailView() {
 
         {/* 안내 박스 */}
         <div className="bg-kkookk-sand p-4 rounded-xl text-xs text-kkookk-steel leading-relaxed">
-          <p>• 스탬프 유효기간은 적립일로부터 6개월입니다.</p>
-          <p>• 1일 최대 5개까지 적립 가능합니다.</p>
           <p>• 리워드 사용 시 사장님 확인이 필요합니다.</p>
         </div>
       </div>
@@ -200,7 +226,7 @@ export function CardDetailView() {
       <div className="absolute bottom-0 left-0 w-full bg-white border-t border-slate-100 p-4 pb-8 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         {isComplete ? (
           <Button
-            onClick={() => customerNavigate('/redeems')}
+            onClick={() => customerNavigate("/redeems")}
             variant="navy"
             size="full"
           >

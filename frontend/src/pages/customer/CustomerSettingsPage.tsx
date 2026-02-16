@@ -40,6 +40,12 @@ export function CustomerSettingsPage() {
           <div
             className="flex justify-between items-center cursor-pointer"
             onClick={() => !stepUpValid && setShowOtpFlow(!showOtpFlow)}
+            onKeyDown={(e) => {
+              if (!stepUpValid && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                setShowOtpFlow(!showOtpFlow);
+              }
+            }}
             role={stepUpValid ? undefined : 'button'}
             tabIndex={stepUpValid ? undefined : 0}
           >

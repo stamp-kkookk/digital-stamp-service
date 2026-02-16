@@ -14,7 +14,6 @@ import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.domain.RedeemEventResult;
-import com.project.kkookk.redeem.domain.RedeemEventType;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.stamp.domain.StampEvent;
 import com.project.kkookk.stamp.domain.StampEventType;
@@ -211,8 +210,9 @@ class CustomerWalletServiceTest {
                 StampCard.builder().storeId(storeId).title("아메리카노 10잔").goalStampCount(10).build();
         ReflectionTestUtils.setField(stampCard, "id", stampCardId);
 
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         WalletStampCard savedWalletStampCard =
                 WalletStampCard.builder()
@@ -362,18 +362,18 @@ class CustomerWalletServiceTest {
 
         RedeemEvent event1 =
                 RedeemEvent.builder()
-                        .redeemSessionId(100L)
+                        .walletRewardId(100L)
                         .walletId(walletId)
                         .storeId(storeId)
-                        .type(RedeemEventType.COMPLETED)
                         .result(RedeemEventResult.SUCCESS)
                         .occurredAt(LocalDateTime.now())
                         .build();
 
         Page<RedeemEvent> eventPage = new PageImpl<>(List.of(event1), pageable, 1);
 
-        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", StoreStatus.ACTIVE, 1L);
+        Store store = new Store("꾹꾹 카페", "서울시 강남구", "02-1234-5678", null, null, null, 1L);
         ReflectionTestUtils.setField(store, "id", storeId);
+        store.transitionTo(StoreStatus.LIVE);
 
         given(walletStampCardRepository.existsByCustomerWalletIdAndStoreId(walletId, storeId))
                 .willReturn(true);
@@ -390,7 +390,6 @@ class CustomerWalletServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.events()).hasSize(1);
-        assertThat(response.events().get(0).type()).isEqualTo(RedeemEventType.COMPLETED);
         assertThat(response.events().get(0).result()).isEqualTo(RedeemEventResult.SUCCESS);
         assertThat(response.events().get(0).store().storeName()).isEqualTo("꾹꾹 카페");
         assertThat(response.pageInfo().totalElements()).isEqualTo(1);

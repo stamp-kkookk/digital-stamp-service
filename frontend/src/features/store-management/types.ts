@@ -23,6 +23,5 @@ export interface StoreFormData {
   name: string;
   address: string;
   phone?: string;
-  category?: string;
   description?: string;
 }

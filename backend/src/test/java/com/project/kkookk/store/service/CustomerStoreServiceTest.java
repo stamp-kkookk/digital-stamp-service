@@ -36,7 +36,7 @@ class CustomerStoreServiceTest {
     void getStoreStampCardSummary_Success() {
         // given
         long storeId = 1L;
-        Store mockStore = createMockStore(storeId, "테스트 매장", StoreStatus.ACTIVE);
+        Store mockStore = createMockStore(storeId, "테스트 매장", StoreStatus.LIVE);
         StampCard mockStampCard = createMockStampCard(mockStore);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
@@ -60,7 +60,7 @@ class CustomerStoreServiceTest {
     void getStoreStampCardSummary_Empty() {
         // given
         long storeId = 1L;
-        Store mockStore = createMockStore(storeId, "테스트 매장", StoreStatus.ACTIVE);
+        Store mockStore = createMockStore(storeId, "테스트 매장", StoreStatus.LIVE);
 
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
         when(stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
@@ -98,7 +98,7 @@ class CustomerStoreServiceTest {
     void getStoreStampCardSummary_StoreInactive() {
         // given
         long storeId = 1L;
-        Store mockStore = createMockStore(storeId, "비활성 매장", StoreStatus.INACTIVE);
+        Store mockStore = createMockStore(storeId, "비활성 매장", StoreStatus.DRAFT);
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(mockStore));
 
         // when & then

@@ -5,57 +5,102 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Search, Loader2 } from 'lucide-react';
+import { ChevronLeft, Loader2, AlertTriangle, X } from 'lucide-react';
 import { useCreateStore } from '@/features/store-management/hooks/useStore';
-import { STORE_CATEGORIES } from '@/lib/constants/mockData';
+import { PlaceSearchInput, IconUpload } from '@/features/store-management/components';
+import type { ErrorResponse, PlaceSearchResult } from '@/types/api';
+import type { AxiosError } from 'axios';
 
 interface StoreFormData {
   name: string;
   address: string;
   phone: string;
-  category: string;
   description: string;
+  placeRef: string | null;
+  iconImageBase64: string | null;
+}
+
+function formatPhone(value: string): string {
+  const digits = value.replace(/[^0-9]/g, '');
+  if (digits.startsWith('02')) {
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 2)}-${digits.slice(2, 5)}-${digits.slice(5)}`;
+    return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6, 10)}`;
+  }
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length <= 10) return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
 }
 
 export function StoreCreatePage() {
   const navigate = useNavigate();
   const createStore = useCreateStore();
+  const [manualAddressMode, setManualAddressMode] = useState(false);
+  const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [formData, setFormData] = useState<StoreFormData>({
     name: '',
     address: '',
     phone: '',
-    category: '',
     description: '',
+    placeRef: null,
+    iconImageBase64: null,
   });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'phone') {
+      setFormData((prev) => ({ ...prev, phone: formatPhone(value) }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleCategorySelect = (category: string) => {
+  const handlePlaceSelect = (place: PlaceSearchResult) => {
     setFormData((prev) => ({
       ...prev,
-      category: prev.category === category ? '' : category,
+      name: prev.name || place.placeName,
+      address: place.roadAddress || place.address,
+      phone: place.phone ? formatPhone(place.phone) : prev.phone,
+      placeRef: place.kakaoPlaceId,
     }));
+    setManualAddressMode(false);
+  };
+
+  const handleManualMode = () => {
+    setManualAddressMode(true);
+    setFormData((prev) => ({ ...prev, placeRef: null }));
   };
 
   const handleSubmit = async () => {
+    setErrorBanner(null);
     createStore.mutate(
       {
         name: formData.name,
         address: formData.address || undefined,
         phone: formData.phone || undefined,
-        status: 'ACTIVE', // 기본값: 활성 상태
+        placeRef: formData.placeRef || undefined,
+        iconImageBase64: formData.iconImageBase64 || undefined,
+        description: formData.description || undefined,
       },
       {
-        onSuccess: () => {
-          navigate('/owner/stores');
+        onSuccess: (newStore) => {
+          navigate(`/owner/stores/${newStore.id}/stamp-cards/new?initial=true`);
         },
         onError: (error) => {
-          alert(`매장 등록 실패: ${error.message}`);
+          const axiosError = error as AxiosError<ErrorResponse>;
+          const code = axiosError.response?.data?.code;
+          if (code === 'STORE_PLACE_REF_DUPLICATED') {
+            setErrorBanner(
+              '이미 등록된 매장입니다. 본인 매장이라면 관리자에게 문의해주세요.'
+            );
+          } else {
+            const msg = axiosError.response?.data?.message || error.message;
+            setErrorBanner(`매장 등록 실패: ${msg}`);
+          }
         },
       }
     );
@@ -78,6 +123,51 @@ export function StoreCreatePage() {
 
       <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
         <div className="space-y-6 max-w-2xl">
+          {/* 매장 아이콘 */}
+          <div>
+            <span className="block text-sm font-bold text-kkookk-navy mb-2">
+              매장 아이콘
+            </span>
+            <IconUpload
+              value={formData.iconImageBase64}
+              onChange={(base64) =>
+                setFormData((prev) => ({ ...prev, iconImageBase64: base64 }))
+              }
+            />
+          </div>
+
+          {/* 장소 검색 */}
+          <div>
+            <span className="block text-sm font-bold text-kkookk-navy mb-2">
+              카카오 장소 검색
+            </span>
+            {manualAddressMode ? (
+              <div className="flex items-center gap-2 p-3 border border-slate-200 rounded-xl bg-slate-50">
+                <span className="text-sm text-kkookk-steel">직접 입력 모드</span>
+                <button
+                  type="button"
+                  onClick={() => setManualAddressMode(false)}
+                  className="text-sm text-kkookk-indigo hover:underline"
+                >
+                  카카오 검색으로 전환
+                </button>
+              </div>
+            ) : (
+              <PlaceSearchInput
+                onSelect={handlePlaceSelect}
+                onManualMode={handleManualMode}
+                defaultAddress={formData.address}
+              />
+            )}
+            {manualAddressMode && (
+              <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                <AlertTriangle size={12} />
+                장소 연동 없이 등록하면 운영 승인 시 추가 확인이 필요할 수 있습니다
+              </p>
+            )}
+          </div>
+
+          {/* 매장 이름 */}
           <div>
             <label
               htmlFor="name"
@@ -96,32 +186,37 @@ export function StoreCreatePage() {
             />
           </div>
 
+          {/* 매장 주소 */}
           <div>
             <label
               htmlFor="address"
               className="block text-sm font-bold text-kkookk-navy mb-2"
             >
-              매장 주소 <span className="text-red-500">*</span>
+              매장 주소
             </label>
-            <div className="flex gap-2">
+            {manualAddressMode ? (
               <input
                 type="text"
                 id="address"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="주소를 검색해주세요"
-                className="flex-1 p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
+                placeholder="예: 서울시 강남구 테헤란로 123"
+                className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
               />
-              <button
-                type="button"
-                className="px-4 py-3 bg-slate-100 text-kkookk-navy font-bold rounded-xl hover:bg-slate-200 flex items-center gap-2"
-              >
-                <Search size={18} /> 검색
-              </button>
-            </div>
+            ) : formData.address ? (
+              <input
+                type="text"
+                value={formData.address}
+                readOnly
+                className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-kkookk-steel"
+              />
+            ) : (
+              <p className="text-sm text-kkookk-steel">카카오 장소 검색으로 자동 입력됩니다</p>
+            )}
           </div>
 
+          {/* 전화번호 */}
           <div>
             <label
               htmlFor="phone"
@@ -140,28 +235,7 @@ export function StoreCreatePage() {
             />
           </div>
 
-          <div>
-            <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              업종 카테고리
-            </span>
-            <div className="flex gap-2 flex-wrap">
-              {STORE_CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => handleCategorySelect(cat)}
-                  className={`px-4 py-2 border rounded-full text-sm transition-colors bg-white ${
-                    formData.category === cat
-                      ? 'border-kkookk-indigo text-kkookk-indigo'
-                      : 'border-slate-200 hover:border-kkookk-indigo hover:text-kkookk-indigo'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
+          {/* 설명 */}
           <div>
             <label
               htmlFor="description"
@@ -180,7 +254,20 @@ export function StoreCreatePage() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end gap-3">
+        {errorBanner && (
+          <div className="mt-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
+            <AlertTriangle size={18} className="mt-0.5 shrink-0 text-red-500" />
+            <p className="flex-1 text-sm font-medium text-red-800">{errorBanner}</p>
+            <button
+              onClick={() => setErrorBanner(null)}
+              className="shrink-0 text-red-400 hover:text-red-600"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="mt-6 pt-6 border-t border-slate-100 flex justify-end gap-3">
           <button
             onClick={() => navigate('/owner/stores')}
             className="px-6 py-3 border border-slate-200 text-kkookk-steel font-bold rounded-xl hover:bg-slate-50 transition-colors"
@@ -189,7 +276,7 @@ export function StoreCreatePage() {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={createStore.isPending || !formData.name || !formData.address}
+            disabled={createStore.isPending || !formData.name}
             className="px-6 py-3 bg-kkookk-navy text-white font-bold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {createStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}

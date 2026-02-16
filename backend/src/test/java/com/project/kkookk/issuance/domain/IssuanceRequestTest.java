@@ -127,6 +127,64 @@ class IssuanceRequestTest {
     }
 
     @Test
+    @DisplayName("PENDING 상태의 요청 취소 성공")
+    void should_CancelRequest_When_StatusIsPending() {
+        // given
+        IssuanceRequest request =
+                IssuanceRequest.builder()
+                        .storeId(1L)
+                        .walletId(1L)
+                        .walletStampCardId(1L)
+                        .expiresAt(LocalDateTime.now().plusMinutes(5))
+                        .build();
+
+        // when
+        request.cancel();
+
+        // then
+        assertThat(request.getStatus()).isEqualTo(IssuanceRequestStatus.CANCELLED);
+        assertThat(request.isPending()).isFalse();
+    }
+
+    @Test
+    @DisplayName("이미 승인된 요청은 취소 불가")
+    void should_ThrowException_When_CancelAlreadyApprovedRequest() {
+        // given
+        IssuanceRequest request =
+                IssuanceRequest.builder()
+                        .storeId(1L)
+                        .walletId(1L)
+                        .walletStampCardId(1L)
+                        .expiresAt(LocalDateTime.now().plusMinutes(5))
+                        .build();
+        request.approve(0);
+
+        // when & then
+        assertThatThrownBy(() -> request.cancel())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Only PENDING requests can be cancelled");
+    }
+
+    @Test
+    @DisplayName("이미 거절된 요청은 취소 불가")
+    void should_ThrowException_When_CancelRejectedRequest() {
+        // given
+        IssuanceRequest request =
+                IssuanceRequest.builder()
+                        .storeId(1L)
+                        .walletId(1L)
+                        .walletStampCardId(1L)
+                        .expiresAt(LocalDateTime.now().plusMinutes(5))
+                        .build();
+        request.reject();
+
+        // when & then
+        assertThatThrownBy(() -> request.cancel())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Only PENDING requests can be cancelled");
+    }
+
+    @Test
     @DisplayName("TTL 만료 시간이 지난 경우 만료된 것으로 판단")
     void should_ReturnExpired_When_ExpiresAtIsPast() {
         // given

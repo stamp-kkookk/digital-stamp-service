@@ -9,10 +9,10 @@ import com.project.kkookk.issuance.controller.dto.IssuanceRequestResult;
 import com.project.kkookk.issuance.domain.IssuanceRequest;
 import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
 import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
+import com.project.kkookk.issuance.service.exception.IssuanceAlreadyProcessedException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendingException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
 import com.project.kkookk.store.domain.Store;
-import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
@@ -53,7 +53,7 @@ public class CustomerIssuanceService {
                         .findById(request.storeId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-        if (store.getStatus() != StoreStatus.ACTIVE) {
+        if (!store.getStatus().isOperational()) {
             throw new BusinessException(ErrorCode.STORE_INACTIVE);
         }
 
@@ -75,8 +75,9 @@ public class CustomerIssuanceService {
 
         if (existing.isPresent()) {
             IssuanceRequest existingRequest = existing.get();
-            // 만료된 요청이 아니면 기존 요청 반환
-            if (existingRequest.getStatus() != IssuanceRequestStatus.EXPIRED) {
+            // 만료/취소된 요청이 아니면 기존 요청 반환
+            if (existingRequest.getStatus() != IssuanceRequestStatus.EXPIRED
+                    && existingRequest.getStatus() != IssuanceRequestStatus.CANCELLED) {
                 return new IssuanceRequestResult(
                         IssuanceRequestResponse.from(
                                 existingRequest, walletStampCard.getStampCount()),
@@ -145,6 +146,49 @@ public class CustomerIssuanceService {
         if (request.isPending() && request.isExpired()) {
             request.expire();
             log.info("[Issuance] Request expired id={}", id);
+        }
+
+        WalletStampCard walletStampCard =
+                walletStampCardRepository
+                        .findById(request.getWalletStampCardId())
+                        .orElseThrow(WalletStampCardNotFoundException::new);
+
+        return IssuanceRequestResponse.from(request, walletStampCard.getStampCount());
+    }
+
+    /**
+     * 적립 요청 취소
+     *
+     * @param id 요청 ID
+     * @param walletId 고객 지갑 ID
+     * @return 취소된 적립 요청 응답
+     */
+    @Transactional
+    public IssuanceRequestResponse cancelIssuanceRequest(Long id, Long walletId) {
+        IssuanceRequest request =
+                issuanceRequestRepository
+                        .findByIdWithLock(id)
+                        .orElseThrow(IssuanceRequestNotFoundException::new);
+
+        // 본인 요청 검증
+        if (!request.getWalletId().equals(walletId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        FlowMdc.setIssuanceFlow(id);
+
+        // 이미 처리된 요청
+        if (!request.isPending()) {
+            throw new IssuanceAlreadyProcessedException();
+        }
+
+        // PENDING이지만 만료된 경우 → 만료 처리
+        if (request.isExpired()) {
+            request.expire();
+            log.info("[Issuance] Request expired during cancel id={}", id);
+        } else {
+            request.cancel();
+            log.info("[Issuance] Request cancelled id={} walletId={}", id, walletId);
         }
 
         WalletStampCard walletStampCard =

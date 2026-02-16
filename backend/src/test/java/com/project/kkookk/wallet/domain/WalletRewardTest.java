@@ -63,8 +63,8 @@ class WalletRewardTest {
     }
 
     @Test
-    @DisplayName("AVAILABLE 리워드 사용 시작 성공")
-    void should_StartRedeeming_When_StatusIsAvailable() {
+    @DisplayName("AVAILABLE 리워드 사용 성공 (AVAILABLE → REDEEMED 직행)")
+    void should_Redeem_When_StatusIsAvailable() {
         // given
         WalletReward reward =
                 WalletReward.builder()
@@ -76,60 +76,17 @@ class WalletRewardTest {
                         .build();
 
         // when
-        reward.startRedeeming();
-
-        // then
-        assertThat(reward.getStatus()).isEqualTo(WalletRewardStatus.REDEEMING);
-        assertThat(reward.isAvailable()).isFalse();
-    }
-
-    @Test
-    @DisplayName("REDEEMING 상태의 리워드 사용 완료 성공")
-    void should_CompleteRedeem_When_StatusIsRedeeming() {
-        // given
-        WalletReward reward =
-                WalletReward.builder()
-                        .walletId(1L)
-                        .stampCardId(1L)
-                        .storeId(1L)
-                        .issuedAt(LocalDateTime.now())
-                        .expiresAt(LocalDateTime.now().plusDays(30))
-                        .build();
-        reward.startRedeeming();
-
-        // when
-        reward.completeRedeem();
+        reward.redeem();
 
         // then
         assertThat(reward.getStatus()).isEqualTo(WalletRewardStatus.REDEEMED);
         assertThat(reward.getRedeemedAt()).isNotNull();
+        assertThat(reward.isAvailable()).isFalse();
     }
 
     @Test
-    @DisplayName("REDEEMING 상태의 리워드 취소 가능")
-    void should_CancelRedeeming_When_StatusIsRedeeming() {
-        // given
-        WalletReward reward =
-                WalletReward.builder()
-                        .walletId(1L)
-                        .stampCardId(1L)
-                        .storeId(1L)
-                        .issuedAt(LocalDateTime.now())
-                        .expiresAt(LocalDateTime.now().plusDays(30))
-                        .build();
-        reward.startRedeeming();
-
-        // when
-        reward.cancelRedeeming();
-
-        // then
-        assertThat(reward.getStatus()).isEqualTo(WalletRewardStatus.AVAILABLE);
-        assertThat(reward.isAvailable()).isTrue();
-    }
-
-    @Test
-    @DisplayName("만료된 리워드는 사용 시작 불가")
-    void should_ThrowException_When_StartRedeemingExpiredReward() {
+    @DisplayName("만료된 리워드는 사용 불가")
+    void should_ThrowException_When_RedeemExpiredReward() {
         // given
         WalletReward reward =
                 WalletReward.builder()
@@ -141,14 +98,14 @@ class WalletRewardTest {
                         .build();
 
         // when & then
-        assertThatThrownBy(reward::startRedeeming)
+        assertThatThrownBy(reward::redeem)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Only AVAILABLE rewards can be redeemed");
     }
 
     @Test
-    @DisplayName("AVAILABLE 상태가 아닌 리워드는 사용 완료 불가")
-    void should_ThrowException_When_CompleteRedeemNonRedeemingReward() {
+    @DisplayName("이미 사용 완료된 리워드는 재사용 불가")
+    void should_ThrowException_When_RedeemAlreadyRedeemedReward() {
         // given
         WalletReward reward =
                 WalletReward.builder()
@@ -158,11 +115,12 @@ class WalletRewardTest {
                         .issuedAt(LocalDateTime.now())
                         .expiresAt(LocalDateTime.now().plusDays(30))
                         .build();
+        reward.redeem();
 
         // when & then
-        assertThatThrownBy(reward::completeRedeem)
+        assertThatThrownBy(reward::redeem)
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Only REDEEMING rewards can be completed");
+                .hasMessage("Only AVAILABLE rewards can be redeemed");
     }
 
     @Test
@@ -177,8 +135,7 @@ class WalletRewardTest {
                         .issuedAt(LocalDateTime.now())
                         .expiresAt(LocalDateTime.now().plusDays(30))
                         .build();
-        reward.startRedeeming();
-        reward.completeRedeem();
+        reward.redeem();
 
         // when & then
         assertThatThrownBy(reward::expire)
