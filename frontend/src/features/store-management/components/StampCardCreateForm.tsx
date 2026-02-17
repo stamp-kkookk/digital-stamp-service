@@ -41,7 +41,6 @@ const COLOR_OPTIONS = [
 ] as const;
 
 export function StampCardCreateForm({
-  storeName,
   onSubmit,
   onCancel,
 }: StampCardCreateFormProps) {
@@ -53,16 +52,28 @@ export function StampCardCreateForm({
     key: "backgroundImage" | "stampImage",
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setDesign((prev) => ({
-          ...prev,
-          [key]: event.target?.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // 파일 크기 제한: 배경 이미지 3MB, 도장 이미지 500KB
+    const maxSize = key === "backgroundImage" ? 3 * 1024 * 1024 : 500 * 1024;
+    const maxSizeText = key === "backgroundImage" ? "3MB" : "500KB";
+
+    if (file.size > maxSize) {
+      alert(
+        `파일 크기가 너무 큽니다.\n${maxSizeText} 이하의 이미지를 선택해주세요.`,
+      );
+      e.target.value = ""; // 파일 선택 초기화
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setDesign((prev) => ({
+        ...prev,
+        [key]: event.target?.result as string,
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = () => {
@@ -159,8 +170,16 @@ export function StampCardCreateForm({
                       : "border-slate-200"
                   }`}
                 >
-                  <div className="flex items-center justify-center h-24 mb-3 border rounded-lg bg-slate-100 border-slate-200 text-slate-400">
-                    <ImageIcon />
+                  <div className="relative flex items-end justify-center h-24 mb-3 overflow-hidden border rounded-lg bg-linear-to-br from-sky-50 to-indigo-50 border-slate-200">
+                    {/* 풍경 장식: 산 + 해 */}
+                    <svg viewBox="0 0 120 48" className="w-full h-12" preserveAspectRatio="xMidYMax slice">
+                      <circle cx="90" cy="12" r="8" className="fill-amber-200/60" />
+                      <path d="M0 48 L30 20 L50 35 L70 15 L100 38 L120 28 L120 48 Z" className="fill-indigo-100/80" />
+                      <path d="M0 48 L20 32 L45 42 L65 28 L90 40 L120 35 L120 48 Z" className="fill-sky-100/90" />
+                    </svg>
+                    <div className="absolute top-2 right-2">
+                      <ImageIcon size={14} className="text-indigo-300" />
+                    </div>
                   </div>
                   <p className="text-sm font-medium text-center text-kkookk-navy">
                     이미지형 (커스텀)
@@ -253,6 +272,7 @@ export function StampCardCreateForm({
                     )}
                     <div className="mt-2 text-xs text-kkookk-steel">
                       <p>권장 사이즈: 800x480px (5:3 비율)</p>
+                      <p className="text-rose-600">• 파일 크기: 3MB 이하</p>
                     </div>
                   </div>
 
@@ -281,6 +301,7 @@ export function StampCardCreateForm({
                       <div className="text-xs text-kkookk-steel">
                         <p>PNG, JPG (투명 배경 권장)</p>
                         <p>권장 사이즈: 100x100px</p>
+                        <p className="text-rose-600">• 파일 크기: 500KB 이하</p>
                       </div>
                     </div>
                   </div>
@@ -355,9 +376,9 @@ export function StampCardCreateForm({
                   {design.cardName}
                 </h2>
 
-                {/* 카드 미리보기 */}
+                {/* 카드 미리보기 - 배경만 표시 */}
                 <div
-                  className={`rounded-2xl p-5 mb-6 shadow-lg relative overflow-hidden transition-all duration-300 ${
+                  className={`rounded-2xl aspect-[1.58/1] mb-6 shadow-lg relative overflow-hidden transition-all duration-300 ${
                     design.template === "basic"
                       ? `${getColorClass(design.color)} ${getColorClass(design.color, "shadow")}`
                       : design.backgroundImage
@@ -378,56 +399,30 @@ export function StampCardCreateForm({
                     <div className="absolute inset-0 bg-black/10" />
                   )}
 
-                  <div
-                    className={`flex justify-between items-start mb-6 relative z-10 ${
-                      design.template === "custom" &&
-                      design.textColor === "black"
-                        ? "text-kkookk-navy"
-                        : design.template === "custom" &&
-                            !design.backgroundImage
-                          ? "text-kkookk-navy"
-                          : "text-white"
-                    }`}
-                  >
-                    <span
-                      className={`font-bold opacity-90 ${design.template === "custom" && design.backgroundImage ? "drop-shadow-md" : ""}`}
-                    >
-                      {storeName}
-                    </span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded backdrop-blur-sm shadow-sm ${
-                        design.template === "custom" && !design.backgroundImage
-                          ? "bg-slate-200 text-kkookk-steel"
-                          : "bg-white/20"
-                      }`}
-                    >
-                      D-30
-                    </span>
-                  </div>
-                  <div
-                    className={`flex justify-between items-end relative z-10 ${
-                      design.template === "custom" &&
-                      design.textColor === "black"
-                        ? "text-kkookk-navy"
-                        : design.template === "custom" &&
-                            !design.backgroundImage
-                          ? "text-kkookk-navy"
-                          : "text-white"
-                    }`}
-                  >
-                    <div>
-                      <p
-                        className={`text-xs opacity-70 mb-1 ${design.template === "custom" && design.backgroundImage ? "drop-shadow-sm" : ""}`}
-                      >
-                        진행률
-                      </p>
-                      <p
-                        className={`text-2xl font-bold ${design.template === "custom" && design.backgroundImage ? "drop-shadow-md" : ""}`}
-                      >
-                        3 / {design.maxStamps}
-                      </p>
+                  {/* 단색 카드: 시그니처 고양이 장식 */}
+                  {design.template === "basic" && (
+                    <>
+                      <div
+                        className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-[0.08]"
+                        style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
+                      />
+                      <img
+                        src="/image/cat_pace.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute -right-6 -bottom-6 opacity-[0.07] w-40 h-40 object-cover -rotate-12"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/[0.08] to-transparent" />
+                    </>
+                  )}
+
+                  {/* 이미지형 미업로드: 빈 이미지 플레이스홀더 */}
+                  {design.template === "custom" && !design.backgroundImage && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-300">
+                      <ImageIcon size={40} strokeWidth={1.2} />
+                      <span className="text-xs font-medium text-slate-400">배경 이미지를 업로드해 주세요</span>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* 스탬프 보드 미리보기 */}
