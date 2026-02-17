@@ -234,7 +234,9 @@ public class TerminalApprovalService {
     }
 
     private String maskPhone(String phone) {
-        if (phone == null || phone.isEmpty()) return "010-****-0000";
+        if (phone == null || phone.isEmpty()) {
+            return "010-****-0000";
+        }
         String digits = phone.replaceAll("\\D", "");
         if (digits.length() >= 10) {
             return digits.substring(0, 3) + "-****-" + digits.substring(digits.length() - 4);
