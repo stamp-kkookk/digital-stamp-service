@@ -2,7 +2,9 @@
  * Wallet Components Index
  */
 
-export * from './StampCardItem';
+export * from './StampCardFront';
+export * from './StampCardBack';
 export * from './StampCardCarousel';
+export * from './CardInfoPanel';
 export * from './CardDetailView';
 export * from './WalletHeader';

@@ -100,7 +100,12 @@ export function WalletPage() {
   };
 
   const handleCardSelect = (card: StampCard) => {
-    customerNavigate(`/wallet/${card.id}`);
+    const isComplete = card.current >= card.max;
+    if (isComplete) {
+      customerNavigate('/redeems');
+    } else {
+      customerNavigate(`/wallet/${card.id}/stamp`);
+    }
   };
 
   // Loading state
@@ -155,7 +160,7 @@ export function WalletPage() {
     <div className="flex-1 flex flex-col min-h-screen">
       <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
 
-      <div className="flex-1 flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center pb-8">
         <StampCardCarousel cards={cards} onCardSelect={handleCardSelect} onCardChange={handleCardChange} />
       </div>
     </div>

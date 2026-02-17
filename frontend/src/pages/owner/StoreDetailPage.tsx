@@ -17,7 +17,6 @@ import {
   AlertTriangle,
   BarChart3,
   ChevronLeft,
-  Coffee,
   Edit,
   Loader2,
   MapPin,
@@ -77,19 +76,13 @@ const COLOR_GRADIENT_MAP: Record<string, [string, string]> = {
 };
 
 function ActiveCardPreview({
-  storeName,
   designType,
   designJson,
   designLoading,
-  expireDays,
-  goalStampCount,
 }: {
-  storeName: string;
   designType: StampCardDesignType;
   designJson: string | null;
   designLoading: boolean;
-  expireDays: number | null;
-  goalStampCount: number;
 }) {
   // 디자인 정보 로딩 중
   if (designLoading) {
@@ -122,25 +115,29 @@ function ActiveCardPreview({
 
   return (
     <div
-      className="relative flex flex-col h-48 p-6 overflow-hidden text-white shadow-lg w-80 rounded-xl shrink-0"
+      className="relative h-48 overflow-hidden shadow-lg w-80 rounded-xl shrink-0"
       style={bgStyle}
     >
       {hasBackgroundImage && (
-        <div className="absolute inset-0 bg-black/30 rounded-xl" />
+        <div className="absolute inset-0 bg-black/10 rounded-xl" />
       )}
-      <div className="relative z-10 flex items-start justify-between mb-4">
-        <span className="text-lg font-bold opacity-90">{storeName}</span>
-        <span className="px-2 py-1 text-xs rounded bg-white/20">
-          {expireDays ? `D-${expireDays}` : "무기한"}
-        </span>
-      </div>
-      <div className="relative z-10 flex items-end justify-between mt-auto">
-        <div>
-          <p className="mb-1 text-xs opacity-80">목표</p>
-          <p className="text-2xl font-bold">0 / {goalStampCount}</p>
-        </div>
-        <Coffee className="absolute w-16 h-16 text-white/20 -right-4 -bottom-4" />
-      </div>
+
+      {/* 단색 카드: 시그니처 고양이 장식 */}
+      {!hasBackgroundImage && (
+        <>
+          <div
+            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-[0.08]"
+            style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
+          />
+          <img
+            src="/image/cat_pace.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute -right-6 -bottom-6 opacity-[0.07] w-40 h-40 object-cover -rotate-12"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/[0.08] to-transparent" />
+        </>
+      )}
     </div>
   );
 }
@@ -512,12 +509,9 @@ export function StoreDetailPage() {
                     <div className="flex items-center gap-8 p-6 transition-shadow bg-white border shadow-sm rounded-2xl border-slate-200 hover:shadow-md">
                       {/* 카드 미리보기 */}
                       <ActiveCardPreview
-                        storeName={store.name}
                         designType={activeCard.designType}
                         designJson={activeCardDetail?.designJson ?? null}
                         designLoading={activeCardDetailLoading}
-                        expireDays={activeCard.expireDays}
-                        goalStampCount={activeCard.goalStampCount}
                       />
 
                       {/* 카드 정보 */}
