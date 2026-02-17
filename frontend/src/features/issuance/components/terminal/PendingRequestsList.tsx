@@ -6,7 +6,7 @@
 import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { formatTime, maskPhone } from '@/lib/utils/format';
+import { formatTime } from '@/lib/utils/format';
 import type { IssuanceRequest } from '@/types/domain';
 
 interface PendingRequestsListProps {
@@ -48,7 +48,7 @@ export function PendingRequestsList({
                 {req.user}님
               </h3>
               <p className="text-sm text-kkookk-steel font-mono mt-1">
-                {maskPhone(req.phone)}
+                {req.phone}
               </p>
             </div>
             <div className="text-right">

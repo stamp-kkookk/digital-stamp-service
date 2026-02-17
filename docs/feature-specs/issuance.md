@@ -198,6 +198,8 @@ Customer App              Backend                    Terminal App
 |-------|------|-------------|
 | `id` | Long | 요청 ID |
 | `customerName` | String | 고객명 (CustomerWallet.name, Batch 조회) |
+| `customerNickname` | String | 고객 닉네임 (CustomerWallet.nickname) |
+| `maskedPhone` | String | 마스킹된 전화번호 (010-****-5678) |
 | `requestedAt` | LocalDateTime | 요청 시각 |
 | `elapsedSeconds` | long | 경과 시간 (초) |
 | `remainingSeconds` | long | 만료까지 남은 시간 (초) |

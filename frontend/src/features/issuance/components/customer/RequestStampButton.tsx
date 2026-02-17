@@ -87,6 +87,9 @@ export function RequestStampButton() {
       setRequestState('expired');
     } else if (requestStatus.status === 'CANCELLED') {
       setRequestState('cancelled');
+    } else if (requestStatus.status === 'PENDING' && requestStatus.remainingSeconds <= 0) {
+      // TTL 만료 but 백엔드 미반영 → 프론트에서 만료 처리
+      setRequestState('expired');
     }
   }
 
@@ -241,7 +244,7 @@ export function RequestStampButton() {
     return (
       <RequestResultView
         success={false}
-        message={requestState === 'expired' ? '요청 시간이 만료되었습니다.' : '매장에서 요청을 거절했습니다.'}
+        message="매장에서 요청을 거절했습니다."
         onConfirm={handleBack}
       />
     );

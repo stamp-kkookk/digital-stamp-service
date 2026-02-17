@@ -52,8 +52,8 @@ export function TerminalLayout() {
     (item) => ({
       id: String(item.id),
       type: "stamp" as const,
-      user: item.customerName,
-      phone: "",
+      user: item.customerNickname,
+      phone: item.maskedPhone,
       count: 1,
       time: new Date(item.requestedAt),
       status: "pending" as const,

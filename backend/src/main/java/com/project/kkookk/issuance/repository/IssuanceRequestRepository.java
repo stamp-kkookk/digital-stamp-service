@@ -19,6 +19,10 @@ public interface IssuanceRequestRepository extends JpaRepository<IssuanceRequest
     boolean existsByWalletStampCardIdAndStatus(
             Long walletStampCardId, IssuanceRequestStatus status);
 
+    /** 특정 지갑 스탬프카드에 대해 특정 상태인 요청 조회 (만료 체크용) */
+    Optional<IssuanceRequest> findByWalletStampCardIdAndStatus(
+            Long walletStampCardId, IssuanceRequestStatus status);
+
     /** 터미널용: 매장의 특정 상태 요청 목록 조회 (생성일 기준 오름차순) */
     @Query(
             "SELECT r FROM IssuanceRequest r "
