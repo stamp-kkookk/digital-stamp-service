@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.owner.controller.dto.OwnerLoginRequest;
 import com.project.kkookk.owner.controller.dto.OwnerLoginResponse;
@@ -40,6 +41,8 @@ class OwnerAuthServiceTest {
     @Mock private PasswordEncoder passwordEncoder;
 
     @Mock private JwtUtil jwtUtil;
+
+    @Mock private RefreshTokenService refreshTokenService;
 
     @Test
     @DisplayName("회원가입 성공")
@@ -120,6 +123,8 @@ class OwnerAuthServiceTest {
         given(passwordEncoder.matches("Password1!", "encodedPassword")).willReturn(true);
         given(jwtUtil.generateOwnerToken(anyLong(), anyString(), anyBoolean()))
                 .willReturn("mock.jwt.token");
+        given(refreshTokenService.issueOwnerRefreshToken(anyLong(), anyString(), anyBoolean()))
+                .willReturn("mock.refresh.token");
 
         // when
         OwnerLoginResponse response = ownerAuthService.login(request);

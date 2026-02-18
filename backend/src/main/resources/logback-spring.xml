@@ -4,9 +4,24 @@
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="kkookk"/>
 
     <!-- ==================== -->
-    <!-- local, test 프로파일  -->
+    <!-- test 프로파일         -->
     <!-- ==================== -->
-    <springProfile name="local | test">
+    <springProfile name="test">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%X{correlationId:-no-cid}] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- ==================== -->
+    <!-- local 프로파일        -->
+    <!-- ==================== -->
+    <springProfile name="local">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%d{HH:mm:ss.SSS} [%X{correlationId:-no-cid}] %-5level %logger{36} - %msg%n</pattern>

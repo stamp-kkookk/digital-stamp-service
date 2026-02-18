@@ -13,6 +13,7 @@ import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.exception.GlobalExceptionHandler;
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
 import com.project.kkookk.terminal.controller.dto.TerminalLoginRequest;
 import com.project.kkookk.terminal.controller.dto.TerminalLoginResponse;
@@ -48,6 +49,8 @@ class TerminalAuthControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean private TerminalAuthService terminalAuthService;
+
+    @MockitoBean private RefreshTokenService refreshTokenService;
 
     @Test
     @DisplayName("터미널 로그인 성공 - 200 OK")
