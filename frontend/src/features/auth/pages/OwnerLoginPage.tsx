@@ -7,12 +7,9 @@ import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LoginForm } from "../components/LoginForm";
-import { PhoneVerification } from "../components/PhoneVerification";
-import { SignupForm } from "../components/SignupForm";
-import { useOwnerLogin, useOwnerSignup, useOtpRequest, useOtpVerify } from "../hooks/useAuth";
+import { useOwnerLogin } from "../hooks/useAuth";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { kkookkToast } from "@/components/ui/Toast";
-import type { AuthMode } from "../types";
 
 interface OwnerLoginPageProps {
   title?: string;
@@ -34,11 +31,8 @@ export function OwnerLoginPage({
   const navigate = useNavigate();
   const { refreshAuthState } = useAuth();
 
-  // API Hooks
   const ownerLogin = useOwnerLogin();
-  const ownerSignup = useOwnerSignup();
-  const otpRequest = useOtpRequest();
-  const otpVerify = useOtpVerify();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleLoginSuccess = () => {
     refreshAuthState();
@@ -56,27 +50,9 @@ export function OwnerLoginPage({
       navigate("/simulation");
     }
   };
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
-  const [phone, setPhone] = useState("");
-  const [signupData, setSignupData] = useState<{
-    name: string;
-    phone: string;
-    email: string;
-    password: string;
-  } | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [devOtpCode, setDevOtpCode] = useState("");
-
-  const isLoading = ownerLogin.isPending || ownerSignup.isPending || otpRequest.isPending || otpVerify.isPending;
-
-  const clearMessages = () => {
-    setErrorMessage("");
-    setSuccessMessage("");
-  };
 
   const handleLogin = (email: string, password: string) => {
-    clearMessages();
+    setErrorMessage("");
     ownerLogin.mutate(
       { email, password },
       {
@@ -92,98 +68,6 @@ export function OwnerLoginPage({
     );
   };
 
-  const handleSignup = (data: {
-    name: string;
-    phone: string;
-    email: string;
-    password: string;
-  }) => {
-    clearMessages();
-    setPhone(data.phone);
-    setSignupData(data);
-
-    // OTP 요청
-    otpRequest.mutate(
-      { phone: data.phone },
-      {
-        onSuccess: (response) => {
-          setAuthMode("verify");
-          if (response.devOtpCode) {
-            setDevOtpCode(response.devOtpCode);
-          }
-        },
-        onError: () => {
-          setErrorMessage("인증번호 발송 실패. 잠시 후 다시 시도해주세요.");
-        },
-      }
-    );
-  };
-
-  const handleVerify = (code: string) => {
-    if (!signupData) return;
-    clearMessages();
-
-    otpVerify.mutate(
-      { phone, code },
-      {
-        onSuccess: (response) => {
-          if (response.verified) {
-            // OTP 인증 성공 후 회원가입 진행
-            ownerSignup.mutate(
-              {
-                email: signupData.email,
-                password: signupData.password,
-                name: signupData.name,
-                phoneNumber: signupData.phone,
-              },
-              {
-                onSuccess: () => {
-                  kkookkToast.success("회원가입이 완료되었습니다", { description: "로그인해주세요." });
-                  setSuccessMessage("회원가입이 완료되었습니다. 로그인해주세요.");
-                  setDevOtpCode("");
-                  setAuthMode("login");
-                  setSignupData(null);
-                },
-                onError: () => {
-                  setErrorMessage("회원가입 실패. 이미 등록된 이메일일 수 있습니다.");
-                },
-              }
-            );
-          } else {
-            setErrorMessage("인증번호가 일치하지 않습니다.");
-          }
-        },
-        onError: () => {
-          setErrorMessage("인증 실패. 인증번호를 확인해주세요.");
-        },
-      }
-    );
-  };
-
-  const handleResend = () => {
-    clearMessages();
-    otpRequest.mutate(
-      { phone },
-      {
-        onSuccess: (response) => {
-          if (response.devOtpCode) {
-            setDevOtpCode(response.devOtpCode);
-          }
-          setSuccessMessage(`인증번호가 ${phone}로 재발송되었습니다.`);
-        },
-        onError: () => {
-          setErrorMessage("인증번호 재발송 실패. 1분 후 다시 시도해주세요.");
-        },
-      }
-    );
-  };
-
-  const handleSwitchMode = (mode: AuthMode) => {
-    clearMessages();
-    setDevOtpCode("");
-    setAuthMode(mode);
-  };
-
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen p-6 ${isTabletMode ? "w-full" : ""}`}
@@ -196,46 +80,12 @@ export function OwnerLoginPage({
           {subtitle && <p className="text-sm text-kkookk-steel">{subtitle}</p>}
         </div>
 
-        {errorMessage && authMode === "signup" && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center">
-            {errorMessage}
-          </div>
-        )}
-        {successMessage && authMode !== "verify" && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-50 text-emerald-600 text-sm text-center">
-            {successMessage}
-          </div>
-        )}
-
-        {authMode === "login" && (
-          <LoginForm
-            onSubmit={handleLogin}
-            onSwitchToSignup={() => handleSwitchMode("signup")}
-            isLoading={isLoading}
-            error={errorMessage}
-          />
-        )}
-
-        {authMode === "signup" && (
-          <SignupForm
-            onSubmit={handleSignup}
-            onSwitchToLogin={() => handleSwitchMode("login")}
-            isLoading={isLoading}
-          />
-        )}
-
-        {authMode === "verify" && (
-          <PhoneVerification
-            phone={phone}
-            devOtpCode={devOtpCode}
-            onVerify={handleVerify}
-            onResend={handleResend}
-            onBack={() => handleSwitchMode("signup")}
-            isLoading={isLoading}
-            error={errorMessage}
-            success={successMessage}
-          />
-        )}
+        <LoginForm
+          onSubmit={handleLogin}
+          onSwitchToSignup={() => navigate("/owner/signup")}
+          isLoading={ownerLogin.isPending}
+          error={errorMessage}
+        />
       </div>
 
       <button
