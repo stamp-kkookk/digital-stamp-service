@@ -69,9 +69,9 @@ export function RequestStampButton() {
   // Navigate back after cancel (useBlocker is deactivated by this point)
   useEffect(() => {
     if (requestState === 'cancelled') {
-      customerNavigate(`/wallet/${cardId}`);
+      customerNavigate('/wallet');
     }
-  }, [requestState, customerNavigate, cardId]);
+  }, [requestState, customerNavigate]);
 
   // Update state based on polling result
   if (requestStatus && requestState === 'pending') {
@@ -115,7 +115,7 @@ export function RequestStampButton() {
   };
 
   const handleBack = () => {
-    customerNavigate(`/wallet/${cardId}`);
+    customerNavigate('/wallet');
   };
 
   const handleGoToRewards = () => {
@@ -267,6 +267,12 @@ export function RequestStampButton() {
         ) : (
           <p className="text-kkookk-steel">카드 정보를 불러오는 중...</p>
         )}
+      </div>
+
+      <div className="mb-6 px-4">
+        <p className="text-xs text-kkookk-steel text-center leading-relaxed">
+          리워드 사용 시 사장님 확인이 필요합니다.
+        </p>
       </div>
 
       <div className="space-y-3 w-full">

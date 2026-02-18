@@ -22,7 +22,7 @@ import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
 import { RequestStampButton } from "@/features/issuance";
 import { MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
-import { CardDetailView, WalletPage } from "@/features/wallet";
+import { WalletPage } from "@/features/wallet";
 
 // Admin 페이지
 import { AdminStoreDetailPage } from "@/pages/admin/AdminStoreDetailPage";
@@ -89,7 +89,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="wallet" replace /> },
       { path: "wallet", element: <WalletPage /> },
-      { path: "wallet/:cardId", element: <CardDetailView /> },
       { path: "wallet/:cardId/stamp", element: <RequestStampButton /> },
       { path: "history", element: <CustomerHistoryPage /> },
       { path: "redeems", element: <RewardList /> },
