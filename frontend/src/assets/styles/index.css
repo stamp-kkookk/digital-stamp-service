@@ -78,10 +78,17 @@ button {
 @theme {
   /* KKOOKK Orange Scale */
   --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-100: #ffedd5;
   --color-kkookk-orange-200: #fed7aa;
   --color-kkookk-orange-500: #ff4d00;
   --color-kkookk-orange-600: #ea580c;
   --color-kkookk-orange-900: #7c2d12;
+
+  /* KKOOKK Indigo Scale (Owner Persona) */
+  --color-kkookk-indigo-50: #eef2ff;
+  --color-kkookk-indigo-100: #e0e7ff;
+  --color-kkookk-indigo-200: #c7d2fe;
+  --color-kkookk-indigo-500: #2e58ff;
 
   /* Status */
   --color-kkookk-red: #dc2626;

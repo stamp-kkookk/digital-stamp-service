@@ -99,7 +99,7 @@ export interface WalletRegisterResponse {
 export interface WalletLoginRequest {
   phone: string;
   name: string;
-  storeId: number;
+  storeId?: number;
 }
 
 export interface WalletLoginStampCard {

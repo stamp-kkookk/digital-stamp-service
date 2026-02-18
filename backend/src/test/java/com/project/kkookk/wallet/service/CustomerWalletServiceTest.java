@@ -502,4 +502,52 @@ class CustomerWalletServiceTest {
         assertThat(available).isFalse();
         verify(customerWalletRepository).existsByNickname("길동이");
     }
+
+    @Test
+    @DisplayName("고객 로그인 실패 - 지갑을 찾을 수 없음")
+    void login_Fail_WalletNotFound() {
+        // given
+        com.project.kkookk.wallet.dto.CustomerLoginRequest request =
+                new com.project.kkookk.wallet.dto.CustomerLoginRequest(
+                        "010-9999-9999", "존재하지않음", 1L);
+
+        given(customerWalletRepository.findByPhoneAndName("01099999999", "존재하지않음"))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> customerWalletService.login(request))
+                .isInstanceOf(
+                        com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException
+                                .class)
+                .hasMessageContaining("해당 전화번호와 이름으로 지갑을 찾을 수 없습니다");
+
+        verify(customerWalletRepository).findByPhoneAndName("01099999999", "존재하지않음");
+        verify(jwtUtil, never()).generateCustomerToken(anyLong());
+    }
+
+    @Test
+    @DisplayName("고객 로그인 실패 - 차단된 지갑")
+    void login_Fail_WalletBlocked() {
+        // given
+        com.project.kkookk.wallet.dto.CustomerLoginRequest request =
+                new com.project.kkookk.wallet.dto.CustomerLoginRequest("010-1234-5678", "홍길동", 1L);
+
+        CustomerWallet blockedWallet =
+                CustomerWallet.builder().phone("01012345678").name("홍길동").nickname("길동이").build();
+        ReflectionTestUtils.setField(blockedWallet, "id", 1L);
+        blockedWallet.block();
+
+        given(customerWalletRepository.findByPhoneAndName("01012345678", "홍길동"))
+                .willReturn(Optional.of(blockedWallet));
+
+        // when & then
+        assertThatThrownBy(() -> customerWalletService.login(request))
+                .isInstanceOf(
+                        com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException
+                                .class)
+                .hasMessageContaining("차단된 지갑입니다");
+
+        verify(customerWalletRepository).findByPhoneAndName("01012345678", "홍길동");
+        verify(jwtUtil, never()).generateCustomerToken(anyLong());
+    }
 }
