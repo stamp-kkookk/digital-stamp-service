@@ -23,7 +23,7 @@ export function useTerminalLogin() {
   return useMutation({
     mutationFn: (data: TerminalLoginRequest) => terminalLogin(data),
     onSuccess: (response) => {
-      setAuthToken(response.accessToken, 'terminal');
+      setAuthToken(response.accessToken, response.refreshToken, 'terminal');
       setUserInfo({
         id: response.ownerId,
         name: response.storeName,

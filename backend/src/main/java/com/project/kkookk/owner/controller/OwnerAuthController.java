@@ -1,5 +1,8 @@
 package com.project.kkookk.owner.controller;
 
+import com.project.kkookk.global.security.OwnerPrincipal;
+import com.project.kkookk.global.security.RefreshTokenService;
+import com.project.kkookk.global.security.TokenType;
 import com.project.kkookk.owner.controller.dto.OwnerLoginRequest;
 import com.project.kkookk.owner.controller.dto.OwnerLoginResponse;
 import com.project.kkookk.owner.controller.dto.OwnerSignupRequest;
@@ -9,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class OwnerAuthController implements OwnerAuthApi {
 
     private final OwnerAuthService ownerAuthService;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     @PostMapping("/signup")
@@ -34,5 +39,11 @@ public class OwnerAuthController implements OwnerAuthApi {
     public ResponseEntity<OwnerLoginResponse> login(@Valid @RequestBody OwnerLoginRequest request) {
         OwnerLoginResponse response = ownerAuthService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal OwnerPrincipal principal) {
+        refreshTokenService.revokeAllUserTokens(TokenType.OWNER, principal.getId());
+        return ResponseEntity.noContent().build();
     }
 }

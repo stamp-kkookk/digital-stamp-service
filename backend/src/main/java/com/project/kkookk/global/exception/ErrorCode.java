@@ -22,6 +22,8 @@ public enum ErrorCode {
     OWNER_LOGIN_ID_DUPLICATED(
             HttpStatus.CONFLICT, "OWNER_LOGIN_ID_DUPLICATED", "이미 사용 중인 로그인 ID입니다"),
     OWNER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OWNER_LOGIN_FAILED", "이메일 또는 비밀번호가 올바르지 않습니다"),
+    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_INVALID", "유효하지 않은 리프레시 토큰입니다"),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_EXPIRED", "리프레시 토큰이 만료되었습니다"),
 
     // StampCard
     STAMP_CARD_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_CARD_NOT_FOUND", "스탬프 카드를 찾을 수 없습니다"),

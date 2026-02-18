@@ -2,6 +2,7 @@ package com.project.kkookk.terminal.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.owner.domain.OwnerAccount;
 import com.project.kkookk.owner.repository.OwnerAccountRepository;
@@ -25,7 +26,9 @@ public class TerminalAuthService {
     private final StoreRepository storeRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
+    @Transactional
     public TerminalLoginResponse login(TerminalLoginRequest request) {
         // 1. Owner 인증
         OwnerAccount owner =
@@ -54,6 +57,9 @@ public class TerminalAuthService {
         // 4. Terminal 토큰 발급
         String accessToken =
                 jwtUtil.generateTerminalToken(owner.getId(), owner.getEmail(), store.getId());
+        String refreshToken =
+                refreshTokenService.issueTerminalRefreshToken(
+                        owner.getId(), owner.getEmail(), store.getId());
 
         log.info(
                 "[Terminal Login] ownerId={}, storeId={}, storeName={}",
@@ -61,6 +67,6 @@ public class TerminalAuthService {
                 store.getId(),
                 store.getName());
 
-        return TerminalLoginResponse.of(accessToken, owner.getId(), store);
+        return TerminalLoginResponse.of(accessToken, refreshToken, owner.getId(), store);
     }
 }
