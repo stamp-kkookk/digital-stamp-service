@@ -9,6 +9,7 @@
 
 const TOKEN_KEYS = {
   AUTH_TOKEN: 'auth_token',
+  REFRESH_TOKEN: 'refresh_token',
   STEPUP_TOKEN: 'stepup_token',
   STEPUP_EXPIRES_AT: 'stepup_expires_at',
   TOKEN_TYPE: 'token_type',
@@ -63,13 +64,18 @@ export interface UserInfo {
 // Auth Token Management (Customer / Owner / Terminal)
 // =============================================================================
 
-export function setAuthToken(token: string, type: TokenType): void {
+export function setAuthToken(token: string, refreshToken: string, type: TokenType): void {
   safeSetItem(TOKEN_KEYS.AUTH_TOKEN, token);
+  safeSetItem(TOKEN_KEYS.REFRESH_TOKEN, refreshToken);
   safeSetItem(TOKEN_KEYS.TOKEN_TYPE, type);
 }
 
 export function getAuthToken(): string | null {
   return safeGetItem(TOKEN_KEYS.AUTH_TOKEN);
+}
+
+export function getRefreshToken(): string | null {
+  return safeGetItem(TOKEN_KEYS.REFRESH_TOKEN);
 }
 
 export function getTokenType(): TokenType | null {
@@ -78,6 +84,7 @@ export function getTokenType(): TokenType | null {
 
 export function clearAuthToken(): void {
   safeRemoveItem(TOKEN_KEYS.AUTH_TOKEN);
+  safeRemoveItem(TOKEN_KEYS.REFRESH_TOKEN);
   safeRemoveItem(TOKEN_KEYS.TOKEN_TYPE);
   safeRemoveItem(TOKEN_KEYS.USER_INFO);
   clearStepUpToken();

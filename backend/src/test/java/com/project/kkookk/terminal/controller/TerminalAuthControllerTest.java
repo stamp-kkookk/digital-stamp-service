@@ -13,6 +13,7 @@ import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.exception.GlobalExceptionHandler;
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
 import com.project.kkookk.terminal.controller.dto.TerminalLoginRequest;
 import com.project.kkookk.terminal.controller.dto.TerminalLoginResponse;
@@ -49,6 +50,8 @@ class TerminalAuthControllerTest {
 
     @MockitoBean private TerminalAuthService terminalAuthService;
 
+    @MockitoBean private RefreshTokenService refreshTokenService;
+
     @Test
     @DisplayName("터미널 로그인 성공 - 200 OK")
     void login_Success() throws Exception {
@@ -57,7 +60,8 @@ class TerminalAuthControllerTest {
                 new TerminalLoginRequest("owner@example.com", "password123", 1L);
 
         TerminalLoginResponse response =
-                new TerminalLoginResponse("mock.terminal.token", 10L, 1L, "꾹꾹 카페");
+                new TerminalLoginResponse(
+                        "mock.terminal.token", "mock.refresh.token", 10L, 1L, "꾹꾹 카페");
 
         given(terminalAuthService.login(any(TerminalLoginRequest.class))).willReturn(response);
 

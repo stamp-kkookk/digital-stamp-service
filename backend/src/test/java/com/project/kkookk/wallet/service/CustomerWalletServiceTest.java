@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.domain.RedeemEventResult;
@@ -70,6 +71,8 @@ class CustomerWalletServiceTest {
 
     @Mock private JwtUtil jwtUtil;
 
+    @Mock private RefreshTokenService refreshTokenService;
+
     @Test
     @DisplayName("지갑 생성 성공")
     void register_Success() {
@@ -95,6 +98,8 @@ class CustomerWalletServiceTest {
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn(expectedToken);
+        given(refreshTokenService.issueCustomerRefreshToken(anyLong()))
+                .willReturn("mock.refresh.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -155,6 +160,8 @@ class CustomerWalletServiceTest {
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
+        given(refreshTokenService.issueCustomerRefreshToken(anyLong()))
+                .willReturn("mock.refresh.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -187,6 +194,8 @@ class CustomerWalletServiceTest {
         given(customerWalletRepository.existsByNickname(request.nickname())).willReturn(false);
         given(customerWalletRepository.save(any(CustomerWallet.class))).willReturn(savedWallet);
         given(jwtUtil.generateCustomerToken(99L)).willReturn("token.with.walletId");
+        given(refreshTokenService.issueCustomerRefreshToken(anyLong()))
+                .willReturn("mock.refresh.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -237,6 +246,8 @@ class CustomerWalletServiceTest {
         given(walletStampCardRepository.save(any(WalletStampCard.class)))
                 .willReturn(savedWalletStampCard);
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
+        given(refreshTokenService.issueCustomerRefreshToken(anyLong()))
+                .willReturn("mock.refresh.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);
@@ -272,6 +283,8 @@ class CustomerWalletServiceTest {
                                 storeId, StampCardStatus.ACTIVE))
                 .willReturn(Optional.empty());
         given(jwtUtil.generateCustomerToken(anyLong())).willReturn("mock.token");
+        given(refreshTokenService.issueCustomerRefreshToken(anyLong()))
+                .willReturn("mock.refresh.token");
 
         // when
         WalletRegisterResponse response = customerWalletService.register(request);

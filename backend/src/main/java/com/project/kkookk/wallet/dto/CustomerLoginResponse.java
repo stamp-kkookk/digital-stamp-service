@@ -8,6 +8,8 @@ import java.util.List;
 public record CustomerLoginResponse(
         @Schema(description = "JWT 액세스 토큰", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
                 String accessToken,
+        @Schema(description = "리프레시 토큰", example = "550e8400-e29b-41d4-a716-446655440000")
+                String refreshToken,
         @Schema(description = "지갑 ID", example = "1") Long walletId,
         @Schema(description = "전화번호", example = "010-1234-5678") String phone,
         @Schema(description = "이름", example = "홍길동") String name,

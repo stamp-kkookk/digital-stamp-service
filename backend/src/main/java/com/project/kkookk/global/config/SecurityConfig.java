@@ -39,6 +39,8 @@ public class SecurityConfig {
                         auth ->
                                 auth.requestMatchers("/api/owner/auth/**")
                                         .permitAll()
+                                        .requestMatchers("/api/auth/refresh")
+                                        .permitAll()
                                         .requestMatchers("/api/public/otp/**")
                                         .permitAll()
                                         .requestMatchers("/api/public/wallet/**")

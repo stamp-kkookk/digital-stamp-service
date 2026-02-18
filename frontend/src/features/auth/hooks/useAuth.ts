@@ -60,7 +60,7 @@ export function useWalletRegister() {
     mutationFn: (data: WalletRegisterRequest) => registerWallet(data),
     onSuccess: (response) => {
       // Store customer token and user info
-      setAuthToken(response.accessToken, 'customer');
+      setAuthToken(response.accessToken, response.refreshToken, 'customer');
       setUserInfo({
         id: response.walletId,
         name: response.name,
@@ -79,7 +79,7 @@ export function useWalletLogin() {
   return useMutation({
     mutationFn: (data: WalletLoginRequest) => loginWallet(data),
     onSuccess: (response) => {
-      setAuthToken(response.accessToken, 'customer');
+      setAuthToken(response.accessToken, response.refreshToken, 'customer');
       setUserInfo({
         id: response.walletId,
         name: response.name,
@@ -105,7 +105,7 @@ export function useOwnerLogin() {
     mutationFn: (data: OwnerLoginRequest) => ownerLogin(data),
     onSuccess: (response) => {
       // Store owner token and user info
-      setAuthToken(response.accessToken, 'owner');
+      setAuthToken(response.accessToken, response.refreshToken, 'owner');
       setUserInfo({
         id: response.id,
         name: response.name,

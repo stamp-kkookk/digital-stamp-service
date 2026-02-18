@@ -12,6 +12,7 @@ import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.exception.GlobalExceptionHandler;
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.owner.controller.config.TestSecurityConfig;
 import com.project.kkookk.owner.controller.dto.OwnerLoginRequest;
 import com.project.kkookk.owner.controller.dto.OwnerLoginResponse;
@@ -50,6 +51,8 @@ class OwnerAuthControllerTest {
     @Autowired private ObjectMapper objectMapper;
 
     @MockitoBean private OwnerAuthService ownerAuthService;
+
+    @MockitoBean private RefreshTokenService refreshTokenService;
 
     @Test
     @DisplayName("회원가입 성공 - 201 Created")
@@ -171,7 +174,12 @@ class OwnerAuthControllerTest {
 
         OwnerLoginResponse response =
                 new OwnerLoginResponse(
-                        "mock.jwt.token", 1L, "owner@example.com", "홍길동", "010-1234-5678");
+                        "mock.jwt.token",
+                        "mock.refresh.token",
+                        1L,
+                        "owner@example.com",
+                        "홍길동",
+                        "010-1234-5678");
 
         given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
 

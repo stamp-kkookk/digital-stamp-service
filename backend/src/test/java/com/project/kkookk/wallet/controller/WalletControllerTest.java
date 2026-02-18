@@ -58,7 +58,13 @@ class WalletControllerTest {
 
         WalletRegisterResponse response =
                 new WalletRegisterResponse(
-                        "mock.jwt.token", 1L, "010-1234-5678", "홍길동", "길동이", null);
+                        "mock.jwt.token",
+                        "mock.refresh.token",
+                        1L,
+                        "010-1234-5678",
+                        "홍길동",
+                        "길동이",
+                        null);
 
         given(customerWalletService.register(any(WalletRegisterRequest.class)))
                 .willReturn(response);
@@ -226,7 +232,14 @@ class WalletControllerTest {
                 new WalletRegisterRequest("01012345678", "홍길동", "길동이", null);
 
         WalletRegisterResponse response =
-                new WalletRegisterResponse("mock.jwt.token", 1L, "01012345678", "홍길동", "길동이", null);
+                new WalletRegisterResponse(
+                        "mock.jwt.token",
+                        "mock.refresh.token",
+                        1L,
+                        "01012345678",
+                        "홍길동",
+                        "길동이",
+                        null);
 
         given(customerWalletService.register(any(WalletRegisterRequest.class)))
                 .willReturn(response);
@@ -253,6 +266,7 @@ class WalletControllerTest {
         WalletRegisterResponse response =
                 new WalletRegisterResponse(
                         "mock.jwt.token",
+                        "mock.refresh.token",
                         1L,
                         "010-1234-5678",
                         maxLengthString,

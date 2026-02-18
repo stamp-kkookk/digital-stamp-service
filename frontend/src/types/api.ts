@@ -36,6 +36,19 @@ export interface PageResponse<T> {
 }
 
 // =============================================================================
+// Token Refresh Types
+// =============================================================================
+
+export interface TokenRefreshRequest {
+  refreshToken: string;
+}
+
+export interface TokenRefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+// =============================================================================
 // OTP Types
 // =============================================================================
 
@@ -89,6 +102,7 @@ export interface RegisteredStampCardInfo {
 
 export interface WalletRegisterResponse {
   accessToken: string;
+  refreshToken: string;
   walletId: number;
   phone: string;
   name: string;
@@ -114,6 +128,7 @@ export interface WalletLoginStampCard {
 
 export interface WalletLoginResponse {
   accessToken: string;
+  refreshToken: string;
   walletId: number;
   phone: string;
   name: string;
@@ -357,6 +372,7 @@ export interface OwnerLoginRequest {
 
 export interface OwnerLoginResponse {
   accessToken: string;
+  refreshToken: string;
   id: number;
   email: string;
   name: string | null;
@@ -597,6 +613,7 @@ export interface TerminalLoginRequest {
 
 export interface TerminalLoginResponse {
   accessToken: string;
+  refreshToken: string;
   ownerId: number;
   storeId: number;
   storeName: string;
