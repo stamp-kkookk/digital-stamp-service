@@ -18,6 +18,7 @@ interface HistoryItem {
   user: string;
   phone: string;
   type: 'stamp' | 'reward';
+  stampEventType?: 'ISSUED' | 'MIGRATED' | 'MANUAL_ADJUST';
   count?: number;
   content: string;
 }
@@ -63,12 +64,13 @@ export function StoreHistoryPage() {
       user: event.customerNickname,
       phone: event.customerPhone,
       type: 'stamp' as const,
+      stampEventType: event.type,
       count: event.delta,
       content: `+${event.delta}`,
     }));
 
     const rewardHistory: HistoryItem[] = (redeemEventsData?.content ?? [])
-      .filter((event) => event.type === 'COMPLETED' && event.result === 'SUCCESS')
+      .filter((event) => event.result === 'SUCCESS')
       .map((event) => ({
         id: `redeem-${event.id}`,
         time: event.occurredAt,
@@ -239,11 +241,17 @@ export function StoreHistoryPage() {
                           <span
                             className={`text-xs font-bold px-2 py-1 rounded ${
                               item.type === 'stamp'
-                                ? 'bg-blue-50 text-kkookk-indigo'
+                                ? item.stampEventType === 'MIGRATED'
+                                  ? 'bg-yellow-50 text-yellow-600'
+                                  : 'bg-blue-50 text-kkookk-indigo'
                                 : 'bg-purple-100 text-purple-700'
                             }`}
                           >
-                            {item.type === 'stamp' ? '적립' : '사용'}
+                            {item.type === 'stamp'
+                              ? item.stampEventType === 'MIGRATED'
+                                ? '전환 적립'
+                                : '스탬프 적립'
+                              : '리워드 사용'}
                           </span>
                         </td>
                         <td className="p-4 text-sm text-right pr-6 font-bold text-kkookk-navy">
