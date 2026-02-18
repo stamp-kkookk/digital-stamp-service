@@ -3,3 +3,4 @@
  */
 
 export * from './OwnerLoginPage';
+export * from './OwnerSignupPage';

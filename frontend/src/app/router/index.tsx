@@ -32,6 +32,7 @@ import { AdminStoreListPage } from "@/pages/admin/AdminStoreListPage";
 
 // 사장님 페이지
 import { OwnerLoginPage } from "@/features/auth/pages/OwnerLoginPage";
+import { OwnerSignupPage } from "@/features/auth/pages/OwnerSignupPage";
 import {
   StampCardCreatePage,
   StampCardEditPage,
@@ -119,6 +120,12 @@ export const router = createBrowserRouter([
   {
     path: "/owner/login",
     element: <OwnerLoginPage />,
+  },
+
+  // 사장님 회원가입 (레이아웃 없음)
+  {
+    path: "/owner/signup",
+    element: <OwnerSignupPage />,
   },
 
   // 사장님 라우트
