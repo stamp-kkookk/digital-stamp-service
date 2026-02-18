@@ -171,7 +171,12 @@ class OwnerAuthControllerTest {
 
         OwnerLoginResponse response =
                 new OwnerLoginResponse(
-                        "mock.jwt.token", 1L, "owner@example.com", "홍길동", "010-1234-5678");
+                        "mock.jwt.token",
+                        "mock.refresh.token",
+                        1L,
+                        "owner@example.com",
+                        "홍길동",
+                        "010-1234-5678");
 
         given(ownerAuthService.login(any(OwnerLoginRequest.class))).willReturn(response);
 

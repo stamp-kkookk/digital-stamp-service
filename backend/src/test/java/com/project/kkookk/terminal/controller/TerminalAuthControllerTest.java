@@ -57,7 +57,8 @@ class TerminalAuthControllerTest {
                 new TerminalLoginRequest("owner@example.com", "password123", 1L);
 
         TerminalLoginResponse response =
-                new TerminalLoginResponse("mock.terminal.token", 10L, 1L, "꾹꾹 카페");
+                new TerminalLoginResponse(
+                        "mock.terminal.token", "mock.refresh.token", 10L, 1L, "꾹꾹 카페");
 
         given(terminalAuthService.login(any(TerminalLoginRequest.class))).willReturn(response);
 

@@ -43,7 +43,7 @@ public class OwnerAuthController implements OwnerAuthApi {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal OwnerPrincipal principal) {
-        refreshTokenService.revokeAllUserTokens(TokenType.OWNER, principal.getId());
+        refreshTokenService.revokeAllUserTokens(TokenType.OWNER, principal.getOwnerId());
         return ResponseEntity.noContent().build();
     }
 }
