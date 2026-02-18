@@ -2,7 +2,6 @@ package com.project.kkookk.wallet.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -16,5 +15,5 @@ public record CustomerLoginRequest(
                 @NotBlank(message = "이름은 필수입니다")
                 @Size(max = 50, message = "이름은 50자 이하여야 합니다")
                 String name,
-        @Schema(description = "매장 ID", example = "1") @NotNull(message = "매장 ID는 필수입니다")
+        @Schema(description = "매장 ID (QR 스캔 진입 시 필수, 직접 로그인 시 선택)", example = "1", nullable = true)
                 Long storeId) {}

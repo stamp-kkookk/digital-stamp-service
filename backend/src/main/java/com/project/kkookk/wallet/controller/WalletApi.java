@@ -46,7 +46,10 @@ public interface WalletApi {
 
     @Operation(
             summary = "고객 로그인",
-            description = "전화번호와 이름으로 기존 고객 로그인을 수행합니다. 해당 매장의 스탬프카드가 없으면 자동 발급합니다.")
+            description =
+                    "전화번호와 이름으로 기존 고객 로그인을 수행합니다. "
+                            + "storeId가 있으면 해당 매장의 스탬프카드를 자동 발급하고 우선 표시합니다. "
+                            + "storeId가 없으면 모든 스탬프카드를 최근 적립순으로 반환합니다.")
     @ApiResponses(
             value = {
                 @ApiResponse(

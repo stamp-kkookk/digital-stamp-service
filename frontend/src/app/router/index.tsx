@@ -9,6 +9,7 @@ import { OwnerLayout } from "@/app/layouts/OwnerLayout";
 import { TerminalLayout } from "@/app/layouts/TerminalLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { LauncherPage } from "@/pages/LauncherPage";
+import { RoleSelectionPage } from "@/pages/RoleSelectionPage";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // 고객 페이지
@@ -16,6 +17,7 @@ import { CustomerHistoryPage } from "@/pages/customer/CustomerHistoryPage";
 import { CustomerLandingPage } from "@/pages/customer/CustomerLandingPage";
 import { CustomerSettingsPage } from "@/pages/customer/CustomerSettingsPage";
 import { CustomerStoreSelectPage } from "@/pages/customer/CustomerStoreSelectPage";
+import { DirectCustomerLoginPage } from "@/pages/customer/DirectCustomerLoginPage";
 
 // 고객 기능 컴포넌트 (페이지로 래핑될 예정)
 import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
@@ -64,6 +66,11 @@ export const router = createBrowserRouter([
     element: <LauncherPage />,
   },
 
+  // 역할 선택 페이지 (진입점)
+  {
+    path: "/funnel",
+    element: <RoleSelectionPage />,
+  },
 
   // 고객 매장 선택 (시뮬레이션 진입점)
   {
@@ -79,6 +86,15 @@ export const router = createBrowserRouter([
       { index: true, element: <CustomerLandingPage /> },
       { path: "login", element: <CustomerLoginForm /> },
       { path: "signup", element: <CustomerSignupForm /> },
+    ],
+  },
+
+  // 직접 고객 로그인 (storeId 없음 - funnel에서 진입)
+  {
+    path: "/customer/login",
+    element: <CustomerLayout />,
+    children: [
+      { index: true, element: <DirectCustomerLoginPage /> },
     ],
   },
 

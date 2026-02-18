@@ -161,10 +161,12 @@ public class CustomerWalletService {
             throw new CustomerWalletBlockedException("차단된 지갑입니다");
         }
 
-        // 3. 해당 매장의 스탬프카드가 있는지 확인, 없으면 생성
-        ensureWalletStampCardExists(wallet.getId(), request.storeId());
+        // 3. 해당 매장의 스탬프카드가 있는지 확인, 없으면 생성 (storeId가 있을 때만)
+        if (request.storeId() != null) {
+            ensureWalletStampCardExists(wallet.getId(), request.storeId());
+        }
 
-        // 4. 고객의 모든 ACTIVE 스탬프카드 조회 (현재 매장 카드 우선)
+        // 4. 고객의 모든 ACTIVE 스탬프카드 조회 (storeId 있으면 현재 매장 카드 우선, 없으면 최근 적립순)
         List<WalletStampCardSummary> stampCards =
                 getAllStampCardsWithCurrentStoreFirst(wallet.getId(), request.storeId());
 
@@ -229,18 +231,21 @@ public class CustomerWalletService {
                 storeRepository.findAllById(storeIds).stream()
                         .collect(Collectors.toMap(Store::getId, Function.identity()));
 
-        // 현재 매장 카드를 첫 번째로 정렬
+        // currentStoreId가 있으면 현재 매장 카드를 첫 번째로 정렬, 없으면 최근 적립순으로만 정렬
         walletCards.sort(
                 (a, b) -> {
-                    boolean firstIsCurrentStore = a.getStoreId().equals(currentStoreId);
-                    boolean secondIsCurrentStore = b.getStoreId().equals(currentStoreId);
-                    if (firstIsCurrentStore && !secondIsCurrentStore) {
-                        return -1;
+                    // currentStoreId가 null이면 스토어 우선순위 건너뛰기
+                    if (currentStoreId != null) {
+                        boolean firstIsCurrentStore = a.getStoreId().equals(currentStoreId);
+                        boolean secondIsCurrentStore = b.getStoreId().equals(currentStoreId);
+                        if (firstIsCurrentStore && !secondIsCurrentStore) {
+                            return -1;
+                        }
+                        if (!firstIsCurrentStore && secondIsCurrentStore) {
+                            return 1;
+                        }
                     }
-                    if (!firstIsCurrentStore && secondIsCurrentStore) {
-                        return 1;
-                    }
-                    // 같은 경우 최근 적립 순
+                    // currentStoreId가 null이거나 같은 경우 최근 적립 순
                     if (a.getLastStampedAt() == null && b.getLastStampedAt() == null) {
                         return 0;
                     }

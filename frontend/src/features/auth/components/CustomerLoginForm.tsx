@@ -27,7 +27,7 @@ export function CustomerLoginForm() {
 
   const phoneDigitCount = stripPhoneToDigits(phone).length;
   const isPhoneComplete = phoneDigitCount >= 10 && phoneDigitCount <= 11;
-  const isFormValid = name.trim() !== '' && isPhoneComplete && !phoneError && !!storeId;
+  const isFormValid = name.trim() !== '' && isPhoneComplete && !phoneError;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
@@ -45,7 +45,11 @@ export function CustomerLoginForm() {
     if (!isFormValid) return;
 
     loginMutation.mutate(
-      { phone: stripPhoneToDigits(phone), name, storeId: Number(storeId) },
+      {
+        phone: stripPhoneToDigits(phone),
+        name,
+        ...(storeId && { storeId: Number(storeId) }),
+      },
       {
         onSuccess: () => {
           if (storeId) saveOriginStoreId(storeId);
@@ -64,7 +68,7 @@ export function CustomerLoginForm() {
     <div className="h-full p-6 pt-12 flex flex-col bg-white">
       <div className="flex items-center mb-6 -ml-2">
         <button
-          onClick={() => customerNavigate('/')}
+          onClick={() => navigate(-1)}
           className="p-2 text-kkookk-steel"
           aria-label="뒤로 가기"
         >
@@ -116,6 +120,13 @@ export function CustomerLoginForm() {
         >
           지갑 열기
         </Button>
+
+        {/* 직접 로그인 시에만 표시되는 안내 문구 */}
+        {!storeId && (
+          <p className="mt-4 text-xs text-center text-gray-500">
+            처음 방문하시나요? 가게에서 QR 코드를 스캔하여 시작하세요
+          </p>
+        )}
       </form>
     </div>
   );
