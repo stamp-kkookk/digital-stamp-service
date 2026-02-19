@@ -23,7 +23,7 @@ export function RoleSelectionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Customer Card */}
           <button
-            onClick={() => navigate("/customer/login")}
+            onClick={() => navigate("/customer/stores")}
             className="group p-8 bg-white border-2 border-gray-200 rounded-2xl hover:border-kkookk-orange-500 hover:shadow-lg transition-all duration-300 text-left"
           >
             <div className="flex flex-col items-center text-center space-y-4">

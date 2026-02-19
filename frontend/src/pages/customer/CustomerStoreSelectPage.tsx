@@ -99,12 +99,12 @@ export function CustomerStoreSelectPage() {
           </>
         )}
 
-        {/* 시뮬레이터로 돌아가기 */}
+        {/* 돌아가기 */}
         <button
-          onClick={() => navigate('/simulation')}
+          onClick={() => navigate(-1)}
           className="flex items-center justify-center gap-2 mx-auto mt-8 text-sm text-kkookk-steel hover:text-kkookk-navy"
         >
-          시뮬레이터로 돌아가기
+          돌아가기
         </button>
       </div>
     </div>
