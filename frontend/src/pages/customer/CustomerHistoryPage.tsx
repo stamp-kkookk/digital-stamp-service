@@ -9,8 +9,6 @@ import { ChevronLeft, History, Check, Gift, Loader2 } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { formatFullDateTime } from '@/lib/utils/format';
 import { useStampHistory, useRedeemHistory } from '@/features/wallet/hooks/useWallet';
-import { isStepUpValid } from '@/lib/api/tokenManager';
-import { StepUpVerify } from '@/components/shared/StepUpVerify';
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
@@ -26,8 +24,6 @@ export function CustomerHistoryPage() {
   const { storeId: defaultStoreId, customerNavigate } = useCustomerNavigate();
   const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState<HistoryFilter>('all');
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
-
   // query param 우선, 없으면 sessionStorage/URL fallback
   const storeIdNum = Number(searchParams.get('storeId')) || (defaultStoreId ? Number(defaultStoreId) : undefined);
 
@@ -76,7 +72,7 @@ export function CustomerHistoryPage() {
   return (
     <div className="h-full bg-white flex flex-col">
       {/* 헤더 */}
-      <div className="px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 justify-between">
+      <div className="px-6 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 justify-between">
         <div className="flex items-center">
           <button
             onClick={() => customerNavigate('/wallet')}
@@ -112,11 +108,7 @@ export function CustomerHistoryPage() {
 
       {/* 목록 */}
       <div className="flex-1 overflow-y-auto px-6">
-        {!stepUpValid ? (
-          <div className="flex items-center justify-center py-16">
-            <StepUpVerify onVerified={() => setStepUpValid(true)} />
-          </div>
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center h-64 text-kkookk-steel">
             <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
             <p>이력을 불러오는 중...</p>

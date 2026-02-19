@@ -5,13 +5,10 @@
 
 import type { Reward } from "@/types/domain";
 import type { WalletRewardItem } from "@/types/api";
-import { useState } from "react";
 import { ChevronLeft, Gift, Loader2 } from "lucide-react";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { RewardCard } from "./RewardCard";
 import { useWalletRewards } from "@/features/wallet/hooks/useWallet";
-import { isStepUpValid } from "@/lib/api/tokenManager";
-import { StepUpVerify } from "@/components/shared/StepUpVerify";
 import { formatShortDate } from "@/lib/utils/format";
 
 function mapReward(item: WalletRewardItem): Reward {
@@ -29,7 +26,6 @@ function mapReward(item: WalletRewardItem): Reward {
 
 export function RewardList() {
   const { customerNavigate } = useCustomerNavigate();
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
   const { data, isLoading } = useWalletRewards();
 
   const rewards: Reward[] =
@@ -40,9 +36,9 @@ export function RewardList() {
   };
 
   return (
-    <div className="relative flex flex-col h-full pt-12">
+    <div className="relative flex flex-col h-full pt-6">
       {/* 헤더 */}
-      <div className="px-6 py-4 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 z-10 -mt-12 pt-12">
+      <div className="px-6 py-3 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 z-10 -mt-6 pt-6">
         <button
           onClick={() => customerNavigate("/wallet")}
           className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
@@ -57,11 +53,7 @@ export function RewardList() {
 
       {/* 리워드 목록 */}
       <div className="p-6 space-y-4 overflow-y-auto">
-        {!stepUpValid ? (
-          <div className="flex items-center justify-center py-20">
-            <StepUpVerify onVerified={() => setStepUpValid(true)} />
-          </div>
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-kkookk-steel">
             <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
             <p>리워드를 불러오는 중...</p>
