@@ -133,7 +133,8 @@ public class StampCardService {
     public void delete(Long storeId, Long id) {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
-        if (!stampCard.isDraft()) {
+        boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
+        if (issued) {
             throw new StampCardDeleteNotAllowedException();
         }
 

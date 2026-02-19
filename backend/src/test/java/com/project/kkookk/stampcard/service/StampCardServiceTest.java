@@ -353,8 +353,8 @@ class StampCardServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 카드 삭제 성공 - DRAFT 상태")
-    void deleteStampCard_Success() {
+    @DisplayName("스탬프 카드 삭제 성공 - 미발급 카드")
+    void deleteStampCard_Success_NotIssued() {
         // given
         Long storeId = 1L;
         Long cardId = 1L;
@@ -364,6 +364,7 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
         stampCardService.delete(storeId, cardId);
@@ -373,8 +374,8 @@ class StampCardServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 카드 삭제 실패 - DRAFT 상태가 아님")
-    void deleteStampCard_Fail_NotDraft() {
+    @DisplayName("스탬프 카드 삭제 실패 - 발급된 카드")
+    void deleteStampCard_Fail_Issued() {
         // given
         Long storeId = 1L;
         Long cardId = 1L;
@@ -385,6 +386,7 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> stampCardService.delete(storeId, cardId))

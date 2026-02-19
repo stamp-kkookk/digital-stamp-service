@@ -643,15 +643,13 @@ export function StoreDetailPage() {
                                 >
                                   <Edit size={16} />
                                 </button>
-                                {card.status === "DRAFT" && (
-                                  <button
-                                    onClick={() => handleDeleteCard(card.id)}
-                                    className="p-2 rounded-lg text-kkookk-steel hover:text-red-600 hover:bg-red-50"
-                                    title="삭제"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => handleDeleteCard(card.id)}
+                                  className="p-2 rounded-lg text-kkookk-steel hover:text-red-600 hover:bg-red-50"
+                                  title="삭제"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
                               </div>
                             </td>
                           </tr>
