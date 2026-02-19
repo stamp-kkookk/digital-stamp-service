@@ -125,6 +125,7 @@ export function CustomerLayout() {
           !urlStoreId &&
           !location.pathname.includes("/stamp") &&
           !location.pathname.endsWith("/use") &&
+          !location.pathname.endsWith("/login") &&
           !isMigrationPath
         }
         onBottomNavClick={handleBottomNavClick}
