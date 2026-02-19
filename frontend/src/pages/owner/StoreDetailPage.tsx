@@ -684,7 +684,11 @@ export function StoreDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={closeConfirm}>
+            <Button
+              variant="outline"
+              className={confirmDialog.variant === "info" ? "border-kkookk-indigo text-kkookk-indigo hover:bg-blue-50" : undefined}
+              onClick={closeConfirm}
+            >
               취소
             </Button>
             <Button
