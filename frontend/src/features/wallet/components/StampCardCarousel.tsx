@@ -1,10 +1,10 @@
 /**
  * StampCardCarousel 컴포넌트
  * 가로형 스탬프 카드 캐러셀 (심플 스케일 전환)
- * - 중앙 카드: 크게 표시, hover/tap으로 3D 플립
+ * - 중앙 카드: 크게 표시, tap/click으로 3D 플립
  * - 좌우 카드: 중앙 기준 좌우에 작게 + 반투명 (PC/모바일 모두)
- * - 모바일: tap → 플립, 스와이프로 전환, 하단 "스탬프 찍기" 버튼
- * - PC: hover → 플립, click → 적립요청, 가로 스크롤(휠)로 전환
+ * - 스와이프(모바일) / 휠 스크롤(PC)로 전환
+ * - 그리드 내 적립 버튼으로 적립 요청
  */
 
 import { useCallback, useState, useEffect, useRef } from 'react'
@@ -17,8 +17,12 @@ import { CardInfoPanel } from './CardInfoPanel'
 
 interface StampCardCarouselProps {
     cards: StampCard[]
-    onCardSelect: (card: StampCard) => void
+    initialIndex?: number
     onCardChange?: (card: StampCard) => void
+    onStampRequest?: (card: StampCard) => void
+    initialFlipped?: boolean
+    animatingStampIndex?: number
+    onAnimationComplete?: () => void
     className?: string
 }
 
@@ -45,12 +49,16 @@ function useIsTouchDevice() {
 
 export function StampCardCarousel({
     cards,
-    onCardSelect,
+    initialIndex = 0,
     onCardChange,
+    onStampRequest,
+    initialFlipped,
+    animatingStampIndex,
+    onAnimationComplete,
     className,
 }: StampCardCarouselProps) {
-    const [currentIndex, setCurrentIndex] = useState(0)
-    const [isFlipped, setIsFlipped] = useState(false)
+    const [currentIndex, setCurrentIndex] = useState(initialIndex)
+    const [isFlipped, setIsFlipped] = useState(initialFlipped ?? false)
     const [slideDirection, setSlideDirection] = useState<1 | -1>(1)
     const isTouchDevice = useIsTouchDevice()
     const wheelAccum = useRef(0)
@@ -83,29 +91,12 @@ export function StampCardCarousel({
         [currentIndex, cards.length, goTo],
     )
 
+    // 클릭/탭: 항상 플립 토글
     const handleCenterClick = useCallback(() => {
-        if (isTouchDevice) {
-            setIsFlipped((prev) => !prev)
-        } else {
-            onCardSelect(cards[currentIndex])
-        }
-    }, [isTouchDevice, onCardSelect, cards, currentIndex])
-
-    const handleHoverStart = useCallback(() => {
-        if (!isTouchDevice) {
-            setIsFlipped(true)
-        }
-    }, [isTouchDevice])
-
-    const handleHoverEnd = useCallback(() => {
-        if (!isTouchDevice) {
-            setIsFlipped(false)
-        }
-    }, [isTouchDevice])
+        setIsFlipped((prev) => !prev)
+    }, [])
 
     // PC: 가로 스크롤(휠/트랙패드)로 캐러셀 전환
-    // 항상 preventDefault로 Mac 브라우저 뒤로/앞으로 방지
-    // delta 누적 방식으로 트랙패드 민감도 개선
     useEffect(() => {
         const el = carouselRef.current
         if (!el || isTouchDevice) return
@@ -113,13 +104,11 @@ export function StampCardCarousel({
         const ACCUM_THRESHOLD = 15
 
         const handleWheel = (e: WheelEvent) => {
-            // 항상 preventDefault → Mac 브라우저 뒤로가기/앞으로가기 방지
             e.preventDefault()
 
             const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
             wheelAccum.current += delta
 
-            // 리셋 타이머: 스크롤 멈추면 누적값 초기화
             clearTimeout(wheelTimer.current)
             wheelTimer.current = setTimeout(() => { wheelAccum.current = 0 }, 150)
 
@@ -169,8 +158,7 @@ export function StampCardCarousel({
     const prevCard = currentIndex > 0 ? cards[currentIndex - 1] : null
     const nextCard = currentIndex < cards.length - 1 ? cards[currentIndex + 1] : null
 
-    // 좌우 카드 위치: 중앙 카드 기준 좌우로 배치 (PC에서도 보이게)
-    const SIDE_OFFSET = 58 // 중앙에서 좌/우 %
+    const SIDE_OFFSET = 58
 
     return (
         <div
@@ -188,7 +176,7 @@ export function StampCardCarousel({
                     height: '240px',
                 }}
             >
-                {/* 좌측 카드 (중앙 기준 왼쪽) */}
+                {/* 좌측 카드 */}
                 <AnimatePresence mode="popLayout">
                     {prevCard && (
                         <motion.div
@@ -223,15 +211,13 @@ export function StampCardCarousel({
                         onDragEnd: handleDragEnd,
                         whileDrag: { scale: 0.97 },
                     } : {})}
-                    onHoverStart={handleHoverStart}
-                    onHoverEnd={handleHoverEnd}
                     transition={springTransition}
                     role="group"
                     aria-roledescription="slide"
                     aria-label={`${currentIndex + 1} / ${cards.length}: ${currentCard?.storeName}`}
                     tabIndex={0}
                 >
-                    {/* 그림자 - 3D 컨테이너 바깥, 부드러운 디퓨즈 */}
+                    {/* 그림자 */}
                     <div
                         className="absolute -inset-2 rounded-3xl pointer-events-none"
                         style={{
@@ -244,11 +230,12 @@ export function StampCardCarousel({
                     <motion.div
                         className="relative"
                         style={{ transformStyle: 'preserve-3d' }}
+                        initial={initialFlipped ? { rotateY: 180 } : undefined}
                         animate={{ rotateY: isFlipped ? 180 : 0 }}
                         transition={flipTransition}
                         onClick={handleCenterClick}
                     >
-                        {/* 불투명 백킹: 사이드 카드가 비치는 것 차단 (앞면용/뒷면용) */}
+                        {/* 불투명 백킹 */}
                         <div
                             className="absolute inset-0 rounded-2xl bg-white"
                             style={{ transform: 'translateZ(-1px)', backfaceVisibility: 'hidden' }}
@@ -271,12 +258,17 @@ export function StampCardCarousel({
                                 transform: 'rotateY(180deg)',
                             }}
                         >
-                            <StampCardBack card={currentCard} />
+                            <StampCardBack
+                                card={currentCard}
+                                onStampRequest={() => onStampRequest?.(currentCard)}
+                                animatingStampIndex={animatingStampIndex}
+                                onAnimationComplete={onAnimationComplete}
+                            />
                         </div>
                     </motion.div>
                 </motion.div>
 
-                {/* 우측 카드 (중앙 기준 오른쪽) */}
+                {/* 우측 카드 */}
                 <AnimatePresence mode="popLayout">
                     {nextCard && (
                         <motion.div
@@ -300,12 +292,10 @@ export function StampCardCarousel({
                 </AnimatePresence>
             </div>
 
-            {/* 카드 정보: 가게 이름만 + 모바일만 버튼 */}
+            {/* 카드 정보: 가게 이름만 */}
             {currentCard && (
                 <CardInfoPanel
                     card={currentCard}
-                    onStampClick={() => onCardSelect(currentCard)}
-                    showButton={isTouchDevice}
                     direction={slideDirection}
                     className="mt-5"
                 />

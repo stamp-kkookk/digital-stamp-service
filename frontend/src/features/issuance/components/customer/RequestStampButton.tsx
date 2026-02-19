@@ -12,8 +12,6 @@ import { kkookkToast } from '@/components/ui/Toast';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { useWalletStampCards } from '@/features/wallet/hooks/useWallet';
 import { useCreateIssuanceRequest, useIssuanceRequestStatus, useCancelIssuanceRequest, generateIdempotencyKey } from '@/features/issuance/hooks/useIssuance';
-import { getWalletStampCards } from '@/features/wallet/api/walletApi';
-import { QUERY_KEYS } from '@/lib/api/endpoints';
 import { RequestingView } from './RequestingView';
 import { RequestResultView } from './RequestResultView';
 import { RewardAchievedView } from './RewardAchievedView';
@@ -118,6 +116,17 @@ export function RequestStampButton() {
     customerNavigate('/wallet');
   };
 
+  const handleBackWithAnimation = () => {
+    customerNavigate('/wallet', {
+      state: {
+        stampJustAdded: true,
+        animateStampIndex: (requestStatus?.currentStampCount ?? 1) - 1,
+        stampedCardId: cardId,
+      },
+      replace: true,
+    });
+  };
+
   const handleGoToRewards = () => {
     customerNavigate('/redeems');
   };
@@ -127,14 +136,7 @@ export function RequestStampButton() {
     setIsNavigating(true);
     try {
       await queryClient.invalidateQueries({ queryKey: ['wallet'] });
-      const fresh = await queryClient.fetchQuery({
-        queryKey: QUERY_KEYS.walletStampCards(storeIdNum),
-        queryFn: () => getWalletStampCards(storeIdNum),
-      });
-      const newCard = fresh?.stampCards
-        ?.filter((c) => c.store.storeId === storeIdNum && c.currentStampCount === 0)
-        ?.sort((a, b) => b.walletStampCardId - a.walletStampCardId)?.[0];
-      customerNavigate(newCard ? `/wallet/${newCard.walletStampCardId}` : '/wallet');
+      customerNavigate('/wallet');
     } catch {
       customerNavigate('/wallet');
     } finally {
@@ -234,7 +236,7 @@ export function RequestStampButton() {
       <RequestResultView
         success={true}
         stampCount={requestStatus?.currentStampCount}
-        onConfirm={handleBack}
+        onConfirm={handleBackWithAnimation}
       />
     );
   }
