@@ -5,9 +5,9 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Loader2, AlertTriangle, X } from 'lucide-react';
+import { ChevronLeft, Loader2, AlertTriangle, X, Search, MapPin } from 'lucide-react';
 import { useCreateStore } from '@/features/store-management/hooks/useStore';
-import { PlaceSearchInput, IconUpload } from '@/features/store-management/components';
+import { PlaceSearchModal, IconUpload } from '@/features/store-management/components';
 import type { ErrorResponse, PlaceSearchResult } from '@/types/api';
 import type { AxiosError } from 'axios';
 import { kkookkToast } from '@/components/ui/Toast';
@@ -39,6 +39,7 @@ export function StoreCreatePage() {
   const navigate = useNavigate();
   const createStore = useCreateStore();
   const [manualAddressMode, setManualAddressMode] = useState(false);
+  const [placeSearchOpen, setPlaceSearchOpen] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const [formData, setFormData] = useState<StoreFormData>({
     name: '',
@@ -63,12 +64,13 @@ export function StoreCreatePage() {
   const handlePlaceSelect = (place: PlaceSearchResult) => {
     setFormData((prev) => ({
       ...prev,
-      name: prev.name || place.placeName,
+      name: place.placeName,
       address: place.roadAddress || place.address,
-      phone: place.phone ? formatPhone(place.phone) : prev.phone,
+      phone: place.phone ? formatPhone(place.phone) : '',
       placeRef: place.kakaoPlaceId,
     }));
     setManualAddressMode(false);
+    setPlaceSearchOpen(false);
   };
 
   const handleManualMode = () => {
@@ -141,7 +143,7 @@ export function StoreCreatePage() {
           {/* 장소 검색 */}
           <div>
             <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              카카오 장소 검색
+              장소 검색
             </span>
             {manualAddressMode ? (
               <div className="flex items-center gap-2 p-3 border border-slate-200 rounded-xl bg-slate-50">
@@ -151,15 +153,35 @@ export function StoreCreatePage() {
                   onClick={() => setManualAddressMode(false)}
                   className="text-sm text-kkookk-indigo hover:underline"
                 >
-                  카카오 검색으로 전환
+                  장소 검색으로 전환
+                </button>
+              </div>
+            ) : formData.placeRef ? (
+              <div className="flex items-center justify-between p-3 border border-slate-200 rounded-xl bg-slate-50">
+                <div className="flex items-center gap-2 min-w-0">
+                  <MapPin size={16} className="shrink-0 text-kkookk-indigo" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-kkookk-navy truncate">{formData.name}</p>
+                    <p className="text-xs text-kkookk-steel truncate">{formData.address}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPlaceSearchOpen(true)}
+                  className="shrink-0 text-sm text-kkookk-indigo hover:underline ml-2"
+                >
+                  다시 검색
                 </button>
               </div>
             ) : (
-              <PlaceSearchInput
-                onSelect={handlePlaceSelect}
-                onManualMode={handleManualMode}
-                defaultAddress={formData.address}
-              />
+              <button
+                type="button"
+                onClick={() => setPlaceSearchOpen(true)}
+                className="flex items-center gap-2 w-full p-3 border border-dashed border-slate-300 rounded-xl text-kkookk-steel hover:border-kkookk-indigo hover:text-kkookk-indigo transition-colors"
+              >
+                <Search size={16} />
+                <span className="text-sm">장소 검색</span>
+              </button>
             )}
             {manualAddressMode && (
               <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
@@ -167,6 +189,12 @@ export function StoreCreatePage() {
                 장소 연동 없이 등록하면 운영 승인 시 추가 확인이 필요할 수 있습니다
               </p>
             )}
+            <PlaceSearchModal
+              open={placeSearchOpen}
+              onOpenChange={setPlaceSearchOpen}
+              onSelect={handlePlaceSelect}
+              onManualMode={handleManualMode}
+            />
           </div>
 
           {/* 매장 이름 */}
@@ -214,7 +242,12 @@ export function StoreCreatePage() {
                 className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-kkookk-steel"
               />
             ) : (
-              <p className="text-sm text-kkookk-steel">카카오 장소 검색으로 자동 입력됩니다</p>
+              <input
+                type="text"
+                disabled
+                placeholder="장소 검색으로 자동 입력됩니다"
+                className="w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-kkookk-steel disabled:cursor-not-allowed"
+              />
             )}
           </div>
 

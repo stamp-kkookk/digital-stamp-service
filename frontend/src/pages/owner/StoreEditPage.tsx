@@ -5,9 +5,9 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Loader2, AlertCircle, AlertTriangle, X } from 'lucide-react';
+import { ChevronLeft, Loader2, AlertCircle, AlertTriangle, X, Search } from 'lucide-react';
 import { useStore, useUpdateStore } from '@/features/store-management/hooks/useStore';
-import { IconUpload, PlaceSearchInput } from '@/features/store-management/components';
+import { IconUpload, PlaceSearchModal } from '@/features/store-management/components';
 import type { ErrorResponse, PlaceSearchResult, StoreUpdateRequest } from '@/types/api';
 import type { AxiosError } from 'axios';
 
@@ -42,6 +42,7 @@ export function StoreEditPage() {
   const { data: store, isLoading, error } = useStore(storeIdNum);
   const updateStore = useUpdateStore();
   const [formData, setFormData] = useState<StoreEditFormData | null>(null);
+  const [placeSearchOpen, setPlaceSearchOpen] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
   // 스토어 로드 후 폼 데이터 초기화
@@ -72,12 +73,14 @@ export function StoreEditPage() {
       prev
         ? {
             ...prev,
+            name: place.placeName,
             address: place.roadAddress || place.address || prev.address,
             phone: place.phone ? formatPhone(place.phone) : prev.phone,
             placeRef: place.kakaoPlaceId,
           }
         : prev
     );
+    setPlaceSearchOpen(false);
   };
 
   const handleSubmit = () => {
@@ -194,23 +197,32 @@ export function StoreEditPage() {
           {/* 장소 연동 */}
           <div>
             <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              카카오 장소 연동
+              장소 연동
             </span>
             {formData.placeRef ? (
               <p className="text-sm text-kkookk-steel p-3 bg-slate-50 rounded-xl border border-slate-200">
-                카카오 장소 ID: {formData.placeRef} (변경 불가)
+                장소 ID: {formData.placeRef} (변경 불가)
               </p>
             ) : (
               <>
-                <PlaceSearchInput
-                  onSelect={handlePlaceSelect}
-                  onManualMode={() => {}}
-                  defaultAddress={formData.address}
-                />
+                <button
+                  type="button"
+                  onClick={() => setPlaceSearchOpen(true)}
+                  className="flex items-center gap-2 w-full p-3 border border-dashed border-slate-300 rounded-xl text-kkookk-steel hover:border-kkookk-indigo hover:text-kkookk-indigo transition-colors"
+                >
+                  <Search size={16} />
+                  <span className="text-sm">장소 검색</span>
+                </button>
                 <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
                   <AlertTriangle size={12} />
                   장소를 연동하면 중복 등록을 방지할 수 있습니다
                 </p>
+                <PlaceSearchModal
+                  open={placeSearchOpen}
+                  onOpenChange={setPlaceSearchOpen}
+                  onSelect={handlePlaceSelect}
+                  onManualMode={() => setPlaceSearchOpen(false)}
+                />
               </>
             )}
           </div>
