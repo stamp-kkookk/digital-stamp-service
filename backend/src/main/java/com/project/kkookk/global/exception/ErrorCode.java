@@ -32,11 +32,11 @@ public enum ErrorCode {
     STAMP_CARD_STATUS_INVALID(
             HttpStatus.BAD_REQUEST, "STAMP_CARD_STATUS_INVALID", "유효하지 않은 상태 전이입니다"),
     STAMP_CARD_DELETE_NOT_ALLOWED(
-            HttpStatus.BAD_REQUEST, "STAMP_CARD_DELETE_NOT_ALLOWED", "초안 상태의 스탬프 카드만 삭제할 수 있습니다"),
+            HttpStatus.BAD_REQUEST, "STAMP_CARD_DELETE_NOT_ALLOWED", "발급된 카드는 삭제할 수 없습니다"),
     STAMP_CARD_ACCESS_DENIED(
             HttpStatus.FORBIDDEN, "STAMP_CARD_ACCESS_DENIED", "해당 스탬프 카드에 대한 접근 권한이 없습니다"),
     STAMP_CARD_UPDATE_NOT_ALLOWED(
-            HttpStatus.BAD_REQUEST, "STAMP_CARD_UPDATE_NOT_ALLOWED", "활성 상태에서는 일부 필드만 수정할 수 있습니다"),
+            HttpStatus.BAD_REQUEST, "STAMP_CARD_UPDATE_NOT_ALLOWED", "발급된 카드는 수정할 수 없습니다"),
 
     // Store
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),

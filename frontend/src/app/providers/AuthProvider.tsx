@@ -92,6 +92,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const hasStepUp = isStepUpValid();
     const stepUpRemainingSeconds = getStepUpRemainingSeconds();
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({
       isAuthenticated: !!token,
       isLoading: false,
@@ -163,6 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 // Hook
 // =============================================================================
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {

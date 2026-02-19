@@ -48,7 +48,7 @@
 
 | Enum | 패키지 | 값 | 전이 |
 |------|--------|---|------|
-| StampCardStatus | `stampcard/domain/` | DRAFT, ACTIVE, PAUSED, ARCHIVED | DRAFT→(ACTIVE\|ARCHIVED); ACTIVE→(PAUSED\|ARCHIVED); PAUSED→(ACTIVE\|ARCHIVED); ARCHIVED→(없음) |
+| StampCardStatus | `stampcard/domain/` | DRAFT, ACTIVE, ARCHIVED | DRAFT→(ACTIVE\|ARCHIVED); ACTIVE→ARCHIVED; ARCHIVED→(없음) |
 | IssuanceRequestStatus | `issuance/domain/` | PENDING, APPROVED, REJECTED, EXPIRED | PENDING→(APPROVED\|REJECTED) or EXPIRED |
 | StampMigrationStatus | `migration/domain/` | SUBMITTED, APPROVED, REJECTED, CANCELED | SUBMITTED→(APPROVED\|REJECTED\|CANCELED) |
 | WalletRewardStatus | `wallet/domain/` | AVAILABLE, REDEEMED, EXPIRED | AVAILABLE→REDEEMED or EXPIRED |

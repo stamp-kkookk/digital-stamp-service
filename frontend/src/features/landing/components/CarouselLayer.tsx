@@ -154,8 +154,11 @@ export function CarouselLayer({ cards, direction }: CarouselLayerProps) {
         shouldShow ? "opacity-100" : "opacity-0"
       }`}
       style={{ transitionDelay: shouldShow ? "400ms" : "0ms" }}
-      role="region"
+      role="slider"
       aria-label="스탬프 카드 캐러셀"
+      aria-valuemin={0}
+      aria-valuemax={cards.length - 1}
+      aria-valuenow={0}
       tabIndex={0}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

@@ -157,12 +157,12 @@ class StampCardRepositoryTest {
         // when
         boolean hasActive =
                 stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
-        boolean hasPaused =
-                stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.PAUSED);
+        boolean hasArchived =
+                stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ARCHIVED);
 
         // then
         assertThat(hasActive).isTrue();
-        assertThat(hasPaused).isFalse();
+        assertThat(hasArchived).isFalse();
     }
 
     @Test

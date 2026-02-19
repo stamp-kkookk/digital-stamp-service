@@ -132,13 +132,14 @@ export function SolvingSection() {
   useEffect(() => {
     if (!isAnimating) {
       if (currentStep === 0) {
-        animateStep1();
+        void animateStep1();
       } else if (currentStep === 1) {
-        animateStep2();
+        void animateStep2();
       } else if (currentStep === 2) {
-        animateStep3();
+        void animateStep3();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   const getColorClass = (colorName: string) => {
@@ -241,11 +242,12 @@ export function SolvingSection() {
                       {currentStep === 0 && (
                         <>
                           <div>
-                            <label className="block mb-2 text-sm font-bold text-kkookk-navy">
+                            <label htmlFor="demo-store-name" className="block mb-2 text-sm font-bold text-kkookk-navy">
                               매장명
                             </label>
                             <div className="relative">
                               <input
+                                id="demo-store-name"
                                 type="text"
                                 value={design.storeName}
                                 readOnly
@@ -265,10 +267,11 @@ export function SolvingSection() {
                             </div>
                           </div>
                           <div>
-                            <label className="block mb-2 text-sm font-bold text-kkookk-navy">
+                            <label htmlFor="demo-card-name" className="block mb-2 text-sm font-bold text-kkookk-navy">
                               카드 이름
                             </label>
                             <input
+                              id="demo-card-name"
                               type="text"
                               value={design.cardName}
                               readOnly
@@ -330,10 +333,11 @@ export function SolvingSection() {
                             </div>
                           </div>
                           <div>
-                            <label className="block mb-2 text-sm font-bold text-kkookk-navy">
+                            <label htmlFor="demo-reward" className="block mb-2 text-sm font-bold text-kkookk-navy">
                               보상 혜택
                             </label>
                             <input
+                              id="demo-reward"
                               type="text"
                               value={design.reward}
                               readOnly

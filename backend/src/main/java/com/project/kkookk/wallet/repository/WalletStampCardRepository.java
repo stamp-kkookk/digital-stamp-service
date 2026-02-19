@@ -70,4 +70,7 @@ public interface WalletStampCardRepository extends JpaRepository<WalletStampCard
 
     /** 매장별 발급된 WalletStampCard 개수 조회 */
     int countByStoreIdAndStatus(Long storeId, WalletStampCardStatus status);
+
+    /** 특정 스탬프카드로 발급된 WalletStampCard 존재 여부 확인 */
+    boolean existsByStampCardId(Long stampCardId);
 }

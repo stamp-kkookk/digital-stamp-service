@@ -16,7 +16,7 @@ import { formatPhoneNumber, hasInvalidPhoneChars, stripPhoneToDigits } from '@/l
 
 export function CustomerLoginForm() {
   const navigate = useNavigate();
-  const { storeId, customerNavigate } = useCustomerNavigate();
+  const { storeId } = useCustomerNavigate();
   const { refreshAuthState } = useAuth();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
