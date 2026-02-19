@@ -45,9 +45,6 @@ public class RefreshToken extends BaseTimeEntity {
     @Column(name = "email", length = 255)
     private String email;
 
-    @Column(name = "store_id")
-    private Long storeId;
-
     @Column(name = "is_admin")
     private Boolean isAdmin;
 
@@ -63,14 +60,12 @@ public class RefreshToken extends BaseTimeEntity {
             TokenType tokenType,
             Long subjectId,
             String email,
-            Long storeId,
             Boolean isAdmin,
             LocalDateTime expiresAt) {
         this.tokenHash = tokenHash;
         this.tokenType = tokenType;
         this.subjectId = subjectId;
         this.email = email;
-        this.storeId = storeId;
         this.isAdmin = isAdmin;
         this.expiresAt = expiresAt;
         this.revoked = false;

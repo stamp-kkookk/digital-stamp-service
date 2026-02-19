@@ -8,7 +8,7 @@
 
 | 클래스 | 패키지 | 용도 | 주요 메서드 |
 |--------|--------|------|------------|
-| JwtUtil | `global/util/` | JWT 토큰 생성/파싱/검증 | `generateOwnerToken(id, email, isAdmin)`, `generateTerminalToken()`, `generateCustomerToken()`, `generateStepUpToken()`, `getTokenType()`, `getSubjectId()`, `validateToken()` |
+| JwtUtil | `global/util/` | JWT 토큰 생성/파싱/검증 | `generateOwnerToken(id, email, isAdmin)`, `generateCustomerToken()`, `generateStepUpToken()`, `getTokenType()`, `getSubjectId()`, `validateToken()` |
 | PhoneValidator | `global/util/` | 전화번호 유효성 검증 | `validate(phone)` - 한국 휴대폰 번호 형식 검증 |
 
 ### Principal 타입 (Security)
@@ -16,8 +16,7 @@
 | 클래스 | Fields | Roles | 용도 |
 |--------|--------|-------|------|
 | CustomerPrincipal | `walletId`, `stepUp` | ROLE_CUSTOMER, ROLE_STEPUP(조건부) | 고객 지갑 요청 |
-| OwnerPrincipal | `ownerId`, `email`, `admin` | ROLE_OWNER, ROLE_ADMIN(조건부: admin=true) | 백오피스 작업 + 관리자 |
-| TerminalPrincipal | `ownerId`, `email`, `storeId` | ROLE_TERMINAL | 매장 터미널 승인 |
+| OwnerPrincipal | `ownerId`, `email`, `admin` | ROLE_OWNER, ROLE_ADMIN(조건부: admin=true) | 백오피스 작업 + 관리자 + 적립 승인 |
 
 ### Base Entity
 
@@ -65,7 +64,7 @@
 | StampCardSortType | `wallet/domain/` | LAST_STAMPED, CREATED, PROGRESS | 지갑 카드 정렬 |
 | StoreAuditAction | `store/domain/` | CREATED, STATUS_CHANGED, UPDATED, DELETED | 매장 감사 로그 액션 |
 | PerformerType | `store/domain/` | OWNER, ADMIN, SYSTEM | 감사 로그 수행자 유형 |
-| TokenType | `global/security/` | OWNER, TERMINAL, CUSTOMER, STEPUP | JWT 토큰 분류 |
+| TokenType | `global/security/` | OWNER, CUSTOMER, STEPUP | JWT 토큰 분류 |
 
 ### ErrorCode (전체 목록)
 
@@ -88,7 +87,7 @@
 | 400 | STAMP_CARD_UPDATE_NOT_ALLOWED | StampCard | 활성 상태에서는 일부 필드만 수정할 수 있습니다 |
 | 404 | STORE_NOT_FOUND | Store | 매장을 찾을 수 없습니다 |
 | 403 | STORE_INACTIVE | Store | 해당 매장은 현재 이용할 수 없습니다 |
-| 403 | TERMINAL_ACCESS_DENIED | Terminal | 단말기 접근 권한이 없습니다 |
+| 403 | STORE_ACCESS_DENIED | Store | 매장 접근 권한이 없습니다 |
 | 404 | ISSUANCE_REQUEST_NOT_FOUND | Issuance | 적립 요청을 찾을 수 없습니다 |
 | 400 | ISSUANCE_REQUEST_NOT_PENDING | Issuance | 처리 대기 중인 요청이 아닙니다 |
 | 409 | ISSUANCE_REQUEST_ALREADY_PENDING | Issuance | 이미 대기 중인 적립 요청이 있습니다 |
@@ -132,12 +131,12 @@
 |------|--------|------|
 | client.ts | `apiClient` | Axios 인스턴스 (30s timeout, Bearer 토큰 자동 주입) |
 | client.ts | `getRaw<T>()`, `postRaw<T,D>()`, `putRaw<T,D>()`, `patchRaw<T,D>()`, `delRaw<T>()` | HTTP 헬퍼 함수 |
-| endpoints.ts | `API_ENDPOINTS` | 역할별 URL 상수 (PUBLIC, CUSTOMER, OWNER, TERMINAL) |
+| endpoints.ts | `API_ENDPOINTS` | 역할별 URL 상수 (PUBLIC, CUSTOMER, OWNER) |
 | endpoints.ts | `QUERY_KEYS` | TanStack Query 캐시 키 팩토리 |
 | tokenManager.ts | `setAuthToken()`, `getAuthToken()`, `clearAuthToken()` | Auth 토큰 관리 |
 | tokenManager.ts | `setStepUpToken()`, `getStepUpToken()`, `isStepUpValid()`, `getStepUpRemainingSeconds()` | StepUp 토큰 관리 (10분 TTL) |
 | tokenManager.ts | `setUserInfo()`, `getUserInfo()`, `getTokenType()` | 사용자 메타데이터 |
-| tokenManager.ts | `isAuthenticated()`, `isCustomer()`, `isOwner()`, `isTerminal()`, `logout()` | 인증 상태 체크 |
+| tokenManager.ts | `isAuthenticated()`, `isCustomer()`, `isOwner()`, `logout()` | 인증 상태 체크 |
 
 ### Utility Functions (`frontend/src/lib/utils/`)
 
@@ -203,7 +202,7 @@
 | `useOwnerMigration()` | `features/migration/hooks/` | 마이그레이션 승인/거절 |
 | `useStore()` | `features/store-management/hooks/` | 매장 CRUD |
 | `useStampCard()` | `features/stampcard/hooks/` | 스탬프카드 CRUD |
-| `useTerminal()` | `features/terminal/hooks/` | 터미널 승인/확인 |
+| `useApproval()` | `features/store-management/hooks/` | 적립 승인/거절 (Owner 백오피스) |
 | `useAdminStores()` | `features/admin/hooks/` | 관리자 매장 목록 (status 필터) |
 | `useAdminStoreDetail()` | `features/admin/hooks/` | 관리자 매장 상세 |
 | `useAdminStoreStatusChange()` | `features/admin/hooks/` | 관리자 매장 상태 변경 |
@@ -239,5 +238,5 @@
 
 | 파일 | 주요 타입 | 용도 |
 |------|----------|------|
-| api.ts | ErrorResponse, PageResponse\<T\>, OTP DTOs, Wallet DTOs, Issuance DTOs, Redeem DTOs, Migration DTOs, Owner DTOs, Store DTOs, StampCard DTOs, Terminal DTOs, Statistics DTOs | API Request/Response 타입 (70+) |
+| api.ts | ErrorResponse, PageResponse\<T\>, OTP DTOs, Wallet DTOs, Issuance DTOs, Redeem DTOs, Migration DTOs, Owner DTOs, Store DTOs, StampCard DTOs, Approval DTOs, Statistics DTOs | API Request/Response 타입 (70+) |
 | domain.ts | StampCard, Reward, IssuanceRequest, MigrationRequest, Store, CustomerWallet, OwnerAccount, StoreStats, RedeemSession, StampCardDesign | 프론트엔드 도메인 모델 (25+) |

@@ -9,6 +9,7 @@ import { ChevronLeft, MapPin, Loader2, AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { MigrationManager } from '@/features/migration/components/admin';
 import { useStore } from '@/features/store-management/hooks/useStore';
+import { StoreTabBar } from '@/features/store-management/components/StoreTabBar';
 import {
   useStoreMigrations,
   useApproveMigration,
@@ -37,13 +38,14 @@ export function StoreMigrationsPage() {
 
   const storeIdNum = Number(storeId);
 
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   // API Hooks
   const { data: store, isLoading: storeLoading, error: storeError } = useStore(storeIdNum);
   const {
     data: apiMigrations,
     isLoading: migrationsLoading,
     refetch: refetchMigrations,
-    isFetching: isRefreshing,
   } = useStoreMigrations(storeIdNum);
   const approveMutation = useApproveMigration();
   const rejectMutation = useRejectMigration();
@@ -52,8 +54,14 @@ export function StoreMigrationsPage() {
   const [imageDetail, setImageDetail] = useState<{ imageUrl: string; count: number } | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
 
-  const handleRefresh = () => {
-    refetchMigrations();
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    try {
+      await refetchMigrations();
+      kkookkToast.success('데이터를 갱신했습니다');
+    } finally {
+      setIsManualRefreshing(false);
+    }
   };
 
   // Fetch migration detail for image preview
@@ -86,8 +94,6 @@ export function StoreMigrationsPage() {
     status: toMigrationStatus(m.status),
     date: new Date(m.requestedAt),
   }));
-
-  const pendingMigrations = migrations.filter((m) => m.status === 'pending');
 
   // Loading state
   if (storeLoading || migrationsLoading) {
@@ -167,28 +173,7 @@ export function StoreMigrationsPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => navigate(`/owner/stores/${storeId}`)}
-            className="px-4 py-2 rounded-lg font-bold text-sm transition-colors text-kkookk-steel hover:bg-slate-50"
-          >
-            스탬프 카드 관리
-          </button>
-          <button
-            onClick={() => navigate(`/owner/stores/${storeId}/history`)}
-            className="px-4 py-2 rounded-lg font-bold text-sm transition-colors text-kkookk-steel hover:bg-slate-50"
-          >
-            적립/사용 내역
-          </button>
-          <button className="px-4 py-2 rounded-lg font-bold text-sm transition-colors bg-kkookk-navy text-white">
-            전환 신청 관리
-            {pendingMigrations.length > 0 && (
-              <span className="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                N
-              </span>
-            )}
-          </button>
-        </div>
+        <StoreTabBar storeId={storeIdNum} activeTab="migrations" />
       </div>
 
       {/* 마이그레이션 매니저 */}
@@ -197,7 +182,7 @@ export function StoreMigrationsPage() {
           migrations={migrations}
           onAction={handleAction}
           onRefresh={handleRefresh}
-          isRefreshing={isRefreshing}
+          isRefreshing={isManualRefreshing}
           onViewImage={handleViewImage}
           imageDetail={imageDetail}
           imageLoading={imageLoading}

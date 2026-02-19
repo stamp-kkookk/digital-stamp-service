@@ -36,8 +36,8 @@ const buttonVariants = cva(
           "shadow-lg shadow-slate-200",
         ],
         outline: [
-          "border-2 border-kkookk-orange-500 text-kkookk-orange-600",
-          "hover:bg-kkookk-orange-50",
+          "border-2 border-slate-300 text-kkookk-steel",
+          "hover:bg-slate-50 hover:text-kkookk-navy",
         ],
         ghost: ["text-kkookk-orange-600", "hover:bg-kkookk-orange-50"],
         destructive: [

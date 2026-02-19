@@ -603,25 +603,7 @@ export interface RedeemEventResponse {
 }
 
 // =============================================================================
-// Terminal Auth Types
-// =============================================================================
-
-export interface TerminalLoginRequest {
-  email: string;
-  password: string;
-  storeId: number;
-}
-
-export interface TerminalLoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  ownerId: number;
-  storeId: number;
-  storeName: string;
-}
-
-// =============================================================================
-// Terminal Types
+// Approval Types (Owner Issuance Approval)
 // =============================================================================
 
 export interface PendingIssuanceRequestItem {

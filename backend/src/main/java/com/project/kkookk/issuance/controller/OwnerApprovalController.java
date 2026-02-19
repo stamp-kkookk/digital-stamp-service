@@ -1,10 +1,10 @@
 package com.project.kkookk.issuance.controller;
 
-import com.project.kkookk.global.security.TerminalPrincipal;
+import com.project.kkookk.global.security.OwnerPrincipal;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
 import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestListResponse;
-import com.project.kkookk.issuance.service.TerminalApprovalService;
+import com.project.kkookk.issuance.service.OwnerApprovalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/terminal/{storeId}/issuance-requests")
-public class TerminalApprovalController implements TerminalApprovalApi {
+@RequestMapping("/api/owner/stores/{storeId}/issuance-requests")
+public class OwnerApprovalController implements OwnerApprovalApi {
 
-    private final TerminalApprovalService terminalApprovalService;
+    private final OwnerApprovalService ownerApprovalService;
 
     @Override
     @GetMapping
     public ResponseEntity<PendingIssuanceRequestListResponse> getPendingRequests(
-            @PathVariable Long storeId, @AuthenticationPrincipal TerminalPrincipal principal) {
+            @PathVariable Long storeId, @AuthenticationPrincipal OwnerPrincipal principal) {
 
         PendingIssuanceRequestListResponse response =
-                terminalApprovalService.getPendingRequests(storeId, principal.getOwnerId());
+                ownerApprovalService.getPendingRequests(storeId, principal.getOwnerId());
 
         return ResponseEntity.ok(response);
     }
@@ -37,10 +37,10 @@ public class TerminalApprovalController implements TerminalApprovalApi {
     public ResponseEntity<IssuanceApprovalResponse> approveRequest(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @AuthenticationPrincipal TerminalPrincipal principal) {
+            @AuthenticationPrincipal OwnerPrincipal principal) {
 
         IssuanceApprovalResponse response =
-                terminalApprovalService.approveRequest(storeId, id, principal.getOwnerId());
+                ownerApprovalService.approveRequest(storeId, id, principal.getOwnerId());
 
         return ResponseEntity.ok(response);
     }
@@ -50,10 +50,10 @@ public class TerminalApprovalController implements TerminalApprovalApi {
     public ResponseEntity<IssuanceRejectionResponse> rejectRequest(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @AuthenticationPrincipal TerminalPrincipal principal) {
+            @AuthenticationPrincipal OwnerPrincipal principal) {
 
         IssuanceRejectionResponse response =
-                terminalApprovalService.rejectRequest(storeId, id, principal.getOwnerId());
+                ownerApprovalService.rejectRequest(storeId, id, principal.getOwnerId());
 
         return ResponseEntity.ok(response);
     }

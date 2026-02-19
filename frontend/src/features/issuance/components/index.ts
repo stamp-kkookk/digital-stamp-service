@@ -3,4 +3,3 @@
  */
 
 export * from './customer';
-export * from './terminal';

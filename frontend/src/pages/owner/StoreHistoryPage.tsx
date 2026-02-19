@@ -8,6 +8,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, MapPin, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { formatDateTime, maskPhone } from '@/lib/utils/format';
 import { useStore, useStampEvents, useRedeemEvents } from '@/features/store-management/hooks/useStore';
+import { StoreTabBar } from '@/features/store-management/components/StoreTabBar';
+import { kkookkToast } from '@/components/ui/Toast';
 
 type HistoryFilter = 'all' | 'stamp' | 'reward';
 
@@ -30,26 +32,29 @@ export function StoreHistoryPage() {
 
   const storeIdNum = Number(storeId);
 
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+
   // API Hooks
   const { data: store, isLoading: storeLoading, error: storeError } = useStore(storeIdNum);
   const {
     data: stampEventsData,
     isLoading: stampLoading,
     refetch: refetchStampEvents,
-    isFetching: stampRefreshing,
   } = useStampEvents({ storeId: storeIdNum });
   const {
     data: redeemEventsData,
     isLoading: redeemLoading,
     refetch: refetchRedeemEvents,
-    isFetching: redeemRefreshing,
   } = useRedeemEvents({ storeId: storeIdNum });
 
-  const isRefreshing = stampRefreshing || redeemRefreshing;
-
-  const handleRefresh = () => {
-    refetchStampEvents();
-    refetchRedeemEvents();
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    try {
+      await Promise.all([refetchStampEvents(), refetchRedeemEvents()]);
+      kkookkToast.success('데이터를 갱신했습니다');
+    } finally {
+      setIsManualRefreshing(false);
+    }
   };
 
   const handleFilterChange = (filter: HistoryFilter) => {
@@ -137,23 +142,7 @@ export function StoreHistoryPage() {
         </div>
 
         {/* 탭 */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => navigate(`/owner/stores/${storeId}`)}
-            className="px-4 py-2 rounded-lg font-bold text-sm transition-colors text-kkookk-steel hover:bg-slate-50"
-          >
-            스탬프 카드 관리
-          </button>
-          <button className="px-4 py-2 rounded-lg font-bold text-sm transition-colors bg-kkookk-navy text-white">
-            적립/사용 내역
-          </button>
-          <button
-            onClick={() => navigate(`/owner/stores/${storeId}/migrations`)}
-            className="px-4 py-2 rounded-lg font-bold text-sm transition-colors text-kkookk-steel hover:bg-slate-50"
-          >
-            전환 신청 관리
-          </button>
-        </div>
+        <StoreTabBar storeId={storeIdNum} activeTab="history" />
       </div>
 
       {/* 컨텐츠 */}
@@ -164,13 +153,17 @@ export function StoreHistoryPage() {
               <h3 className="text-xl font-bold text-kkookk-navy">적립/사용 내역</h3>
               <button
                 onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="p-2 text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                disabled={isManualRefreshing}
+                className={`p-2 rounded-lg transition-all active:scale-90 disabled:opacity-50 ${
+                  isManualRefreshing
+                    ? 'bg-kkookk-indigo/10 text-kkookk-indigo'
+                    : 'text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-100'
+                }`}
                 title="새로고침"
               >
                 <RefreshCw
                   size={18}
-                  className={isRefreshing ? 'animate-spin' : ''}
+                  className={isManualRefreshing ? 'animate-spin' : ''}
                 />
               </button>
             </div>

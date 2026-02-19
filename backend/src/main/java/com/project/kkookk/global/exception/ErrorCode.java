@@ -57,8 +57,8 @@ public enum ErrorCode {
     // Kakao
     KAKAO_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "KAKAO_API_ERROR", "카카오 API 호출 중 오류가 발생했습니다"),
 
-    // Terminal
-    TERMINAL_ACCESS_DENIED(HttpStatus.FORBIDDEN, "TERMINAL_ACCESS_DENIED", "단말기 접근 권한이 없습니다"),
+    // Store Access
+    STORE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "STORE_ACCESS_DENIED", "매장 접근 권한이 없습니다"),
 
     // Issuance
     ISSUANCE_REQUEST_NOT_FOUND(

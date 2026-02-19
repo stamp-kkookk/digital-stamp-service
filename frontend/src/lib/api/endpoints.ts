@@ -79,6 +79,13 @@ export const API_ENDPOINTS = {
 
     // Place Search
     PLACE_SEARCH: '/api/owner/places/search',
+
+    // Approval (Issuance Requests)
+    ISSUANCE_REQUESTS: (storeId: number) => `/api/owner/stores/${storeId}/issuance-requests`,
+    APPROVE_ISSUANCE: (storeId: number, requestId: number) =>
+      `/api/owner/stores/${storeId}/issuance-requests/${requestId}/approve`,
+    REJECT_ISSUANCE: (storeId: number, requestId: number) =>
+      `/api/owner/stores/${storeId}/issuance-requests/${requestId}/reject`,
   },
 
   // ==========================================================================
@@ -91,18 +98,6 @@ export const API_ENDPOINTS = {
     STORE_AUDIT_LOGS: (storeId: number) => `/api/admin/stores/${storeId}/audit-logs`,
   },
 
-  // ==========================================================================
-  // Terminal API (Terminal Token 필요)
-  // ==========================================================================
-  TERMINAL: {
-    LOGIN: '/api/public/terminal/login',
-    ISSUANCE_REQUESTS: (storeId: number) => `/api/terminal/${storeId}/issuance-requests`,
-    APPROVE_ISSUANCE: (storeId: number, requestId: number) =>
-      `/api/terminal/${storeId}/issuance-requests/${requestId}/approve`,
-    REJECT_ISSUANCE: (storeId: number, requestId: number) =>
-      `/api/terminal/${storeId}/issuance-requests/${requestId}/reject`,
-    STAMP_EVENTS: (storeId: number) => `/api/terminal/stores/${storeId}/stamp-events`,
-  },
 } as const;
 
 // Query Key Factory for TanStack Query
@@ -137,10 +132,8 @@ export const QUERY_KEYS = {
     ['owner', 'store', storeId, 'migrations'] as const,
   storeMigration: (storeId: number, migrationId: number) =>
     ['owner', 'store', storeId, 'migration', migrationId] as const,
-
-  // Terminal
   pendingIssuanceRequests: (storeId: number) =>
-    ['terminal', storeId, 'pendingIssuances'] as const,
+    ['owner', 'store', storeId, 'pendingIssuances'] as const,
   // Public
   storePublicInfo: (storeId: number) => ['public', 'store', storeId] as const,
   publicStores: () => ['public', 'stores'] as const,

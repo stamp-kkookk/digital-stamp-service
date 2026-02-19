@@ -9,3 +9,4 @@ export * from './StampCardStats';
 export * from './StoreStatusBadge';
 export * from './IconUpload';
 export * from './PlaceSearchModal';
+export * from './StoreTabBar';

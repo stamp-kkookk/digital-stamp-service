@@ -173,7 +173,7 @@ public class OwnerMigrationService {
                         .walletStampCardId(result.currentWalletStampCard().getId())
                         .type(StampEventType.MIGRATED)
                         .delta(stampCount)
-                        .reason("마이그레이션 승인")
+                        .reason("종이 스탬프 전환 승인")
                         .occurredAt(LocalDateTime.now())
                         .stampMigrationRequestId(migration.getId())
                         .build();

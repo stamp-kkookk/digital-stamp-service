@@ -1,6 +1,6 @@
 /**
  * Token Manager for KKOOKK Authentication
- * Manages multiple token types: customer, stepUp, owner, terminal
+ * Manages multiple token types: customer, stepUp, owner
  */
 
 // =============================================================================
@@ -16,7 +16,7 @@ const TOKEN_KEYS = {
   USER_INFO: 'user_info',
 } as const;
 
-export type TokenType = 'customer' | 'owner' | 'terminal';
+export type TokenType = 'customer' | 'owner';
 
 const STEPUP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -61,7 +61,7 @@ export interface UserInfo {
 }
 
 // =============================================================================
-// Auth Token Management (Customer / Owner / Terminal)
+// Auth Token Management (Customer / Owner)
 // =============================================================================
 
 export function setAuthToken(token: string, refreshToken: string, type: TokenType): void {
@@ -166,10 +166,6 @@ export function isCustomer(): boolean {
 
 export function isOwner(): boolean {
   return getTokenType() === 'owner';
-}
-
-export function isTerminal(): boolean {
-  return getTokenType() === 'terminal';
 }
 
 // =============================================================================

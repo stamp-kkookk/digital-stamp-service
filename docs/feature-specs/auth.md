@@ -1,6 +1,6 @@
 # Feature: Auth (인증)
 
-> KKOOKK 플랫폼의 3가지 사용자 유형(Owner, Terminal, Customer)에 대한
+> KKOOKK 플랫폼의 2가지 사용자 유형(Owner, Customer)에 대한
 > 인증/인가 체계. JWT 기반 stateless 인증을 사용하며, 고객은 OTP 인증 후
 > StepUp 토큰으로 민감 기능에 접근한다.
 
@@ -10,13 +10,12 @@
 
 ## 1. Overview
 
-KKOOKK은 4가지 토큰 타입을 사용하여 역할 기반 접근 제어를 구현한다:
+KKOOKK은 3가지 토큰 타입을 사용하여 역할 기반 접근 제어를 구현한다:
 
 | Token Type | Role | Subject | Purpose |
 |------------|------|---------|---------|
 | OWNER | ROLE_OWNER | ownerId | 점주 백오피스 전체 접근 |
 | OWNER (admin) | ROLE_OWNER + ROLE_ADMIN | ownerId | 관리자 기능 (매장 승인/정지, Audit Log) |
-| TERMINAL | ROLE_TERMINAL | ownerId | 매장 단말기 (적립 승인/거절) |
 | CUSTOMER | ROLE_CUSTOMER | walletId | 고객 지갑, 적립 요청, 내역 조회 |
 | STEPUP | ROLE_CUSTOMER + ROLE_STEPUP | walletId | OTP 인증 후 민감 기능 (리딤, 마이그레이션) |
 
@@ -43,16 +42,6 @@ com.project.kkookk/
 │   │   └── OwnerAccountRepository.java
 │   └── service/
 │       └── OwnerAuthService.java
-│
-├── terminal/
-│   ├── controller/
-│   │   ├── TerminalAuthApi.java        # Swagger interface
-│   │   ├── TerminalAuthController.java # /api/public/terminal/*
-│   │   └── dto/
-│   │       ├── TerminalLoginRequest.java
-│   │       └── TerminalLoginResponse.java
-│   └── service/
-│       └── TerminalAuthService.java
 │
 ├── otp/
 │   ├── controller/
@@ -85,9 +74,8 @@ com.project.kkookk/
     │   └── JwtProperties.java          # application.yaml binding
     ├── security/
     │   ├── JwtAuthenticationFilter.java # OncePerRequestFilter
-    │   ├── TokenType.java              # Enum: OWNER, TERMINAL, CUSTOMER, STEPUP
+    │   ├── TokenType.java              # Enum: OWNER, CUSTOMER, STEPUP
     │   ├── OwnerPrincipal.java         # UserDetails (ROLE_OWNER)
-    │   ├── TerminalPrincipal.java      # UserDetails (ROLE_TERMINAL + storeId)
     │   └── CustomerPrincipal.java      # UserDetails (ROLE_CUSTOMER + optional ROLE_STEPUP)
     └── util/
         ├── JwtUtil.java                # Token generation & parsing
@@ -202,89 +190,16 @@ Pattern: ^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]+$
 
 ---
 
-## 4. Auth Flow 2: Terminal Login
+## 4. Auth Flow 2: Customer OTP Verification
 
 ### 4.1 API Endpoints
-
-| Method | Path | Auth | Status | Description |
-|--------|------|------|--------|-------------|
-| POST | `/api/public/terminal/login` | Public | 200 | 터미널 로그인 (Owner 자격 + storeId) |
-
-### 4.2 Login Sequence
-
-```
-Terminal Device      TerminalAuthController   TerminalAuthService   OwnerAccountRepo  StoreRepo  JwtUtil
-     |                      |                       |                     |             |          |
-     |--POST /login-------->|                       |                     |             |          |
-     |  {email, password,   |                       |                     |             |          |
-     |   storeId}           |                       |                     |             |          |
-     |                      |--login(request)------->|                     |             |          |
-     |                      |                       |                     |             |          |
-     |                      |           [Step 1: Owner 인증]               |             |          |
-     |                      |                       |--findByEmail-------->|             |          |
-     |                      |                       |<--OwnerAccount------|             |          |
-     |                      |                       |--matches(password)->|             |          |
-     |                      |                       |<--true (OK)---------|             |          |
-     |                      |                       |                     |             |          |
-     |                      |           [Step 2: 매장 소유권 확인]          |             |          |
-     |                      |                       |--findByIdAnd------->|             |          |
-     |                      |                       |  OwnerAccountId     |------------>|          |
-     |                      |                       |<--Store-------------|             |          |
-     |                      |                       |                     |             |          |
-     |                      |           [Step 3: Terminal 토큰 발급]        |             |          |
-     |                      |                       |--generateTerminal-->|             |          |
-     |                      |                       |  Token(ownerId,     |             |--------->|
-     |                      |                       |  email, storeId)    |             |          |
-     |                      |                       |<--accessToken-------|             |          |
-     |                      |                       |                     |             |          |
-     |                      |<--TerminalLoginResp---|                     |             |          |
-     |<--200 + body---------|                       |                     |             |          |
-```
-
-### 4.3 TerminalLoginRequest DTO
-
-| Field | Type | Required | Validation | Example |
-|-------|------|----------|------------|---------|
-| email | String | Yes | @NotBlank, @Email | "owner@example.com" |
-| password | String | Yes | @NotBlank | "password123" |
-| storeId | Long | Yes | @NotNull | 1 |
-
-### 4.4 TerminalLoginResponse DTO
-
-| Field | Type | Description |
-|-------|------|-------------|
-| accessToken | String | JWT 액세스 토큰 (type=TERMINAL, storeId claim 포함) |
-| ownerId | Long | 점주 ID |
-| storeId | Long | 매장 ID |
-| storeName | String | 매장 이름 |
-
-### 4.5 Terminal JWT Unique Claims
-
-Terminal JWT에는 일반 Owner JWT와 달리 `storeId` claim이 추가로 포함된다:
-
-```json
-{
-  "sub": "1",           // ownerId
-  "type": "TERMINAL",
-  "email": "owner@example.com",
-  "storeId": 42,        // Terminal 전용 claim
-  "iat": 1700000000,
-  "exp": 1700003600
-}
-```
-
----
-
-## 5. Auth Flow 3: Customer OTP Verification
-
-### 5.1 API Endpoints
 
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
 | POST | `/api/public/otp/request` | Public | 200 | OTP 요청 (SMS 발송) |
 | POST | `/api/public/otp/verify` | Public | 200 | OTP 검증 (StepUp 토큰 발급) |
 
-### 5.2 OTP Request Sequence
+### 4.2 OTP Request Sequence
 
 ```
 Customer App        OtpController           OtpService            In-Memory Store
@@ -314,7 +229,7 @@ Customer App        OtpController           OtpService            In-Memory Stor
      |  true, devOtpCode} |                      |                       |
 ```
 
-### 5.3 OTP Verify Sequence
+### 4.3 OTP Verify Sequence
 
 ```
 Customer App        OtpController           OtpService         In-Memory   WalletRepo  JwtUtil
@@ -349,7 +264,7 @@ Customer App        OtpController           OtpService         In-Memory   Walle
      |  true, stepUpToken}|                      |                 |            |          |
 ```
 
-### 5.4 OTP Configuration Constants
+### 4.4 OTP Configuration Constants
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
@@ -359,7 +274,7 @@ Customer App        OtpController           OtpService         In-Memory   Walle
 | RATE_LIMIT_MAX_REQUESTS | 2 | 윈도우 내 최대 요청 수 |
 | MAX_ATTEMPTS | 3 | OTP 코드 최대 시도 횟수 |
 
-### 5.5 OTP State Machine
+### 4.5 OTP State Machine
 
 ```
                       requestOtp(phone)
@@ -402,27 +317,27 @@ OTP_INVALID    |              | |
                                      ATTEMPTS_EXCEEDED)
 ```
 
-### 5.6 OtpRequestDto
+### 4.6 OtpRequestDto
 
 | Field | Type | Required | Validation | Example |
 |-------|------|----------|------------|---------|
 | phone | String | Yes | @NotBlank, @Pattern(`^01[0-9]-?\d{3,4}-?\d{4}$`) | "010-1234-5678" |
 
-### 5.7 OtpRequestResponse
+### 4.7 OtpRequestResponse
 
 | Field | Type | Description |
 |-------|------|-------------|
 | success | boolean | 요청 성공 여부 |
 | devOtpCode | String | *시연용* OTP 코드 (프로덕션에서 제거 필요) |
 
-### 5.8 OtpVerifyDto
+### 4.8 OtpVerifyDto
 
 | Field | Type | Required | Validation | Example |
 |-------|------|----------|------------|---------|
 | phone | String | Yes | @NotBlank, @Pattern(`^01[0-9]-?\d{3,4}-?\d{4}$`) | "010-1234-5678" |
 | code | String | Yes | @NotBlank, @Pattern(`^\d{6}$`) | "123456" |
 
-### 5.9 OtpVerifyResponse
+### 4.9 OtpVerifyResponse
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -431,16 +346,16 @@ OTP_INVALID    |              | |
 
 ---
 
-## 6. Auth Flow 4: Customer Wallet Register / Login
+## 5. Auth Flow 3: Customer Wallet Register / Login
 
-### 6.1 API Endpoints
+### 5.1 API Endpoints
 
 | Method | Path | Auth | Status | Description |
 |--------|------|------|--------|-------------|
 | POST | `/api/public/wallet/register` | Public | 201 | 지갑 생성 + JWT 발급 |
 | POST | `/api/public/wallet/login` | Public | 200 | 기존 고객 로그인 + JWT 발급 |
 
-### 6.2 Register Sequence
+### 5.2 Register Sequence
 
 ```
 Customer App       WalletController     CustomerWalletService    WalletRepo    JwtUtil
@@ -468,7 +383,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
      |<--201 + body-------|                      |                    |           |
 ```
 
-### 6.3 Login Sequence
+### 5.3 Login Sequence
 
 ```
 Customer App       WalletController     CustomerWalletService    WalletRepo    JwtUtil
@@ -497,7 +412,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
      |<--200 + body-------|                      |                    |           |
 ```
 
-### 6.4 WalletRegisterRequest DTO
+### 5.4 WalletRegisterRequest DTO
 
 | Field | Type | Required | Validation | Example |
 |-------|------|----------|------------|---------|
@@ -506,7 +421,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
 | nickname | String | Yes | @NotBlank, @Size(max=50) | "길동이" |
 | storeId | Long | No | | 1 |
 
-### 6.5 WalletRegisterResponse DTO
+### 5.5 WalletRegisterResponse DTO
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -517,7 +432,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
 | nickname | String | 닉네임 |
 | stampCard | RegisteredStampCardInfo | 발급된 스탬프카드 정보 (매장 진입 시에만, nullable) |
 
-### 6.6 CustomerLoginRequest DTO
+### 5.6 CustomerLoginRequest DTO
 
 | Field | Type | Required | Validation | Example |
 |-------|------|----------|------------|---------|
@@ -525,7 +440,7 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
 | name | String | Yes | @NotBlank, @Size(max=50) | "홍길동" |
 | storeId | Long | Yes | @NotNull | 1 |
 
-### 6.7 CustomerLoginResponse DTO
+### 5.7 CustomerLoginResponse DTO
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -538,9 +453,9 @@ Customer App       WalletController     CustomerWalletService    WalletRepo    J
 
 ---
 
-## 7. JWT Infrastructure
+## 6. JWT Infrastructure
 
-### 7.1 JwtProperties (application.yaml binding)
+### 6.1 JwtProperties (application.yaml binding)
 
 ```yaml
 jwt:
@@ -549,27 +464,25 @@ jwt:
   stepup-token-expiration: 600000     # 10 minutes (ms)
 ```
 
-### 7.2 Token Types and Claims
+### 6.2 Token Types and Claims
 
 | Token Type | Subject (sub) | Claims | TTL | Authority |
 |------------|--------------|--------|-----|-----------|
 | OWNER | ownerId | type=OWNER, email, admin (boolean) | accessTokenExpiration | ROLE_OWNER (+ ROLE_ADMIN if admin=true) |
-| TERMINAL | ownerId | type=TERMINAL, email, storeId | accessTokenExpiration | ROLE_TERMINAL |
 | CUSTOMER | walletId | type=CUSTOMER | accessTokenExpiration | ROLE_CUSTOMER |
 | STEPUP | walletId | type=STEPUP | stepupTokenExpiration (10min) | ROLE_CUSTOMER + ROLE_STEPUP |
 
-### 7.3 JwtUtil Token Generation Methods
+### 6.3 JwtUtil Token Generation Methods
 
 ```java
 String generateOwnerToken(Long ownerId, String email, boolean isAdmin)
-String generateTerminalToken(Long ownerId, String email, Long storeId)
 String generateCustomerToken(Long walletId)
 String generateStepUpToken(Long walletId)
 ```
 
 > `generateOwnerToken`은 기존 `generateAccessToken(id, email)`을 대체한다. `isAdmin` 파라미터가 추가되어 admin claim이 JWT에 포함된다.
 
-### 7.4 JwtAuthenticationFilter Flow
+### 6.4 JwtAuthenticationFilter Flow
 
 ```
 HTTP Request
@@ -592,9 +505,6 @@ HTTP Request
      +--[OWNER]--> OwnerPrincipal.of(subjectId, email, admin)
      |              authorities: [ROLE_OWNER] (+ [ROLE_ADMIN] if admin=true)
      |
-     +--[TERMINAL]--> TerminalPrincipal.of(subjectId, email, storeId)
-     |                 authorities: [ROLE_TERMINAL]
-     |
      +--[CUSTOMER]--> CustomerPrincipal.of(subjectId, false)
      |                 authorities: [ROLE_CUSTOMER]
      |
@@ -608,7 +518,7 @@ HTTP Request
 [Continue filter chain]
 ```
 
-### 7.5 Principal Classes
+### 6.5 Principal Classes
 
 #### OwnerPrincipal
 
@@ -618,15 +528,6 @@ HTTP Request
 | email | String | 이메일 |
 | admin | boolean | 관리자 여부 |
 | authorities | Collection | admin ? [ROLE_OWNER, ROLE_ADMIN] : [ROLE_OWNER] |
-
-#### TerminalPrincipal
-
-| Field | Type | Description |
-|-------|------|-------------|
-| ownerId | Long | 점주 계정 ID |
-| email | String | 이메일 |
-| storeId | Long | 로그인한 매장 ID |
-| authorities | Collection | [ROLE_TERMINAL] |
 
 #### CustomerPrincipal
 
@@ -638,9 +539,9 @@ HTTP Request
 
 ---
 
-## 8. Security Configuration (SecurityConfig)
+## 7. Security Configuration (SecurityConfig)
 
-### 8.1 URL Authorization Matrix
+### 7.1 URL Authorization Matrix
 
 | URL Pattern | Required Role | Description |
 |-------------|--------------|-------------|
@@ -650,12 +551,11 @@ HTTP Request
 | `/api/public/**` | permitAll | 공개 API (매장 정보 등) |
 | `/api/customer/wallet/stamp-cards` | permitAll | 특정 고객 경로 허용 |
 | `/api/customer/**` | ROLE_CUSTOMER | 고객 기능 |
-| `/api/terminal/**` | ROLE_TERMINAL | 터미널 기능 |
 | `/api/admin/**` | ROLE_ADMIN | 관리자 기능 (매장 승인/정지, Audit Log) |
 | `/api/owner/**` | ROLE_OWNER | 점주 백오피스 |
 | `/swagger-ui/**`, `/v3/api-docs/**` | permitAll | Swagger UI |
 
-### 8.2 Session Policy
+### 7.2 Session Policy
 
 - `SessionCreationPolicy.STATELESS` -- JWT 기반이므로 서버 세션 없음
 - CSRF disabled (stateless REST API)
@@ -663,14 +563,13 @@ HTTP Request
 
 ---
 
-## 9. Error Codes
+## 8. Error Codes
 
 | ErrorCode | HTTP Status | Code String | Korean Message | Trigger |
 |-----------|-------------|-------------|----------------|---------|
 | OWNER_EMAIL_DUPLICATED | 409 | OWNER_EMAIL_DUPLICATED | 이미 사용 중인 이메일입니다 | 가입 시 이메일 중복 |
 | OWNER_LOGIN_ID_DUPLICATED | 409 | OWNER_LOGIN_ID_DUPLICATED | 이미 사용 중인 로그인 ID입니다 | 로그인 ID 중복 |
 | OWNER_LOGIN_FAILED | 401 | OWNER_LOGIN_FAILED | 이메일 또는 비밀번호가 올바르지 않습니다 | 이메일 미존재 또는 비밀번호 불일치 |
-| TERMINAL_ACCESS_DENIED | 403 | TERMINAL_ACCESS_DENIED | 단말기 접근 권한이 없습니다 | 터미널 로그인 시 매장 비소유 |
 | OTP_RATE_LIMIT_EXCEEDED | 429 | OTP_001 | OTP 요청 제한을 초과했습니다 | 60초 내 2회 초과 요청 |
 | OTP_EXPIRED | 401 | OTP_002 | OTP가 만료되었습니다 | 3분 초과 후 검증 시도 |
 | OTP_INVALID | 401 | OTP_003 | OTP가 일치하지 않습니다 | 코드 불일치 또는 미존재 |
@@ -686,49 +585,44 @@ HTTP Request
 
 ---
 
-## 10. Edge Cases
+## 9. Edge Cases
 
-### 10.1 Owner Login: Same Error for Email Not Found and Wrong Password
+### 9.1 Owner Login: Same Error for Email Not Found and Wrong Password
 
 - **Behavior**: Both cases throw `OWNER_LOGIN_FAILED` (401).
 - **Security**: Prevents email enumeration attacks. Attacker cannot determine whether an email is registered.
 
-### 10.2 Terminal Login: Store Ownership Check After Auth
-
-- **Behavior**: First authenticates the owner, then verifies store ownership via `findByIdAndOwnerAccountId`.
-- **Error**: `TERMINAL_ACCESS_DENIED` (403) if store doesn't belong to the owner. Unlike the owner store API (which returns 404), terminal login explicitly returns 403 because the owner identity is already confirmed.
-
-### 10.3 OTP: In-Memory Storage Limitation
+### 9.2 OTP: In-Memory Storage Limitation
 
 - **Current**: `ConcurrentHashMap` in `OtpService`. Data lost on server restart.
 - **Impact**: All pending OTPs are invalidated on deployment/restart.
 - **Future**: Migrate to Redis for production.
 
-### 10.4 OTP: Rate Limit Window Reset
+### 9.3 OTP: Rate Limit Window Reset
 
 - **Behavior**: Rate limit window starts from the first request. After 60 seconds, the window resets completely (new `RateLimitData` created).
 - **Edge case**: If first request at T=0, second at T=59 (allowed), third at T=61 (allowed, new window).
 
-### 10.5 OTP: StepUp Token Not Issued for Unregistered Phone
+### 9.4 OTP: StepUp Token Not Issued for Unregistered Phone
 
 - **Behavior**: If `customerWalletRepository.findByPhone()` returns empty, `stepUpToken` is null in the response even though OTP verification succeeded.
 - **Frontend flow**: After OTP verification, if no stepUpToken, redirect to wallet registration.
 
-### 10.6 Customer Login: Auto-Create WalletStampCard
+### 9.5 Customer Login: Auto-Create WalletStampCard
 
 - **Behavior**: When a customer logs in with a storeId, if no WalletStampCard exists for that store's active stamp card, one is automatically created.
 - **Precondition**: Store must have an ACTIVE stamp card.
 
-### 10.7 JWT Token Expiry: No Refresh Token
+### 9.6 JWT Token Expiry: No Refresh Token
 
 - **Current**: No refresh token mechanism. When token expires, user must re-authenticate.
-- **Impact**: Owner/Terminal sessions expire after `accessTokenExpiration` (configured in YAML). Customer StepUp expires after 10 minutes.
+- **Impact**: Owner sessions expire after `accessTokenExpiration` (configured in YAML). Customer StepUp expires after 10 minutes.
 
 ---
 
-## 11. Frontend Integration
+## 10. Frontend Integration
 
-### 11.1 Feature Directory
+### 10.1 Feature Directory
 
 ```
 frontend/src/features/auth/
@@ -748,7 +642,7 @@ frontend/src/features/auth/
 └── index.ts                  # Public exports
 ```
 
-### 11.2 TanStack Query Hooks
+### 10.2 TanStack Query Hooks
 
 ```typescript
 // OTP
@@ -770,7 +664,7 @@ useStorePublicInfo(storeId) -- queryKey: QUERY_KEYS.storePublicInfo(storeId)
 useLogout()       -- mutationFn: clearAuthToken()
 ```
 
-### 11.3 Token Storage (Client-Side)
+### 10.3 Token Storage (Client-Side)
 
 ```typescript
 setAuthToken(token, type)   // Store JWT + user type in localStorage
@@ -779,7 +673,7 @@ setUserInfo(info)           // Store user profile
 clearAuthToken()            // Clear all auth data on logout
 ```
 
-### 11.4 TanStack Query Keys (Auth-Related)
+### 10.4 TanStack Query Keys (Auth-Related)
 
 ```typescript
 QUERY_KEYS.storePublicInfo = (storeId: number) =>
@@ -789,7 +683,7 @@ QUERY_KEYS.publicStores = () =>
   ['public', 'stores'] as const
 ```
 
-### 11.5 API Endpoints (Frontend)
+### 10.5 API Endpoints (Frontend)
 
 ```typescript
 API_ENDPOINTS.PUBLIC.OTP_REQUEST      = '/api/public/otp/request'
@@ -800,12 +694,11 @@ API_ENDPOINTS.PUBLIC.STORE_INFO       = (storeId) => `/api/public/stores/${store
 API_ENDPOINTS.PUBLIC.STORES           = '/api/public/stores'
 API_ENDPOINTS.OWNER.SIGNUP            = '/api/owner/auth/signup'
 API_ENDPOINTS.OWNER.LOGIN             = '/api/owner/auth/login'
-API_ENDPOINTS.TERMINAL.LOGIN          = '/api/public/terminal/login'
 ```
 
 ---
 
-## 12. Complete Auth Flow Diagram (Customer End-to-End)
+## 11. Complete Auth Flow Diagram (Customer End-to-End)
 
 ```
 [Customer scans QR code]
@@ -856,9 +749,9 @@ API_ENDPOINTS.TERMINAL.LOGIN          = '/api/public/terminal/login'
 
 ---
 
-## 13. Database Tables (Reference)
+## 12. Database Tables (Reference)
 
-### 13.1 owner_account
+### 12.1 owner_account
 
 ```sql
 CREATE TABLE owner_account (
@@ -876,7 +769,7 @@ CREATE TABLE owner_account (
 );
 ```
 
-### 13.2 customer_wallet
+### 12.2 customer_wallet
 
 ```sql
 CREATE TABLE customer_wallet (

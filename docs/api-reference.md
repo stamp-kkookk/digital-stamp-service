@@ -9,7 +9,6 @@
 | JWT (Customer) | `POST /api/public/wallet/login` | `/api/customer/**` 엔드포인트 | 1시간 |
 | JWT (Owner) | `POST /api/owner/auth/login` | `/api/owner/**` 엔드포인트 | 1시간 |
 | JWT (Admin) | `POST /api/owner/auth/login` (admin=true) | `/api/admin/**` 엔드포인트 | 1시간 |
-| JWT (Terminal) | `POST /api/public/terminal/login` | `/api/terminal/**` 엔드포인트 | 1시간 |
 | StepUp Token | `POST /api/public/otp/verify` | 민감 Customer 작업 (리딤, 마이그레이션, 히스토리) | 10분 |
 
 ### Security URL Patterns (SecurityConfig.java)
@@ -18,7 +17,6 @@
 /api/owner/auth/**           → PERMIT_ALL
 /api/public/**               → PERMIT_ALL
 /api/customer/**             → hasRole("CUSTOMER")
-/api/terminal/**             → hasRole("TERMINAL")
 /api/admin/**                → hasRole("ADMIN")
 /api/owner/**                → hasRole("OWNER")
 /swagger-ui/**, /v3/api-docs/** → PERMIT_ALL
@@ -75,12 +73,6 @@
 |--------|------|---------|-------------|
 | GET | `/api/public/stores` | `StorePublicController.getAllActiveStores()` | LIVE 매장 전체 목록 |
 | GET | `/api/public/stores/{storeId}` | `StorePublicController.getStorePublicInfo()` | 매장 공개 정보 (QR 스캔 진입 화면) |
-
-### Terminal 인증
-
-| Method | Path | Handler | Description |
-|--------|------|---------|-------------|
-| POST | `/api/public/terminal/login` | `TerminalAuthController.login()` | 터미널 로그인 (Owner 인증 + Store ID) |
 
 ---
 
@@ -182,23 +174,13 @@
 | GET | `/api/owner/stores/{storeId}/stamp-events` | `OwnerStampEventController.getStampEvents()` | 스탬프 적립 이벤트 이력 (페이지네이션) |
 | GET | `/api/owner/stores/{storeId}/redeem-events` | `OwnerRedeemEventController.getRedeemEvents()` | 리딤 완료 이벤트 이력 (페이지네이션) |
 
----
-
-## Terminal API (Bearer terminalAccessToken, ROLE_TERMINAL)
-
 ### 적립 승인
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| GET | `/api/terminal/{storeId}/issuance-requests` | `TerminalApprovalController.getPendingRequests()` | 대기 중 적립 요청 목록 (폴링) |
-| POST | `/api/terminal/{storeId}/issuance-requests/{id}/approve` | `TerminalApprovalController.approveRequest()` | 적립 승인 (스탬프 + 원장 생성) |
-| POST | `/api/terminal/{storeId}/issuance-requests/{id}/reject` | `TerminalApprovalController.rejectRequest()` | 적립 거절 |
-
-### 이력 조회
-
-| Method | Path | Handler | Description |
-|--------|------|---------|-------------|
-| GET | `/api/terminal/stores/{storeId}/stamp-events` | `TerminalStampEventController.getStampEvents()` | 스탬프 적립 이벤트 이력 (페이지네이션) |
+| GET | `/api/owner/stores/{storeId}/issuance-requests` | `OwnerApprovalController.getPendingRequests()` | 대기 중 적립 요청 목록 (폴링) |
+| POST | `/api/owner/stores/{storeId}/issuance-requests/{id}/approve` | `OwnerApprovalController.approveRequest()` | 적립 승인 (스탬프 + 원장 생성) |
+| POST | `/api/owner/stores/{storeId}/issuance-requests/{id}/reject` | `OwnerApprovalController.rejectRequest()` | 적립 거절 |
 
 ---
 

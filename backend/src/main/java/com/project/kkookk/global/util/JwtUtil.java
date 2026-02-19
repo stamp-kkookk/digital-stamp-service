@@ -23,7 +23,6 @@ public class JwtUtil {
 
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_EMAIL = "email";
-    private static final String CLAIM_STORE_ID = "storeId";
     private static final String CLAIM_ADMIN = "admin";
 
     private final JwtProperties jwtProperties;
@@ -34,16 +33,6 @@ public class JwtUtil {
         claims.put(CLAIM_TYPE, TokenType.OWNER.name());
         claims.put(CLAIM_EMAIL, email);
         claims.put(CLAIM_ADMIN, isAdmin);
-
-        return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
-    }
-
-    /** Terminal 매장단말용 토큰 생성 */
-    public String generateTerminalToken(Long ownerId, String email, Long storeId) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenType.TERMINAL.name());
-        claims.put(CLAIM_EMAIL, email);
-        claims.put(CLAIM_STORE_ID, storeId);
 
         return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
     }
@@ -94,16 +83,10 @@ public class JwtUtil {
         return Long.parseLong(claims.getSubject());
     }
 
-    /** 토큰에서 이메일 추출 (Owner, Terminal용) */
+    /** 토큰에서 이메일 추출 (Owner용) */
     public String getEmail(String token) {
         Claims claims = parseToken(token);
         return claims.get(CLAIM_EMAIL, String.class);
-    }
-
-    /** 토큰에서 매장 ID 추출 (Terminal용) */
-    public Long getStoreId(String token) {
-        Claims claims = parseToken(token);
-        return claims.get(CLAIM_STORE_ID, Long.class);
     }
 
     /** 토큰에서 Admin 여부 추출 (Owner용) */

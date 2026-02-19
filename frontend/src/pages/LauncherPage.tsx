@@ -4,7 +4,7 @@
  */
 
 import { LauncherCard } from "@/components/shared/LauncherCard";
-import { Monitor, Smartphone, Tablet } from "lucide-react";
+import { Monitor, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export function LauncherPage() {
@@ -19,7 +19,7 @@ export function LauncherPage() {
         각 디바이스 환경을 선택하여 시뮬레이션을 시작하세요.
       </p>
 
-      <div className="grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-2">
         <LauncherCard
           icon={<Smartphone size={40} />}
           title="고객용 PWA"
@@ -28,23 +28,16 @@ export function LauncherPage() {
           color="bg-kkookk-orange-500"
         />
         <LauncherCard
-          icon={<Tablet size={40} />}
-          title="매장용 태블릿"
-          desc="적립/사용 요청 실시간 승인, 영업 관리"
-          onClick={() => navigate("/terminal/login")}
-          color="bg-gray-500"
-        />
-        <LauncherCard
           icon={<Monitor size={40} />}
           title="사장님 백오피스"
-          desc="스탬프 카드 설계, 스토어 관리"
+          desc="스탬프 카드 설계, 스토어 관리, 적립 승인"
           onClick={() => navigate("/owner/login")}
           color="bg-kkookk-indigo"
         />
       </div>
 
       <p className="mt-12 text-sm text-kkookk-steel">
-        Tip: 고객 앱에서 적립 요청 후 매장 태블릿에서 승인해보세요.
+        Tip: 고객 앱에서 적립 요청 후 사장님 백오피스에서 승인해보세요.
       </p>
     </div>
   );

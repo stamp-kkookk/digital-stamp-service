@@ -22,7 +22,6 @@ import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
-import com.project.kkookk.store.service.exception.TerminalAccessDeniedException;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.domain.WalletStampCardStatus;
@@ -44,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class TerminalApprovalService {
+public class OwnerApprovalService {
 
     private static final int STAMP_DELTA = 1;
 
@@ -56,7 +55,7 @@ public class TerminalApprovalService {
     private final StampCardRepository stampCardRepository;
     private final StampRewardService stampRewardService;
 
-    /** 승인 대기 목록 조회 (터미널 Polling용) */
+    /** 승인 대기 목록 조회 (Owner Polling용) */
     public PendingIssuanceRequestListResponse getPendingRequests(Long storeId, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
 
@@ -200,13 +199,13 @@ public class TerminalApprovalService {
                             if (!storeRepository.existsById(storeId)) {
                                 return new StoreNotFoundException();
                             }
-                            return new TerminalAccessDeniedException();
+                            return new BusinessException(ErrorCode.STORE_ACCESS_DENIED);
                         });
     }
 
     private void validateRequestBelongsToStore(IssuanceRequest request, Long storeId) {
         if (!request.getStoreId().equals(storeId)) {
-            throw new TerminalAccessDeniedException();
+            throw new BusinessException(ErrorCode.STORE_ACCESS_DENIED);
         }
     }
 

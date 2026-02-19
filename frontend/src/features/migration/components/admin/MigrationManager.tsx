@@ -52,7 +52,11 @@ export function MigrationManager({
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="p-2 text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+              className={`p-2 rounded-lg transition-all active:scale-90 disabled:opacity-50 ${
+                isRefreshing
+                  ? 'bg-kkookk-indigo/10 text-kkookk-indigo'
+                  : 'text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-100'
+              }`}
               title="새로고침"
             >
               <RefreshCw
