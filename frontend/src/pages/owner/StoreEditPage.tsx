@@ -5,9 +5,9 @@
 
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, Loader2, AlertCircle, AlertTriangle, X } from 'lucide-react';
+import { ChevronLeft, Loader2, AlertCircle, AlertTriangle, Info, X, Search } from 'lucide-react';
 import { useStore, useUpdateStore } from '@/features/store-management/hooks/useStore';
-import { IconUpload, PlaceSearchInput } from '@/features/store-management/components';
+import { IconUpload, PlaceSearchModal } from '@/features/store-management/components';
 import type { ErrorResponse, PlaceSearchResult, StoreUpdateRequest } from '@/types/api';
 import type { AxiosError } from 'axios';
 
@@ -42,6 +42,7 @@ export function StoreEditPage() {
   const { data: store, isLoading, error } = useStore(storeIdNum);
   const updateStore = useUpdateStore();
   const [formData, setFormData] = useState<StoreEditFormData | null>(null);
+  const [placeSearchOpen, setPlaceSearchOpen] = useState(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
   // 스토어 로드 후 폼 데이터 초기화
@@ -67,17 +68,22 @@ export function StoreEditPage() {
     }
   };
 
+  const isLive = store?.status === 'LIVE';
+
   const handlePlaceSelect = (place: PlaceSearchResult) => {
+    if (isLive) return;
     setFormData((prev) =>
       prev
         ? {
             ...prev,
+            name: place.placeName,
             address: place.roadAddress || place.address || prev.address,
             phone: place.phone ? formatPhone(place.phone) : prev.phone,
             placeRef: place.kakaoPlaceId,
           }
         : prev
     );
+    setPlaceSearchOpen(false);
   };
 
   const handleSubmit = () => {
@@ -103,7 +109,11 @@ export function StoreEditPage() {
         onError: (err) => {
           const axiosError = err as AxiosError<ErrorResponse>;
           const code = axiosError.response?.data?.code;
-          if (code === 'STORE_PLACE_REF_DUPLICATED') {
+          if (code === 'STORE_UPDATE_NOT_ALLOWED') {
+            setErrorBanner(
+              '운영 중인 매장은 설명과 아이콘만 수정할 수 있습니다. 다른 정보를 변경하려면 관리자에게 문의해주세요.'
+            );
+          } else if (code === 'STORE_PLACE_REF_DUPLICATED') {
             setErrorBanner(
               '이미 등록된 매장입니다. 본인 매장이라면 관리자에게 문의해주세요.'
             );
@@ -176,6 +186,13 @@ export function StoreEditPage() {
         </p>
       </div>
 
+      {isLive && (
+        <div className="flex items-center gap-3 px-4 py-3 mb-6 text-sm border rounded-lg bg-amber-50 border-amber-200 text-amber-700">
+          <Info size={18} className="shrink-0" />
+          <p className="font-medium">운영 중인 매장은 설명과 아이콘만 수정할 수 있습니다. 다른 정보를 변경하려면 관리자에게 문의해주세요.</p>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
         <div className="space-y-6 max-w-2xl">
           {/* 매장 아이콘 */}
@@ -194,23 +211,34 @@ export function StoreEditPage() {
           {/* 장소 연동 */}
           <div>
             <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              카카오 장소 연동
+              장소 연동
             </span>
-            {formData.placeRef ? (
+            {formData.placeRef || isLive ? (
               <p className="text-sm text-kkookk-steel p-3 bg-slate-50 rounded-xl border border-slate-200">
-                카카오 장소 ID: {formData.placeRef} (변경 불가)
+                {formData.placeRef
+                  ? `장소 ID: ${formData.placeRef} (변경 불가)`
+                  : '장소 미연동 (운영 중 변경 불가)'}
               </p>
             ) : (
               <>
-                <PlaceSearchInput
-                  onSelect={handlePlaceSelect}
-                  onManualMode={() => {}}
-                  defaultAddress={formData.address}
-                />
+                <button
+                  type="button"
+                  onClick={() => setPlaceSearchOpen(true)}
+                  className="flex items-center gap-2 w-full p-3 border border-dashed border-slate-300 rounded-xl text-kkookk-steel hover:border-kkookk-indigo hover:text-kkookk-indigo transition-colors"
+                >
+                  <Search size={16} />
+                  <span className="text-sm">장소 검색</span>
+                </button>
                 <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
                   <AlertTriangle size={12} />
                   장소를 연동하면 중복 등록을 방지할 수 있습니다
                 </p>
+                <PlaceSearchModal
+                  open={placeSearchOpen}
+                  onOpenChange={setPlaceSearchOpen}
+                  onSelect={handlePlaceSelect}
+                  onManualMode={() => setPlaceSearchOpen(false)}
+                />
               </>
             )}
           </div>
@@ -229,8 +257,9 @@ export function StoreEditPage() {
               name="name"
               value={formData.name}
               onChange={handleChange}
+              disabled={isLive}
               placeholder="예: 카페 루나 강남점"
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
+              className={`w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none ${isLive ? 'bg-slate-100 text-kkookk-steel cursor-not-allowed' : ''}`}
             />
           </div>
 
@@ -248,8 +277,9 @@ export function StoreEditPage() {
               name="address"
               value={formData.address}
               onChange={handleChange}
+              disabled={isLive}
               placeholder="예: 서울시 강남구 테헤란로 123"
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
+              className={`w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none ${isLive ? 'bg-slate-100 text-kkookk-steel cursor-not-allowed' : ''}`}
             />
           </div>
 
@@ -267,8 +297,9 @@ export function StoreEditPage() {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
+              disabled={isLive}
               placeholder="02-0000-0000"
-              className="w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none"
+              className={`w-full p-3 border border-slate-200 rounded-xl focus:border-kkookk-indigo focus:outline-none ${isLive ? 'bg-slate-100 text-kkookk-steel cursor-not-allowed' : ''}`}
             />
           </div>
 

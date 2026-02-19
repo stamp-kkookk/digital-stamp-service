@@ -8,4 +8,4 @@ export * from './StampCardCreateForm';
 export * from './StampCardStats';
 export * from './StoreStatusBadge';
 export * from './IconUpload';
-export * from './PlaceSearchInput';
+export * from './PlaceSearchModal';
