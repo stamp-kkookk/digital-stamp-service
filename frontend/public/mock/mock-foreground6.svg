@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
+  <defs>
+    <symbol id="s" viewBox="0 0 24 24">
+      <circle cx="12" cy="7" r="3.8" fill="white" opacity="0.9"/>
+      <circle cx="7" cy="11.5" r="3.8" fill="white" opacity="0.85"/>
+      <circle cx="17" cy="11.5" r="3.8" fill="white" opacity="0.85"/>
+      <circle cx="8.5" cy="17" r="3.8" fill="white" opacity="0.8"/>
+      <circle cx="15.5" cy="17" r="3.8" fill="white" opacity="0.8"/>
+      <circle cx="12" cy="12.5" r="2.2" fill="#FFE082"/>
+    </symbol>
+  </defs>
+  <rect width="1296" height="832" rx="20" fill="#FFF9F0"/>
+  <rect x="20" y="20" width="1256" height="792" rx="14" fill="none" stroke="#C05050" stroke-opacity="0.15" stroke-width="2"/>
+  <!-- Corner ornaments -->
+  <g fill="#C05050" opacity="0.08">
+    <circle cx="50" cy="50" r="6"/><circle cx="1246" cy="50" r="6"/>
+    <circle cx="50" cy="782" r="6"/><circle cx="1246" cy="782" r="6"/>
+  </g>
+  <text x="648" y="55" text-anchor="middle" fill="#8C2F2F" font-family="sans-serif" font-size="30" font-weight="700">옛뜰 한과점</text>
+  <text x="648" y="86" text-anchor="middle" fill="#8C2F2F" font-family="sans-serif" font-size="18" opacity="0.7">12개 적립 시 한과세트 무료</text>
+  <!-- Row 0: filled -->
+  <circle cx="323" cy="203" r="42" fill="#C05050"/><use href="#s" x="310" y="190" width="26" height="26"/>
+  <circle cx="648" cy="203" r="42" fill="#C05050"/><use href="#s" x="635" y="190" width="26" height="26"/>
+  <circle cx="973" cy="203" r="42" fill="#C05050"/><use href="#s" x="960" y="190" width="26" height="26"/>
+  <!-- Row 1: filled -->
+  <circle cx="323" cy="348" r="42" fill="#C05050"/><use href="#s" x="310" y="335" width="26" height="26"/>
+  <circle cx="648" cy="348" r="42" fill="#C05050"/><use href="#s" x="635" y="335" width="26" height="26"/>
+  <circle cx="973" cy="348" r="42" fill="#C05050"/><use href="#s" x="960" y="335" width="26" height="26"/>
+  <!-- Row 2: filled -->
+  <circle cx="323" cy="493" r="42" fill="#C05050"/><use href="#s" x="310" y="480" width="26" height="26"/>
+  <circle cx="648" cy="493" r="42" fill="#C05050"/><use href="#s" x="635" y="480" width="26" height="26"/>
+  <circle cx="973" cy="493" r="42" fill="#C05050"/><use href="#s" x="960" y="480" width="26" height="26"/>
+  <!-- Row 3: empty + reward -->
+  <circle cx="323" cy="638" r="42" fill="none" stroke="#C05050" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="8 5"/>
+  <circle cx="648" cy="638" r="42" fill="none" stroke="#C05050" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="8 5"/>
+  <circle cx="973" cy="638" r="42" fill="#8C2F2F"/>
+  <text x="973" y="634" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">무료</text>
+  <text x="973" y="650" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">한과</text>
+  <text x="648" y="755" text-anchor="middle" fill="#8C2F2F" font-family="sans-serif" font-size="18" opacity="0.55">도장 12칸을 채우면 한과세트를 무료로 드려요</text>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <rect width="1240" height="790" fill="#1B2838"/>
+  <!-- Gold star dots -->
+  <g fill="#C9A96E" opacity="0.2">
+    <circle cx="120" cy="80" r="2.5"/><circle cx="280" cy="150" r="1.8"/><circle cx="450" cy="60" r="2"/>
+    <circle cx="780" cy="100" r="2.2"/><circle cx="950" cy="170" r="1.5"/><circle cx="1100" cy="80" r="2.5"/>
+    <circle cx="100" cy="400" r="1.5"/><circle cx="1140" cy="350" r="2"/><circle cx="200" cy="650" r="2"/>
+    <circle cx="1050" cy="680" r="1.8"/><circle cx="500" cy="700" r="1.5"/><circle cx="750" cy="720" r="2"/>
+    <circle cx="350" cy="300" r="1.2"/><circle cx="900" cy="600" r="1.8"/>
+  </g>
+  <!-- Warm glow behind cup -->
+  <circle cx="620" cy="350" r="180" fill="#C9A96E" opacity="0.06"/>
+  <circle cx="620" cy="350" r="120" fill="#C9A96E" opacity="0.04"/>
+  <!-- Latte cup centered -->
+  <g transform="translate(620, 340) scale(2)">
+    <!-- Cup body -->
+    <path d="M-32,-28 Q-32,-35 -26,-35 L26,-35 Q32,-35 32,-28 L30,48 Q30,58 20,58 L-20,58 Q-30,58 -30,48Z" fill="#F0DCC8"/>
+    <!-- Milk layer -->
+    <path d="M-30,10 L-30,48 Q-30,58 -20,58 L20,58 Q30,58 30,48 L30,10Z" fill="#FFF8F0"/>
+    <!-- Wavy milk-coffee border -->
+    <path d="M-30,10 Q-15,0 0,12 Q15,24 30,10 L30,10 L-30,10Z" fill="#FFF8F0" opacity="0.3"/>
+    <!-- Coffee layer -->
+    <path d="M-32,-28 Q-32,-35 -26,-35 L26,-35 Q32,-35 32,-28 L30,10 L-30,10Z" fill="#C4956A"/>
+    <!-- Whipped cream -->
+    <path d="M-36,-35 Q-36,-50 -18,-56 Q-5,-64 5,-58 Q18,-66 32,-52 Q38,-44 36,-35Z" fill="#D4A87A"/>
+    <!-- Cream peak -->
+    <path d="M0,-60 Q6,-78 10,-62 Q14,-72 11,-55" fill="#C09060"/>
+    <!-- Straw -->
+    <line x1="18" y1="-74" x2="14" y2="-8" stroke="#FFF8F0" stroke-width="6" stroke-linecap="round"/>
+    <line x1="18" y1="-74" x2="14" y2="-8" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <rect width="1240" height="790" fill="#1A6B8A"/>
+  <!-- Wave pattern at bottom -->
+  <g fill="none" stroke="#7CC4D6" stroke-width="2" opacity="0.12">
+    <path d="M-60,550 Q100,500 260,550 T580,550 T900,550 T1220,550 T1540,550"/>
+    <path d="M-60,620 Q100,570 260,620 T580,620 T900,620 T1220,620 T1540,620"/>
+    <path d="M-60,690 Q100,640 260,690 T580,690 T900,690 T1220,690 T1540,690"/>
+    <path d="M-60,760 Q100,710 260,760 T580,760 T900,760 T1220,760 T1540,760"/>
+  </g>
+  <!-- Glow -->
+  <circle cx="620" cy="340" r="150" fill="#7CC4D6" opacity="0.06"/>
+  <!-- Iced coffee cup -->
+  <g transform="translate(620, 330) scale(2)">
+    <!-- Lid -->
+    <path d="M-34,-52 Q-34,-58 -28,-58 L28,-58 Q34,-58 34,-52 L32,-48 L-32,-48Z" fill="#B8DEE8"/>
+    <!-- Lid dome -->
+    <path d="M-30,-58 Q-30,-65 0,-65 Q30,-65 30,-58" fill="#C8E8F0"/>
+    <!-- Cup body (clear) -->
+    <path d="M-30,-48 L-28,52 Q-28,60 -18,60 L18,60 Q28,60 28,52 L30,-48Z" fill="#D0EAF2" opacity="0.7"/>
+    <!-- Coffee liquid -->
+    <path d="M-29,0 L-28,52 Q-28,60 -18,60 L18,60 Q28,60 28,52 L29,0Z" fill="#8CBAC8" opacity="0.5"/>
+    <!-- Ice cubes -->
+    <rect x="-16" y="-30" width="16" height="14" rx="3" fill="white" opacity="0.5" transform="rotate(-5)"/>
+    <rect x="4" y="-18" width="14" height="12" rx="3" fill="white" opacity="0.4" transform="rotate(3)"/>
+    <rect x="-10" y="-8" width="13" height="11" rx="3" fill="white" opacity="0.35"/>
+    <!-- Straw -->
+    <line x1="10" y1="-72" x2="6" y2="20" stroke="white" stroke-width="5" stroke-linecap="round"/>
+    <!-- Condensation drops -->
+    <circle cx="-20" cy="15" r="2.5" fill="white" opacity="0.3"/>
+    <circle cx="22" cy="30" r="2" fill="white" opacity="0.25"/>
+    <circle cx="-15" cy="40" r="1.8" fill="white" opacity="0.2"/>
+  </g>
+</svg>

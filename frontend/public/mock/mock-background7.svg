@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <rect width="1240" height="790" fill="#E87830"/>
+  <!-- Subtle bubbles -->
+  <g fill="#FFF3E0" opacity="0.1">
+    <circle cx="180" cy="130" r="40"/><circle cx="350" cy="600" r="30"/>
+    <circle cx="900" cy="150" r="35"/><circle cx="1060" cy="550" r="28"/>
+    <circle cx="150" cy="450" r="22"/><circle cx="1100" cy="300" r="25"/>
+  </g>
+  <!-- Glow -->
+  <circle cx="620" cy="360" r="160" fill="#FFF3E0" opacity="0.08"/>
+  <!-- Orange fruit (half cut) centered -->
+  <g transform="translate(620, 360) scale(2)">
+    <!-- Orange body -->
+    <circle cx="0" cy="0" r="50" fill="#FFA040"/>
+    <!-- Orange rind -->
+    <circle cx="0" cy="0" r="50" fill="none" stroke="#E88020" stroke-width="3"/>
+    <!-- Inner flesh -->
+    <circle cx="0" cy="0" r="42" fill="#FFB860"/>
+    <!-- Segments -->
+    <g stroke="#FFA040" stroke-width="2.5" fill="none">
+      <line x1="0" y1="-42" x2="0" y2="42"/>
+      <line x1="-42" y1="0" x2="42" y2="0"/>
+      <line x1="-30" y1="-30" x2="30" y2="30"/>
+      <line x1="30" y1="-30" x2="-30" y2="30"/>
+    </g>
+    <!-- Center -->
+    <circle cx="0" cy="0" r="6" fill="#FF9020"/>
+    <!-- Leaf on top -->
+    <path d="M0,-52 Q-12,-68 -6,-80 Q2,-75 8,-65 Q4,-58 0,-52Z" fill="#4CAF50"/>
+    <path d="M0,-52 Q12,-65 18,-75 Q12,-78 4,-68 Q2,-58 0,-52Z" fill="#66BB6A"/>
+    <!-- Leaf stem -->
+    <path d="M0,-52 Q0,-56 2,-60" stroke="#388E3C" stroke-width="1.5" fill="none"/>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <rect width="1240" height="790" fill="#2D6B3F"/>
+  <!-- Leaf branch illustration (like 카페나무 reference) -->
+  <g transform="translate(480, 360)" stroke="white" fill="none" stroke-width="2.5" stroke-linecap="round" opacity="0.85">
+    <!-- Main stem -->
+    <path d="M20,200 Q25,120 10,20 Q5,-20 15,-80"/>
+    <!-- Large leaves -->
+    <path d="M10,20 Q-40,-5 -30,-40 Q-18,-50 10,20" fill="white" fill-opacity="0.12" stroke-width="2"/>
+    <path d="M15,70 Q-35,45 -30,10 Q-15,-2 15,70" fill="white" fill-opacity="0.1" stroke-width="2"/>
+    <path d="M12,-20 Q-25,-50 -18,-75 Q-5,-80 12,-20" fill="white" fill-opacity="0.1" stroke-width="2"/>
+    <path d="M18,130 Q-25,105 -22,75 Q-8,62 18,130" fill="white" fill-opacity="0.08" stroke-width="2"/>
+    <!-- Right-side small leaves -->
+    <path d="M15,-60 Q40,-80 38,-95 Q28,-90 15,-60" fill="white" fill-opacity="0.1" stroke-width="1.8"/>
+    <path d="M12,0 Q45,-15 42,-35 Q30,-30 12,0" fill="white" fill-opacity="0.08" stroke-width="1.8"/>
+  </g>
+  <!-- Subtle bottom-right leaf -->
+  <g transform="translate(900, 550) scale(0.6) rotate(150)" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" opacity="0.15">
+    <path d="M0,100 Q5,50 -5,-20"/>
+    <path d="M-5,-20 Q-30,-40 -25,-60 Q-12,-55 -5,-20" fill="white" fill-opacity="0.3"/>
+    <path d="M0,30 Q-30,15 -28,-5 Q-15,-10 0,30" fill="white" fill-opacity="0.25"/>
+  </g>
+</svg>
