@@ -86,7 +86,9 @@ export function CustomerSignupForm() {
         return;
       }
     } catch {
-      // 네트워크 에러 시 서버에서 최종 차단하므로 진행 허용
+      setError("전화번호 확인에 실패했습니다. 다시 시도해주세요.");
+      setIsCheckingPhone(false);
+      return;
     }
     setIsCheckingPhone(false);
 
@@ -150,8 +152,11 @@ export function CustomerSignupForm() {
                   const nameFieldError = fieldErrors.find(e => e.field === 'name');
                   setNameError(nameFieldError?.message ?? "이름에는 숫자를 입력할 수 없어요.");
                   setStep("input");
+                } else if (errorCode === 'WALLET_001') {
+                  setPhoneError("이미 등록된 번호입니다");
+                  setStep("input");
                 } else {
-                  setError("이미 등록된 번호입니다.");
+                  setError("회원가입에 실패했습니다. 다시 시도해주세요.");
                 }
               },
             }
