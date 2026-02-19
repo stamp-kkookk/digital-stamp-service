@@ -21,7 +21,7 @@ export function LandingHeader() {
         {/* CTA */}
         <Link to="/funnel">
           <button className="flex items-center h-10 px-5 py-2.5 font-semibold text-kkookk-orange-500 transition-all border-2 border-kkookk-orange-500 rounded-lg hover:bg-kkookk-orange-50">
-            로그인
+            체험해 보기
           </button>
         </Link>
       </div>

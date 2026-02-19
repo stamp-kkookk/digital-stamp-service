@@ -37,7 +37,7 @@ export function HeroSection() {
       <div className="relative z-10 px-6 mx-auto mt-auto mb-8 text-center max-w-7xl md:mt-0 md:mb-12">
         <AnimatedHeadline />
         <Link
-          to={"/simulation"}
+          to={"/owner/login"}
           className={`relative inline-flex items-center justify-center
             px-8 py-4 md:px-10 md:py-5
             text-lg md:text-xl font-bold text-white
