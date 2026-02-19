@@ -22,6 +22,8 @@ public enum ErrorCode {
     OWNER_LOGIN_ID_DUPLICATED(
             HttpStatus.CONFLICT, "OWNER_LOGIN_ID_DUPLICATED", "이미 사용 중인 로그인 ID입니다"),
     OWNER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OWNER_LOGIN_FAILED", "이메일 또는 비밀번호가 올바르지 않습니다"),
+    REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_INVALID", "유효하지 않은 리프레시 토큰입니다"),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_EXPIRED", "리프레시 토큰이 만료되었습니다"),
 
     // StampCard
     STAMP_CARD_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_CARD_NOT_FOUND", "스탬프 카드를 찾을 수 없습니다"),
@@ -46,6 +48,8 @@ public enum ErrorCode {
             HttpStatus.PAYLOAD_TOO_LARGE, "STORE_ICON_TOO_LARGE", "아이콘 이미지 크기가 너무 큽니다 (최대 5MB)"),
     STORE_PHONE_INVALID(HttpStatus.BAD_REQUEST, "STORE_PHONE_INVALID", "전화번호 형식이 올바르지 않습니다"),
     STORE_NOT_OPERATIONAL(HttpStatus.BAD_REQUEST, "STORE_NOT_OPERATIONAL", "운영 중인 매장이 아닙니다"),
+    STORE_UPDATE_NOT_ALLOWED(
+            HttpStatus.BAD_REQUEST, "STORE_UPDATE_NOT_ALLOWED", "운영 중인 매장은 일부 필드만 수정할 수 있습니다"),
 
     // Admin
     ADMIN_ACCESS_DENIED(HttpStatus.FORBIDDEN, "ADMIN_ACCESS_DENIED", "관리자 권한이 필요합니다"),

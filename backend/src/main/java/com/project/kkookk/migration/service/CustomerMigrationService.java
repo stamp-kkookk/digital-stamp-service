@@ -11,6 +11,7 @@ import com.project.kkookk.migration.service.exception.MigrationAccessDeniedExcep
 import com.project.kkookk.migration.service.exception.MigrationAlreadyPendingException;
 import com.project.kkookk.migration.service.exception.MigrationRequestNotFoundException;
 import com.project.kkookk.migration.util.Base64ImageValidator;
+import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
 import com.project.kkookk.wallet.domain.CustomerWallet;
@@ -18,6 +19,9 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -110,6 +114,17 @@ public class CustomerMigrationService {
                 migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
                         customerWalletId);
 
-        return requests.stream().map(MigrationListItemResponse::from).toList();
+        Set<Long> storeIds =
+                requests.stream()
+                        .map(StampMigrationRequest::getStoreId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, String> storeNameMap =
+                storeRepository.findAllById(storeIds).stream()
+                        .collect(Collectors.toMap(Store::getId, Store::getName));
+
+        return requests.stream()
+                .map(r -> MigrationListItemResponse.from(r, storeNameMap.get(r.getStoreId())))
+                .toList();
     }
 }

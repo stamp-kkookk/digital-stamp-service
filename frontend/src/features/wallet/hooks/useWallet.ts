@@ -7,6 +7,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import {
   getStoreSummary,
   getWalletStampCards,
+  getAllWalletStampCards,
   getStampHistory,
   getRedeemHistory,
   getWalletRewards,
@@ -40,6 +41,14 @@ export function useWalletStampCards(storeId: number | undefined) {
     queryFn: () => getWalletStampCards(storeId!),
     enabled: !!storeId,
     refetchOnMount: 'always',
+  });
+}
+
+export function useAllWalletStampCards() {
+  return useQuery({
+    queryKey: QUERY_KEYS.allWalletStampCards(),
+    queryFn: getAllWalletStampCards,
+    staleTime: 30_000,
   });
 }
 

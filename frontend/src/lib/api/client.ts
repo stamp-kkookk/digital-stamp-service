@@ -4,7 +4,14 @@
  */
 
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-import { getAuthToken, getStepUpToken, clearAuthToken } from './tokenManager';
+import {
+  getAuthToken,
+  getStepUpToken,
+  clearAuthToken,
+  getRefreshToken,
+  setAuthToken,
+  getTokenType,
+} from './tokenManager';
 
 // =============================================================================
 // API Configuration
@@ -24,6 +31,55 @@ export const apiClient: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// =============================================================================
+// Token Refresh Management (Race Condition Prevention)
+// =============================================================================
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function subscribeTokenRefresh(callback: (token: string) => void) {
+  refreshSubscribers.push(callback);
+}
+
+function onTokenRefreshed(token: string) {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
+}
+
+async function refreshAuthToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  const tokenType = getTokenType();
+
+  if (!refreshToken || !tokenType) {
+    return null;
+  }
+
+  try {
+    // Create a new axios instance without interceptors to avoid infinite loop
+    const refreshClient = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: API_TIMEOUT,
+    });
+
+    const response = await refreshClient.post<{
+      accessToken: string;
+      refreshToken: string;
+    }>('/api/auth/refresh', { refreshToken });
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+    // Update tokens in storage
+    setAuthToken(accessToken, newRefreshToken, tokenType);
+
+    return accessToken;
+  } catch (error) {
+    // Refresh failed - clear all tokens and redirect to login
+    clearAuthToken();
+    return null;
+  }
+}
 
 // =============================================================================
 // Request Interceptor
@@ -47,22 +103,81 @@ apiClient.interceptors.request.use(
 );
 
 // =============================================================================
-// Response Interceptor
+// Response Interceptor (with Auto Token Refresh)
 // =============================================================================
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
-    // Handle specific error codes
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Handle 401 Unauthorized - attempt token refresh
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Skip refresh for /api/auth/refresh endpoint itself
+      if (originalRequest.url === '/api/auth/refresh') {
+        clearAuthToken();
+        return Promise.reject(error);
+      }
+
+      // Skip refresh if StepUp token was used (StepUp tokens don't have refresh)
+      if (getStepUpToken()) {
+        return Promise.reject(error);
+      }
+
+      // Mark this request as retried to prevent infinite loops
+      originalRequest._retry = true;
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        try {
+          const newAccessToken = await refreshAuthToken();
+
+          if (!newAccessToken) {
+            // Refresh failed - reject all pending requests
+            isRefreshing = false;
+            return Promise.reject(error);
+          }
+
+          // Notify all waiting requests
+          isRefreshing = false;
+          onTokenRefreshed(newAccessToken);
+
+          // Retry the original request with new token
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
+          return apiClient(originalRequest);
+        } catch (refreshError) {
+          isRefreshing = false;
+          clearAuthToken();
+          return Promise.reject(refreshError);
+        }
+      } else {
+        // Another request is already refreshing - wait for it
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh((token: string) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(apiClient(originalRequest));
+          });
+
+          // Also handle the case where refresh fails
+          setTimeout(() => {
+            if (isRefreshing) {
+              reject(error);
+            }
+          }, 10000); // 10 second timeout
+        });
+      }
+    }
+
+    // Handle other error codes
     if (error.response) {
       const { status } = error.response;
 
       switch (status) {
-        case 401:
-          // Unauthorized - clear token
-          clearAuthToken();
-          // Could dispatch an event or navigate to login
-          break;
         case 403:
           // Forbidden - user doesn't have permission
           console.error('Permission denied');

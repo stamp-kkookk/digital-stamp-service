@@ -91,6 +91,19 @@ public class Store extends BaseTimeEntity {
         this.placeRef = placeRef;
     }
 
+    public void updatePartial(final String description, final String iconImageBase64) {
+        this.description = description;
+        this.iconImageBase64 = iconImageBase64;
+    }
+
+    public boolean isDraft() {
+        return this.status == StoreStatus.DRAFT;
+    }
+
+    public boolean isLive() {
+        return this.status == StoreStatus.LIVE;
+    }
+
     public void transitionTo(final StoreStatus newStatus) {
         Set<StoreStatus> allowed = ALLOWED_TRANSITIONS.getOrDefault(this.status, Set.of());
         if (!allowed.contains(newStatus)) {

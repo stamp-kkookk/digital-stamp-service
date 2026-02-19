@@ -22,7 +22,7 @@ import { DirectCustomerLoginPage } from "@/pages/customer/DirectCustomerLoginPag
 // 고객 기능 컴포넌트 (페이지로 래핑될 예정)
 import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
 import { RequestStampButton } from "@/features/issuance";
-import { MigrationForm, MigrationList } from "@/features/migration";
+import { MigrationDetail, MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
 import { WalletPage } from "@/features/wallet";
 
@@ -112,6 +112,7 @@ export const router = createBrowserRouter([
       { path: "redeems/:redeemId/use", element: <RedeemScreen /> },
       { path: "migrations", element: <MigrationList /> },
       { path: "migrations/new", element: <MigrationForm /> },
+      { path: "migrations/:id", element: <MigrationDetail /> },
       { path: "settings", element: <CustomerSettingsPage /> },
     ],
   },

@@ -14,6 +14,7 @@ import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreAuditLogRepository;
 import com.project.kkookk.store.repository.StoreRepository;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,17 +94,22 @@ public class StoreService {
             throw new BusinessException(ErrorCode.STORE_NOT_OPERATIONAL);
         }
 
-        validatePhone(request.phone());
         validateIconSize(request.iconImageBase64());
-        validatePlaceRefUniqueForUpdate(request.placeRef(), storeId);
 
-        store.updateInfo(
-                request.name(),
-                request.address(),
-                request.phone(),
-                request.description(),
-                request.iconImageBase64(),
-                request.placeRef());
+        if (store.isLive()) {
+            validateLiveStoreRestrictedFields(store, request);
+            store.updatePartial(request.description(), request.iconImageBase64());
+        } else {
+            validatePhone(request.phone());
+            validatePlaceRefUniqueForUpdate(request.placeRef(), storeId);
+            store.updateInfo(
+                    request.name(),
+                    request.address(),
+                    request.phone(),
+                    request.description(),
+                    request.iconImageBase64(),
+                    request.placeRef());
+        }
 
         storeAuditLogRepository.save(
                 StoreAuditLog.builder()
@@ -159,6 +165,17 @@ public class StoreService {
     private void validatePlaceRefUnique(String placeRef) {
         if (placeRef != null && !placeRef.isBlank() && storeRepository.existsByPlaceRef(placeRef)) {
             throw new BusinessException(ErrorCode.STORE_PLACE_REF_DUPLICATED);
+        }
+    }
+
+    private void validateLiveStoreRestrictedFields(Store store, StoreUpdateRequest request) {
+        boolean restricted =
+                !Objects.equals(store.getName(), request.name())
+                        || !Objects.equals(store.getAddress(), request.address())
+                        || !Objects.equals(store.getPhone(), request.phone())
+                        || !Objects.equals(store.getPlaceRef(), request.placeRef());
+        if (restricted) {
+            throw new BusinessException(ErrorCode.STORE_UPDATE_NOT_ALLOWED);
         }
     }
 

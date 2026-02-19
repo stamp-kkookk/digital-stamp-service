@@ -2,6 +2,7 @@ package com.project.kkookk.wallet.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
@@ -66,6 +67,7 @@ public class CustomerWalletService {
     private final StampEventRepository stampEventRepository;
     private final RedeemEventRepository redeemEventRepository;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     private String normalizePhone(String phone) {
         return phone.replaceAll("[^0-9]", "");
@@ -124,6 +126,7 @@ public class CustomerWalletService {
 
         // 4. JWT 토큰 생성 (일반 CUSTOMER 토큰, STEPUP 아님)
         String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId());
+        String refreshToken = refreshTokenService.issueCustomerRefreshToken(savedWallet.getId());
 
         log.info(
                 "[Wallet Register] walletId={}, phone={}, name={}, storeId={}, walletStampCardId={}",
@@ -136,6 +139,7 @@ public class CustomerWalletService {
         // 5. Response 반환
         return new WalletRegisterResponse(
                 accessToken,
+                refreshToken,
                 savedWallet.getId(),
                 savedWallet.getPhone(),
                 savedWallet.getName(),
@@ -172,6 +176,7 @@ public class CustomerWalletService {
 
         // 5. JWT 토큰 생성
         String accessToken = jwtUtil.generateCustomerToken(wallet.getId());
+        String refreshToken = refreshTokenService.issueCustomerRefreshToken(wallet.getId());
 
         log.info(
                 "[Customer Login] walletId={}, phone={}, name={}, storeId={}, stampCardCount={}",
@@ -184,6 +189,7 @@ public class CustomerWalletService {
         // 6. Response 반환
         return new CustomerLoginResponse(
                 accessToken,
+                refreshToken,
                 wallet.getId(),
                 wallet.getPhone(),
                 wallet.getName(),

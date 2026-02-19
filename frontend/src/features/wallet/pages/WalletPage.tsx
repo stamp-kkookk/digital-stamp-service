@@ -1,10 +1,11 @@
 /**
  * WalletPage 컴포넌트
  * 스탬프 카드 캐러셀이 포함된 메인 지갑 뷰
+ * 적립 승인 후 돌아오면 자동 뒤집기 + 도장 애니메이션 재생
  */
 
-import { useEffect, useMemo } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useOutletContext, useLocation } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { WalletHeader } from '../components/WalletHeader';
 import { StampCardCarousel } from '../components/StampCardCarousel';
@@ -18,11 +19,32 @@ interface CustomerLayoutContext {
   setCurrentStoreId: (storeId: number | undefined) => void;
 }
 
+interface WalletLocationState {
+  stampJustAdded?: boolean;
+  animateStampIndex?: number;
+  stampedCardId?: string;
+}
+
 export function WalletPage() {
   const { storeId, customerNavigate } = useCustomerNavigate();
   const { setIsMenuOpen, setCurrentStoreId } = useOutletContext<CustomerLayoutContext>();
+  const location = useLocation();
   const storeIdNum = storeId ? Number(storeId) : undefined;
   const { data: storeSummary } = useStoreSummary(storeIdNum);
+
+  // Read navigation state for animation trigger
+  const locationState = location.state as WalletLocationState | null;
+  const [animatingStampIndex, setAnimatingStampIndex] = useState<number | undefined>(
+    locationState?.stampJustAdded ? locationState.animateStampIndex : undefined,
+  );
+  const [initialFlipped] = useState(() => locationState?.stampJustAdded === true);
+
+  // Clear navigation state to prevent re-animation on refresh
+  useEffect(() => {
+    if (locationState?.stampJustAdded) {
+      window.history.replaceState({}, '');
+    }
+  }, [locationState?.stampJustAdded]);
 
   // API Hook - JWT identifies the customer, storeId scopes the store
   const { data: walletData, isLoading, error, refetch } = useWalletStampCards(storeIdNum);
@@ -88,30 +110,38 @@ export function WalletPage() {
     return mapped;
   }, [walletData?.stampCards, storeSummary, storeIdNum]);
 
-  // 첫 번째 카드의 storeId로 초기화
+  // 적립된 카드의 초기 캐러셀 인덱스 계산
+  const stampedCardId = locationState?.stampedCardId;
+  const initialCardIndex = useMemo(() => {
+    if (!stampedCardId || cards.length === 0) return 0;
+    const idx = cards.findIndex((c) => c.id === stampedCardId);
+    return idx >= 0 ? idx : 0;
+  }, [cards, stampedCardId]);
+
+  // 첫 번째 카드의 storeId로 초기화 (또는 적립된 카드의 storeId)
   useEffect(() => {
     if (cards.length > 0) {
-      setCurrentStoreId(cards[0].storeId);
+      const startCard = cards[initialCardIndex] ?? cards[0];
+      setCurrentStoreId(startCard.storeId);
     }
-  }, [cards, setCurrentStoreId]);
+  }, [cards, initialCardIndex, setCurrentStoreId]);
 
   const handleCardChange = (card: StampCard) => {
     setCurrentStoreId(card.storeId);
   };
 
-  const handleCardSelect = (card: StampCard) => {
-    const isComplete = card.current >= card.max;
-    if (isComplete) {
-      customerNavigate('/redeems');
-    } else {
-      customerNavigate(`/wallet/${card.id}/stamp`);
-    }
+  const handleStampRequest = (card: StampCard) => {
+    customerNavigate(`/wallet/${card.id}/stamp`);
+  };
+
+  const handleAnimationComplete = () => {
+    setAnimatingStampIndex(undefined);
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
@@ -124,7 +154,7 @@ export function WalletPage() {
   // Error state
   if (error) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           <AlertCircle className="w-12 h-12 text-red-500" />
@@ -144,7 +174,7 @@ export function WalletPage() {
   // Empty state
   if (cards.length === 0) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <p className="text-lg font-medium text-kkookk-navy">아직 스탬프 카드가 없어요</p>
@@ -157,11 +187,19 @@ export function WalletPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col h-full">
       <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
 
       <div className="flex-1 flex flex-col justify-center pb-8">
-        <StampCardCarousel cards={cards} onCardSelect={handleCardSelect} onCardChange={handleCardChange} />
+        <StampCardCarousel
+          cards={cards}
+          initialIndex={initialCardIndex}
+          onCardChange={handleCardChange}
+          onStampRequest={handleStampRequest}
+          initialFlipped={initialFlipped}
+          animatingStampIndex={animatingStampIndex}
+          onAnimationComplete={handleAnimationComplete}
+        />
       </div>
     </div>
   );

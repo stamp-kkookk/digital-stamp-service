@@ -1,7 +1,7 @@
 import { Camera, X } from 'lucide-react';
 import { useRef } from 'react';
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3MB
 
 interface IconUploadProps {
   value: string | null;
@@ -16,7 +16,7 @@ export function IconUpload({ value, onChange }: IconUploadProps) {
     if (!file) return;
 
     if (file.size > MAX_SIZE_BYTES) {
-      alert('아이콘 이미지 크기는 5MB 이하여야 합니다.');
+      alert('아이콘 이미지 크기는 3MB 이하여야 합니다.');
       return;
     }
 
@@ -54,15 +54,18 @@ export function IconUpload({ value, onChange }: IconUploadProps) {
           <Camera size={24} className="text-slate-400" />
         )}
       </div>
-      {value && (
-        <button
-          type="button"
-          onClick={() => onChange(null)}
-          className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
-        >
-          <X size={14} /> 삭제
-        </button>
-      )}
+      <div className="flex flex-col gap-1">
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
+          >
+            <X size={14} /> 삭제
+          </button>
+        )}
+        <p className="text-xs text-kkookk-steel">최대 3MB · 권장 200×200px</p>
+      </div>
       <input
         ref={inputRef}
         type="file"

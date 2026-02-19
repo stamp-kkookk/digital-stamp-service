@@ -2,6 +2,7 @@ package com.project.kkookk.owner.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.owner.controller.dto.OwnerLoginRequest;
 import com.project.kkookk.owner.controller.dto.OwnerLoginResponse;
@@ -24,6 +25,7 @@ public class OwnerAuthService {
     private final OwnerAccountRepository ownerAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public OwnerSignupResponse signup(OwnerSignupRequest request) {
@@ -45,6 +47,7 @@ public class OwnerAuthService {
         return OwnerSignupResponse.from(savedOwnerAccount);
     }
 
+    @Transactional
     public OwnerLoginResponse login(OwnerLoginRequest request) {
         OwnerAccount ownerAccount =
                 ownerAccountRepository
@@ -59,9 +62,12 @@ public class OwnerAuthService {
         String accessToken =
                 jwtUtil.generateOwnerToken(
                         ownerAccount.getId(), ownerAccount.getEmail(), ownerAccount.isAdmin());
+        String refreshToken =
+                refreshTokenService.issueOwnerRefreshToken(
+                        ownerAccount.getId(), ownerAccount.getEmail(), ownerAccount.isAdmin());
         log.info("[Auth] Owner login success ownerId={}", ownerAccount.getId());
 
-        return OwnerLoginResponse.of(accessToken, ownerAccount);
+        return OwnerLoginResponse.of(accessToken, refreshToken, ownerAccount);
     }
 
     private void validateEmailNotDuplicated(String email) {

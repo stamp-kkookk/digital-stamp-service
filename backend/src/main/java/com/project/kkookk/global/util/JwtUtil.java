@@ -6,9 +6,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -129,6 +133,37 @@ public class JwtUtil {
     private SecretKey getSigningKey() {
         byte[] keyBytes = jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    // ========== RefreshToken 관련 메서드 ==========
+
+    /** RefreshToken 생성 (UUID 기반, JWT 아님) */
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    /** RefreshToken SHA-256 해싱 (DB 저장용) */
+    public String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    /** RefreshToken 만료 여부 확인 */
+    public boolean isRefreshTokenExpired(LocalDateTime expiresAt) {
+        return LocalDateTime.now().isAfter(expiresAt);
     }
 
     // ========== 하위 호환용 메서드 (Deprecated) ==========

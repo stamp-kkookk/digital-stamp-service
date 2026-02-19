@@ -3,7 +3,9 @@ package com.project.kkookk.migration.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -17,6 +19,7 @@ import com.project.kkookk.migration.service.exception.MigrationAccessDeniedExcep
 import com.project.kkookk.migration.service.exception.MigrationAlreadyPendingException;
 import com.project.kkookk.migration.service.exception.MigrationImageTooLargeException;
 import com.project.kkookk.migration.service.exception.MigrationRequestNotFoundException;
+import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
 import com.project.kkookk.wallet.domain.CustomerWallet;
@@ -296,7 +299,7 @@ class CustomerMigrationServiceTest {
     }
 
     @Test
-    @DisplayName("내 마이그레이션 요청 목록 조회 성공")
+    @DisplayName("내 마이그레이션 요청 목록 조회 성공 - storeName 포함")
     void getMyMigrationRequests_Success() {
         // given
         StampMigrationRequest request1 =
@@ -317,10 +320,19 @@ class CustomerMigrationServiceTest {
                         .requestedAt(LocalDateTime.now())
                         .build();
 
+        Store store1 = mock(Store.class);
+        given(store1.getId()).willReturn(STORE_ID);
+        given(store1.getName()).willReturn("꾹꾹 카페 강남점");
+
+        Store store2 = mock(Store.class);
+        given(store2.getId()).willReturn(200L);
+        given(store2.getName()).willReturn("꾹꾹 베이커리");
+
         given(
                         migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
                                 CUSTOMER_WALLET_ID))
                 .willReturn(List.of(request2, request1));
+        given(storeRepository.findAllById(anySet())).willReturn(List.of(store1, store2));
 
         // when
         List<MigrationListItemResponse> responses =
@@ -329,8 +341,10 @@ class CustomerMigrationServiceTest {
         // then
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).storeId()).isEqualTo(200L);
+        assertThat(responses.get(0).storeName()).isEqualTo("꾹꾹 베이커리");
         assertThat(responses.get(0).claimedStampCount()).isEqualTo(3);
         assertThat(responses.get(1).storeId()).isEqualTo(STORE_ID);
+        assertThat(responses.get(1).storeName()).isEqualTo("꾹꾹 카페 강남점");
         assertThat(responses.get(1).claimedStampCount()).isEqualTo(5);
     }
 
@@ -342,6 +356,7 @@ class CustomerMigrationServiceTest {
                         migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
                                 CUSTOMER_WALLET_ID))
                 .willReturn(List.of());
+        given(storeRepository.findAllById(anySet())).willReturn(List.of());
 
         // when
         List<MigrationListItemResponse> responses =

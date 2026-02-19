@@ -417,6 +417,7 @@ Customer requests /api/customer/stores/{storeId}/summary
 | STORE_NOT_FOUND | 404 | STORE_NOT_FOUND | 매장을 찾을 수 없습니다 | findByIdAndOwnerAccountId returns empty, OR findById returns empty for customer |
 | STORE_INACTIVE | 403 | STORE_INACTIVE | 해당 매장은 현재 이용할 수 없습니다 | (레거시) Customer accesses non-LIVE store |
 | STORE_NOT_OPERATIONAL | 403 | STORE_NOT_OPERATIONAL | 매장이 운영 중이 아닙니다 | Customer accesses non-LIVE store |
+| STORE_UPDATE_NOT_ALLOWED | 400 | STORE_UPDATE_NOT_ALLOWED | 운영 중인 매장은 일부 필드만 수정할 수 있습니다 | LIVE 매장에서 name/address/phone/placeRef 변경 시도 |
 | STORE_STATUS_TRANSITION_INVALID | 400 | STORE_STATUS_TRANSITION_INVALID | 유효하지 않은 매장 상태 전이입니다 | Invalid state transition (e.g., DRAFT→SUSPENDED) |
 | STORE_PLACE_REF_DUPLICATED | 409 | STORE_PLACE_REF_DUPLICATED | 이미 등록된 장소입니다 | placeRef uniqueness violation |
 | STORE_ICON_TOO_LARGE | 413 | STORE_ICON_TOO_LARGE | 아이콘 이미지 크기가 너무 큽니다 (최대 5MB) | Icon image exceeds 5MB limit |
@@ -463,7 +464,19 @@ Customer requests /api/customer/stores/{storeId}/summary
 - **Scenario**: Customer accesses store summary but no ACTIVE stamp card exists.
 - **Behavior**: `StoreStampCardSummaryResponse.stampCard` is `null`. The frontend should display an appropriate "no active card" state.
 
-### 8.7 No Pagination on Owner Store List
+### 8.7 LIVE Store Update Field Restrictions
+
+- **Scenario**: Owner tries to edit a LIVE store's name, address, phone, or placeRef.
+- **Behavior**: `STORE_UPDATE_NOT_ALLOWED` (400) error. Only `description` and `iconImageBase64` are editable.
+- **Frontend**: Name, address, phone inputs are disabled. Place search button is hidden.
+
+| Status | Editable Fields | Restricted Fields |
+|--------|----------------|-------------------|
+| DRAFT | All | None |
+| LIVE | description, iconImageBase64 | name, address, phone, placeRef |
+| SUSPENDED/DELETED | None | All (existing behavior) |
+
+### 8.8 No Pagination on Owner Store List
 
 - **Scenario**: Owner has many stores.
 - **Behavior**: `getStores()` returns `List<StoreResponse>` (no pagination). For MVP with typical single-digit store counts per owner, this is acceptable.

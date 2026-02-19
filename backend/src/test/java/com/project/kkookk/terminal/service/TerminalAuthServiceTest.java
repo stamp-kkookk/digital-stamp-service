@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.owner.domain.OwnerAccount;
 import com.project.kkookk.owner.repository.OwnerAccountRepository;
@@ -38,6 +39,8 @@ class TerminalAuthServiceTest {
 
     @Mock private JwtUtil jwtUtil;
 
+    @Mock private RefreshTokenService refreshTokenService;
+
     @Test
     @DisplayName("터미널 로그인 성공")
     void login_Success() {
@@ -68,6 +71,8 @@ class TerminalAuthServiceTest {
                 .willReturn(Optional.of(store));
         given(jwtUtil.generateTerminalToken(ownerId, email, storeId))
                 .willReturn("mock.terminal.token");
+        given(refreshTokenService.issueTerminalRefreshToken(ownerId, email, storeId))
+                .willReturn("mock.refresh.token");
 
         // when
         TerminalLoginResponse response = terminalAuthService.login(request);

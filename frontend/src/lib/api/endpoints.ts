@@ -109,6 +109,7 @@ export const API_ENDPOINTS = {
 export const QUERY_KEYS = {
   // Customer
   walletStampCards: (storeId: number) => ['wallet', 'stampCards', storeId] as const,
+  allWalletStampCards: () => ['wallet', 'stampCards', 'all'] as const,
   stampHistory: (storeId: number) =>
     ['wallet', 'stampHistory', storeId] as const,
   redeemHistory: (storeId: number) => ['wallet', 'redeemHistory', storeId] as const,
