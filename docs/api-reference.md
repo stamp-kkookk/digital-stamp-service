@@ -145,7 +145,7 @@
 | POST | `/api/owner/stores` | `StoreController.createStore()` | 매장 생성 (항상 DRAFT 상태로 생성, Admin 승인 후 LIVE) |
 | GET | `/api/owner/stores` | `StoreController.getStores()` | 소유 매장 목록 (DELETED 제외) |
 | GET | `/api/owner/stores/{storeId}` | `StoreController.getStore()` | 매장 상세 |
-| PUT | `/api/owner/stores/{storeId}` | `StoreController.updateStore()` | 매장 정보 수정 |
+| PUT | `/api/owner/stores/{storeId}` | `StoreController.updateStore()` | 매장 정보 수정 (LIVE: description/icon만 가능, STORE_UPDATE_NOT_ALLOWED) |
 | DELETE | `/api/owner/stores/{storeId}` | `StoreController.deleteStore()` | 매장 삭제 (Soft delete → DELETED 상태 전이) |
 
 ### 장소 검색

@@ -48,6 +48,21 @@ class StoreServiceTest {
         return store;
     }
 
+    private Store createLiveStoreWithId() {
+        Store store =
+                new Store(
+                        "라이브 매장",
+                        "서울시 서초구",
+                        "010-1111-2222",
+                        "place-ref-1",
+                        null,
+                        "매장 설명",
+                        OWNER_ID);
+        ReflectionTestUtils.setField(store, "id", STORE_ID);
+        store.transitionTo(StoreStatus.LIVE);
+        return store;
+    }
+
     @Test
     @DisplayName("매장 생성 성공 - 항상 DRAFT 상태로 생성")
     void createStore_Success() {
@@ -150,6 +165,100 @@ class StoreServiceTest {
         // then
         assertThat(response.name()).isEqualTo("수정된 매장");
         then(storeRepository).should().findByIdAndOwnerAccountId(STORE_ID, OWNER_ID);
+    }
+
+    @Test
+    @DisplayName("LIVE 매장 description/icon 수정 성공")
+    void updateStore_Live_PartialUpdate_Success() {
+        // given
+        Store store = createLiveStoreWithId();
+        StoreUpdateRequest request =
+                new StoreUpdateRequest(
+                        "라이브 매장",
+                        "서울시 서초구",
+                        "010-1111-2222",
+                        "새로운 설명",
+                        "newIconBase64",
+                        "place-ref-1");
+        given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
+                .willReturn(Optional.of(store));
+        given(storeAuditLogRepository.save(any(StoreAuditLog.class))).willReturn(null);
+
+        // when
+        StoreResponse response = storeService.updateStore(OWNER_ID, STORE_ID, request);
+
+        // then
+        assertThat(response.description()).isEqualTo("새로운 설명");
+        assertThat(response.iconImageBase64()).isEqualTo("newIconBase64");
+        assertThat(response.name()).isEqualTo("라이브 매장");
+    }
+
+    @Test
+    @DisplayName("LIVE 매장 name 변경 시 실패")
+    void updateStore_Live_ChangeName_Fail() {
+        // given
+        Store store = createLiveStoreWithId();
+        StoreUpdateRequest request =
+                new StoreUpdateRequest(
+                        "변경된 이름", "서울시 서초구", "010-1111-2222", "매장 설명", null, "place-ref-1");
+        given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
+                .willReturn(Optional.of(store));
+
+        // when & then
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
+    }
+
+    @Test
+    @DisplayName("LIVE 매장 address 변경 시 실패")
+    void updateStore_Live_ChangeAddress_Fail() {
+        // given
+        Store store = createLiveStoreWithId();
+        StoreUpdateRequest request =
+                new StoreUpdateRequest(
+                        "라이브 매장", "서울시 강남구 변경", "010-1111-2222", "매장 설명", null, "place-ref-1");
+        given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
+                .willReturn(Optional.of(store));
+
+        // when & then
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
+    }
+
+    @Test
+    @DisplayName("LIVE 매장 phone 변경 시 실패")
+    void updateStore_Live_ChangePhone_Fail() {
+        // given
+        Store store = createLiveStoreWithId();
+        StoreUpdateRequest request =
+                new StoreUpdateRequest(
+                        "라이브 매장", "서울시 서초구", "010-9999-8888", "매장 설명", null, "place-ref-1");
+        given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
+                .willReturn(Optional.of(store));
+
+        // when & then
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
+    }
+
+    @Test
+    @DisplayName("LIVE 매장 placeRef 변경 시 실패")
+    void updateStore_Live_ChangePlaceRef_Fail() {
+        // given
+        Store store = createLiveStoreWithId();
+        StoreUpdateRequest request =
+                new StoreUpdateRequest(
+                        "라이브 매장", "서울시 서초구", "010-1111-2222", "매장 설명", null, "new-place-ref");
+        given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
+                .willReturn(Optional.of(store));
+
+        // when & then
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
     }
 
     @Test
