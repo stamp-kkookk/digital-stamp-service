@@ -39,12 +39,18 @@ export function StampCardBack({ card, className, onStampRequest, animatingStampI
         <div
             className={cn(
                 'w-full aspect-[1.58/1] rounded-2xl overflow-hidden relative',
-                'bg-white select-none flex flex-col',
+                'bg-white select-none flex flex-col texture-cardstock-white shadow-cardstock',
                 className,
             )}
         >
-            {/* 보더 */}
+            {/* 보더 + 엣지 두께감 */}
             <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-slate-200/80 pointer-events-none" />
+            <div
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{
+                    boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,0.6)',
+                }}
+            />
 
             {/* 상단: 진행률 + 보상 */}
             <div className="px-4 pt-4 pb-2 shrink-0 flex items-center justify-between">

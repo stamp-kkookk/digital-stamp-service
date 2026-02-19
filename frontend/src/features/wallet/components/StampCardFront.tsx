@@ -22,7 +22,7 @@ export function StampCardFront({ card, className }: StampCardFrontProps) {
     <div
       className={cn(
         "w-full aspect-[1.58/1] rounded-2xl overflow-hidden relative",
-        "select-none",
+        "select-none texture-cardstock shadow-cardstock",
         !hasBackgroundImage && "bg-linear-to-br",
         !hasBackgroundImage && bgGradient,
         className,
@@ -70,19 +70,23 @@ export function StampCardFront({ card, className }: StampCardFrontProps) {
 
           {/* 하단 그라데이션 깊이감 */}
           <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/8 to-transparent" />
+
+          {/* 매트 코팅 오버레이 - 채도 약간 낮춰 카드스톡 느낌 */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'rgba(0,0,0,0.03)', mixBlendMode: 'saturation' }}
+          />
         </>
       )}
 
-      {/* 미세한 노이즈 텍스처 오버레이 */}
+      {/* 인너 보더 하이라이트 - 카드 엣지 두께감 */}
+      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" />
       <div
-        className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none"
+        className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255,255,255,0.15)',
         }}
       />
-
-      {/* 인너 보더 하이라이트 */}
-      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/15 pointer-events-none" />
     </div>
   );
 }
