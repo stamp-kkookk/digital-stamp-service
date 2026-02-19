@@ -111,7 +111,7 @@ export function WalletPage() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
@@ -124,7 +124,7 @@ export function WalletPage() {
   // Error state
   if (error) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           <AlertCircle className="w-12 h-12 text-red-500" />
@@ -144,7 +144,7 @@ export function WalletPage() {
   // Empty state
   if (cards.length === 0) {
     return (
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-full">
         <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
           <p className="text-lg font-medium text-kkookk-navy">아직 스탬프 카드가 없어요</p>
@@ -157,7 +157,7 @@ export function WalletPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col h-full">
       <WalletHeader onMenuClick={() => setIsMenuOpen(true)} />
 
       <div className="flex-1 flex flex-col justify-center pb-8">
