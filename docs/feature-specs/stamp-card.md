@@ -10,7 +10,7 @@
 ## 1. Overview
 
 스탬프 카드는 매장(Store)에 종속되며, Owner가 백오피스에서 CRUD 및 상태 전이를 수행한다.
-카드는 DRAFT -> ACTIVE -> PAUSED -> ARCHIVED 라이프사이클을 따르며,
+카드는 DRAFT -> ACTIVE -> ARCHIVED 라이프사이클을 따르며,
 **매장당 ACTIVE 카드는 반드시 1개**만 존재할 수 있다.
 
 ---
@@ -165,12 +165,11 @@ Owner Browser          StampCardController       StampCardService       StampCar
 
 ### 5.1 Transition Matrix
 
-| From \ To | DRAFT | ACTIVE | PAUSED | ARCHIVED |
-|-----------|-------|--------|--------|----------|
-| **DRAFT** | - | OK | - | OK |
-| **ACTIVE** | - | - | OK | OK |
-| **PAUSED** | - | OK | - | OK |
-| **ARCHIVED** | - | - | - | - |
+| From \ To | DRAFT | ACTIVE | ARCHIVED |
+|-----------|-------|--------|----------|
+| **DRAFT** | - | OK | OK |
+| **ACTIVE** | - | - | OK |
+| **ARCHIVED** | - | - | - |
 
 ### 5.2 State Machine Diagram
 
@@ -188,30 +187,17 @@ Owner Browser          StampCardController       StampCardService       StampCar
                  |  ACTIVE   |     |  ARCHIVED  |
                  | - Limited |     |  (Final)   |
                  |   edit    |     |  Read-only |
-                 +--+----+--+     +------------+
-                    |    |              ^  ^
-              pause()  archive()        |  |
-                    |    |              |  |
-                    |    +--------------+  |
-                    v                      |
-                 +-----------+             |
-                 |  PAUSED   |             |
-                 | - Fully   |             |
-                 |   editable|             |
-                 +--+----+---+             |
-                    |    |                 |
-             activate()  archive()         |
-                    |    +-----------------+
-                    v
-                  ACTIVE
+                 +-----+-----+     +------------+
+                       |                 ^
+                   archive()             |
+                       +-----------------+
 ```
 
 ### 5.3 Transition Logic (StampCardStatus.java)
 
 ```java
 ALLOWED_FROM_DRAFT  = Set.of(ACTIVE, ARCHIVED)
-ALLOWED_FROM_ACTIVE = Set.of(PAUSED, ARCHIVED)
-ALLOWED_FROM_PAUSED = Set.of(ACTIVE, ARCHIVED)
+ALLOWED_FROM_ACTIVE = Set.of(ARCHIVED)
 ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 ```
 
@@ -221,7 +207,6 @@ ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 |--------|-----------|------------------------------------------------|--------|
 | DRAFT | Yes | N/A | Yes |
 | ACTIVE | No | Yes | No |
-| PAUSED | Yes | N/A | No |
 | ARCHIVED | No | No | No |
 
 ---

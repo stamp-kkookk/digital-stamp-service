@@ -11,7 +11,6 @@ import {
 } from "@/features/store-management/hooks/useStampCard";
 import { useStore, useDeleteStore } from "@/features/store-management/hooks/useStore";
 import type { StampCardDesignType, StampCardStatus } from "@/types/api";
-import { isAxiosError } from "axios";
 import {
   AlertCircle,
   AlertTriangle,
@@ -20,7 +19,6 @@ import {
   Edit,
   Loader2,
   MapPin,
-  Pause,
   Pencil,
   Play,
   Plus,
@@ -290,10 +288,39 @@ export function StoreDetailPage() {
   const handleStatusChange = (stampCardId: number, status: StampCardStatus) => {
     const labels: Record<string, string> = {
       ACTIVE: "게시",
-      PAUSED: "일시정지",
       ARCHIVED: "보관",
       DRAFT: "초안으로 변경",
     };
+
+    // 활성화 요청 + 이미 활성 카드가 있으면 → 교체 모달 1번만 표시
+    if (status === "ACTIVE" && activeCard) {
+      openConfirm({
+        title: "활성 카드 교체",
+        description: `현재 활성화된 "${activeCard.title}" 카드를 보관하고\n이 카드를 게시하시겠습니까?`,
+        variant: "default",
+        onConfirm: async () => {
+          closeConfirm();
+          try {
+            await updateStatus.mutateAsync({
+              storeId: storeIdNum,
+              stampCardId: activeCard.id,
+              status: "ARCHIVED",
+            });
+            await updateStatus.mutateAsync({
+              storeId: storeIdNum,
+              stampCardId,
+              status: "ACTIVE",
+            });
+            kkookkToast.success("활성 카드가 교체되었습니다");
+          } catch (err) {
+            kkookkToast.error("상태 변경 실패", {
+              description: err instanceof Error ? err.message : "알 수 없는 오류",
+            });
+          }
+        },
+      });
+      return;
+    }
 
     openConfirm({
       title: "상태 변경",
@@ -305,43 +332,9 @@ export function StoreDetailPage() {
           await updateStatus.mutateAsync({ storeId: storeIdNum, stampCardId, status });
           kkookkToast.success(`스탬프 카드가 "${labels[status]}" 상태로 변경되었습니다`);
         } catch (err) {
-          if (
-            status === "ACTIVE" &&
-            isAxiosError(err) &&
-            err.response?.status === 409 &&
-            activeCard
-          ) {
-            openConfirm({
-              title: "활성 카드 교체",
-              description: `현재 활성화된 "${activeCard.title}" 카드를 비활성화하고\n이 카드를 게시하시겠습니까?`,
-              variant: "default",
-              onConfirm: async () => {
-                closeConfirm();
-                try {
-                  await updateStatus.mutateAsync({
-                    storeId: storeIdNum,
-                    stampCardId: activeCard.id,
-                    status: "PAUSED",
-                  });
-                  await updateStatus.mutateAsync({
-                    storeId: storeIdNum,
-                    stampCardId,
-                    status: "ACTIVE",
-                  });
-                  kkookkToast.success("활성 카드가 교체되었습니다");
-                } catch (retryErr) {
-                  kkookkToast.error("상태 변경 실패", {
-                    description:
-                      retryErr instanceof Error ? retryErr.message : "알 수 없는 오류",
-                  });
-                }
-              },
-            });
-          } else {
-            kkookkToast.error("상태 변경 실패", {
-              description: err instanceof Error ? err.message : "알 수 없는 오류",
-            });
-          }
+          kkookkToast.error("상태 변경 실패", {
+            description: err instanceof Error ? err.message : "알 수 없는 오류",
+          });
         }
       },
     });
@@ -565,14 +558,6 @@ export function StoreDetailPage() {
                           className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50"
                         >
                           <BarChart3 size={16} /> 통계
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleStatusChange(activeCard.id, "PAUSED")
-                          }
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-yellow-700 border border-yellow-200 rounded-lg hover:bg-yellow-50"
-                        >
-                          <Pause size={16} /> 일시정지
                         </button>
                       </div>
                     </div>
