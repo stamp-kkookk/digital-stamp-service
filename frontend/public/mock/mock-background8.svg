@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <rect width="1240" height="790" fill="#0F0F1A"/>
+  <!-- Star field -->
+  <g fill="#FFD700">
+    <circle cx="100" cy="80" r="1.8" opacity="0.6"/><circle cx="250" cy="200" r="1.2" opacity="0.4"/>
+    <circle cx="400" cy="50" r="2.2" opacity="0.7"/><circle cx="550" cy="180" r="1.4" opacity="0.5"/>
+    <circle cx="700" cy="70" r="2" opacity="0.6"/><circle cx="850" cy="150" r="1.2" opacity="0.3"/>
+    <circle cx="1000" cy="90" r="2.5" opacity="0.7"/><circle cx="1150" cy="200" r="1.6" opacity="0.5"/>
+    <circle cx="150" cy="350" r="1.2" opacity="0.3"/><circle cx="300" cy="450" r="1.6" opacity="0.5"/>
+    <circle cx="500" cy="380" r="1.4" opacity="0.4"/><circle cx="800" cy="420" r="1.2" opacity="0.3"/>
+    <circle cx="950" cy="550" r="2" opacity="0.5"/><circle cx="1100" cy="400" r="1.4" opacity="0.4"/>
+    <circle cx="200" cy="600" r="2.2" opacity="0.6"/><circle cx="450" cy="650" r="1.6" opacity="0.5"/>
+    <circle cx="780" cy="680" r="2" opacity="0.6"/><circle cx="1050" cy="700" r="2.8" opacity="0.7"/>
+    <circle cx="350" cy="120" r="1.5" opacity="0.45"/><circle cx="900" cy="280" r="1.8" opacity="0.55"/>
+  </g>
+  <!-- Glow -->
+  <circle cx="620" cy="350" r="140" fill="#FFD700" opacity="0.04"/>
+  <!-- Cocktail glass -->
+  <g transform="translate(620, 350) scale(2)">
+    <!-- Glass bowl (martini shape) -->
+    <path d="M-40,-40 L0,20 L40,-40Z" fill="#1A1A30" stroke="#FFD700" stroke-width="1.5" stroke-opacity="0.6"/>
+    <!-- Liquid -->
+    <path d="M-30,-30 L0,10 L30,-30Z" fill="#FFD700" opacity="0.2"/>
+    <!-- Liquid surface -->
+    <path d="M-30,-30 Q0,-22 30,-30" fill="#FFD700" opacity="0.15"/>
+    <!-- Stem -->
+    <line x1="0" y1="20" x2="0" y2="55" stroke="#FFD700" stroke-width="3" stroke-opacity="0.5"/>
+    <!-- Base -->
+    <ellipse cx="0" cy="55" rx="22" ry="5" fill="#FFD700" opacity="0.4" stroke="#FFD700" stroke-width="1" stroke-opacity="0.3"/>
+    <!-- Glass highlight -->
+    <path d="M-25,-35 L-8,0" stroke="white" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+    <!-- Sparkle on rim -->
+    <circle cx="-30" cy="-30" r="3" fill="white" opacity="0.35"/>
+    <!-- Small diamond decoration -->
+    <path d="M32,-35 L38,-28 L32,-21 L26,-28Z" fill="#FFD700" opacity="0.5"/>
+  </g>
+</svg>
