@@ -269,12 +269,6 @@ export function RequestStampButton() {
         )}
       </div>
 
-      <div className="mb-6 px-4">
-        <p className="text-xs text-kkookk-steel text-center leading-relaxed">
-          리워드 사용 시 사장님 확인이 필요합니다.
-        </p>
-      </div>
-
       <div className="space-y-3 w-full">
         <Button
           onClick={handleRequest}

@@ -81,18 +81,6 @@ public class CustomerWalletService {
         return !customerWalletRepository.existsByPhone(normalizePhone(phone));
     }
 
-    private String normalizePhone(String phone) {
-        return phone.replaceAll("[^0-9]", "");
-    }
-
-    public boolean checkNicknameAvailable(String nickname) {
-        return !customerWalletRepository.existsByNickname(nickname);
-    }
-
-    public boolean checkPhoneAvailable(String phone) {
-        return !customerWalletRepository.existsByPhone(normalizePhone(phone));
-    }
-
     @Transactional
     public WalletRegisterResponse register(WalletRegisterRequest request) {
         String phone = normalizePhone(request.phone());

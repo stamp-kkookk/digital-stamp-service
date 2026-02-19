@@ -4,16 +4,28 @@
  * API 연동: createMigration({ storeId, imageData, claimedStampCount })
  */
 
-import { useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronDown, Camera, Check, Info, AlertCircle, Loader2, Store } from 'lucide-react';
-import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { StepUpVerify } from '@/components/shared/StepUpVerify';
-import { isStepUpValid } from '@/lib/api/tokenManager';
-import { useCreateMigration, useMigrationList } from '@/features/migration/hooks/useMigration';
-import { kkookkToast } from '@/components/ui/Toast';
-import { useAllWalletStampCards } from '@/features/wallet/hooks/useWallet';
+import { StepUpVerify } from "@/components/shared/StepUpVerify";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { kkookkToast } from "@/components/ui/Toast";
+import {
+  useCreateMigration,
+  useMigrationList,
+} from "@/features/migration/hooks/useMigration";
+import { useAllWalletStampCards } from "@/features/wallet/hooks/useWallet";
+import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
+import { isStepUpValid } from "@/lib/api/tokenManager";
+import {
+  AlertCircle,
+  Camera,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  Info,
+  Loader2,
+  Store,
+} from "lucide-react";
+import { useMemo, useRef, useState } from "react";
 
 /** File → Base64 data URI */
 function fileToBase64(file: File): Promise<string> {
@@ -30,9 +42,11 @@ export function MigrationForm() {
   const originStoreId = urlStoreId ? Number(urlStoreId) : undefined;
 
   const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
-  const [selectedStoreId, setSelectedStoreId] = useState<number | undefined>(originStoreId);
+  const [selectedStoreId, setSelectedStoreId] = useState<number | undefined>(
+    originStoreId,
+  );
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [count, setCount] = useState('');
+  const [count, setCount] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -58,10 +72,10 @@ export function MigrationForm() {
     () =>
       new Set(
         (migrations ?? [])
-          .filter((m) => m.status === 'SUBMITTED')
-          .map((m) => m.storeId)
+          .filter((m) => m.status === "SUBMITTED")
+          .map((m) => m.storeId),
       ),
-    [migrations]
+    [migrations],
   );
 
   // 선택 가능한 매장 먼저, 심사 중 매장 뒤로
@@ -70,14 +84,16 @@ export function MigrationForm() {
       ...availableStores.filter((s) => !pendingStoreIds.has(s.storeId)),
       ...availableStores.filter((s) => pendingStoreIds.has(s.storeId)),
     ],
-    [availableStores, pendingStoreIds]
+    [availableStores, pendingStoreIds],
   );
 
-  const selectedStoreName = availableStores.find((s) => s.storeId === selectedStoreId)?.storeName;
+  const selectedStoreName = availableStores.find(
+    (s) => s.storeId === selectedStoreId,
+  )?.storeName;
 
   const isFormValid =
     selectedStoreId !== undefined &&
-    count.trim() !== '' &&
+    count.trim() !== "" &&
     Number(count) >= 1 &&
     file !== null &&
     !pendingStoreIds.has(selectedStoreId);
@@ -104,26 +120,26 @@ export function MigrationForm() {
         },
         {
           onSuccess: () => {
-            kkookkToast.success('전환 신청이 접수되었습니다');
-            customerNavigate('/migrations');
+            kkookkToast.success("전환 신청이 접수되었습니다");
+            customerNavigate("/migrations");
           },
           onError: (error) => {
             const err = error as { response?: { status?: number } };
             if (err.response?.status === 409) {
-              setSubmitError('이미 심사 중인 전환 신청이 있습니다.');
+              setSubmitError("이미 심사 중인 전환 신청이 있습니다.");
             } else if (err.response?.status === 413) {
-              setSubmitError('이미지 크기가 너무 큽니다. (최대 5MB)');
+              setSubmitError("이미지 크기가 너무 큽니다. (최대 5MB)");
             } else if (err.response?.status === 403) {
-              setSubmitError('본인 인증이 만료되었습니다. 다시 인증해주세요.');
+              setSubmitError("본인 인증이 만료되었습니다. 다시 인증해주세요.");
               setStepUpValid(false);
             } else {
-              setSubmitError('전환 신청에 실패했습니다. 다시 시도해주세요.');
+              setSubmitError("전환 신청에 실패했습니다. 다시 시도해주세요.");
             }
           },
-        }
+        },
       );
     } catch {
-      setSubmitError('이미지 처리 중 오류가 발생했습니다.');
+      setSubmitError("이미지 처리 중 오류가 발생했습니다.");
     }
   };
 
@@ -133,13 +149,15 @@ export function MigrationForm() {
       <div className="h-full bg-white flex flex-col pt-12">
         <div className="px-6 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
           <button
-            onClick={() => customerNavigate('/migrations')}
+            onClick={() => customerNavigate("/migrations")}
             className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
             aria-label="뒤로 가기"
           >
             <ChevronLeft size={24} />
           </button>
-          <h1 className="font-bold text-lg ml-2 text-kkookk-navy">전환 신청하기</h1>
+          <h1 className="font-bold text-lg ml-2 text-kkookk-navy">
+            전환 신청하기
+          </h1>
         </div>
         <div className="flex-1 flex items-center justify-center">
           <StepUpVerify onVerified={() => setStepUpValid(true)} />
@@ -153,13 +171,15 @@ export function MigrationForm() {
       {/* 헤더 */}
       <div className="px-6 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
         <button
-          onClick={() => customerNavigate('/migrations')}
+          onClick={() => customerNavigate("/migrations")}
           className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
           aria-label="뒤로 가기"
         >
           <ChevronLeft size={24} />
         </button>
-        <h1 className="font-bold text-lg ml-2 text-kkookk-navy">전환 신청하기</h1>
+        <h1 className="font-bold text-lg ml-2 text-kkookk-navy">
+          전환 신청하기
+        </h1>
       </div>
 
       {/* 폼 콘텐츠 */}
@@ -169,7 +189,6 @@ export function MigrationForm() {
           <Info size={20} className="shrink-0" />
           <div>
             <p className="font-bold mb-1">안내사항</p>
-            <p>• 매장별로 1회만 전환 신청이 가능합니다.</p>
             <p>• 신청 후 승인까지 약 24~48시간 소요됩니다.</p>
           </div>
         </div>
@@ -186,24 +205,32 @@ export function MigrationForm() {
                 type="button"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
                 className={[
-                  'w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm transition-colors',
+                  "w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm transition-colors",
                   isDropdownOpen
-                    ? 'border-kkookk-orange-500 bg-white'
-                    : 'border-slate-200 bg-white hover:border-slate-300',
-                ].join(' ')}
+                    ? "border-kkookk-orange-500 bg-white"
+                    : "border-slate-200 bg-white hover:border-slate-300",
+                ].join(" ")}
               >
                 <div className="flex items-center gap-2.5">
                   <Store
                     size={16}
-                    className={selectedStoreName ? 'text-kkookk-navy' : 'text-slate-400'}
+                    className={
+                      selectedStoreName ? "text-kkookk-navy" : "text-slate-400"
+                    }
                   />
-                  <span className={selectedStoreName ? 'text-kkookk-navy font-medium' : 'text-slate-400'}>
-                    {selectedStoreName ?? '매장을 선택하세요'}
+                  <span
+                    className={
+                      selectedStoreName
+                        ? "text-kkookk-navy font-medium"
+                        : "text-slate-400"
+                    }
+                  >
+                    {selectedStoreName ?? "매장을 선택하세요"}
                   </span>
                 </div>
                 <ChevronDown
                   size={16}
-                  className={`text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`text-slate-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
@@ -233,19 +260,19 @@ export function MigrationForm() {
                             disabled={isPending}
                             onClick={() => handleStoreSelect(store.storeId)}
                             className={[
-                              'w-full flex items-center justify-between px-4 py-3 text-sm text-left border-b border-slate-100 last:border-b-0 transition-colors',
+                              "w-full flex items-center justify-between px-4 py-3 text-sm text-left border-b border-slate-100 last:border-b-0 transition-colors",
                               isPending
-                                ? 'opacity-50 cursor-not-allowed bg-white'
+                                ? "opacity-50 cursor-not-allowed bg-white"
                                 : isSelected
-                                ? 'bg-kkookk-orange-50'
-                                : 'hover:bg-slate-50',
-                            ].join(' ')}
+                                  ? "bg-kkookk-orange-50"
+                                  : "hover:bg-slate-50",
+                            ].join(" ")}
                           >
                             <span
                               className={
                                 isSelected && !isPending
-                                  ? 'font-medium text-kkookk-navy'
-                                  : 'text-kkookk-steel'
+                                  ? "font-medium text-kkookk-navy"
+                                  : "text-kkookk-steel"
                               }
                             >
                               {store.storeName}
@@ -257,7 +284,10 @@ export function MigrationForm() {
                                 </span>
                               )}
                               {isSelected && !isPending && (
-                                <Check size={14} className="text-kkookk-orange-500" />
+                                <Check
+                                  size={14}
+                                  className="text-kkookk-orange-500"
+                                />
                               )}
                             </div>
                           </button>
@@ -272,7 +302,10 @@ export function MigrationForm() {
 
           {/* 스탬프 개수 */}
           <div>
-            <label htmlFor="count-input" className="block text-xs font-bold text-kkookk-navy mb-2">
+            <label
+              htmlFor="count-input"
+              className="block text-xs font-bold text-kkookk-navy mb-2"
+            >
               보유 스탬프 개수 <span className="text-kkookk-orange-500">*</span>
             </label>
             <Input
@@ -291,7 +324,8 @@ export function MigrationForm() {
               htmlFor="photo-upload"
               className="block text-sm font-bold text-kkookk-navy mb-2"
             >
-              종이 쿠폰 사진 첨부 <span className="text-kkookk-orange-500">*</span>
+              종이 쿠폰 사진 첨부{" "}
+              <span className="text-kkookk-orange-500">*</span>
             </label>
             <p className="text-xs text-kkookk-steel mb-2">
               <span className="text-rose-600">• 파일 크기: 3MB 이하</span>
@@ -308,8 +342,10 @@ export function MigrationForm() {
 
                   const maxSize = 3 * 1024 * 1024;
                   if (selectedFile.size > maxSize) {
-                    alert('파일 크기가 너무 큽니다.\n3MB 이하의 이미지를 선택해주세요.');
-                    e.target.value = '';
+                    alert(
+                      "파일 크기가 너무 큽니다.\n3MB 이하의 이미지를 선택해주세요.",
+                    );
+                    e.target.value = "";
                     return;
                   }
 
@@ -320,7 +356,9 @@ export function MigrationForm() {
                 {file ? (
                   <>
                     <Check size={32} className="text-green-500 mb-2" />
-                    <p className="text-sm font-bold text-kkookk-navy">{file.name}</p>
+                    <p className="text-sm font-bold text-kkookk-navy">
+                      {file.name}
+                    </p>
                   </>
                 ) : (
                   <>
@@ -357,7 +395,7 @@ export function MigrationForm() {
               제출 중...
             </>
           ) : (
-            '제출하기'
+            "제출하기"
           )}
         </Button>
       </div>

@@ -5,7 +5,7 @@
 
 import type { Reward } from "@/types/domain";
 import type { WalletRewardItem } from "@/types/api";
-import { ChevronLeft, Gift, Loader2 } from "lucide-react";
+import { ChevronLeft, Gift, Info, Loader2 } from "lucide-react";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { RewardCard } from "./RewardCard";
 import { useWalletRewards } from "@/features/wallet/hooks/useWallet";
@@ -53,6 +53,12 @@ export function RewardList() {
 
       {/* 리워드 목록 */}
       <div className="p-6 space-y-4 overflow-y-auto">
+        {/* 안내 문구 */}
+        <div className="flex items-center gap-1.5 text-kkookk-steel">
+          <Info size={12} className="shrink-0 opacity-60" />
+          <p className="text-[11px] leading-relaxed">리워드 사용 시 사장님 확인이 필요합니다.</p>
+        </div>
+
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-kkookk-steel">
             <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
