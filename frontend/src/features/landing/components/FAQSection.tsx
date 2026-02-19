@@ -6,7 +6,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const faqs = [
   {
@@ -57,7 +56,11 @@ const itemVariants = {
   },
 };
 
-export function FAQSection() {
+interface FAQSectionProps {
+  onOpenContact?: () => void;
+}
+
+export function FAQSection({ onOpenContact }: FAQSectionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
@@ -151,8 +154,8 @@ export function FAQSection() {
           <p className="mb-6 text-lg text-kkookk-steel">
             지금 바로 문의주세요!
           </p>
-          <Link
-            to="/simulation"
+          <button
+            onClick={onOpenContact}
             className="relative inline-flex items-center justify-center px-8 py-3 overflow-hidden text-lg text-white transition-all duration-500 shadow-lg bg-kkookk-orange-500 rounded-2xl active:scale-95 group"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:-translate-y-full">
@@ -164,7 +167,7 @@ export function FAQSection() {
               <ChevronRight className="ml-2" />
             </span>
             <span className="invisible">바로 문의하기</span>
-          </Link>
+          </button>
         </motion.div>
       </div>
     </motion.section>

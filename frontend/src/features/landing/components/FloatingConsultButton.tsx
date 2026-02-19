@@ -1,18 +1,25 @@
 /**
  * FloatingConsultButton
- * 오픈카카오톡 상담 버튼 (우측 하단 고정)
+ * 문의하기 플로팅 버튼 (우측 하단 고정)
  */
 
-export function FloatingConsultButton() {
+import { MessageCircle } from "lucide-react";
+
+interface FloatingConsultButtonProps {
+  onOpenContact: () => void;
+}
+
+export function FloatingConsultButton({
+  onOpenContact,
+}: FloatingConsultButtonProps) {
   return (
-    <a
-      href="https://open.kakao.com/o/gqnX1Qei"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed z-50 transition-all duration-300 bottom-4 right-4 hover:scale-110 active:scale-95 md:bottom-4 md:right-4"
-      aria-label="카카오톡 상담하기"
+    <button
+      onClick={onOpenContact}
+      className="fixed z-50 flex items-center gap-2 rounded-full bg-[#FEE500] px-4 py-3 shadow-lg transition-all duration-300 bottom-4 right-4 hover:scale-105 active:scale-95"
+      aria-label="문의하기"
     >
-      <img src="/image/consult_small_yellow_pc.png" alt="상담하기" />
-    </a>
+      <MessageCircle className="h-5 w-5 text-[#391B1B]" />
+      <span className="text-sm font-semibold text-[#391B1B]">문의하기</span>
+    </button>
   );
 }
