@@ -40,6 +40,7 @@
 | Types | `frontend/src/features/migration/types.ts` |
 | Customer - Migration Form | `frontend/src/features/migration/components/customer/MigrationForm.tsx` |
 | Customer - Migration List | `frontend/src/features/migration/components/customer/MigrationList.tsx` |
+| Customer - Migration Detail | `frontend/src/features/migration/components/customer/MigrationDetail.tsx` |
 | Admin - Migration Manager | `frontend/src/features/migration/components/admin/MigrationManager.tsx` |
 
 ---
@@ -225,6 +226,7 @@ Customer App              Backend                    Owner Backoffice
 |-------|------|----------|-------------|
 | `id` | Long | No | 마이그레이션 요청 ID |
 | `storeId` | Long | No | 매장 ID |
+| `storeName` | String | No | 매장 이름 |
 | `status` | StampMigrationStatus | No | 요청 상태 |
 | `claimedStampCount` | Integer | No | 고객이 주장한 스탬프 개수 |
 | `approvedStampCount` | Integer | Yes | 승인된 스탬프 개수 |

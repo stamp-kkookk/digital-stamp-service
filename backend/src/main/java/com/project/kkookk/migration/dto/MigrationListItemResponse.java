@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public record MigrationListItemResponse(
         @Schema(description = "마이그레이션 요청 ID", example = "1") Long id,
         @Schema(description = "매장 ID", example = "1") Long storeId,
+        @Schema(description = "매장 이름", example = "꾹꾹 카페 강남점") String storeName,
         @Schema(description = "요청 상태", example = "SUBMITTED") StampMigrationStatus status,
         @Schema(description = "고객이 주장한 스탬프 개수", example = "8") Integer claimedStampCount,
         @Schema(description = "승인된 스탬프 개수 (승인 시에만 존재)", example = "7") Integer approvedStampCount,
@@ -18,10 +19,11 @@ public record MigrationListItemResponse(
         @Schema(description = "처리 완료 시각 (승인/반려 시)", example = "2025-01-16T14:20:00")
                 LocalDateTime processedAt) {
 
-    public static MigrationListItemResponse from(StampMigrationRequest entity) {
+    public static MigrationListItemResponse from(StampMigrationRequest entity, String storeName) {
         return new MigrationListItemResponse(
                 entity.getId(),
                 entity.getStoreId(),
+                storeName,
                 entity.getStatus(),
                 entity.getClaimedStampCount(),
                 entity.getApprovedStampCount(),

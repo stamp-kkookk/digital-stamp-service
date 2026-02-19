@@ -4,8 +4,8 @@
  * API 연동: createMigration({ storeId, imageData, claimedStampCount })
  */
 
-import { useState } from 'react';
-import { ChevronLeft, Camera, Check, Info, AlertCircle, Loader2 } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronDown, Camera, Check, Info, AlertCircle, Loader2, Store } from 'lucide-react';
 import { useCustomerNavigate } from '@/hooks/useCustomerNavigate';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -13,7 +13,7 @@ import { StepUpVerify } from '@/components/shared/StepUpVerify';
 import { isStepUpValid } from '@/lib/api/tokenManager';
 import { useCreateMigration, useMigrationList } from '@/features/migration/hooks/useMigration';
 import { kkookkToast } from '@/components/ui/Toast';
-import { useWalletStampCards } from '@/features/wallet/hooks/useWallet';
+import { useAllWalletStampCards } from '@/features/wallet/hooks/useWallet';
 
 /** File → Base64 data URI */
 function fileToBase64(file: File): Promise<string> {
@@ -26,36 +26,70 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 export function MigrationForm() {
-  const { storeId, customerNavigate } = useCustomerNavigate();
-  const storeIdNum = storeId ? Number(storeId) : undefined;
+  const { storeId: urlStoreId, customerNavigate } = useCustomerNavigate();
+  const originStoreId = urlStoreId ? Number(urlStoreId) : undefined;
 
   const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
+  const [selectedStoreId, setSelectedStoreId] = useState<number | undefined>(originStoreId);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [count, setCount] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Hooks
-  const { data: walletData } = useWalletStampCards(storeIdNum);
+  const { data: walletData } = useAllWalletStampCards();
   const { data: migrations } = useMigrationList();
   const createMigration = useCreateMigration();
 
-  // Store info from wallet
-  const storeName = walletData?.stampCards?.[0]?.store?.storeName ?? '현재 매장';
+  // 중복 없는 매장 목록
+  const availableStores = useMemo(() => {
+    const seen = new Set<number>();
+    return (walletData?.stampCards ?? [])
+      .filter((c) => {
+        if (seen.has(c.store.storeId)) return false;
+        seen.add(c.store.storeId);
+        return true;
+      })
+      .map((c) => ({ storeId: c.store.storeId, storeName: c.store.storeName }));
+  }, [walletData?.stampCards]);
 
-  // Check if already has pending migration for this store
-  const hasPending = (migrations ?? []).some(
-    (m) => m.storeId === storeIdNum && m.status === 'SUBMITTED'
+  // 현재 SUBMITTED 상태인 매장 set
+  const pendingStoreIds = useMemo(
+    () =>
+      new Set(
+        (migrations ?? [])
+          .filter((m) => m.status === 'SUBMITTED')
+          .map((m) => m.storeId)
+      ),
+    [migrations]
   );
 
+  // 선택 가능한 매장 먼저, 심사 중 매장 뒤로
+  const sortedStores = useMemo(
+    () => [
+      ...availableStores.filter((s) => !pendingStoreIds.has(s.storeId)),
+      ...availableStores.filter((s) => pendingStoreIds.has(s.storeId)),
+    ],
+    [availableStores, pendingStoreIds]
+  );
+
+  const selectedStoreName = availableStores.find((s) => s.storeId === selectedStoreId)?.storeName;
+
   const isFormValid =
+    selectedStoreId !== undefined &&
     count.trim() !== '' &&
     Number(count) >= 1 &&
     file !== null &&
-    !hasPending;
+    !pendingStoreIds.has(selectedStoreId);
+
+  const handleStoreSelect = (storeId: number) => {
+    setSelectedStoreId(storeId);
+    setIsDropdownOpen(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!storeIdNum || !file || !count) return;
+    if (!selectedStoreId || !file || !count) return;
 
     setSubmitError(null);
 
@@ -64,7 +98,7 @@ export function MigrationForm() {
 
       createMigration.mutate(
         {
-          storeId: storeIdNum,
+          storeId: selectedStoreId,
           imageData,
           claimedStampCount: parseInt(count, 10),
         },
@@ -141,23 +175,100 @@ export function MigrationForm() {
         </div>
 
         <div className="space-y-6">
-          {/* 매장 정보 */}
+          {/* 매장 선택 드롭다운 */}
           <div>
-            <label className="block text-sm font-bold text-kkookk-navy mb-2">
-              매장
-            </label>
-            <div className="w-full p-4 bg-kkookk-sand rounded-xl border border-slate-200 text-kkookk-navy font-medium">
-              {storeName}
+            <p className="text-sm font-bold text-kkookk-navy mb-2">
+              매장 선택 <span className="text-kkookk-orange-500">*</span>
+            </p>
+            <div className="relative" ref={dropdownRef}>
+              {/* 트리거 버튼 */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                className={[
+                  'w-full flex items-center justify-between px-4 py-3.5 rounded-xl border text-sm transition-colors',
+                  isDropdownOpen
+                    ? 'border-kkookk-orange-500 bg-white'
+                    : 'border-slate-200 bg-white hover:border-slate-300',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Store
+                    size={16}
+                    className={selectedStoreName ? 'text-kkookk-navy' : 'text-slate-400'}
+                  />
+                  <span className={selectedStoreName ? 'text-kkookk-navy font-medium' : 'text-slate-400'}>
+                    {selectedStoreName ?? '매장을 선택하세요'}
+                  </span>
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={`text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* 드롭다운 패널 */}
+              {isDropdownOpen && (
+                <>
+                  {/* 백드롭 — 외부 클릭 시 닫기 */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsDropdownOpen(false)}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                    {sortedStores.length === 0 ? (
+                      <div className="flex items-center gap-2 px-4 py-3 text-sm text-kkookk-steel">
+                        <Store size={15} className="shrink-0" />
+                        <span>스탬프 카드가 있는 매장이 없습니다.</span>
+                      </div>
+                    ) : (
+                      sortedStores.map((store) => {
+                        const isPending = pendingStoreIds.has(store.storeId);
+                        const isSelected = selectedStoreId === store.storeId;
+                        return (
+                          <button
+                            key={store.storeId}
+                            type="button"
+                            disabled={isPending}
+                            onClick={() => handleStoreSelect(store.storeId)}
+                            className={[
+                              'w-full flex items-center justify-between px-4 py-3 text-sm text-left border-b border-slate-100 last:border-b-0 transition-colors',
+                              isPending
+                                ? 'opacity-50 cursor-not-allowed bg-white'
+                                : isSelected
+                                ? 'bg-kkookk-orange-50'
+                                : 'hover:bg-slate-50',
+                            ].join(' ')}
+                          >
+                            <span
+                              className={
+                                isSelected && !isPending
+                                  ? 'font-medium text-kkookk-navy'
+                                  : 'text-kkookk-steel'
+                              }
+                            >
+                              {store.storeName}
+                            </span>
+                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                              {isPending && (
+                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                                  심사 중
+                                </span>
+                              )}
+                              {isSelected && !isPending && (
+                                <Check size={14} className="text-kkookk-orange-500" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
-
-          {/* 이미 심사중인 경우 경고 */}
-          {hasPending && (
-            <div className="flex items-center gap-2 p-4 text-sm text-amber-700 bg-amber-50 rounded-xl">
-              <AlertCircle size={16} className="shrink-0" />
-              <span>이 매장에 이미 심사 중인 전환 신청이 있습니다.</span>
-            </div>
-          )}
 
           {/* 스탬프 개수 */}
           <div>
@@ -171,7 +282,6 @@ export function MigrationForm() {
               onChange={(e) => setCount(e.target.value)}
               placeholder="0"
               min={1}
-              disabled={hasPending}
             />
           </div>
 
@@ -196,7 +306,6 @@ export function MigrationForm() {
                   const selectedFile = e.target.files?.[0];
                   if (!selectedFile) return;
 
-                  // 파일 크기 제한: 3MB
                   const maxSize = 3 * 1024 * 1024;
                   if (selectedFile.size > maxSize) {
                     alert('파일 크기가 너무 큽니다.\n3MB 이하의 이미지를 선택해주세요.');
@@ -206,15 +315,12 @@ export function MigrationForm() {
 
                   setFile(selectedFile);
                 }}
-                disabled={hasPending}
               />
               <div className="flex flex-col items-center text-kkookk-steel">
                 {file ? (
                   <>
                     <Check size={32} className="text-green-500 mb-2" />
-                    <p className="text-sm font-bold text-kkookk-navy">
-                      {file.name}
-                    </p>
+                    <p className="text-sm font-bold text-kkookk-navy">{file.name}</p>
                   </>
                 ) : (
                   <>

@@ -4,11 +4,14 @@
  */
 
 import { Badge } from "@/components/ui/Badge";
-import { formatShortDate } from "@/lib/utils/format";
-import type { MigrationListItemResponse, StampMigrationStatus } from "@/types/api";
-import { ChevronLeft, Plus, FileText, Loader2 } from "lucide-react";
-import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { useMigrationList } from "@/features/migration/hooks/useMigration";
+import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
+import { formatShortDate } from "@/lib/utils/format";
+import type {
+  MigrationListItemResponse,
+  StampMigrationStatus,
+} from "@/types/api";
+import { ChevronLeft, FileText, Loader2, Plus } from "lucide-react";
 
 function getStatusBadge(status: StampMigrationStatus) {
   switch (status) {
@@ -70,25 +73,38 @@ export function MigrationList() {
           items.map((item) => (
             <div
               key={item.id}
-              className="p-5 bg-white border shadow-sm rounded-2xl border-slate-100"
+              role="button"
+              tabIndex={0}
+              onClick={() => customerNavigate(`/migrations/${item.id}`)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && customerNavigate(`/migrations/${item.id}`)
+              }
+              className="p-5 bg-white border shadow-sm rounded-2xl border-slate-100 cursor-pointer active:scale-[0.99] transition-transform"
             >
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold text-kkookk-navy">{item.storeName}</h3>
                 {getStatusBadge(item.status)}
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-sm text-kkookk-steel">
-                  신청 수량:{" "}
-                  <span className="font-bold text-kkookk-navy">
-                    {item.claimedStampCount}개
-                  </span>
+                <div>
+                  <p className="text-sm text-kkookk-steel">
+                    신청 수량:{" "}
+                    <span className="font-bold text-kkookk-navy">
+                      {item.claimedStampCount}개
+                    </span>
+                  </p>
+                </div>
+                <p className="text-end text-xs text-slate-400 shrink-0 ml-2">
                   {item.approvedStampCount != null && (
-                    <span className="text-xs text-slate-400 ml-2">
-                      (승인: {item.approvedStampCount}개)
+                    <span className="mb-2 line-clamp-2 text-xs text-green-700">
+                      승인: {item.approvedStampCount}개
                     </span>
                   )}
-                </p>
-                <p className="text-xs text-slate-400">
+                  {item.status === "REJECTED" && item.rejectReason && (
+                    <p className="mb-2 text-xs text-red-500 mt-1 line-clamp-2">
+                      반려 사유: {item.rejectReason}
+                    </p>
+                  )}
                   {formatShortDate(new Date(item.requestedAt))}
                 </p>
               </div>
