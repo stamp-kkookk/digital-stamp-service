@@ -62,6 +62,9 @@ public class OwnerAuthService {
         String accessToken =
                 jwtUtil.generateOwnerToken(
                         ownerAccount.getId(), ownerAccount.getEmail(), ownerAccount.isAdmin());
+        String refreshToken =
+                refreshTokenService.issueOwnerRefreshToken(
+                        ownerAccount.getId(), ownerAccount.getEmail(), ownerAccount.isAdmin());
         log.info("[Auth] Owner login success ownerId={}", ownerAccount.getId());
 
         return OwnerLoginResponse.of(accessToken, refreshToken, ownerAccount);
