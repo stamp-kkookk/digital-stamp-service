@@ -51,11 +51,6 @@ export function OwnerLoginPage({
     }
   };
 
-  const clearMessages = () => {
-    setErrorMessage("");
-    setSuccessMessage("");
-  };
-
   const handleLogin = (email: string, password: string) => {
     setErrorMessage("");
     ownerLogin.mutate(
@@ -71,12 +66,6 @@ export function OwnerLoginPage({
         },
       }
     );
-  };
-
-  const handleSwitchMode = (mode: AuthMode) => {
-    clearMessages();
-    setDevOtpCode("");
-    setAuthMode(mode);
   };
 
   return (

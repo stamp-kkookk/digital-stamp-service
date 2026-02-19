@@ -74,7 +74,7 @@ async function refreshAuthToken(): Promise<string | null> {
     setAuthToken(accessToken, newRefreshToken, tokenType);
 
     return accessToken;
-  } catch (error) {
+  } catch {
     // Refresh failed - clear all tokens and redirect to login
     clearAuthToken();
     return null;

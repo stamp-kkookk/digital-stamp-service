@@ -196,13 +196,6 @@ export function MigrationForm() {
         <div className="space-y-6">
           {/* 매장 선택 드롭다운 */}
           <div>
-            <span className="block text-sm font-bold text-kkookk-navy mb-2">
-              매장
-            </span>
-            <div className="w-full p-4 bg-kkookk-sand rounded-xl border border-slate-200 text-kkookk-navy font-medium">
-              {storeName}
-            </div>
-          </div>
             <p className="text-sm font-bold text-kkookk-navy mb-2">
               매장 선택 <span className="text-kkookk-orange-500">*</span>
             </p>
