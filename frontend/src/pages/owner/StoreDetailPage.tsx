@@ -625,7 +625,7 @@ export function StoreDetailPage() {
                             </td>
                             <td className="p-4 pr-6 text-right">
                               <div className="flex justify-end gap-2 transition-opacity opacity-50 group-hover:opacity-100">
-                                {(card.status === "DRAFT" || card.status === "PAUSED") && (
+                                {(card.status === "DRAFT" || card.status === "ARCHIVED") && (
                                   <button
                                     onClick={() =>
                                       handleStatusChange(card.id, "ACTIVE")

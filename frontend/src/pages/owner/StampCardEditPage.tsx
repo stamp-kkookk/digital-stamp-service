@@ -2,7 +2,7 @@
  * StampCardEditPage 컴포넌트
  * 스탬프 카드 수정 페이지 (발급 여부 기준으로 수정 허용/차단)
  * - 발급 이력 없음: 생성과 동일한 3단계 마법사로 전체 수정
- * - 발급 이력 있음 또는 ARCHIVED: 수정 불가 안내
+ * - 발급 이력 있음: 수정 불가 안내
  */
 
 import { useNavigate, useParams } from 'react-router-dom';
@@ -121,10 +121,8 @@ export function StampCardEditPage() {
     );
   }
 
-  // --- Non-editable (issued or ARCHIVED) ---
-  const isEditable = !card.issued && card.status !== 'ARCHIVED';
-
-  if (!isEditable) {
+  // --- Non-editable (issued) ---
+  if (card.issued) {
     return (
       <div className="w-full max-w-2xl p-8 mx-auto">
         <button
@@ -140,9 +138,7 @@ export function StampCardEditPage() {
             수정할 수 없습니다
           </h2>
           <p className="mb-6 text-sm text-kkookk-steel">
-            {card.status === 'ARCHIVED'
-              ? '보관된 카드는 수정할 수 없습니다.'
-              : '이미 고객에게 발급된 카드는 수정할 수 없습니다.'}
+            이미 고객에게 발급된 카드는 수정할 수 없습니다.
           </p>
           <Button variant="outline" onClick={goBack}>
             매장으로 돌아가기

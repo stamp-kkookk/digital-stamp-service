@@ -15,7 +15,6 @@ import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
-import com.project.kkookk.stampcard.service.exception.StampCardAlreadyActiveException;
 import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedException;
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
@@ -250,14 +249,14 @@ class StampCardServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 카드 수정 실패 - ARCHIVED 상태 수정 불가")
-    void updateStampCard_Fail_ArchivedNotAllowed() {
+    @DisplayName("스탬프 카드 수정 성공 - ARCHIVED 상태 미발급 전체 수정")
+    void updateStampCard_Success_ArchivedNotIssuedFullUpdate() {
         // given
         Long storeId = 1L;
         Long cardId = 1L;
         UpdateStampCardRequest request =
                 new UpdateStampCardRequest(
-                        "수정", 10, 10, "리워드", 1, 30, StampCardDesignType.COLOR, null);
+                        "수정된 카드", 15, 15, "수정된 리워드", 2, 60, StampCardDesignType.COLOR, null);
 
         StampCard stampCard =
                 StampCard.builder().storeId(storeId).title("원본 카드").goalStampCount(10).build();
@@ -265,10 +264,14 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
-        // when & then
-        assertThatThrownBy(() -> stampCardService.update(storeId, cardId, request))
-                .isInstanceOf(StampCardUpdateNotAllowedException.class);
+        // when
+        StampCardResponse response = stampCardService.update(storeId, cardId, request);
+
+        // then
+        assertThat(response.title()).isEqualTo("수정된 카드");
+        assertThat(response.goalStampCount()).isEqualTo(15);
     }
 
     @Test
@@ -285,8 +288,8 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
-        given(stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
-                .willReturn(false);
+        given(stampCardRepository.findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
+                .willReturn(Optional.empty());
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
@@ -297,17 +300,49 @@ class StampCardServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 카드 상태 변경 실패 - 유효하지 않은 상태 전이")
+    @DisplayName("스탬프 카드 상태 변경 성공 - ARCHIVED에서 ACTIVE로 (기존 ACTIVE 자동 보관)")
+    void updateStampCardStatus_Success_ArchivedToActiveAutoArchive() {
+        // given
+        Long storeId = 1L;
+        Long cardId = 2L;
+        UpdateStampCardStatusRequest request =
+                new UpdateStampCardStatusRequest(StampCardStatus.ACTIVE);
+
+        StampCard existingActive =
+                StampCard.builder().storeId(storeId).title("기존 활성 카드").goalStampCount(10).build();
+        existingActive.updateStatus(StampCardStatus.ACTIVE);
+
+        StampCard archivedCard =
+                StampCard.builder().storeId(storeId).title("보관된 카드").goalStampCount(8).build();
+        archivedCard.updateStatus(StampCardStatus.ARCHIVED);
+
+        given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
+                .willReturn(Optional.of(archivedCard));
+        given(stampCardRepository.findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
+                .willReturn(Optional.of(existingActive));
+        given(walletStampCardRepository.existsByStampCardId(archivedCard.getId()))
+                .willReturn(false);
+
+        // when
+        StampCardResponse response = stampCardService.updateStatus(storeId, cardId, request);
+
+        // then
+        assertThat(response.status()).isEqualTo(StampCardStatus.ACTIVE);
+        assertThat(existingActive.getStatus()).isEqualTo(StampCardStatus.ARCHIVED);
+    }
+
+    @Test
+    @DisplayName("스탬프 카드 상태 변경 실패 - 유효하지 않은 상태 전이 (ACTIVE에서 DRAFT)")
     void updateStampCardStatus_Fail_InvalidTransition() {
         // given
         Long storeId = 1L;
         Long cardId = 1L;
         UpdateStampCardStatusRequest request =
-                new UpdateStampCardStatusRequest(StampCardStatus.ACTIVE);
+                new UpdateStampCardStatusRequest(StampCardStatus.DRAFT);
 
         StampCard stampCard =
                 StampCard.builder().storeId(storeId).title("커피 스탬프 카드").goalStampCount(10).build();
-        stampCard.updateStatus(StampCardStatus.ARCHIVED);
+        stampCard.updateStatus(StampCardStatus.ACTIVE);
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
@@ -315,28 +350,6 @@ class StampCardServiceTest {
         // when & then
         assertThatThrownBy(() -> stampCardService.updateStatus(storeId, cardId, request))
                 .isInstanceOf(StampCardStatusInvalidException.class);
-    }
-
-    @Test
-    @DisplayName("스탬프 카드 상태 변경 실패 - 이미 활성화된 카드 존재")
-    void updateStampCardStatus_Fail_AlreadyActive() {
-        // given
-        Long storeId = 1L;
-        Long cardId = 1L;
-        UpdateStampCardStatusRequest request =
-                new UpdateStampCardStatusRequest(StampCardStatus.ACTIVE);
-
-        StampCard stampCard =
-                StampCard.builder().storeId(storeId).title("커피 스탬프 카드").goalStampCount(10).build();
-
-        given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
-                .willReturn(Optional.of(stampCard));
-        given(stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
-                .willReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> stampCardService.updateStatus(storeId, cardId, request))
-                .isInstanceOf(StampCardAlreadyActiveException.class);
     }
 
     @Test

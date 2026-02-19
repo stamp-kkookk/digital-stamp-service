@@ -17,6 +17,8 @@ public interface StampCardRepository extends JpaRepository<StampCard, Long> {
 
     boolean existsByStoreIdAndStatus(Long storeId, StampCardStatus status);
 
+    Optional<StampCard> findByStoreIdAndStatus(Long storeId, StampCardStatus status);
+
     Optional<StampCard> findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
             Long storeId, StampCardStatus status);
 

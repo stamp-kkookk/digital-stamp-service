@@ -9,7 +9,6 @@ import com.project.kkookk.stampcard.controller.dto.UpdateStampCardStatusRequest;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
-import com.project.kkookk.stampcard.service.exception.StampCardAlreadyActiveException;
 import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedException;
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
@@ -81,10 +80,6 @@ public class StampCardService {
     public StampCardResponse update(Long storeId, Long id, UpdateStampCardRequest request) {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
-        if (stampCard.getStatus() == StampCardStatus.ARCHIVED) {
-            throw new StampCardUpdateNotAllowedException();
-        }
-
         boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
         if (issued) {
             throw new StampCardUpdateNotAllowedException();
@@ -116,11 +111,15 @@ public class StampCardService {
         }
 
         if (newStatus == StampCardStatus.ACTIVE) {
-            boolean hasActiveCard =
-                    stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
-            if (hasActiveCard) {
-                throw new StampCardAlreadyActiveException();
-            }
+            stampCardRepository
+                    .findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE)
+                    .ifPresent(
+                            activeCard -> {
+                                activeCard.updateStatus(StampCardStatus.ARCHIVED);
+                                log.info(
+                                        "[StampCard] Auto-archived existing active card id={}",
+                                        activeCard.getId());
+                            });
         }
 
         stampCard.updateStatus(newStatus);
