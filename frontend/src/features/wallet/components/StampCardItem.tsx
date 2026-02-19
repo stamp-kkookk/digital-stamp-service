@@ -71,11 +71,23 @@ export function StampCardItem({
 
       {/* 배경 아이콘 (COLOR 타입만) */}
       {!hasBackgroundImage && (
-        <img
-          src="/image/cat_pace.png"
-          alt="Background"
-          className="absolute -right-12 -bottom-12 opacity-10 w-64 h-64 object-cover transform -rotate-12"
-        />
+        <>
+          {/* KKOOKK 텍스트 로고 - 왼쪽 상단 */}
+          <img
+            src="/logo/logo_text_customer.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute -left-20 -top-20 opacity-10 w-80 h-80 object-contain"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
+          {/* 고양이 장식 아이콘 - 오른쪽 하단 */}
+          <img
+            src="/image/cat_pace.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute -right-12 -bottom-12 opacity-10 w-64 h-64 object-cover transform -rotate-12"
+          />
+        </>
       )}
 
       {/* 푸터 */}

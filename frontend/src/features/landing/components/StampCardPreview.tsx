@@ -72,11 +72,22 @@ export function StampCardPreview({
         </div>
       </div>
 
-      {/* 배경 아이콘 */}
-      <Coffee
-        className="absolute w-24 h-24 transform -right-2 -bottom-3 text-white/8 rotate-12"
-        strokeWidth={0.8}
-      />
+      {/* 배경 장식 요소 */}
+      <>
+        {/* KKOOKK 텍스트 로고 - 왼쪽 상단 */}
+        <img
+          src="/logo/logo_text_customer.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute -left-8 -top-8 opacity-[0.08] w-48 h-48 object-contain"
+          style={{ filter: 'brightness(0) invert(1)' }}
+        />
+        {/* 배경 아이콘 - 오른쪽 하단 */}
+        <Coffee
+          className="absolute w-24 h-24 transform -right-2 -bottom-3 text-white/8 rotate-12"
+          strokeWidth={0.8}
+        />
+      </>
 
       {/* 장식 요소 */}
       <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-kkookk-orange-500/5 blur-2xl" />
