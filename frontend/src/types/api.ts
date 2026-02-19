@@ -275,7 +275,7 @@ export interface MigrationRequestResponse {
 export interface MigrationListItemResponse {
   id: number;
   storeId: number;
-  storeName?: string;
+  storeName: string;
   status: StampMigrationStatus;
   claimedStampCount: number;
   approvedStampCount: number | null;

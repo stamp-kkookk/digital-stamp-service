@@ -4,3 +4,4 @@
 
 export * from './MigrationList';
 export * from './MigrationForm';
+export * from './MigrationDetail';

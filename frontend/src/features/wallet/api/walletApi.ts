@@ -33,6 +33,10 @@ export async function getWalletStampCards(
   });
 }
 
+export async function getAllWalletStampCards(): Promise<WalletStampCardListResponse> {
+  return getRaw<WalletStampCardListResponse>(API_ENDPOINTS.CUSTOMER.WALLET_STAMP_CARDS);
+}
+
 // =============================================================================
 // Stamp History (StepUp Required)
 // =============================================================================
