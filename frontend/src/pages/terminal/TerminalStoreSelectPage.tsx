@@ -7,7 +7,7 @@
 import { useStores } from "@/features/store-management/hooks/useStore";
 import { useTerminalLogin } from "@/features/terminal/hooks/useTerminal";
 import { useAuth } from "@/app/providers/AuthProvider";
-import { getTerminalCredentials, clearTerminalCredentials } from "./TerminalLoginPage";
+import { getTerminalCredentials, clearTerminalCredentials } from "./terminalCredentials";
 import { AlertCircle, Loader2, LogOut, MapPin, Store } from "lucide-react";
 import { kkookkToast } from "@/components/ui/Toast";
 import { useState } from "react";

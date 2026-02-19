@@ -143,9 +143,9 @@ export function MigrationForm() {
         <div className="space-y-6">
           {/* 매장 정보 */}
           <div>
-            <label className="block text-sm font-bold text-kkookk-navy mb-2">
+            <span className="block text-sm font-bold text-kkookk-navy mb-2">
               매장
-            </label>
+            </span>
             <div className="w-full p-4 bg-kkookk-sand rounded-xl border border-slate-200 text-kkookk-navy font-medium">
               {storeName}
             </div>
