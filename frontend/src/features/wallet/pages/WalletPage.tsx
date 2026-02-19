@@ -111,11 +111,20 @@ export function WalletPage() {
   }, [walletData?.stampCards, storeSummary, storeIdNum]);
 
   // 적립된 카드의 초기 캐러셀 인덱스 계산
+  // 우선순위: stampedCardId (적립 후 복귀) > sessionStorage (탭 이동 후 복귀) > 0
   const stampedCardId = locationState?.stampedCardId;
   const initialCardIndex = useMemo(() => {
-    if (!stampedCardId || cards.length === 0) return 0;
-    const idx = cards.findIndex((c) => c.id === stampedCardId);
-    return idx >= 0 ? idx : 0;
+    if (cards.length === 0) return 0;
+    if (stampedCardId) {
+      const idx = cards.findIndex((c) => c.id === stampedCardId);
+      if (idx >= 0) return idx;
+    }
+    const lastViewedCardId = sessionStorage.getItem('wallet_lastViewedCardId');
+    if (lastViewedCardId) {
+      const idx = cards.findIndex((c) => c.id === lastViewedCardId);
+      if (idx >= 0) return idx;
+    }
+    return 0;
   }, [cards, stampedCardId]);
 
   // 첫 번째 카드의 storeId로 초기화 (또는 적립된 카드의 storeId)
@@ -128,6 +137,7 @@ export function WalletPage() {
 
   const handleCardChange = (card: StampCard) => {
     setCurrentStoreId(card.storeId);
+    sessionStorage.setItem('wallet_lastViewedCardId', card.id);
   };
 
   const handleStampRequest = (card: StampCard) => {
