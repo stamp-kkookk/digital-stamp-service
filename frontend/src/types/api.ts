@@ -507,6 +507,7 @@ export interface StampCardResponse {
   designType: StampCardDesignType;
   designJson: string | null;
   storeId: number;
+  issued: boolean;
   createdAt: string;
   updatedAt: string;
 }

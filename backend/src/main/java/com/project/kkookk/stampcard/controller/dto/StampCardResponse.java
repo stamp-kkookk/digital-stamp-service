@@ -19,10 +19,11 @@ public record StampCardResponse(
         @Schema(description = "디자인 타입", example = "COLOR") StampCardDesignType designType,
         @Schema(description = "카드 디자인 정보(JSON)") String designJson,
         @Schema(description = "소속 매장 ID", example = "100") Long storeId,
+        @Schema(description = "고객 발급 여부", example = "false") boolean issued,
         @Schema(description = "생성 시각") LocalDateTime createdAt,
         @Schema(description = "수정 시각") LocalDateTime updatedAt) {
 
-    public static StampCardResponse from(StampCard entity) {
+    public static StampCardResponse from(StampCard entity, boolean issued) {
         return new StampCardResponse(
                 entity.getId(),
                 entity.getTitle(),
@@ -35,6 +36,7 @@ public record StampCardResponse(
                 entity.getDesignType(),
                 entity.getDesignJson(),
                 entity.getStoreId(),
+                issued,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }

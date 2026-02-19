@@ -54,7 +54,7 @@ com.project.kkookk.stampcard/
 | id | Long (PK) | No | AUTO_INCREMENT | 식별자 |
 | store_id | Long | No | FK (logical) | 소속 매장 ID |
 | title | VARCHAR(100) | No | | 카드 이름 |
-| status | VARCHAR(20) | No | ENUM | DRAFT/ACTIVE/PAUSED/ARCHIVED |
+| status | VARCHAR(20) | No | ENUM | DRAFT/ACTIVE/ARCHIVED |
 | goal_stamp_count | INT | No | 1-50 | 목표 스탬프 수 |
 | required_stamps | INT | Yes | 1-50 | 리워드 달성 기준 스탬프 수 |
 | reward_name | VARCHAR(255) | Yes | | 리워드 명 |
@@ -92,7 +92,7 @@ int countByStoreIdAndStatus(Long storeId, StampCardStatus status);
 ### 3.1 Pagination Defaults
 
 - `size=20`, `sort=createdAt`, `direction=DESC`
-- Optional query param: `status` (DRAFT, ACTIVE, PAUSED, ARCHIVED)
+- Optional query param: `status` (DRAFT, ACTIVE, ARCHIVED)
 
 ---
 
@@ -137,26 +137,29 @@ Owner Browser          StampCardController       StampCardService       StampCar
      |<--200 + body-----------|                        |                        |
 ```
 
-### 4.3 Update (ACTIVE Card - Partial)
+### 4.3 Update (발급 이력 기준 수정 허용/차단)
 
 ```
-Owner Browser          StampCardController       StampCardService       StampCardRepository
-     |                        |                        |                        |
-     |--PUT /{id}------------>|                        |                        |
-     |  {title, designJson,   |                        |                        |
-     |   goalStampCount, ...} |                        |                        |
-     |                        |--update()------------->|                        |
-     |                        |                        |--findByIdAndStoreId--->|
-     |                        |                        |<--StampCard------------|
-     |                        |                        |                        |
-     |                        |                        |--isActive() = true     |
-     |                        |                        |--updatePartial(title,  |
-     |                        |                        |   designType,          |
-     |                        |                        |   designJson)          |
-     |                        |                        |  (goalStampCount 등    |
-     |                        |                        |   무시됨!)              |
-     |                        |<--StampCardResponse----|                        |
-     |<--200 + body-----------|                        |                        |
+Owner Browser          StampCardController       StampCardService       WalletStampCardRepo  StampCardRepo
+     |                        |                        |                        |                  |
+     |--PUT /{id}------------>|                        |                        |                  |
+     |  {title, goalStamp,    |                        |                        |                  |
+     |   rewardName, ...}     |                        |                        |                  |
+     |                        |--update()------------->|                        |                  |
+     |                        |                        |--findByIdAndStoreId--->|                  |
+     |                        |                        |<--StampCard------------|                  |
+     |                        |                        |                        |                  |
+     |                        |                        |--existsByStampCardId-->|                  |
+     |                        |                        |<--true/false-----------|                  |
+     |                        |                        |                        |                  |
+     |                        |                        |  [발급 이력 있음]        |                  |
+     |                        |                        |  -> throw UpdateNot    |                  |
+     |                        |                        |     AllowedException   |                  |
+     |                        |                        |                        |                  |
+     |                        |                        |  [발급 이력 없음]        |                  |
+     |                        |                        |  -> updateAll(전체필드) |                  |
+     |                        |<--StampCardResponse----|                        |                  |
+     |<--200 + body-----------|                        |                        |                  |
 ```
 
 ---
@@ -185,8 +188,8 @@ Owner Browser          StampCardController       StampCardService       StampCar
                          v                v
                  +-----------+     +------------+
                  |  ACTIVE   |     |  ARCHIVED  |
-                 | - Limited |     |  (Final)   |
-                 |   edit    |     |  Read-only |
+                 | - Edit by |     |  (Final)   |
+                 |  issuance |     |  Read-only |
                  +-----+-----+     +------------+
                        |                 ^
                    archive()             |
@@ -201,13 +204,18 @@ ALLOWED_FROM_ACTIVE = Set.of(ARCHIVED)
 ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 ```
 
-### 5.4 Editability Rules by Status
+### 5.4 Editability Rules (발급 이력 기준)
 
-| Status | Full Edit | Partial Edit (title + designType + designJson) | Delete |
-|--------|-----------|------------------------------------------------|--------|
-| DRAFT | Yes | N/A | Yes |
-| ACTIVE | No | Yes | No |
-| ARCHIVED | No | No | No |
+수정 가능 여부는 **상태(status)**가 아닌 **고객 발급 이력(wallet_stamp_cards 존재 여부)**으로 결정된다.
+
+| 조건 | Full Edit | Delete |
+|------|-----------|--------|
+| 발급 이력 없음 (DRAFT/ACTIVE 무관) | Yes | DRAFT만 가능 |
+| 발급 이력 있음 (고객에게 발급된 적 있음) | No (수정 불가) | No |
+| ARCHIVED | No | No |
+
+> **핵심 규칙**: 한 명이라도 해당 카드를 발급받은 적 있으면, 모든 필드 수정이 차단된다.
+> 발급 이력이 없는 카드는 상태와 무관하게 생성 폼과 동일하게 전체 수정 가능하다.
 
 ---
 
@@ -239,8 +247,8 @@ ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 | designType | StampCardDesignType | No | Enum | "COLOR" |
 | designJson | String | No | Free-form JSON | `{"theme":"coffee","color":"#8B4513"}` |
 
-> **Note**: When the card is ACTIVE, only `title`, `designType`, and `designJson` are applied.
-> All other fields in the request body are **silently ignored**.
+> **Note**: 발급 이력이 있는 카드(wallet_stamp_cards에 레코드 존재)는 수정이 완전히 차단된다 (400 에러).
+> 발급 이력이 없는 카드는 상태와 무관하게 모든 필드가 수정 가능하다.
 
 ### 6.3 UpdateStampCardStatusRequest
 
@@ -254,7 +262,7 @@ ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 |-------|------|----------|-------------|
 | id | Long | No | 스탬프 카드 ID |
 | title | String | No | 카드 이름 |
-| status | StampCardStatus | No | DRAFT/ACTIVE/PAUSED/ARCHIVED |
+| status | StampCardStatus | No | DRAFT/ACTIVE/ARCHIVED |
 | goalStampCount | Integer | No | 목표 스탬프 수 |
 | requiredStamps | Integer | Yes | 리워드 달성 기준 스탬프 수 |
 | rewardName | String | Yes | 리워드 명 |
@@ -322,10 +330,10 @@ ARCHIVED -> (nothing)  // terminal state, canTransitionTo() always returns false
 - **Behavior**: `existsByStoreIdAndStatus(storeId, ACTIVE)` check prevents the second one. No DB-level unique constraint; relies on application-level check within `@Transactional`.
 - **Risk**: Under extreme concurrency, a race condition is theoretically possible. For MVP, this is accepted.
 
-### 9.2 ACTIVE Card Partial Update Silently Ignores Fields
-- **Scenario**: Owner sends `goalStampCount=20` for an ACTIVE card.
-- **Behavior**: The service calls `updatePartial()` which only applies `title`, `designType`, and `designJson`. The `goalStampCount` change is **silently ignored** (no error thrown).
-- **Frontend Mitigation**: The design studio UI should disable those fields when card is ACTIVE.
+### 9.2 Issued Card Edit Blocked
+- **Scenario**: Owner가 고객에게 발급된 적 있는 카드를 수정 시도.
+- **Behavior**: `wallet_stamp_cards` 테이블에 해당 stampCardId로 레코드가 1개라도 존재하면, 수정 요청 시 `StampCardUpdateNotAllowedException` (400) 반환. 모든 필드 수정 차단.
+- **Frontend Mitigation**: 발급 이력이 있는 카드의 수정 버튼을 비활성화하고 "발급된 카드는 수정할 수 없습니다" 안내 표시.
 
 ### 9.3 Self-Transition Rejection
 - **Scenario**: PATCH status with the same current status (e.g., ACTIVE -> ACTIVE).

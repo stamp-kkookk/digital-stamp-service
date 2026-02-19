@@ -20,6 +20,7 @@ import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedE
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
 import com.project.kkookk.stampcard.service.exception.StampCardUpdateNotAllowedException;
+import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +40,8 @@ class StampCardServiceTest {
     @InjectMocks private StampCardService stampCardService;
 
     @Mock private StampCardRepository stampCardRepository;
+
+    @Mock private WalletStampCardRepository walletStampCardRepository;
 
     @Test
     @DisplayName("스탬프 카드 생성 성공")
@@ -134,12 +137,14 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
         StampCardResponse response = stampCardService.getById(storeId, cardId);
 
         // then
         assertThat(response.title()).isEqualTo("커피 스탬프 카드");
+        assertThat(response.issued()).isFalse();
     }
 
     @Test
@@ -178,6 +183,7 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
         StampCardResponse response = stampCardService.update(storeId, cardId, request);
@@ -188,8 +194,8 @@ class StampCardServiceTest {
     }
 
     @Test
-    @DisplayName("스탬프 카드 수정 성공 - ACTIVE 상태 부분 수정")
-    void updateStampCard_Success_ActivePartialUpdate() {
+    @DisplayName("스탬프 카드 수정 성공 - ACTIVE 상태 미발급 전체 수정")
+    void updateStampCard_Success_ActiveNotIssuedFullUpdate() {
         // given
         Long storeId = 1L;
         Long cardId = 1L;
@@ -210,13 +216,37 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
         StampCardResponse response = stampCardService.update(storeId, cardId, request);
 
         // then
         assertThat(response.title()).isEqualTo("수정된 카드");
-        assertThat(response.goalStampCount()).isEqualTo(10);
+        assertThat(response.goalStampCount()).isEqualTo(15);
+    }
+
+    @Test
+    @DisplayName("스탬프 카드 수정 실패 - 발급된 카드 수정 불가")
+    void updateStampCard_Fail_IssuedNotAllowed() {
+        // given
+        Long storeId = 1L;
+        Long cardId = 1L;
+        UpdateStampCardRequest request =
+                new UpdateStampCardRequest(
+                        "수정된 카드", 15, 15, "수정된 리워드", 2, 60, StampCardDesignType.IMAGE, null);
+
+        StampCard stampCard =
+                StampCard.builder().storeId(storeId).title("원본 카드").goalStampCount(10).build();
+        stampCard.updateStatus(StampCardStatus.ACTIVE);
+
+        given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
+                .willReturn(Optional.of(stampCard));
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> stampCardService.update(storeId, cardId, request))
+                .isInstanceOf(StampCardUpdateNotAllowedException.class);
     }
 
     @Test
@@ -257,6 +287,7 @@ class StampCardServiceTest {
                 .willReturn(Optional.of(stampCard));
         given(stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
                 .willReturn(false);
+        given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
         StampCardResponse response = stampCardService.updateStatus(storeId, cardId, request);

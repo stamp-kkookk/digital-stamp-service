@@ -161,7 +161,7 @@
 | POST | `/api/owner/stores/{storeId}/stamp-cards` | `StampCardController.create()` | 스탬프카드 생성 (초기: DRAFT) |
 | GET | `/api/owner/stores/{storeId}/stamp-cards` | `StampCardController.getList()` | 스탬프카드 목록 (페이지네이션, status 필터) |
 | GET | `/api/owner/stores/{storeId}/stamp-cards/{id}` | `StampCardController.getById()` | 스탬프카드 상세 |
-| PUT | `/api/owner/stores/{storeId}/stamp-cards/{id}` | `StampCardController.update()` | 스탬프카드 수정 (ACTIVE: 제한적) |
+| PUT | `/api/owner/stores/{storeId}/stamp-cards/{id}` | `StampCardController.update()` | 스탬프카드 수정 (발급된 카드는 수정 불가) |
 | PATCH | `/api/owner/stores/{storeId}/stamp-cards/{id}/status` | `StampCardController.updateStatus()` | 상태 변경 (매장당 ACTIVE 1개 제한) |
 | DELETE | `/api/owner/stores/{storeId}/stamp-cards/{id}` | `StampCardController.delete()` | 삭제 (DRAFT 상태만) |
 
