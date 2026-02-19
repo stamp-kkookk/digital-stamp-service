@@ -22,6 +22,7 @@ export function useStoreMigrations(storeId: number | undefined) {
     queryKey: QUERY_KEYS.storeMigrations(storeId ?? 0),
     queryFn: () => getStoreMigrations(storeId!),
     enabled: !!storeId,
+    refetchOnMount: 'always',
   });
 }
 

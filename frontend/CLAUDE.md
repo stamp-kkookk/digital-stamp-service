@@ -11,7 +11,7 @@ pnpm lint                      # 린트 검사
 ```
 
 ## Architecture
-3 사용자 모드: Customer (`/customer/*`), Owner (`/owner/*`), Terminal (`/terminal/*`)
+2 사용자 모드: Customer (`/customer/*`), Owner (`/owner/*`)
 패턴: Page -> Container (데이터) -> View (프레젠테이션)
 피처: `src/features/{domain}/`, 공통 UI: `src/components/`
 

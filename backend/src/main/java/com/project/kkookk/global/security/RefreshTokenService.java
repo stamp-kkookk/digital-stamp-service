@@ -44,29 +44,6 @@ public class RefreshTokenService {
         return token;
     }
 
-    /** Terminal용 RefreshToken 발급 */
-    @Transactional
-    public String issueTerminalRefreshToken(Long ownerId, String email, Long storeId) {
-        String token = jwtUtil.generateRefreshToken();
-        String tokenHash = jwtUtil.hashToken(token);
-
-        LocalDateTime expiresAt =
-                LocalDateTime.now().plusSeconds(jwtProperties.getRefreshTokenExpiration() / 1000);
-
-        RefreshToken refreshToken =
-                RefreshToken.builder()
-                        .tokenHash(tokenHash)
-                        .tokenType(TokenType.TERMINAL)
-                        .subjectId(ownerId)
-                        .email(email)
-                        .storeId(storeId)
-                        .expiresAt(expiresAt)
-                        .build();
-
-        refreshTokenRepository.save(refreshToken);
-        return token;
-    }
-
     /** Customer용 RefreshToken 발급 */
     @Transactional
     public String issueCustomerRefreshToken(Long walletId) {

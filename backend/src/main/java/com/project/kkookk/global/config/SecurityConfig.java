@@ -53,8 +53,6 @@ public class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers("/api/customer/**")
                                         .hasRole("CUSTOMER")
-                                        .requestMatchers("/api/terminal/**")
-                                        .hasRole("TERMINAL")
                                         .requestMatchers("/api/admin/**")
                                         .hasRole("ADMIN")
                                         .requestMatchers("/api/owner/**")

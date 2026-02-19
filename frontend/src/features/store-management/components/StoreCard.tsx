@@ -65,9 +65,9 @@ export function StoreCard({ store, onClick, onQRClick }: StoreCardProps) {
             <QrCode size={16} /> QR 포스터
           </Button>
           <Button
-            variant="primary"
+            variant="subtle"
             size="sm"
-            className="flex items-center gap-2 bg-kkookk-orange-50 text-kkookk-orange-500 hover:bg-kkookk-orange-100"
+            className="flex items-center gap-2 bg-slate-800 text-white hover:bg-slate-700"
           >
             관리 <ArrowRight size={16} />
           </Button>

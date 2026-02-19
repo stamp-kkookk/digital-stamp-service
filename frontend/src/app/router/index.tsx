@@ -6,7 +6,6 @@
 import { AdminLayout } from "@/app/layouts/AdminLayout";
 import { CustomerLayout } from "@/app/layouts/CustomerLayout";
 import { OwnerLayout } from "@/app/layouts/OwnerLayout";
-import { TerminalLayout } from "@/app/layouts/TerminalLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { LauncherPage } from "@/pages/LauncherPage";
 import { RoleSelectionPage } from "@/pages/RoleSelectionPage";
@@ -37,6 +36,7 @@ import {
   StampCardCreatePage,
   StampCardEditPage,
   StampCardStatsPage,
+  StoreApprovalPage,
   StoreCreatePage,
   StoreDetailPage,
   StoreEditPage,
@@ -44,15 +44,6 @@ import {
   StoreListPage,
   StoreMigrationsPage,
 } from "@/pages/owner";
-
-// 터미널 페이지
-import {
-  TerminalApprovalPage,
-  TerminalHistoryPage,
-  TerminalLoginPage,
-  TerminalSettingsPage,
-  TerminalStoreSelectPage,
-} from "@/pages/terminal";
 
 export const router = createBrowserRouter([
   // 랜딩 페이지
@@ -141,6 +132,7 @@ export const router = createBrowserRouter([
       { path: "stores/:storeId/edit", element: <StoreEditPage /> },
       { path: "stores/:storeId/history", element: <StoreHistoryPage /> },
       { path: "stores/:storeId/migrations", element: <StoreMigrationsPage /> },
+      { path: "stores/:storeId/approval", element: <StoreApprovalPage /> },
       {
         path: "stores/:storeId/stamp-cards/new",
         element: <StampCardCreatePage />,
@@ -164,30 +156,6 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="stores" replace /> },
       { path: "stores", element: <AdminStoreListPage /> },
       { path: "stores/:storeId", element: <AdminStoreDetailPage /> },
-    ],
-  },
-
-  // 터미널 로그인 (레이아웃 없음)
-  {
-    path: "/terminal/login",
-    element: <TerminalLoginPage />,
-  },
-
-  // 터미널 매장 선택 (레이아웃 없음)
-  {
-    path: "/terminal/stores",
-    element: <TerminalStoreSelectPage />,
-  },
-
-  // 터미널 라우트 (레이아웃 포함)
-  {
-    path: "/terminal",
-    element: <TerminalLayout />,
-    children: [
-      { path: ":storeId", element: <Navigate to="approval" replace /> },
-      { path: ":storeId/approval", element: <TerminalApprovalPage /> },
-      { path: ":storeId/history", element: <TerminalHistoryPage /> },
-      { path: ":storeId/settings", element: <TerminalSettingsPage /> },
     ],
   },
 ]);

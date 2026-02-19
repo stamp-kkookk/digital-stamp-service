@@ -5,13 +5,13 @@
 ## Overview
 
 ```
-┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│  Customer Mobile │     │  Owner Desktop   │     │ Terminal Tablet  │
-│  (React PWA)     │     │  (React SPA)     │     │  (React SPA)     │
-└────────┬─────────┘     └────────┬─────────┘     └────────┬─────────┘
-         │                        │                         │
-         └────────────────────────┼─────────────────────────┘
-                                  │ HTTP (JSON)
+┌──────────────────┐     ┌──────────────────┐
+│  Customer Mobile │     │  Owner Desktop   │
+│  (React PWA)     │     │  (React SPA)     │
+└────────┬─────────┘     └────────┬─────────┘
+         │                        │
+         └────────────────────────┘
+                    │ HTTP (JSON)
                         ┌─────────▼──────────┐
                         │  Frontend (Vite)   │
                         │  port 5173         │
@@ -38,7 +38,6 @@
 |------|--------|-----|----------|
 | OWNER | `sub: ownerId, email, type: OWNER` | 1시간 | `/api/owner/auth/login` |
 | ADMIN | `sub: ownerId, email, admin: true, type: OWNER` | 1시간 | `/api/owner/auth/login` (admin 계정) |
-| TERMINAL | `sub: ownerId, email, storeId, type: TERMINAL` | 1시간 | `/api/public/terminal/login` |
 | CUSTOMER | `sub: walletId, type: CUSTOMER` | 1시간 | `/api/public/wallet/login` |
 | STEPUP | `sub: walletId, type: STEPUP` | 10분 | `/api/public/otp/verify` |
 
@@ -48,8 +47,8 @@
 Request → JwtAuthenticationFilter
            ├─ Extract Bearer token
            ├─ Validate signature + expiry
-           ├─ Parse TokenType (OWNER/TERMINAL/CUSTOMER/STEPUP)
-           └─ Create Principal (OwnerPrincipal / TerminalPrincipal / CustomerPrincipal)
+           ├─ Parse TokenType (OWNER/CUSTOMER/STEPUP)
+           └─ Create Principal (OwnerPrincipal / CustomerPrincipal)
                └─ Set SecurityContext
 ```
 
@@ -59,7 +58,6 @@ Request → JwtAuthenticationFilter
 |-----------|--------|-------|
 | CustomerPrincipal | `walletId`, `stepUp` | `ROLE_CUSTOMER`, `ROLE_STEPUP` (조건부) |
 | OwnerPrincipal | `ownerId`, `email`, `admin` | `ROLE_OWNER`, `ROLE_ADMIN` (조건부: admin=true) |
-| TerminalPrincipal | `ownerId`, `email`, `storeId` | `ROLE_TERMINAL` |
 
 ### Security URL Patterns
 
@@ -67,7 +65,6 @@ Request → JwtAuthenticationFilter
 /api/owner/auth/**   → PERMIT_ALL (로그인/회원가입)
 /api/public/**       → PERMIT_ALL (OTP, 지갑, 매장 공개)
 /api/customer/**     → hasRole("CUSTOMER")
-/api/terminal/**     → hasRole("TERMINAL")
 /api/admin/**        → hasRole("ADMIN")
 /api/owner/**        → hasRole("OWNER")
 ```
@@ -108,7 +105,7 @@ CustomerWallet
 ### 1. Issuance (적립)
 
 ```
-Customer                Backend                Terminal
+Customer                Backend                Owner 백오피스
    │                       │                       │
    ├─POST /issuance-requests─>│                    │
    │ (walletStampCardId,    │                       │
@@ -121,7 +118,7 @@ Customer                Backend                Terminal
    ├─GET /issuance-requests/{id}─>│                │
    │<─{status: PENDING}────│                       │
    │                        │                       │
-   │                        │  Terminal 폴링         │
+   │                        │  Owner 폴링            │
    │                        │<─GET /pending-requests─┤
    │                        ├─Return list───────────>│
    │                        │                       │
@@ -241,7 +238,6 @@ backend/src/main/java/com/project/kkookk/
 ├── stampcard/           # 스탬프카드 설계/관리
 ├── statistics/          # 통계
 ├── store/               # 매장
-├── terminal/            # 터미널 인증/승인
 └── wallet/              # 고객 지갑
 ```
 
@@ -251,9 +247,8 @@ backend/src/main/java/com/project/kkookk/
 
 ```
 /customer/*          → 고객 지갑 (모바일 퍼스트)
-/owner/*             → 사장님 백오피스 (데스크톱 퍼스트)
+/owner/*             → 사장님 백오피스 (데스크톱 퍼스트, 적립 승인 포함)
 /admin/*             → 관리자 (매장 승인/관리, 데스크톱)
-/terminal/*          → 매장 터미널 (태블릿, 센터 정렬)
 /stores/:storeId/customer → QR 스캔 진입 (로그인 전)
 ```
 

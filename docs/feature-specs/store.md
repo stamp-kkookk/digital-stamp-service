@@ -1,7 +1,7 @@
 # Feature: Store (매장)
 
 > Owner가 매장을 등록/관리하고, 고객이 매장 정보를 조회하는 도메인.
-> StampCard, Terminal, Statistics 등 대부분의 기능이 Store에 종속된다.
+> StampCard, Statistics 등 대부분의 기능이 Store에 종속된다.
 
 ## Status: Implemented
 
@@ -10,7 +10,7 @@
 ## 1. Overview
 
 매장(Store)은 KKOOKK 플랫폼의 중심 엔티티로, 1개의 Owner가 여러 매장을 소유할 수 있다.
-매장에는 스탬프 카드, 터미널 로그인, 통계, 적립/리딤 등 모든 비즈니스 기능이 연결된다.
+매장에는 스탬프 카드, 통계, 적립/리딤 등 모든 비즈니스 기능이 연결된다.
 
 **핵심 원칙:**
 - 1 Owner : N Stores (owner_account_id FK)
@@ -61,8 +61,7 @@ com.project.kkookk.store/
     ├── KakaoPlaceSearchService.java  # 카카오 장소 검색 API 연동
     └── exception/
         ├── StoreNotFoundException.java
-        ├── StoreInactiveException.java
-        └── TerminalAccessDeniedException.java
+        └── StoreInactiveException.java
 
 com.project.kkookk.admin/
 ├── controller/
@@ -424,7 +423,7 @@ Customer requests /api/customer/stores/{storeId}/summary
 | STORE_PHONE_INVALID | 400 | STORE_PHONE_INVALID | 전화번호 형식이 올바르지 않습니다 | PhoneValidator fails |
 | ADMIN_ACCESS_DENIED | 403 | ADMIN_ACCESS_DENIED | 관리자 권한이 필요합니다 | Non-admin accesses /api/admin/** |
 | KAKAO_API_ERROR | 500 | KAKAO_API_ERROR | 카카오 API 호출 중 오류가 발생했습니다 | KakaoPlaceSearchService fails |
-| TERMINAL_ACCESS_DENIED | 403 | TERMINAL_ACCESS_DENIED | 단말기 접근 권한이 없습니다 | Terminal login for non-owned store |
+| STORE_ACCESS_DENIED | 403 | STORE_ACCESS_DENIED | 매장 접근 권한이 없습니다 | Owner approval for non-owned store |
 
 ---
 
@@ -544,7 +543,6 @@ API_ENDPOINTS.PUBLIC.STORES     = '/api/public/stores'
 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 .requestMatchers("/api/owner/**").hasRole("OWNER")
 .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
-.requestMatchers("/api/terminal/**").hasRole("TERMINAL")
 .requestMatchers("/api/public/**").permitAll()
 ```
 
@@ -562,8 +560,7 @@ API_ENDPOINTS.PUBLIC.STORES     = '/api/public/stores'
 | Feature | Relationship |
 |---------|-------------|
 | **StampCard** | Stamp cards belong to a store (store_id FK). Only ACTIVE stores can have usable stamp cards. |
-| **Terminal Login** | Terminal JWT includes storeId claim. Login verifies store ownership. |
-| **Issuance** | Stamp issuance requests are scoped to a store. |
+| **Issuance** | Stamp issuance requests are scoped to a store. Owner approves via backoffice. |
 | **Redeem** | Reward redemption sessions are scoped to a store. |
 | **Statistics** | Per-store aggregation of stamp events, redeem events, active users. |
 | **Migration** | Migration requests are filed per store. |

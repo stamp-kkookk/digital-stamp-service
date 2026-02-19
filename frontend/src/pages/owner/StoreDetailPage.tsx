@@ -38,8 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/Modal";
-
-type TabType = "cards" | "history" | "migrations";
+import { StoreTabBar } from "@/features/store-management/components/StoreTabBar";
 
 interface ConfirmDialogState {
   open: boolean;
@@ -144,7 +143,6 @@ export function StoreDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { storeId } = useParams<{ storeId: string }>();
-  const [storeDetailTab, setStoreDetailTab] = useState<TabType>("cards");
   const locationMessage = (location.state as { message?: string } | null)?.message ?? null;
   const [successMessage, setSuccessMessage] = useState<string | null>(locationMessage);
 
@@ -221,16 +219,6 @@ export function StoreDetailPage() {
   }
 
   const archivedCards = stampCards.filter((c) => c.status !== "ACTIVE");
-
-  const handleTabClick = (tab: TabType) => {
-    if (tab === "history") {
-      navigate(`/owner/stores/${storeId}/history`);
-    } else if (tab === "migrations") {
-      navigate(`/owner/stores/${storeId}/migrations`);
-    } else {
-      setStoreDetailTab(tab);
-    }
-  };
 
   const getStatusBadge = (status: StampCardStatus) => {
     switch (status) {
@@ -436,37 +424,12 @@ export function StoreDetailPage() {
         )}
 
         {/* 탭 */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => handleTabClick("cards")}
-            className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-              storeDetailTab === "cards"
-                ? "bg-kkookk-navy text-white"
-                : "text-kkookk-steel hover:bg-slate-50"
-            }`}
-          >
-            스탬프 카드 관리
-          </button>
-          <button
-            onClick={() => handleTabClick("history")}
-            className="px-4 py-2 text-sm font-bold transition-colors rounded-lg text-kkookk-steel hover:bg-slate-50"
-          >
-            적립/사용 내역
-          </button>
-          <button
-            onClick={() => handleTabClick("migrations")}
-            className="px-4 py-2 text-sm font-bold transition-colors rounded-lg text-kkookk-steel hover:bg-slate-50"
-          >
-            전환 신청 관리
-          </button>
-        </div>
+        <StoreTabBar storeId={storeIdNum} activeTab="cards" />
       </div>
 
       {/* 카드 관리 탭 컨텐츠 */}
       <div className="flex-1 overflow-y-auto">
-        {storeDetailTab === "cards" && (
-          <>
-            {cardsLoading ? (
+        {cardsLoading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
               </div>
@@ -670,8 +633,6 @@ export function StoreDetailPage() {
                 </div>
               </div>
             )}
-          </>
-        )}
       </div>
 
       {/* 확인 다이얼로그 (상태 변경, 카드 삭제 등) */}
@@ -692,7 +653,7 @@ export function StoreDetailPage() {
               취소
             </Button>
             <Button
-              variant={confirmDialog.variant === "destructive" ? "destructive" : confirmDialog.variant === "info" ? "secondary" : "primary"}
+              variant={confirmDialog.variant === "destructive" ? "destructive" : confirmDialog.variant === "info" ? "secondary" : "navy"}
               onClick={confirmDialog.onConfirm}
             >
               확인

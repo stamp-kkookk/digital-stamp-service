@@ -79,7 +79,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String formatUserId(TokenType tokenType, Long subjectId) {
         return switch (tokenType) {
             case OWNER -> "owner:" + subjectId;
-            case TERMINAL -> "terminal:" + subjectId;
             case CUSTOMER, STEPUP -> "wallet:" + subjectId;
         };
     }
@@ -92,11 +91,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtUtil.getEmail(token);
                 boolean isAdmin = jwtUtil.getIsAdmin(token);
                 yield OwnerPrincipal.of(subjectId, email, isAdmin);
-            }
-            case TERMINAL -> {
-                String email = jwtUtil.getEmail(token);
-                Long storeId = jwtUtil.getStoreId(token);
-                yield TerminalPrincipal.of(subjectId, email, storeId);
             }
             case CUSTOMER -> CustomerPrincipal.of(subjectId, false);
             case STEPUP -> CustomerPrincipal.of(subjectId, true);

@@ -8,7 +8,7 @@
 
 리워드 사용은 고객이 적립 보상(쿠폰)을 매장에서 사용하는 플로우이다.
 **OTP Step-Up 인증 필수** -> 세션 생성 -> **2-step Confirm Modal (비가역적 액션)** -> 완료의 단계를 거치며,
-60초 TTL 내에 완료하지 않으면 자동 만료된다. 터미널에서는 대기 중인 리딤 세션 목록을 폴링으로 확인할 수 있다.
+60초 TTL 내에 완료하지 않으면 자동 만료된다.
 
 ---
 
@@ -18,10 +18,7 @@
 |-------|-----------|
 | Controller (Customer) | `backend/src/main/java/com/project/kkookk/redeem/controller/CustomerRedeemController.java` |
 | API Interface (Customer) | `backend/src/main/java/com/project/kkookk/redeem/controller/CustomerRedeemApi.java` |
-| Controller (Terminal) | `backend/src/main/java/com/project/kkookk/redeem/controller/TerminalRedeemController.java` |
-| API Interface (Terminal) | `backend/src/main/java/com/project/kkookk/redeem/controller/TerminalRedeemApi.java` |
 | Service (Customer) | `backend/src/main/java/com/project/kkookk/redeem/service/CustomerRedeemService.java` |
-| Service (Terminal) | `backend/src/main/java/com/project/kkookk/redeem/service/TerminalRedeemService.java` |
 | Service (Owner) | `backend/src/main/java/com/project/kkookk/redeem/service/OwnerRedeemEventService.java` |
 | Entity - RedeemSession | `backend/src/main/java/com/project/kkookk/redeem/domain/RedeemSession.java` |
 | Entity - RedeemEvent | `backend/src/main/java/com/project/kkookk/redeem/domain/RedeemEvent.java` |
@@ -45,7 +42,6 @@
 | Result View | `frontend/src/features/redemption/components/RedeemResultView.tsx` |
 | Staff Confirm Modal | `frontend/src/features/redemption/components/StaffConfirmModal.tsx` |
 | TTL Countdown | `frontend/src/features/redemption/components/TTLCountdown.tsx` |
-| Terminal Hooks | `frontend/src/features/terminal/hooks/useTerminal.ts` |
 
 ---
 
@@ -55,7 +51,6 @@
 |--------|------|---------|------|-------------|
 | POST | `/api/customer/redeem-sessions` | `CustomerRedeemController.createRedeemSession()` | CUSTOMER + **STEPUP** | 리워드 사용 세션 생성 (TTL: 60s). OTP Step-Up 필수. |
 | POST | `/api/customer/redeem-sessions/{id}/complete` | `CustomerRedeemController.completeRedeemSession()` | CUSTOMER | 리워드 사용 세션 완료 처리. 2-step confirm 후 호출. |
-| GET | `/api/terminal/{storeId}/redeem-sessions` | `TerminalRedeemController.getPendingRedeemSessions()` | TERMINAL | 매장의 PENDING 리딤 세션 목록 조회 (터미널 폴링용). |
 
 ---
 
@@ -69,82 +64,73 @@
 - **매장 상태 체크**: Store가 ACTIVE 상태여야 세션 생성 가능.
 - **리워드 유효기간**: `WalletReward.expiresAt` 이후이면 410 `REWARD_EXPIRED`.
 - **원장 기록**: 완료 시 `RedeemEvent(COMPLETED, SUCCESS)` 저장.
-- **터미널 조회**: 매장 소유권 검증 후 PENDING 세션만 반환. 만료된 세션은 시간 기반 필터링.
 
 ---
 
 ## Sequence Diagram
 
 ```
-Customer App              Backend                    Terminal App
-    |                        |                            |
-    | [1. OTP Step-Up]       |                            |
-    |--POST /api/public/     |                            |
-    |  otp/request           |                            |
-    |<--OTP sent via SMS-----|                            |
-    |                        |                            |
-    |--POST /api/public/     |                            |
-    |  otp/verify            |                            |
-    |  {code}                |                            |
-    |<--{stepUpToken}--------|                            |
-    |                        |                            |
-    | [2. Create Session]    |                            |
-    |--POST /api/customer/   |                            |
-    |  redeem-sessions       |                            |
-    |  {walletRewardId}      |                            |
-    |  [Authorization:       |                            |
-    |   Bearer stepUpToken]  |                            |
-    |                        |                            |
-    |                        |--Validate: StepUp auth     |
-    |                        |--Validate: Reward owner    |
-    |                        |--Validate: Store ACTIVE    |
-    |                        |--Validate: Not expired     |
-    |                        |--Validate: AVAILABLE       |
-    |                        |--Validate: No PENDING sess |
-    |                        |--WalletReward: AVAILABLE   |
-    |                        |   -> REDEEMING             |
-    |                        |--Create RedeemSession      |
-    |                        |  (PENDING, TTL=60s)        |
-    |                        |                            |
-    |<--201 {sessionId,      |                            |
-    |     PENDING,           |                            |
-    |     expiresAt,         |                            |
-    |     remainingSeconds}  |                            |
-    |                        |                            |
-    | [3. Show to Staff]     |                            |
-    | [TTL Countdown UI]     |     [Poll every 2s]        |
-    |                        |<--GET /api/terminal/       |
-    |                        |   {storeId}/redeem-        |
-    |                        |   sessions                 |
-    |                        |--Filter: not expired       |
-    |                        |--Return list with          |
-    |                        |   customerNickname,        |
-    |                        |   rewardName,              |
-    |                        |   remainingSeconds-------->|
-    |                        |                            |
-    | [4. Staff Confirms]    |                            |
-    | [2-Step Confirm Modal] |                            |
-    | [User taps "Confirm"]  |                            |
-    |                        |                            |
-    |--POST /api/customer/   |                            |
-    |  redeem-sessions/      |                            |
-    |  {id}/complete         |                            |
-    |                        |                            |
-    |                        |--Validate: Session owner   |
-    |                        |--Validate: PENDING         |
-    |                        |--Validate: Not expired     |
-    |                        |--RedeemSession: PENDING    |
-    |                        |   -> COMPLETED             |
-    |                        |--WalletReward: REDEEMING   |
-    |                        |   -> REDEEMED              |
-    |                        |--RedeemEvent(COMPLETED,    |
-    |                        |   SUCCESS) save            |
-    |                        |                            |
-    |<--200 {sessionId,      |                            |
-    |     COMPLETED,         |                            |
-    |     remainingSeconds=0}|                            |
-    | [Show Result View]     |                            |
-    | [Invalidate rewards]   |                            |
+Customer App              Backend
+    |                        |
+    | [1. OTP Step-Up]       |
+    |--POST /api/public/     |
+    |  otp/request           |
+    |<--OTP sent via SMS-----|
+    |                        |
+    |--POST /api/public/     |
+    |  otp/verify            |
+    |  {code}                |
+    |<--{stepUpToken}--------|
+    |                        |
+    | [2. Create Session]    |
+    |--POST /api/customer/   |
+    |  redeem-sessions       |
+    |  {walletRewardId}      |
+    |  [Authorization:       |
+    |   Bearer stepUpToken]  |
+    |                        |
+    |                        |--Validate: StepUp auth
+    |                        |--Validate: Reward owner
+    |                        |--Validate: Store ACTIVE
+    |                        |--Validate: Not expired
+    |                        |--Validate: AVAILABLE
+    |                        |--Validate: No PENDING sess
+    |                        |--WalletReward: AVAILABLE
+    |                        |   -> REDEEMING
+    |                        |--Create RedeemSession
+    |                        |  (PENDING, TTL=60s)
+    |                        |
+    |<--201 {sessionId,      |
+    |     PENDING,           |
+    |     expiresAt,         |
+    |     remainingSeconds}  |
+    |                        |
+    | [3. Show to Staff]     |
+    | [TTL Countdown UI]     |
+    |                        |
+    | [4. Staff Confirms]    |
+    | [2-Step Confirm Modal] |
+    | [User taps "Confirm"]  |
+    |                        |
+    |--POST /api/customer/   |
+    |  redeem-sessions/      |
+    |  {id}/complete         |
+    |                        |
+    |                        |--Validate: Session owner
+    |                        |--Validate: PENDING
+    |                        |--Validate: Not expired
+    |                        |--RedeemSession: PENDING
+    |                        |   -> COMPLETED
+    |                        |--WalletReward: REDEEMING
+    |                        |   -> REDEEMED
+    |                        |--RedeemEvent(COMPLETED,
+    |                        |   SUCCESS) save
+    |                        |
+    |<--200 {sessionId,      |
+    |     COMPLETED,         |
+    |     remainingSeconds=0}|
+    | [Show Result View]     |
+    | [Invalidate rewards]   |
 ```
 
 ### TTL Expiry Flow
@@ -211,23 +197,6 @@ Customer App              Backend
 | `remainingSeconds` | Long | No | 남은 시간 (초, 최소 0) |
 | `createdAt` | LocalDateTime | No | 생성 시각 |
 
-### PendingRedeemSessionItem (Backend -> Terminal)
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `sessionId` | Long | 리딤 세션 ID |
-| `customerNickname` | String | 고객 닉네임 (CustomerWallet.nickname) |
-| `rewardName` | String | 리워드명 (StampCard.rewardName) |
-| `remainingSeconds` | long | 남은 시간 (초) |
-| `createdAt` | LocalDateTime | 세션 생성 시간 |
-
-### PendingRedeemSessionListResponse (Backend -> Terminal)
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `sessions` | List\<PendingRedeemSessionItem\> | 대기 중인 리딤 세션 목록 |
-| `totalCount` | int | 총 개수 |
-
 ---
 
 ## Entity: RedeemSession
@@ -272,7 +241,6 @@ Customer App              Backend
 | 존재하지 않는 세션 ID로 완료 요청 | 404 | `REDEEM_SESSION_NOT_FOUND` | 사용 세션을 찾을 수 없습니다 |
 | 이미 COMPLETED/EXPIRED된 세션 완료 시도 | 400 | `REDEEM_SESSION_NOT_PENDING` | 처리 대기 중인 세션이 아닙니다 |
 | TTL 만료 후 완료 시도 | 410 | `REDEEM_SESSION_EXPIRED` | 사용 세션이 만료되었습니다 (reward rollback 수행) |
-| 터미널이 다른 매장 리딤 세션 조회 | 403 | `ACCESS_DENIED` | 접근 권한이 없습니다 |
 | 매장 미존재 | 404 | `STORE_NOT_FOUND` | 매장을 찾을 수 없습니다 |
 
 ---
@@ -281,10 +249,6 @@ Customer App              Backend
 
 ```typescript
 // frontend/src/lib/api/endpoints.ts
-
-// Terminal - 대기 중 리딤 세션 목록 (Polling)
-QUERY_KEYS.pendingRedeemSessions = (storeId: number) =>
-  ['terminal', storeId, 'pendingRedeems'] as const
 
 // Customer - 리워드 목록
 QUERY_KEYS.walletRewards = (status?: string) =>
@@ -305,10 +269,6 @@ QUERY_KEYS.redeemHistory = (storeId: number) =>
 // useCompleteRedeemSession (useRedeem.ts)
 // Mutation: POST /api/customer/redeem-sessions/{id}/complete
 // onSuccess: invalidateQueries(['wallet', 'rewards']), invalidateQueries(['wallet', 'redeemHistory'])
-
-// usePendingRedeemSessions (useTerminal.ts)
-// Query with Polling: GET /api/terminal/{storeId}/redeem-sessions
-// refetchInterval: 2000ms (403/401 시 중단)
 ```
 
 ### Cache Invalidation
