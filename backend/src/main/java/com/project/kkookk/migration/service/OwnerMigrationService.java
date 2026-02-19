@@ -134,13 +134,6 @@ public class OwnerMigrationService {
 
         int stampCount = request.approvedStampCount();
 
-        // Store의 ACTIVE StampCard 조회
-        StampCard activeStampCard =
-                stampCardRepository
-                        .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
-                                storeId, StampCardStatus.ACTIVE)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
-
         // 고객의 ACTIVE WalletStampCard 조회 (비관적 락으로 동시성 제어)
         WalletStampCard walletStampCard =
                 walletStampCardRepository
@@ -151,10 +144,23 @@ public class OwnerMigrationService {
                         .orElseThrow(
                                 () -> new BusinessException(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND));
 
+        // 고객이 적립 중인 원본 스탬프카드 조회 (리워드 기준)
+        StampCard linkedStampCard =
+                stampCardRepository
+                        .findById(walletStampCard.getStampCardId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.STAMP_CARD_NOT_FOUND));
+
+        // 현재 ACTIVE 스탬프카드 조회 (완료 후 새 카드 생성용, 없으면 원본 사용)
+        StampCard activeStampCard =
+                stampCardRepository
+                        .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                storeId, StampCardStatus.ACTIVE)
+                        .orElse(linkedStampCard);
+
         // 스탬프 적립 및 리워드 발급 처리
         StampRewardService.StampAccumulationResult result =
                 stampRewardService.processStampAccumulation(
-                        walletStampCard, activeStampCard, stampCount);
+                        walletStampCard, linkedStampCard, activeStampCard, stampCount);
 
         // Migration 승인 처리
         migration.approve(stampCount);
@@ -163,7 +169,7 @@ public class OwnerMigrationService {
         StampEvent stampEvent =
                 StampEvent.builder()
                         .storeId(storeId)
-                        .stampCardId(activeStampCard.getId())
+                        .stampCardId(linkedStampCard.getId())
                         .walletStampCardId(result.currentWalletStampCard().getId())
                         .type(StampEventType.MIGRATED)
                         .delta(stampCount)

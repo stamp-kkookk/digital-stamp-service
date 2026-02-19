@@ -49,7 +49,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 2);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 2);
 
             // then
             assertThat(result.issuedRewards()).isEmpty();
@@ -77,7 +78,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 2);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 2);
 
             // then
             assertThat(result.issuedRewards()).hasSize(1);
@@ -111,7 +113,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 5);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 5);
 
             // then
             assertThat(result.issuedRewards()).hasSize(1);
@@ -140,7 +143,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 25);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 25);
 
             // then
             assertThat(result.issuedRewards()).hasSize(3); // (8 + 25) / 10 = 3
@@ -171,7 +175,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 1);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 1);
 
             // then
             assertThat(result.issuedRewards()).hasSize(1);
@@ -198,7 +203,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 1);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 1);
 
             // then
             assertThat(result.issuedRewards()).hasSize(1);
@@ -214,7 +220,8 @@ class StampRewardServiceTest {
 
             // when
             StampAccumulationResult result =
-                    stampRewardService.processStampAccumulation(walletStampCard, stampCard, 0);
+                    stampRewardService.processStampAccumulation(
+                            walletStampCard, stampCard, stampCard, 0);
 
             // then
             assertThat(result.issuedRewards()).isEmpty();

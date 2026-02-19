@@ -45,7 +45,7 @@ interface ConfirmDialogState {
   open: boolean;
   title: string;
   description: string;
-  variant: "default" | "destructive";
+  variant: "default" | "destructive" | "info";
   onConfirm: () => void;
 }
 
@@ -297,7 +297,7 @@ export function StoreDetailPage() {
       openConfirm({
         title: "활성 카드 교체",
         description: `현재 활성화된 "${activeCard.title}" 카드를 보관하고\n이 카드를 게시하시겠습니까?`,
-        variant: "default",
+        variant: "info",
         onConfirm: async () => {
           closeConfirm();
           try {
@@ -688,7 +688,7 @@ export function StoreDetailPage() {
               취소
             </Button>
             <Button
-              variant={confirmDialog.variant === "destructive" ? "destructive" : "primary"}
+              variant={confirmDialog.variant === "destructive" ? "destructive" : confirmDialog.variant === "info" ? "secondary" : "primary"}
               onClick={confirmDialog.onConfirm}
             >
               확인

@@ -198,15 +198,19 @@ class OwnerMigrationServiceTest {
             given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(
-                            stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
-                                    storeId, StampCardStatus.ACTIVE))
-                    .willReturn(Optional.of(activeCard));
-            given(
                             walletStampCardRepository
                                     .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
                                             walletId, storeId, WalletStampCardStatus.ACTIVE))
                     .willReturn(Optional.of(walletStampCard));
-            given(stampRewardService.processStampAccumulation(any(), any(), any(Integer.class)))
+            given(stampCardRepository.findById(walletStampCard.getStampCardId()))
+                    .willReturn(Optional.of(activeCard));
+            given(
+                            stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                    storeId, StampCardStatus.ACTIVE))
+                    .willReturn(Optional.of(activeCard));
+            given(
+                            stampRewardService.processStampAccumulation(
+                                    any(), any(), any(), any(Integer.class)))
                     .willReturn(new StampAccumulationResult(List.of(), walletStampCard));
             given(stampEventRepository.save(any(StampEvent.class)))
                     .willAnswer(i -> i.getArgument(0));
@@ -235,17 +239,12 @@ class OwnerMigrationServiceTest {
             Long walletId = 100L;
 
             StampMigrationRequest migration = createMigration(migrationId, walletId, storeId);
-            StampCard activeCard = createActiveStampCard(10L, storeId);
             Store store = createStore(storeId, OWNER_ID);
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
             given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
                     .willReturn(Optional.of(migration));
-            given(
-                            stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
-                                    storeId, StampCardStatus.ACTIVE))
-                    .willReturn(Optional.of(activeCard));
             given(
                             walletStampCardRepository
                                     .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
@@ -298,14 +297,17 @@ class OwnerMigrationServiceTest {
         }
 
         @Test
-        @DisplayName("승인 실패 - 활성 스탬프 카드 없음")
-        void approve_Fail_NoActiveStampCard() {
+        @DisplayName("승인 성공 - 활성 스탬프 카드 없으면 원본 카드로 대체")
+        void approve_Success_NoActiveStampCard_FallbackToLinked() {
             // given
             Long storeId = 1L;
             Long migrationId = 1L;
             Long walletId = 100L;
+            int approvedCount = 3;
 
             StampMigrationRequest migration = createMigration(migrationId, walletId, storeId);
+            StampCard linkedCard = createActiveStampCard(10L, storeId);
+            WalletStampCard walletStampCard = createWalletStampCard(50L, walletId, storeId, 10L, 0);
             Store store = createStore(storeId, OWNER_ID);
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
@@ -313,22 +315,32 @@ class OwnerMigrationServiceTest {
             given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(
+                            walletStampCardRepository
+                                    .findByCustomerWalletIdAndStoreIdAndStatusWithLock(
+                                            walletId, storeId, WalletStampCardStatus.ACTIVE))
+                    .willReturn(Optional.of(walletStampCard));
+            given(stampCardRepository.findById(walletStampCard.getStampCardId()))
+                    .willReturn(Optional.of(linkedCard));
+            given(
                             stampCardRepository.findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
                                     storeId, StampCardStatus.ACTIVE))
                     .willReturn(Optional.empty());
+            given(
+                            stampRewardService.processStampAccumulation(
+                                    any(), any(), any(), any(Integer.class)))
+                    .willReturn(new StampAccumulationResult(List.of(), walletStampCard));
+            given(stampEventRepository.save(any(StampEvent.class)))
+                    .willAnswer(i -> i.getArgument(0));
 
-            MigrationApproveRequest request = new MigrationApproveRequest(3);
+            MigrationApproveRequest request = new MigrationApproveRequest(approvedCount);
 
-            // when & then
-            assertThatThrownBy(
-                            () ->
-                                    ownerMigrationService.approve(
-                                            storeId, migrationId, request, OWNER_ID))
-                    .isInstanceOf(BusinessException.class)
-                    .satisfies(
-                            ex ->
-                                    assertThat(((BusinessException) ex).getErrorCode())
-                                            .isEqualTo(ErrorCode.NO_ACTIVE_STAMP_CARD));
+            // when
+            MigrationApproveResponse response =
+                    ownerMigrationService.approve(storeId, migrationId, request, OWNER_ID);
+
+            // then
+            assertThat(response.id()).isEqualTo(migrationId);
+            assertThat(response.status()).isEqualTo("APPROVED");
         }
 
         @Test
