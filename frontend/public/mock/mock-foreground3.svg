@@ -33,56 +33,56 @@
   </g>
 
   <!-- Stamp 1 (filled) - slight tilt right -->
-  <g transform="translate(160, 180) rotate(3)">
-    <use href="#seal3f" x="0" y="0" width="65" height="65"/>
+  <g transform="translate(143, 163) rotate(3)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 2 (filled) - slight tilt left -->
-  <g transform="translate(370, 155) rotate(-5)">
-    <use href="#seal3f" x="0" y="0" width="60" height="60"/>
+  <g transform="translate(350, 135) rotate(-5)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 3 (filled) - almost straight, slightly larger -->
-  <g transform="translate(560, 195) rotate(1)">
-    <use href="#seal3f" x="0" y="0" width="68" height="68"/>
+  <g transform="translate(544, 179) rotate(1)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 4 (filled) - tilted right -->
-  <g transform="translate(790, 165) rotate(7)">
-    <use href="#seal3f" x="0" y="0" width="62" height="62"/>
+  <g transform="translate(771, 146) rotate(7)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 5 (filled) - slight tilt left -->
-  <g transform="translate(1020, 190) rotate(-3)">
-    <use href="#seal3f" x="0" y="0" width="64" height="64"/>
+  <g transform="translate(1002, 172) rotate(-3)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 6 (filled) - lower row, tilt right -->
-  <g transform="translate(210, 420) rotate(4)">
-    <use href="#seal3f" x="0" y="0" width="66" height="66"/>
+  <g transform="translate(193, 403) rotate(4)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 7 (filled) - lower row, tilted left more -->
-  <g transform="translate(440, 450) rotate(-8)">
-    <use href="#seal3f" x="0" y="0" width="60" height="60"/>
+  <g transform="translate(420, 430) rotate(-8)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 8 (ghost) - lower row -->
-  <g transform="translate(660, 415) rotate(2)">
-    <use href="#seal3g" x="0" y="0" width="63" height="63"/>
+  <g transform="translate(642, 396) rotate(2)">
+    <use href="#seal3g" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Stamp 9 (ghost) - lower row -->
-  <g transform="translate(870, 445) rotate(-4)">
-    <use href="#seal3g" x="0" y="0" width="61" height="61"/>
+  <g transform="translate(852, 425) rotate(-4)">
+    <use href="#seal3g" x="0" y="0" width="100" height="100"/>
   </g>
 
   <!-- Reward: special square seal -->
-  <g transform="translate(1060, 430) rotate(2)">
-    <rect width="72" height="72" rx="3" fill="#3B2A1A"/>
-    <rect x="4" y="4" width="64" height="64" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
-    <text x="36" y="30" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="12" letter-spacing="1">한 잔</text>
-    <text x="36" y="50" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="15" font-weight="700">증정</text>
+  <g transform="translate(1040, 410) rotate(2)">
+    <rect width="110" height="110" rx="3" fill="#3B2A1A"/>
+    <rect x="5" y="5" width="100" height="100" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
+    <text x="55" y="45" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="16" letter-spacing="1">한 잔</text>
+    <text x="55" y="72" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="22" font-weight="700">증정</text>
   </g>
 
   <!-- Footer -->
