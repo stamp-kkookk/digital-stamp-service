@@ -52,15 +52,6 @@ export const router = createBrowserRouter([
     element: <LandingPage />,
   },
 
-  // DEV: 디자이너 테스트
-  {
-    path: "/dev/designer",
-    lazy: async () => {
-      const { default: Page } = await import("@/pages/DevDesignerTest");
-      return { element: <Page /> };
-    },
-  },
-
   // 시연용 페이지
   {
     path: "/simulation",
