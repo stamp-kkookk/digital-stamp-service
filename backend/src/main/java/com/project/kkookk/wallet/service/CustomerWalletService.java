@@ -124,7 +124,7 @@ public class CustomerWalletService {
             stampCardInfo = createWalletStampCardIfExists(savedWallet.getId(), request.storeId());
         }
 
-        // 4. JWT 토큰 생성 (일반 CUSTOMER 토큰, STEPUP 아님)
+        // 4. JWT 토큰 생성
         String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId());
         String refreshToken = refreshTokenService.issueCustomerRefreshToken(savedWallet.getId());
 
@@ -195,6 +195,11 @@ public class CustomerWalletService {
                 wallet.getName(),
                 wallet.getNickname(),
                 stampCards);
+    }
+
+    @Transactional
+    public void ensureWalletStampCardForStore(Long walletId, Long storeId) {
+        ensureWalletStampCardExists(walletId, storeId);
     }
 
     private void ensureWalletStampCardExists(Long walletId, Long storeId) {

@@ -2,7 +2,6 @@ package com.project.kkookk.global.security;
 
 import java.util.Collection;
 import java.util.List;
-import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,23 +11,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class CustomerPrincipal implements UserDetails {
 
     private final Long walletId;
-    private final boolean stepUp;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    @Builder
-    private CustomerPrincipal(Long walletId, boolean stepUp) {
+    private CustomerPrincipal(Long walletId) {
         this.walletId = walletId;
-        this.stepUp = stepUp;
-        this.authorities =
-                stepUp
-                        ? List.of(
-                                new SimpleGrantedAuthority("ROLE_CUSTOMER"),
-                                new SimpleGrantedAuthority("ROLE_STEPUP"))
-                        : List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
     }
 
-    public static CustomerPrincipal of(Long walletId, boolean stepUp) {
-        return CustomerPrincipal.builder().walletId(walletId).stepUp(stepUp).build();
+    public static CustomerPrincipal of(Long walletId) {
+        return new CustomerPrincipal(walletId);
     }
 
     @Override

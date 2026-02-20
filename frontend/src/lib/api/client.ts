@@ -6,7 +6,6 @@
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import {
   getAuthToken,
-  getStepUpToken,
   clearAuthToken,
   getRefreshToken,
   setAuthToken,
@@ -87,9 +86,7 @@ async function refreshAuthToken(): Promise<string | null> {
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Use StepUp token as Bearer when available (it supersedes the auth token)
-    const stepUpToken = getStepUpToken();
-    const token = stepUpToken || getAuthToken();
+    const token = getAuthToken();
 
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -116,11 +113,6 @@ apiClient.interceptors.response.use(
       // Skip refresh for /api/auth/refresh endpoint itself
       if (originalRequest.url === '/api/auth/refresh') {
         clearAuthToken();
-        return Promise.reject(error);
-      }
-
-      // Skip refresh if StepUp token was used (StepUp tokens don't have refresh)
-      if (getStepUpToken()) {
         return Promise.reject(error);
       }
 

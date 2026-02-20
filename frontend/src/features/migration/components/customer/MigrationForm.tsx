@@ -4,7 +4,6 @@
  * API 연동: createMigration({ storeId, imageData, claimedStampCount })
  */
 
-import { StepUpVerify } from "@/components/shared/StepUpVerify";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { kkookkToast } from "@/components/ui/Toast";
@@ -14,7 +13,6 @@ import {
 } from "@/features/migration/hooks/useMigration";
 import { useAllWalletStampCards } from "@/features/wallet/hooks/useWallet";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
-import { isStepUpValid } from "@/lib/api/tokenManager";
 import {
   AlertCircle,
   Camera,
@@ -41,7 +39,6 @@ export function MigrationForm() {
   const { storeId: urlStoreId, customerNavigate } = useCustomerNavigate();
   const originStoreId = urlStoreId ? Number(urlStoreId) : undefined;
 
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
   const [selectedStoreId, setSelectedStoreId] = useState<number | undefined>(
     originStoreId,
   );
@@ -129,9 +126,6 @@ export function MigrationForm() {
               setSubmitError("이미 심사 중인 전환 신청이 있습니다.");
             } else if (err.response?.status === 413) {
               setSubmitError("이미지 크기가 너무 큽니다. (최대 5MB)");
-            } else if (err.response?.status === 403) {
-              setSubmitError("본인 인증이 만료되었습니다. 다시 인증해주세요.");
-              setStepUpValid(false);
             } else {
               setSubmitError("전환 신청에 실패했습니다. 다시 시도해주세요.");
             }
@@ -142,29 +136,6 @@ export function MigrationForm() {
       setSubmitError("이미지 처리 중 오류가 발생했습니다.");
     }
   };
-
-  // StepUp 인증 필요
-  if (!stepUpValid) {
-    return (
-      <div className="h-full bg-white flex flex-col pt-12">
-        <div className="px-6 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
-          <button
-            onClick={() => customerNavigate("/migrations")}
-            className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
-            aria-label="뒤로 가기"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className="font-bold text-lg ml-2 text-kkookk-navy">
-            전환 신청하기
-          </h1>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <StepUpVerify onVerified={() => setStepUpValid(true)} />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full bg-white flex flex-col pt-12">

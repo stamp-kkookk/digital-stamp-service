@@ -59,7 +59,6 @@ public class TokenRefreshController {
                             refreshToken.getEmail(),
                             refreshToken.getIsAdmin() != null && refreshToken.getIsAdmin());
             case CUSTOMER -> jwtUtil.generateCustomerToken(refreshToken.getSubjectId());
-            case STEPUP -> throw new IllegalStateException("STEPUP 토큰은 RefreshToken을 지원하지 않습니다");
         };
     }
 
@@ -71,7 +70,6 @@ public class TokenRefreshController {
                             oldToken.getEmail(),
                             oldToken.getIsAdmin() != null && oldToken.getIsAdmin());
             case CUSTOMER -> refreshTokenService.issueCustomerRefreshToken(oldToken.getSubjectId());
-            case STEPUP -> throw new IllegalStateException("STEPUP 토큰은 RefreshToken을 지원하지 않습니다");
         };
     }
 }

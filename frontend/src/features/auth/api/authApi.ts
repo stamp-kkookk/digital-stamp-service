@@ -1,48 +1,22 @@
 /**
  * Auth API Service for KKOOKK
- * Handles OTP, wallet registration, and owner auth
+ * Handles wallet registration and store info
  */
 
 import { postRaw, getRaw } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
-  OtpRequestDto,
-  OtpRequestResponse,
-  OtpVerifyDto,
-  OtpVerifyResponse,
   NicknameCheckResponse,
   PhoneCheckResponse,
   WalletRegisterRequest,
   WalletRegisterResponse,
   WalletLoginRequest,
   WalletLoginResponse,
-  OwnerSignupRequest,
-  OwnerSignupResponse,
-  OwnerLoginRequest,
-  OwnerLoginResponse,
   StorePublicInfoResponse,
 } from '@/types/api';
 
 // =============================================================================
-// Public API - OTP
-// =============================================================================
-
-export async function requestOtp(data: OtpRequestDto): Promise<OtpRequestResponse> {
-  return postRaw<OtpRequestResponse, OtpRequestDto>(
-    API_ENDPOINTS.PUBLIC.OTP_REQUEST,
-    data
-  );
-}
-
-export async function verifyOtp(data: OtpVerifyDto): Promise<OtpVerifyResponse> {
-  return postRaw<OtpVerifyResponse, OtpVerifyDto>(
-    API_ENDPOINTS.PUBLIC.OTP_VERIFY,
-    data
-  );
-}
-
-// =============================================================================
-// Public API - Nickname Check
+// Public API - Nickname / Phone Check
 // =============================================================================
 
 export async function checkNickname(nickname: string): Promise<NicknameCheckResponse> {
@@ -93,26 +67,4 @@ export async function getStorePublicInfo(
 
 export async function getPublicStores(): Promise<StorePublicInfoResponse[]> {
   return getRaw<StorePublicInfoResponse[]>(API_ENDPOINTS.PUBLIC.STORES);
-}
-
-// =============================================================================
-// Owner API - Auth
-// =============================================================================
-
-export async function ownerSignup(
-  data: OwnerSignupRequest
-): Promise<OwnerSignupResponse> {
-  return postRaw<OwnerSignupResponse, OwnerSignupRequest>(
-    API_ENDPOINTS.OWNER.SIGNUP,
-    data
-  );
-}
-
-export async function ownerLogin(
-  data: OwnerLoginRequest
-): Promise<OwnerLoginResponse> {
-  return postRaw<OwnerLoginResponse, OwnerLoginRequest>(
-    API_ENDPOINTS.OWNER.LOGIN,
-    data
-  );
 }

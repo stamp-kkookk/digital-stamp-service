@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/api/public/wallet")
 public interface WalletApi {
 
-    @Operation(summary = "지갑 생성", description = "OTP 인증 완료 후 고객 지갑을 생성하고 JWT 토큰을 발급합니다.")
+    @Operation(summary = "지갑 생성", description = "고객 지갑을 생성하고 JWT 토큰을 발급합니다.")
     @ApiResponses(
             value = {
                 @ApiResponse(

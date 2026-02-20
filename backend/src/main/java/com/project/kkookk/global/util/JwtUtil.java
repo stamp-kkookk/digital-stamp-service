@@ -45,14 +45,6 @@ public class JwtUtil {
         return generateToken(walletId, claims, jwtProperties.getAccessTokenExpiration());
     }
 
-    /** Customer StepUp 토큰 생성 (OTP 인증 후 민감 기능용) */
-    public String generateStepUpToken(Long walletId) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenType.STEPUP.name());
-
-        return generateToken(walletId, claims, jwtProperties.getStepupTokenExpiration());
-    }
-
     /** 공통 토큰 생성 메서드 */
     private String generateToken(Long subjectId, Map<String, Object> claims, long expiration) {
         Date now = new Date();
@@ -118,6 +110,20 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /** 임시 토큰 생성 (OAuth 가입 프로세스용, 10분 만료) */
+    public String generateTempToken(Map<String, Object> claims) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + 600_000); // 10 minutes
+
+        return Jwts.builder()
+                .claims(claims)
+                .subject("temp")
+                .issuedAt(now)
+                .expiration(expirationDate)
+                .signWith(getSigningKey())
+                .compact();
+    }
+
     // ========== RefreshToken 관련 메서드 ==========
 
     /** RefreshToken 생성 (UUID 기반, JWT 아님) */
@@ -147,31 +153,5 @@ public class JwtUtil {
     /** RefreshToken 만료 여부 확인 */
     public boolean isRefreshTokenExpired(LocalDateTime expiresAt) {
         return LocalDateTime.now().isAfter(expiresAt);
-    }
-
-    // ========== 하위 호환용 메서드 (Deprecated) ==========
-
-    /**
-     * @deprecated Use {@link #generateOwnerToken(Long, String, boolean)} instead
-     */
-    @Deprecated
-    public String generateAccessToken(Long ownerId, String email) {
-        return generateOwnerToken(ownerId, email, false);
-    }
-
-    /**
-     * @deprecated Use {@link #generateCustomerToken(Long)} instead
-     */
-    @Deprecated
-    public String generateCustomerAccessToken(Long walletId, String phone) {
-        return generateCustomerToken(walletId);
-    }
-
-    /**
-     * @deprecated Use {@link #getSubjectId(String)} instead
-     */
-    @Deprecated
-    public Long getOwnerIdFromToken(String token) {
-        return getSubjectId(token);
     }
 }

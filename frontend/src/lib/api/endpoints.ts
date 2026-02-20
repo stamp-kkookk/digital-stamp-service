@@ -7,14 +7,16 @@ export const API_ENDPOINTS = {
   // Public API (인증 불필요)
   // ==========================================================================
   PUBLIC: {
-    OTP_REQUEST: '/api/public/otp/request',
-    OTP_VERIFY: '/api/public/otp/verify',
     WALLET_REGISTER: '/api/public/wallet/register',
     WALLET_LOGIN: '/api/public/wallet/login',
     STORE_INFO: (storeId: number) => `/api/public/stores/${storeId}`,
     STORES: '/api/public/stores',
     CHECK_NICKNAME: '/api/public/wallet/check-nickname',
     CHECK_PHONE: '/api/public/wallet/check-phone',
+    OAUTH_LOGIN: '/api/public/oauth/login',
+    OAUTH_COMPLETE_CUSTOMER_SIGNUP: '/api/public/oauth/complete-customer-signup',
+    OAUTH_COMPLETE_OWNER_SIGNUP: '/api/public/oauth/complete-owner-signup',
+    OAUTH_TERMINAL_SELECT: '/api/public/oauth/terminal-select',
   },
 
   // ==========================================================================

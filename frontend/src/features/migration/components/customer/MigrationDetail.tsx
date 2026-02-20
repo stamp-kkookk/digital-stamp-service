@@ -3,20 +3,16 @@
  * 마이그레이션 요청 상세 화면 — 상태별 결과 표시
  */
 
-import { StepUpVerify } from "@/components/shared/StepUpVerify";
 import { Button } from "@/components/ui/Button";
 import { useMigrationStatus } from "@/features/migration/hooks/useMigration";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
-import { isStepUpValid } from "@/lib/api/tokenManager";
 import { formatShortDate } from "@/lib/utils/format";
 import { Check, ChevronLeft, Clock, Loader2, X } from "lucide-react";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 export function MigrationDetail() {
   const { id } = useParams<{ id: string }>();
   const { customerNavigate } = useCustomerNavigate();
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
 
   const migrationId = id ? Number(id) : undefined;
   const {
@@ -24,28 +20,6 @@ export function MigrationDetail() {
     isLoading,
     isError,
   } = useMigrationStatus(migrationId);
-
-  if (!stepUpValid) {
-    return (
-      <div className="h-full bg-white flex flex-col pt-12">
-        <div className="px-6 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 bg-white z-10 -mt-12 pt-12">
-          <button
-            onClick={() => customerNavigate("/migrations")}
-            className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
-            aria-label="뒤로 가기"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <h1 className="font-bold text-lg ml-2 text-kkookk-navy">
-            전환 신청 상세
-          </h1>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <StepUpVerify onVerified={() => setStepUpValid(true)} />
-        </div>
-      </div>
-    );
-  }
 
   if (isLoading) {
     return (

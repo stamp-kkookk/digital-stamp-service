@@ -8,7 +8,7 @@ import { redeemReward } from '../api/redeemApi';
 import type { RedeemRewardRequest } from '@/types/api';
 
 // =============================================================================
-// Redeem Reward Hook (StepUp Required)
+// Redeem Reward Hook
 // =============================================================================
 
 export function useRedeemReward() {

@@ -27,11 +27,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface CustomerMigrationApi {
 
     @Operation(
-            summary = "스탬프 마이그레이션 요청 생성 (StepUp 토큰 필수)",
+            summary = "스탬프 마이그레이션 요청 생성",
             description =
                     """
                 종이 스탬프 판 이미지(Base64)와 개수를 제출하여 디지털 전환 요청.
-                - OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
                 - Wallet당 매장별 1회 제한 (SUBMITTED 상태 중복 불가)
                 - 승인/반려된 요청은 재신청 가능
                 - 이미지는 Base64 인코딩, 최대 5MB
@@ -54,7 +53,7 @@ public interface CustomerMigrationApi {
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "403",
-                description = "StepUp 인증 필요 또는 지갑이 차단됨 (BLOCKED 상태)",
+                description = "지갑이 차단됨 (BLOCKED 상태)",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
@@ -75,11 +74,10 @@ public interface CustomerMigrationApi {
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 
     @Operation(
-            summary = "마이그레이션 요청 상태 조회 (StepUp 토큰 필수)",
+            summary = "마이그레이션 요청 상태 조회",
             description =
                     """
                 제출된 마이그레이션 요청의 처리 상태 확인.
-                - OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
                 - SUBMITTED: 제출됨 (심사 대기)
                 - APPROVED: 승인됨 (스탬프 반영 완료)
                 - REJECTED: 반려됨 (사유 포함)
@@ -98,7 +96,7 @@ public interface CustomerMigrationApi {
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "403",
-                description = "StepUp 인증 필요 또는 권한 없음 (다른 고객의 마이그레이션 요청)",
+                description = "권한 없음 (다른 고객의 마이그레이션 요청)",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
@@ -111,11 +109,10 @@ public interface CustomerMigrationApi {
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 
     @Operation(
-            summary = "내 마이그레이션 요청 목록 조회 (StepUp 토큰 필수)",
+            summary = "내 마이그레이션 요청 목록 조회",
             description =
                     """
                 인증된 사용자의 모든 마이그레이션 요청 목록을 조회합니다.
-                - OTP 인증 후 발급된 StepUp 토큰이 필요합니다.
                 - 최신순 정렬 (requestedAt DESC)
                 - 이미지 데이터는 제외되며, 상세 조회 API에서 확인 가능
                 - 반려된 요청의 경우 rejectReason 포함
@@ -131,10 +128,6 @@ public interface CustomerMigrationApi {
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요 (JWT 토큰 없음/만료)",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(
-                responseCode = "403",
-                description = "StepUp 인증 필요",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/api/customer/migrations")

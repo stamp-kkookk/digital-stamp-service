@@ -49,29 +49,6 @@ export interface TokenRefreshResponse {
 }
 
 // =============================================================================
-// OTP Types
-// =============================================================================
-
-export interface OtpRequestDto {
-  phone: string;
-}
-
-export interface OtpRequestResponse {
-  success: boolean;
-  devOtpCode: string | null;
-}
-
-export interface OtpVerifyDto {
-  phone: string;
-  code: string;
-}
-
-export interface OtpVerifyResponse {
-  verified: boolean;
-  stepUpToken: string | null;
-}
-
-// =============================================================================
 // Wallet Types
 // =============================================================================
 

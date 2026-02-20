@@ -1,15 +1,16 @@
 /**
  * CustomerLandingPage 컴포넌트
  * QR 스캔 시 표시되는 고객 앱 랜딩 페이지
+ * OAuth 로그인 버튼으로 진입
  */
 
-import { Button } from "@/components/ui/Button";
+import { OAuthButtons } from "@/features/auth/components/OAuthButtons";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { useStorePublicInfo } from "@/hooks/useStorePublicInfo";
 import { Loader2, AlertCircle } from "lucide-react";
 
 export function CustomerLandingPage() {
-  const { storeId, customerNavigate } = useCustomerNavigate();
+  const { storeId } = useCustomerNavigate();
   const { data: storeInfo, isLoading, error } = useStorePublicInfo(
     storeId ? Number(storeId) : undefined,
   );
@@ -56,20 +57,7 @@ export function CustomerLandingPage() {
         </div>
       </div>
       <div className="w-full pb-8 mt-auto">
-        <Button
-          onClick={() => customerNavigate("/login")}
-          variant="primary"
-          size="full"
-          className="shadow-lg shadow-orange-200"
-        >
-          내 지갑 열기
-        </Button>
-        <button
-          onClick={() => customerNavigate("/signup")}
-          className="mt-4 text-sm underline text-kkookk-steel/60 hover:text-kkookk-steel decoration-kkookk-steel/30 underline-offset-4"
-        >
-          처음이신가요?
-        </button>
+        <OAuthButtons role="CUSTOMER" storeId={storeId} />
       </div>
     </div>
   );

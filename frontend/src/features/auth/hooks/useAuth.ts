@@ -5,51 +5,20 @@
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
-  requestOtp,
-  verifyOtp,
   registerWallet,
   loginWallet,
-  ownerSignup,
-  ownerLogin,
   getStorePublicInfo,
 } from '../api/authApi';
 import {
   setAuthToken,
-  setStepUpToken,
   setUserInfo,
   clearAuthToken,
 } from '@/lib/api/tokenManager';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
 import type {
-  OtpRequestDto,
-  OtpVerifyDto,
   WalletRegisterRequest,
   WalletLoginRequest,
-  OwnerSignupRequest,
-  OwnerLoginRequest,
 } from '@/types/api';
-
-// =============================================================================
-// OTP Hooks
-// =============================================================================
-
-export function useOtpRequest() {
-  return useMutation({
-    mutationFn: (data: OtpRequestDto) => requestOtp(data),
-  });
-}
-
-export function useOtpVerify() {
-  return useMutation({
-    mutationFn: (data: OtpVerifyDto) => verifyOtp(data),
-    onSuccess: (response) => {
-      // Store StepUp token if verification successful
-      if (response.verified && response.stepUpToken) {
-        setStepUpToken(response.stepUpToken);
-      }
-    },
-  });
-}
 
 // =============================================================================
 // Wallet Registration Hook
@@ -85,32 +54,6 @@ export function useWalletLogin() {
         name: response.name,
         phone: response.phone,
         nickname: response.nickname,
-      });
-    },
-  });
-}
-
-// =============================================================================
-// Owner Auth Hooks
-// =============================================================================
-
-export function useOwnerSignup() {
-  return useMutation({
-    mutationFn: (data: OwnerSignupRequest) => ownerSignup(data),
-  });
-}
-
-export function useOwnerLogin() {
-  return useMutation({
-    mutationFn: (data: OwnerLoginRequest) => ownerLogin(data),
-    onSuccess: (response) => {
-      // Store owner token and user info
-      setAuthToken(response.accessToken, response.refreshToken, 'owner');
-      setUserInfo({
-        id: response.id,
-        name: response.name,
-        email: response.email,
-        phone: response.phoneNumber,
       });
     },
   });

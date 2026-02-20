@@ -11,7 +11,7 @@ import { MobileFrame } from "@/components/layout/MobileFrame";
 import { PrivacyPolicyModal } from "@/components/shared/PrivacyPolicyModal";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
 import { clearOriginStoreId } from "@/hooks/useCustomerNavigate";
-import { getUserInfo, isStepUpValid } from "@/lib/api/tokenManager";
+import { getUserInfo } from "@/lib/api/tokenManager";
 import { useState } from "react";
 import {
   matchPath,
@@ -28,15 +28,8 @@ export function CustomerLayout() {
   const { logout } = useAuth();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentStoreId, setCurrentStoreId] = useState<number | undefined>(
-    undefined,
-  );
-  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const [afterOtpCallback, setAfterOtpCallback] = useState<(() => void) | null>(
-    null,
-  );
+  const [, setCurrentStoreId] = useState<number | undefined>(undefined);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
-  const [isStepUpVerified, setIsStepUpVerified] = useState(isStepUpValid());
 
   // Pre-login: /stores/:storeId/customer, Post-login: /customer
   const base = urlStoreId ? `/stores/${urlStoreId}/customer` : "/customer";
@@ -46,11 +39,9 @@ export function CustomerLayout() {
 
   const navigateToTab = (tab: string) => {
     switch (tab) {
-      case "history": {
-        const query = currentStoreId ? `?storeId=${currentStoreId}` : "";
-        navigate(`${base}/history${query}`);
+      case "history":
+        navigate(`${base}/history`);
         break;
-      }
       case "rewardBox":
         navigate(`${base}/redeems`);
         break;
@@ -62,43 +53,13 @@ export function CustomerLayout() {
     }
   };
 
-  const openOtpModal = (callback?: () => void) => {
-    setAfterOtpCallback(() => callback ?? null);
-    setIsOtpModalOpen(true);
-  };
-
   const handleBottomNavClick = (tab: string) => {
-    if (tab === "wallet") {
-      navigate(`${base}/wallet`);
-      return;
-    }
-    const requiresStepUp = ["history", "rewardBox", "migrationList"].includes(
-      tab,
-    );
-    if (requiresStepUp && !isStepUpValid()) {
-      openOtpModal(() => navigateToTab(tab));
-    } else {
-      navigateToTab(tab);
-    }
-  };
-
-  const handleVerifyIdentity = () => {
-    setIsMenuOpen(false);
-    if (!isStepUpValid()) {
-      openOtpModal();
-    }
+    navigateToTab(tab);
   };
 
   const handlePrivacyPolicy = () => {
     setIsMenuOpen(false);
     setIsPrivacyModalOpen(true);
-  };
-
-  const handleOtpVerified = () => {
-    setIsStepUpVerified(true);
-    setIsOtpModalOpen(false);
-    afterOtpCallback?.();
-    setAfterOtpCallback(null);
   };
 
   const handleLogout = () => {
@@ -117,7 +78,6 @@ export function CustomerLayout() {
       <MobileFrame
         isMenuOpen={isMenuOpen}
         onMenuClose={() => setIsMenuOpen(false)}
-        onVerifyIdentity={handleVerifyIdentity}
         onPrivacyPolicy={handlePrivacyPolicy}
         onLogout={handleLogout}
         userName={userName}
@@ -129,10 +89,6 @@ export function CustomerLayout() {
           !isMigrationPath
         }
         onBottomNavClick={handleBottomNavClick}
-        isStepUpVerified={isStepUpVerified}
-        isOtpModalOpen={isOtpModalOpen}
-        onOtpModalChange={setIsOtpModalOpen}
-        onOtpVerified={handleOtpVerified}
       >
         <ScrollToTop />
         <Outlet context={{ setIsMenuOpen, setCurrentStoreId }} />

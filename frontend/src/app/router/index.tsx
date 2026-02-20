@@ -18,12 +18,15 @@ import { CustomerSettingsPage } from "@/pages/customer/CustomerSettingsPage";
 import { CustomerStoreSelectPage } from "@/pages/customer/CustomerStoreSelectPage";
 import { DirectCustomerLoginPage } from "@/pages/customer/DirectCustomerLoginPage";
 
-// 고객 기능 컴포넌트 (페이지로 래핑될 예정)
-import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
+// 고객 기능 컴포넌트
+import { OAuthCompleteSignupForm } from "@/features/auth";
 import { RequestStampButton } from "@/features/issuance";
 import { MigrationDetail, MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
 import { WalletPage } from "@/features/wallet";
+
+// OAuth
+import { OAuthCallbackPage } from "@/features/auth/components/OAuthCallbackPage";
 
 // Admin 페이지
 import { AdminStoreDetailPage } from "@/pages/admin/AdminStoreDetailPage";
@@ -31,7 +34,6 @@ import { AdminStoreListPage } from "@/pages/admin/AdminStoreListPage";
 
 // 사장님 페이지
 import { OwnerLoginPage } from "@/features/auth/pages/OwnerLoginPage";
-import { OwnerSignupPage } from "@/features/auth/pages/OwnerSignupPage";
 import {
   StampCardCreatePage,
   StampCardEditPage,
@@ -64,6 +66,12 @@ export const router = createBrowserRouter([
     element: <RoleSelectionPage />,
   },
 
+  // OAuth 콜백
+  {
+    path: "/oauth/callback",
+    element: <OAuthCallbackPage />,
+  },
+
   // 고객 매장 선택 (시뮬레이션 진입점)
   {
     path: "/customer/stores",
@@ -76,8 +84,7 @@ export const router = createBrowserRouter([
     element: <CustomerLayout />,
     children: [
       { index: true, element: <CustomerLandingPage /> },
-      { path: "login", element: <CustomerLoginForm /> },
-      { path: "signup", element: <CustomerSignupForm /> },
+      { path: "signup", element: <OAuthCompleteSignupForm role="customer" /> },
     ],
   },
 
@@ -112,12 +119,6 @@ export const router = createBrowserRouter([
   {
     path: "/owner/login",
     element: <OwnerLoginPage />,
-  },
-
-  // 사장님 회원가입 (레이아웃 없음)
-  {
-    path: "/owner/signup",
-    element: <OwnerSignupPage />,
   },
 
   // 사장님 라우트
