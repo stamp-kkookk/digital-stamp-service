@@ -1,22 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
-  <rect width="1240" height="790" fill="#2D6B3F"/>
-  <!-- Leaf branch illustration (like 카페나무 reference) -->
-  <g transform="translate(480, 360)" stroke="white" fill="none" stroke-width="2.5" stroke-linecap="round" opacity="0.85">
-    <!-- Main stem -->
-    <path d="M20,200 Q25,120 10,20 Q5,-20 15,-80"/>
-    <!-- Large leaves -->
-    <path d="M10,20 Q-40,-5 -30,-40 Q-18,-50 10,20" fill="white" fill-opacity="0.12" stroke-width="2"/>
-    <path d="M15,70 Q-35,45 -30,10 Q-15,-2 15,70" fill="white" fill-opacity="0.1" stroke-width="2"/>
-    <path d="M12,-20 Q-25,-50 -18,-75 Q-5,-80 12,-20" fill="white" fill-opacity="0.1" stroke-width="2"/>
-    <path d="M18,130 Q-25,105 -22,75 Q-8,62 18,130" fill="white" fill-opacity="0.08" stroke-width="2"/>
-    <!-- Right-side small leaves -->
-    <path d="M15,-60 Q40,-80 38,-95 Q28,-90 15,-60" fill="white" fill-opacity="0.1" stroke-width="1.8"/>
-    <path d="M12,0 Q45,-15 42,-35 Q30,-30 12,0" fill="white" fill-opacity="0.08" stroke-width="1.8"/>
+  <defs>
+    <filter id="noise3">
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.06"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Brighter warm kraft paper -->
+  <rect width="1240" height="790" fill="#EDE3D0"/>
+  <!-- Light paper texture -->
+  <rect width="1240" height="790" filter="url(#noise3)" opacity="0.25"/>
+  <!-- Double border frame -->
+  <rect x="40" y="40" width="1160" height="710" fill="none" stroke="#6B5A4A" stroke-width="2.5"/>
+  <rect x="52" y="52" width="1136" height="686" fill="none" stroke="#6B5A4A" stroke-width="0.8" opacity="0.4"/>
+  <!-- Corner ornaments -->
+  <g fill="none" stroke="#6B5A4A" stroke-width="1.2">
+    <path d="M60,60 L90,60 M60,60 L60,90"/>
+    <path d="M1180,60 L1150,60 M1180,60 L1180,90"/>
+    <path d="M60,730 L90,730 M60,730 L60,700"/>
+    <path d="M1180,730 L1150,730 M1180,730 L1180,700"/>
   </g>
-  <!-- Subtle bottom-right leaf -->
-  <g transform="translate(900, 550) scale(0.6) rotate(150)" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" opacity="0.15">
-    <path d="M0,100 Q5,50 -5,-20"/>
-    <path d="M-5,-20 Q-30,-40 -25,-60 Q-12,-55 -5,-20" fill="white" fill-opacity="0.3"/>
-    <path d="M0,30 Q-30,15 -28,-5 Q-15,-10 0,30" fill="white" fill-opacity="0.25"/>
+  <!-- Vintage woodcut coffee beans -->
+  <g transform="translate(620, 280)" fill="#6B5A4A" opacity="0.55">
+    <ellipse cx="-25" cy="0" rx="22" ry="30" transform="rotate(-15)"/>
+    <path d="M-25,-28 Q-20,-5 -25,28" fill="#EDE3D0" stroke="#EDE3D0" stroke-width="2"/>
+    <ellipse cx="25" cy="0" rx="22" ry="30" transform="rotate(15)"/>
+    <path d="M25,-28 Q30,-5 25,28" fill="#EDE3D0" stroke="#EDE3D0" stroke-width="2"/>
   </g>
+  <!-- Letterpress style typography -->
+  <text x="620" y="420" text-anchor="middle" fill="#6B5A4A" font-family="'Georgia', serif" font-size="20" letter-spacing="10">— E S T . —</text>
+  <text x="620" y="500" text-anchor="middle" fill="#5A4A3A" font-family="'Georgia', serif" font-size="56" font-weight="700" letter-spacing="4">구활자인쇄소</text>
+  <!-- Decorative line -->
+  <line x1="420" y1="540" x2="820" y2="540" stroke="#6B5A4A" stroke-width="1" opacity="0.35"/>
+  <text x="620" y="575" text-anchor="middle" fill="#6B5A4A" font-family="'Georgia', serif" font-size="16" letter-spacing="8" opacity="0.5">VINTAGE ROASTERY</text>
 </svg>

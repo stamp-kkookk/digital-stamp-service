@@ -1,25 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
-  <rect width="1240" height="790" fill="#7A5230"/>
-  <!-- Wheat stalk decorations -->
-  <g stroke="#F5E6D3" fill="none" stroke-width="2" opacity="0.12" stroke-linecap="round">
-    <path d="M160,790 Q170,650 180,550 M170,700 L145,675 M170,650 L195,625 M170,600 L145,575 M170,560 L190,545"/>
-    <path d="M1080,790 Q1070,650 1060,550 M1070,700 L1095,675 M1070,650 L1045,625 M1070,600 L1095,575"/>
+  <defs>
+    <filter id="noise2">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.08"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Sage green base -->
+  <rect width="1240" height="790" fill="#8B9D83"/>
+  <!-- Texture -->
+  <rect width="1240" height="790" filter="url(#noise2)" opacity="0.4"/>
+  <!-- Single tea leaf monoline drawing -->
+  <g transform="translate(620, 300)" fill="none" stroke="#FFF8F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+    <!-- Leaf stem -->
+    <path d="M0,80 Q-5,40 0,0 Q5,-40 -3,-70"/>
+    <!-- Leaf shape - organic curves -->
+    <path d="M0,0 Q-45,-10 -50,-45 Q-48,-75 -3,-70"/>
+    <path d="M0,0 Q40,-15 42,-50 Q38,-72 -3,-70"/>
+    <!-- Leaf veins -->
+    <path d="M0,0 Q-20,-25 -30,-50" stroke-width="1" opacity="0.5"/>
+    <path d="M0,0 Q15,-30 22,-55" stroke-width="1" opacity="0.5"/>
   </g>
-  <!-- Warm glow -->
-  <circle cx="620" cy="370" r="160" fill="#F5E6D3" opacity="0.06"/>
-  <!-- Croissant centered -->
-  <g transform="translate(620, 360) scale(2.2)">
-    <!-- Croissant body - crescent shape -->
-    <path d="M-55,15 Q-65,-5 -50,-25 Q-35,-40 -15,-38 Q0,-50 15,-38 Q35,-40 50,-25 Q65,-5 55,15 Q35,30 0,28 Q-35,30 -55,15Z" fill="#E8C088"/>
-    <!-- Layer lines -->
-    <path d="M-40,10 Q-20,-15 0,-12 Q20,-15 40,10" fill="none" stroke="#D4A060" stroke-width="1.8" opacity="0.6"/>
-    <path d="M-30,0 Q-10,-22 0,-20 Q10,-22 30,0" fill="none" stroke="#D4A060" stroke-width="1.2" opacity="0.5"/>
-    <path d="M-20,-8 Q0,-28 20,-8" fill="none" stroke="#D4A060" stroke-width="1" opacity="0.4"/>
-    <!-- Highlight -->
-    <path d="M-15,-30 Q0,-42 15,-30" fill="#F0D8A8" opacity="0.4"/>
-    <!-- Score marks -->
-    <path d="M-35,-15 L-25,-28" stroke="#D4A060" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-    <path d="M0,-18 L0,-35" stroke="#D4A060" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-    <path d="M35,-15 L25,-28" stroke="#D4A060" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
-  </g>
+  <!-- Brand name -->
+  <text x="620" y="500" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="28" letter-spacing="12">소요</text>
+  <text x="620" y="550" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="52" font-weight="700" letter-spacing="14">SOYO</text>
+  <!-- Subtitle -->
+  <text x="620" y="590" text-anchor="middle" fill="#FFF8F0" font-family="sans-serif" font-size="14" letter-spacing="6" opacity="0.6">T E A  H O U S E</text>
 </svg>

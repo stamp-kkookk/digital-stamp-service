@@ -1,30 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
-  <rect width="1240" height="790" fill="#9B7EC8"/>
-  <!-- Clouds -->
-  <g fill="white" opacity="0.08">
-    <circle cx="200" cy="180" r="50"/><circle cx="250" cy="170" r="60"/><circle cx="310" cy="185" r="45"/>
-    <circle cx="900" cy="550" r="40"/><circle cx="945" cy="540" r="52"/><circle cx="990" cy="555" r="38"/>
-    <circle cx="1050" cy="130" r="35"/><circle cx="1085" cy="120" r="42"/><circle cx="1120" cy="135" r="30"/>
+  <defs>
+    <filter id="noise4">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.1"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Retro mustard base -->
+  <rect width="1240" height="790" fill="#D4A04A"/>
+  <!-- Burgundy top section with arch -->
+  <path d="M0,0 L1240,0 L1240,450 Q620,350 0,450Z" fill="#8C2F2F"/>
+  <!-- Arch shape -->
+  <path d="M320,790 L320,350 Q620,180 920,350 L920,790" fill="none" stroke="#D4A04A" stroke-width="3" opacity="0.5"/>
+  <!-- Inner arch glow -->
+  <path d="M370,790 L370,380 Q620,230 870,380 L870,790" fill="#D4A04A" opacity="0.15"/>
+  <!-- Texture -->
+  <rect width="1240" height="790" filter="url(#noise4)" opacity="0.4"/>
+  <!-- Retro coffee cup icon -->
+  <g transform="translate(620, 400)" fill="none" stroke="#FFF8F0" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+    <!-- Saucer -->
+    <ellipse cx="0" cy="50" rx="50" ry="12"/>
+    <!-- Cup -->
+    <path d="M-30,0 L-25,45 Q0,55 25,45 L30,0"/>
+    <path d="M-30,0 Q0,-8 30,0"/>
+    <!-- Steam swirl -->
+    <path d="M0,-15 Q-10,-30 0,-40 Q10,-50 0,-60" stroke-width="2"/>
   </g>
-  <!-- Sparkle dots -->
-  <g fill="#FFB8D0" opacity="0.25">
-    <circle cx="350" cy="250" r="3"/><circle cx="700" cy="120" r="2.5"/><circle cx="500" cy="600" r="2.5"/>
-    <circle cx="900" cy="350" r="2"/><circle cx="150" cy="500" r="3"/><circle cx="1100" cy="420" r="2.5"/>
-  </g>
-  <!-- Cupcake centered -->
-  <g transform="translate(620, 370) scale(2)">
-    <!-- Wrapper -->
-    <path d="M-30,5 L-25,50 Q-25,55 -20,55 L20,55 Q25,55 25,50 L30,5Z" fill="#E898B8"/>
-    <!-- Wrapper ridges -->
-    <path d="M-30,5 Q-26,12 -22,5 Q-18,12 -14,5 Q-10,12 -6,5 Q-2,12 2,5 Q6,12 10,5 Q14,12 18,5 Q22,12 26,5 Q30,12 30,5" fill="none" stroke="#D888A8" stroke-width="1"/>
-    <!-- Frosting -->
-    <path d="M-34,5 Q-35,-12 -18,-22 Q-5,-32 5,-26 Q18,-35 30,-20 Q38,-10 34,5Z" fill="#FFB8D0"/>
-    <!-- Frosting swirl -->
-    <path d="M-15,-10 Q0,-28 15,-10" fill="#FFA8C0" opacity="0.6"/>
-    <path d="M-8,-16 Q0,-25 8,-16" fill="#FF98B0" opacity="0.5"/>
-    <!-- Cherry -->
-    <circle cx="2" cy="-28" r="7" fill="#FF6B8A"/>
-    <path d="M2,-35 Q8,-42 12,-38" stroke="#4CAF50" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <path d="M9,-40 Q12,-38 10,-35" fill="#66BB6A"/>
+  <!-- Brand name - retro lettering -->
+  <text x="620" y="560" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="64" font-weight="700" letter-spacing="6">다방 칠팔</text>
+  <!-- Subtitle -->
+  <text x="620" y="600" text-anchor="middle" fill="#D4A04A" font-family="sans-serif" font-size="14" letter-spacing="8">SINCE 1978</text>
+  <!-- Decorative dots -->
+  <g fill="#D4A04A" opacity="0.4">
+    <circle cx="430" cy="625" r="3"/><circle cx="450" cy="625" r="3"/><circle cx="470" cy="625" r="3"/>
+    <circle cx="770" cy="625" r="3"/><circle cx="790" cy="625" r="3"/><circle cx="810" cy="625" r="3"/>
   </g>
 </svg>
