@@ -38,8 +38,7 @@ export async function getAllWalletStampCards(): Promise<WalletStampCardListRespo
 }
 
 // =============================================================================
-// Stamp History (StepUp Required)
-// =============================================================================
+// Stamp History// =============================================================================
 
 export interface GetStampHistoryParams {
   storeId: number;
@@ -60,8 +59,7 @@ export async function getStampHistory(
 }
 
 // =============================================================================
-// Redeem History (StepUp Required)
-// =============================================================================
+// Redeem History// =============================================================================
 
 export interface GetRedeemHistoryParams {
   storeId: number;
@@ -82,8 +80,7 @@ export async function getRedeemHistory(
 }
 
 // =============================================================================
-// Wallet Rewards (StepUp Required)
-// =============================================================================
+// Wallet Rewards// =============================================================================
 
 export interface GetWalletRewardsParams {
   status?: WalletRewardStatus;

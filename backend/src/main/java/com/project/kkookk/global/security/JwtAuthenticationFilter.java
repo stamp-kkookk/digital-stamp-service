@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String formatUserId(TokenType tokenType, Long subjectId) {
         return switch (tokenType) {
             case OWNER -> "owner:" + subjectId;
-            case CUSTOMER, STEPUP -> "wallet:" + subjectId;
+            case CUSTOMER -> "wallet:" + subjectId;
         };
     }
 
@@ -92,8 +92,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 boolean isAdmin = jwtUtil.getIsAdmin(token);
                 yield OwnerPrincipal.of(subjectId, email, isAdmin);
             }
-            case CUSTOMER -> CustomerPrincipal.of(subjectId, false);
-            case STEPUP -> CustomerPrincipal.of(subjectId, true);
+            case CUSTOMER -> CustomerPrincipal.of(subjectId);
         };
     }
 }

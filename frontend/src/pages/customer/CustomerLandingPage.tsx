@@ -1,75 +1,118 @@
 /**
  * CustomerLandingPage 컴포넌트
  * QR 스캔 시 표시되는 고객 앱 랜딩 페이지
+ * 신규 유저는 OAuth 후 동일 카드 안에서 2차 폼 표시
  */
 
-import { Button } from "@/components/ui/Button";
+import { OAuthButtons } from "@/features/auth/components/OAuthButtons";
+import {
+  OAuthCompleteSignupForm,
+  type SignupLocationState,
+} from "@/features/auth/components/OAuthCompleteSignupForm";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { useStorePublicInfo } from "@/hooks/useStorePublicInfo";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronLeft, Loader2, Users } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function CustomerLandingPage() {
-  const { storeId, customerNavigate } = useCustomerNavigate();
-  const { data: storeInfo, isLoading, error } = useStorePublicInfo(
-    storeId ? Number(storeId) : undefined,
-  );
+  const { storeId } = useCustomerNavigate();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as SignupLocationState | undefined;
+  const showSignup = locationState?.tempToken;
+
+  const {
+    data: storeInfo,
+    isLoading,
+    error,
+  } = useStorePublicInfo(storeId ? Number(storeId) : undefined);
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 bg-white">
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-kkookk-sand">
         <Loader2 className="w-8 h-8 animate-spin text-kkookk-orange-500" />
-        <p className="mt-4 text-sm text-kkookk-steel">매장 정보를 불러오는 중...</p>
+        <p className="mt-4 text-sm text-kkookk-steel">
+          매장 정보를 불러오는 중...
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 bg-white">
-        <AlertCircle className="w-12 h-12 text-red-500" />
-        <p className="mt-4 text-lg font-medium text-kkookk-navy">매장을 찾을 수 없습니다</p>
-        <p className="mt-1 text-sm text-kkookk-steel">QR 코드를 다시 스캔해주세요</p>
+      <div className="flex flex-col items-center justify-center h-full p-6 bg-kkookk-sand">
+        <AlertCircle className="w-12 h-12 text-kkookk-red" />
+        <p className="mt-4 text-lg font-medium text-kkookk-navy">
+          매장을 찾을 수 없습니다
+        </p>
+        <p className="mt-1 text-sm text-kkookk-steel">
+          QR 코드를 다시 스캔해주세요
+        </p>
       </div>
     );
   }
 
   const storeName = storeInfo?.storeName ?? "매장";
+  const activeCount = storeInfo?.activeStampCardCount ?? 0;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-white">
-      <div className="flex flex-col items-center justify-center flex-1 -mt-10">
-        <img
-          src="/logo/symbol_customer.png"
-          alt="KKOOKK Customer"
-          className="mb-2 w-26 h-26 "
-        />
-        <h2 className="mb-3 text-2xl font-bold leading-tight text-kkookk-navy">
-          {storeName}에
-          <br />
-          오신 것을 환영해요!
-        </h2>
-        <p className="mb-8 text-sm text-kkookk-steel">
-          스탬프를 모아 특별한 혜택을 받아보세요.
-        </p>
-        <div className="bg-kkookk-navy text-white px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-kkookk-navy/20 animate-pulse">
-          현재 {storeInfo?.activeStampCardCount ?? 0}명이 적립 중
-        </div>
-      </div>
-      <div className="w-full pb-8 mt-auto">
-        <Button
-          onClick={() => customerNavigate("/login")}
-          variant="primary"
-          size="full"
-          className="shadow-lg shadow-orange-200"
-        >
-          내 지갑 열기
-        </Button>
-        <button
-          onClick={() => customerNavigate("/signup")}
-          className="mt-4 text-sm underline text-kkookk-steel/60 hover:text-kkookk-steel decoration-kkookk-steel/30 underline-offset-4"
-        >
-          처음이신가요?
-        </button>
+    <div className="flex flex-col items-center justify-center h-full p-6 bg-kkookk-sand">
+      <div className="relative w-full max-w-md overflow-hidden bg-white rounded-3xl border border-slate-100 shadow-xl text-center animate-fadeInUp texture-grain">
+        {showSignup ? (
+          <div className="px-8 py-6 text-left">
+            <button
+              onClick={() =>
+                navigate(`/stores/${storeId}/customer`, { replace: true })
+              }
+              className="flex items-center gap-1 mb-4 -ml-2 text-sm text-kkookk-steel hover:text-kkookk-indigo"
+            >
+              <ChevronLeft size={18} /> 돌아가기
+            </button>
+            <OAuthCompleteSignupForm signupState={locationState} />
+          </div>
+        ) : (
+          <>
+            {/* Branding */}
+            <div className="pt-8 pb-2 px-8">
+              <img
+                src="/logo/logo_textandsymbol_customer.png"
+                alt="KKOOKK"
+                className="h-24 mx-auto"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            </div>
+
+            {/* Store welcome */}
+            <div className="px-8 pt-2 pb-6">
+              <h1 className="mb-2 text-3xl font-extrabold bg-linear-to-r from-kkookk-orange-600 via-kkookk-orange-500 to-kkookk-orange-600 bg-clip-text text-transparent">
+                {storeName}
+              </h1>
+              <p className="text-sm text-kkookk-steel">
+                스탬프를 모아 특별한 혜택을 받아보세요
+              </p>
+            </div>
+
+            {/* Social proof badge */}
+            {activeCount > 0 && (
+              <div className="pb-6">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold bg-kkookk-orange-50 text-kkookk-orange-600 animate-pulse-badge">
+                  <Users size={13} />
+                  현재 {activeCount}명이 적립 중
+                </span>
+              </div>
+            )}
+
+            {/* Gradient divider */}
+            <div className="mx-8 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent" />
+
+            {/* OAuth action area */}
+            <div className="px-8 pt-6 pb-6">
+              <OAuthButtons userRole="CUSTOMER" storeId={storeId} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

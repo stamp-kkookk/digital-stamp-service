@@ -16,7 +16,6 @@ import {
   type GetWalletRewardsParams,
 } from '../api/walletApi';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
-import { isStepUpValid } from '@/lib/api/tokenManager';
 
 // =============================================================================
 // Store Summary Hook
@@ -53,7 +52,7 @@ export function useAllWalletStampCards() {
 }
 
 // =============================================================================
-// Stamp History Hook (StepUp Required)
+// Stamp History Hook
 // =============================================================================
 
 export function useStampHistory(
@@ -68,7 +67,7 @@ export function useStampHistory(
         page: options?.page,
         size: options?.size,
       }),
-    enabled: !!storeId && isStepUpValid(),
+    enabled: !!storeId,
     refetchOnMount: 'always',
   });
 }
@@ -93,12 +92,12 @@ export function useStampHistoryInfinite(
       return undefined;
     },
     initialPageParam: 0,
-    enabled: !!storeId && isStepUpValid(),
+    enabled: !!storeId,
   });
 }
 
 // =============================================================================
-// Redeem History Hook (StepUp Required)
+// Redeem History Hook
 // =============================================================================
 
 export function useRedeemHistory(
@@ -113,7 +112,7 @@ export function useRedeemHistory(
         page: options?.page,
         size: options?.size,
       }),
-    enabled: !!storeId && isStepUpValid(),
+    enabled: !!storeId,
     refetchOnMount: 'always',
   });
 }
@@ -138,19 +137,19 @@ export function useRedeemHistoryInfinite(
       return undefined;
     },
     initialPageParam: 0,
-    enabled: !!storeId && isStepUpValid(),
+    enabled: !!storeId,
   });
 }
 
 // =============================================================================
-// Wallet Rewards Hook (StepUp Required)
+// Wallet Rewards Hook
 // =============================================================================
 
 export function useWalletRewards(options?: GetWalletRewardsParams) {
   return useQuery({
     queryKey: QUERY_KEYS.walletRewards(options?.status),
     queryFn: () => getWalletRewards(options),
-    enabled: isStepUpValid(),
+    enabled: true,
   });
 }
 
@@ -174,6 +173,6 @@ export function useWalletRewardsInfinite(
       return undefined;
     },
     initialPageParam: 0,
-    enabled: isStepUpValid(),
+    enabled: true,
   });
 }

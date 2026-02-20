@@ -2,8 +2,6 @@ package com.project.kkookk.wallet.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
-import com.project.kkookk.global.security.RefreshTokenService;
-import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.repository.RedeemEventRepository;
 import com.project.kkookk.stamp.domain.StampEvent;
@@ -19,10 +17,6 @@ import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.domain.WalletRewardStatus;
 import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.domain.WalletStampCardStatus;
-import com.project.kkookk.wallet.dto.CustomerLoginRequest;
-import com.project.kkookk.wallet.dto.CustomerLoginResponse;
-import com.project.kkookk.wallet.dto.WalletRegisterRequest;
-import com.project.kkookk.wallet.dto.WalletRegisterResponse;
 import com.project.kkookk.wallet.dto.response.PageInfo;
 import com.project.kkookk.wallet.dto.response.RedeemEventHistoryResponse;
 import com.project.kkookk.wallet.dto.response.RedeemEventSummary;
@@ -47,7 +41,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,8 +59,6 @@ public class CustomerWalletService {
     private final StoreRepository storeRepository;
     private final StampEventRepository stampEventRepository;
     private final RedeemEventRepository redeemEventRepository;
-    private final JwtUtil jwtUtil;
-    private final RefreshTokenService refreshTokenService;
 
     private String normalizePhone(String phone) {
         return phone.replaceAll("[^0-9]", "");
@@ -82,119 +73,8 @@ public class CustomerWalletService {
     }
 
     @Transactional
-    public WalletRegisterResponse register(WalletRegisterRequest request) {
-        String phone = normalizePhone(request.phone());
-
-        // 1. 전화번호 중복 체크
-        if (customerWalletRepository.existsByPhone(phone)) {
-            throw new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED);
-        }
-
-        // 2. 닉네임 중복 체크
-        if (customerWalletRepository.existsByNickname(request.nickname())) {
-            throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
-        }
-
-        // 3. CustomerWallet 생성 (정규화된 전화번호 저장)
-        CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone(phone)
-                        .name(request.name())
-                        .nickname(request.nickname())
-                        .build();
-
-        // 4. 저장 (Race condition 대응: DB unique constraint 위반 시 재검사)
-        CustomerWallet savedWallet;
-        try {
-            savedWallet = customerWalletRepository.save(wallet);
-            customerWalletRepository.flush();
-        } catch (DataIntegrityViolationException e) {
-            if (customerWalletRepository.existsByNickname(request.nickname())) {
-                throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
-            }
-            if (customerWalletRepository.existsByPhone(phone)) {
-                throw new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED);
-            }
-            throw e;
-        }
-
-        // 3. storeId가 있으면 해당 매장의 ACTIVE 스탬프카드로 WalletStampCard 자동 생성
-        RegisteredStampCardInfo stampCardInfo = null;
-        if (request.storeId() != null) {
-            stampCardInfo = createWalletStampCardIfExists(savedWallet.getId(), request.storeId());
-        }
-
-        // 4. JWT 토큰 생성 (일반 CUSTOMER 토큰, STEPUP 아님)
-        String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId());
-        String refreshToken = refreshTokenService.issueCustomerRefreshToken(savedWallet.getId());
-
-        log.info(
-                "[Wallet Register] walletId={}, phone={}, name={}, storeId={}, walletStampCardId={}",
-                savedWallet.getId(),
-                savedWallet.getPhone(),
-                savedWallet.getName(),
-                request.storeId(),
-                stampCardInfo != null ? stampCardInfo.walletStampCardId() : null);
-
-        // 5. Response 반환
-        return new WalletRegisterResponse(
-                accessToken,
-                refreshToken,
-                savedWallet.getId(),
-                savedWallet.getPhone(),
-                savedWallet.getName(),
-                savedWallet.getNickname(),
-                stampCardInfo);
-    }
-
-    @Transactional
-    public CustomerLoginResponse login(CustomerLoginRequest request) {
-        String phone = normalizePhone(request.phone());
-
-        // 1. 전화번호와 이름으로 CustomerWallet 조회
-        CustomerWallet wallet =
-                customerWalletRepository
-                        .findByPhoneAndName(phone, request.name())
-                        .orElseThrow(
-                                () ->
-                                        new CustomerWalletNotFoundException(
-                                                "해당 전화번호와 이름으로 지갑을 찾을 수 없습니다"));
-
-        // 2. BLOCKED 상태 체크
-        if (wallet.isBlocked()) {
-            throw new CustomerWalletBlockedException("차단된 지갑입니다");
-        }
-
-        // 3. 해당 매장의 스탬프카드가 있는지 확인, 없으면 생성 (storeId가 있을 때만)
-        if (request.storeId() != null) {
-            ensureWalletStampCardExists(wallet.getId(), request.storeId());
-        }
-
-        // 4. 고객의 모든 ACTIVE 스탬프카드 조회 (storeId 있으면 현재 매장 카드 우선, 없으면 최근 적립순)
-        List<WalletStampCardSummary> stampCards =
-                getAllStampCardsWithCurrentStoreFirst(wallet.getId(), request.storeId());
-
-        // 5. JWT 토큰 생성
-        String accessToken = jwtUtil.generateCustomerToken(wallet.getId());
-        String refreshToken = refreshTokenService.issueCustomerRefreshToken(wallet.getId());
-
-        log.info(
-                "[Customer Login] walletId={}, phone={}, name={}, storeId={}, stampCardCount={}",
-                wallet.getId(),
-                wallet.getPhone(),
-                wallet.getName(),
-                request.storeId(),
-                stampCards.size());
-
-        // 6. Response 반환
-        return new CustomerLoginResponse(
-                accessToken,
-                refreshToken,
-                wallet.getId(),
-                wallet.getPhone(),
-                wallet.getName(),
-                wallet.getNickname(),
-                stampCards);
+    public void ensureWalletStampCardForStore(Long walletId, Long storeId) {
+        ensureWalletStampCardExists(walletId, storeId);
     }
 
     private void ensureWalletStampCardExists(Long walletId, Long storeId) {
@@ -208,71 +88,6 @@ public class CustomerWalletService {
         if (!exists) {
             createWalletStampCardIfExists(walletId, storeId);
         }
-    }
-
-    private List<WalletStampCardSummary> getAllStampCardsWithCurrentStoreFirst(
-            Long walletId, Long currentStoreId) {
-
-        // 고객의 모든 ACTIVE 스탬프카드 조회
-        List<WalletStampCard> walletCards =
-                walletStampCardRepository.findByCustomerWalletIdAndStatus(
-                        walletId, WalletStampCardStatus.ACTIVE);
-
-        if (walletCards.isEmpty()) {
-            return List.of();
-        }
-
-        // StampCard, Store Batch 조회 (N+1 방지)
-        Set<Long> stampCardIds =
-                walletCards.stream()
-                        .map(WalletStampCard::getStampCardId)
-                        .collect(Collectors.toSet());
-        Set<Long> storeIds =
-                walletCards.stream().map(WalletStampCard::getStoreId).collect(Collectors.toSet());
-
-        Map<Long, StampCard> stampCardMap =
-                stampCardRepository.findAllById(stampCardIds).stream()
-                        .collect(Collectors.toMap(StampCard::getId, Function.identity()));
-        Map<Long, Store> storeMap =
-                storeRepository.findAllById(storeIds).stream()
-                        .collect(Collectors.toMap(Store::getId, Function.identity()));
-
-        // currentStoreId가 있으면 현재 매장 카드를 첫 번째로 정렬, 없으면 최근 적립순으로만 정렬
-        walletCards.sort(
-                (a, b) -> {
-                    // currentStoreId가 null이면 스토어 우선순위 건너뛰기
-                    if (currentStoreId != null) {
-                        boolean firstIsCurrentStore = a.getStoreId().equals(currentStoreId);
-                        boolean secondIsCurrentStore = b.getStoreId().equals(currentStoreId);
-                        if (firstIsCurrentStore && !secondIsCurrentStore) {
-                            return -1;
-                        }
-                        if (!firstIsCurrentStore && secondIsCurrentStore) {
-                            return 1;
-                        }
-                    }
-                    // currentStoreId가 null이거나 같은 경우 최근 적립 순
-                    if (a.getLastStampedAt() == null && b.getLastStampedAt() == null) {
-                        return 0;
-                    }
-                    if (a.getLastStampedAt() == null) {
-                        return 1;
-                    }
-                    if (b.getLastStampedAt() == null) {
-                        return -1;
-                    }
-                    return b.getLastStampedAt().compareTo(a.getLastStampedAt());
-                });
-
-        // WalletStampCardSummary 변환
-        return walletCards.stream()
-                .map(
-                        walletCard ->
-                                WalletStampCardSummary.from(
-                                        walletCard,
-                                        stampCardMap.get(walletCard.getStampCardId()),
-                                        storeMap.get(walletCard.getStoreId())))
-                .toList();
     }
 
     private RegisteredStampCardInfo createWalletStampCardIfExists(Long walletId, Long storeId) {
