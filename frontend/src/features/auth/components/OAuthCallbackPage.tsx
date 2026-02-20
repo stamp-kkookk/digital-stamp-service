@@ -47,77 +47,79 @@ export function OAuthCallbackPage() {
     const provider = (state as OAuthProviderType) || oauthState.provider;
     const { role, storeId } = oauthState;
 
-    oauthLogin.mutate(
-      {
-        provider,
-        code,
-        redirectUri: getOAuthRedirectUri(),
-        role,
-        storeId: storeId ? Number(storeId) : undefined,
-      },
-      {
-        onSuccess: (response) => {
-          clearOAuthState();
+    const performLogin = async () => {
+      try {
+        const response = await oauthLogin.mutateAsync({
+          provider,
+          code,
+          redirectUri: getOAuthRedirectUri(),
+          role,
+          storeId: storeId ? Number(storeId) : undefined,
+        });
 
-          if (response.isNewUser) {
-            if (role === 'TERMINAL') {
-              kkookkToast.error('사장님 계정을 먼저 등록해주세요.');
-              navigate('/terminal/login');
-              return;
-            }
+        clearOAuthState();
 
-            // New user → signup form with tempToken
-            const signupState = {
-              tempToken: response.tempToken,
-              oauthName: response.oauthName,
-              oauthEmail: response.oauthEmail,
-              provider,
-            };
-
-            if (role === 'CUSTOMER') {
-              navigate(
-                storeId ? `/stores/${storeId}/customer/signup` : '/customer/login',
-                { state: signupState },
-              );
-            } else if (role === 'OWNER') {
-              navigate('/owner/login', { state: { ...signupState, showSignup: true } });
-            }
+        if (response.isNewUser) {
+          if (role === 'TERMINAL') {
+            kkookkToast.error('사장님 계정을 먼저 등록해주세요.');
+            navigate('/terminal/login', { replace: true });
             return;
           }
 
-          // Terminal: store selection needed
-          if (role === 'TERMINAL' && response.stores && response.tempToken) {
-            navigate('/terminal/stores', {
-              state: {
-                tempToken: response.tempToken,
-                ownerId: response.ownerId,
-                stores: response.stores,
-              },
-            });
-            return;
-          }
-
-          // Existing user → logged in
-          refreshAuthState();
+          // New user → signup form with tempToken
+          const signupState = {
+            tempToken: response.tempToken,
+            oauthName: response.oauthName,
+            oauthEmail: response.oauthEmail,
+            provider,
+          };
 
           if (role === 'CUSTOMER') {
-            if (storeId) {
-              sessionStorage.setItem('origin_store_id', storeId);
-            }
-            navigate('/customer/wallet');
+            navigate(
+              storeId ? `/stores/${storeId}/customer` : '/customer/login',
+              { state: signupState, replace: true },
+            );
           } else if (role === 'OWNER') {
-            navigate('/owner/stores');
+            navigate('/owner/login', { state: { ...signupState, showSignup: true }, replace: true });
           }
+          return;
+        }
 
-          kkookkToast.success('로그인 성공');
-        },
-        onError: () => {
-          clearOAuthState();
-          setError('로그인에 실패했습니다. 다시 시도해주세요.');
-        },
-      },
-    );
-  }, [searchParams, navigate, oauthLogin, refreshAuthState]);
+        // Terminal: store selection needed
+        if (role === 'TERMINAL' && response.stores && response.tempToken) {
+          navigate('/terminal/stores', {
+            state: {
+              tempToken: response.tempToken,
+              ownerId: response.ownerId,
+              stores: response.stores,
+            },
+            replace: true,
+          });
+          return;
+        }
+
+        // Existing user → logged in
+        refreshAuthState();
+
+        if (role === 'CUSTOMER') {
+          if (storeId) {
+            sessionStorage.setItem('origin_store_id', storeId);
+          }
+          navigate('/customer/wallet', { replace: true });
+        } else if (role === 'OWNER') {
+          navigate('/owner/stores', { replace: true });
+        }
+
+        kkookkToast.success('로그인 성공');
+      } catch {
+        clearOAuthState();
+        setError('로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+
+    performLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   if (error) {
     return (

@@ -101,9 +101,9 @@ public enum ErrorCode {
 
     // OAuth
     OAUTH_CODE_EXCHANGE_FAILED(
-            HttpStatus.UNAUTHORIZED, "OAUTH_CODE_EXCHANGE_FAILED", "OAuth 인가 코드 교환에 실패했습니다"),
+            HttpStatus.BAD_GATEWAY, "OAUTH_CODE_EXCHANGE_FAILED", "OAuth 인가 코드 교환에 실패했습니다"),
     OAUTH_USERINFO_FAILED(
-            HttpStatus.UNAUTHORIZED, "OAUTH_USERINFO_FAILED", "OAuth 사용자 정보 조회에 실패했습니다"),
+            HttpStatus.BAD_GATEWAY, "OAUTH_USERINFO_FAILED", "OAuth 사용자 정보 조회에 실패했습니다"),
     OAUTH_INVALID_TEMP_TOKEN(
             HttpStatus.UNAUTHORIZED, "OAUTH_INVALID_TEMP_TOKEN", "유효하지 않은 임시 토큰입니다"),
     OAUTH_OWNER_NOT_FOUND(HttpStatus.NOT_FOUND, "OAUTH_OWNER_NOT_FOUND", "사장님 계정을 먼저 등록해주세요"),

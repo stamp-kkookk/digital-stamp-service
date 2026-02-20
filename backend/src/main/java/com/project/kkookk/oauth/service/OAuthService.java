@@ -110,17 +110,21 @@ public class OAuthService {
                         .build();
         CustomerWallet savedWallet = customerWalletRepository.save(wallet);
 
-        // Create OAuthAccount linked to wallet
+        // Link or create OAuthAccount for wallet
         String email = claims.get("email", String.class);
         String oauthName = claims.get("oauthName", String.class);
         OAuthAccount oauthAccount =
-                OAuthAccount.builder()
-                        .provider(provider)
-                        .providerId(providerId)
-                        .email(email)
-                        .name(oauthName)
-                        .customerWalletId(savedWallet.getId())
-                        .build();
+                oauthAccountRepository
+                        .findByProviderAndProviderId(provider, providerId)
+                        .orElseGet(
+                                () ->
+                                        OAuthAccount.builder()
+                                                .provider(provider)
+                                                .providerId(providerId)
+                                                .email(email)
+                                                .name(oauthName)
+                                                .build());
+        oauthAccount.linkCustomer(savedWallet.getId());
         oauthAccountRepository.save(oauthAccount);
 
         // Auto-create stamp card if storeId provided
@@ -165,16 +169,20 @@ public class OAuthService {
                         .build();
         OwnerAccount savedOwner = ownerAccountRepository.save(owner);
 
-        // Create OAuthAccount linked to owner
+        // Link or create OAuthAccount for owner
         String oauthName = claims.get("oauthName", String.class);
         OAuthAccount oauthAccount =
-                OAuthAccount.builder()
-                        .provider(provider)
-                        .providerId(providerId)
-                        .email(email)
-                        .name(oauthName)
-                        .ownerAccountId(savedOwner.getId())
-                        .build();
+                oauthAccountRepository
+                        .findByProviderAndProviderId(provider, providerId)
+                        .orElseGet(
+                                () ->
+                                        OAuthAccount.builder()
+                                                .provider(provider)
+                                                .providerId(providerId)
+                                                .email(email)
+                                                .name(oauthName)
+                                                .build());
+        oauthAccount.linkOwner(savedOwner.getId());
         oauthAccountRepository.save(oauthAccount);
 
         // Generate tokens
@@ -215,11 +223,10 @@ public class OAuthService {
             throw new BusinessException(ErrorCode.STORE_NOT_OPERATIONAL);
         }
 
-        String accessToken =
-                jwtUtil.generateTerminalToken(ownerId, owner.getEmail(), store.getId());
+        String accessToken = jwtUtil.generateOwnerToken(ownerId, owner.getEmail(), owner.isAdmin());
         String refreshToken =
-                refreshTokenService.issueTerminalRefreshToken(
-                        ownerId, owner.getEmail(), store.getId());
+                refreshTokenService.issueOwnerRefreshToken(
+                        ownerId, owner.getEmail(), owner.isAdmin());
 
         log.info("[OAuth Terminal Select] ownerId={}, storeId={}", ownerId, store.getId());
 
@@ -252,7 +259,14 @@ public class OAuthService {
 
     private OAuthLoginResponse handleExistingCustomer(OAuthAccount oauthAccount, Long storeId) {
         if (oauthAccount.getCustomerWalletId() == null) {
-            throw new BusinessException(ErrorCode.CUSTOMER_WALLET_NOT_FOUND);
+            // Owner로만 등록된 OAuth 계정 → Customer 회원가입 플로우
+            OAuthUserInfo userInfo =
+                    new OAuthUserInfo(
+                            oauthAccount.getProviderId(),
+                            oauthAccount.getName(),
+                            oauthAccount.getEmail());
+            String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "CUSTOMER");
+            return OAuthLoginResponse.newUser(tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
 
         CustomerWallet wallet =
@@ -288,7 +302,14 @@ public class OAuthService {
 
     private OAuthLoginResponse handleExistingOwner(OAuthAccount oauthAccount) {
         if (oauthAccount.getOwnerAccountId() == null) {
-            throw new BusinessException(ErrorCode.OAUTH_OWNER_NOT_FOUND);
+            // Customer로만 등록된 OAuth 계정 → Owner 회원가입 플로우
+            OAuthUserInfo userInfo =
+                    new OAuthUserInfo(
+                            oauthAccount.getProviderId(),
+                            oauthAccount.getName(),
+                            oauthAccount.getEmail());
+            String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "OWNER");
+            return OAuthLoginResponse.newUser(tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
 
         OwnerAccount owner =

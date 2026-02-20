@@ -110,9 +110,12 @@ apiClient.interceptors.response.use(
 
     // Handle 401 Unauthorized - attempt token refresh
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      // Skip refresh for /api/auth/refresh endpoint itself
-      if (originalRequest.url === '/api/auth/refresh') {
-        clearAuthToken();
+      // Skip refresh for public endpoints and auth refresh endpoint
+      if (
+        originalRequest.url?.startsWith('/api/public/') ||
+        originalRequest.url?.startsWith('/api/owner/auth/') ||
+        originalRequest.url === '/api/auth/refresh'
+      ) {
         return Promise.reject(error);
       }
 

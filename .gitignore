@@ -2,3 +2,4 @@
 .idea
 .npm-cache/
 .vscode
+.DS_Store

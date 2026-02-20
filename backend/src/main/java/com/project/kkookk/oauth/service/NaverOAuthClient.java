@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 @Slf4j
 @Component
@@ -48,8 +49,14 @@ public class NaverOAuthClient implements OAuthProviderClient {
                             .body(JsonNode.class);
 
             return response.get("access_token").asText();
+        } catch (RestClientResponseException e) {
+            log.error(
+                    "[Naver OAuth] Code exchange failed: status={}, body={}",
+                    e.getStatusCode(),
+                    e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED);
         } catch (Exception e) {
-            log.error("[Naver OAuth] Code exchange failed: {}", e.getMessage());
+            log.error("[Naver OAuth] Code exchange failed: {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.OAUTH_CODE_EXCHANGE_FAILED);
         }
     }

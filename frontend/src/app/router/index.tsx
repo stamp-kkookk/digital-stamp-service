@@ -19,7 +19,6 @@ import { CustomerStoreSelectPage } from "@/pages/customer/CustomerStoreSelectPag
 import { DirectCustomerLoginPage } from "@/pages/customer/DirectCustomerLoginPage";
 
 // 고객 기능 컴포넌트
-import { OAuthCompleteSignupForm } from "@/features/auth";
 import { RequestStampButton } from "@/features/issuance";
 import { MigrationDetail, MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
@@ -84,7 +83,6 @@ export const router = createBrowserRouter([
     element: <CustomerLayout />,
     children: [
       { index: true, element: <CustomerLandingPage /> },
-      { path: "signup", element: <OAuthCompleteSignupForm role="customer" /> },
     ],
   },
 
