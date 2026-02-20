@@ -60,59 +60,6 @@ export interface PhoneCheckResponse {
   available: boolean;
 }
 
-export interface WalletRegisterRequest {
-  phone: string;
-  name: string;
-  nickname: string;
-  storeId?: number;
-}
-
-export interface RegisteredStampCardInfo {
-  walletStampCardId: number;
-  stampCardId: number;
-  title: string;
-  goalStampCount: number;
-  designType: string;
-  designJson: string;
-  storeName: string;
-}
-
-export interface WalletRegisterResponse {
-  accessToken: string;
-  refreshToken: string;
-  walletId: number;
-  phone: string;
-  name: string;
-  nickname: string;
-  stampCard: RegisteredStampCardInfo | null;
-}
-
-export interface WalletLoginRequest {
-  phone: string;
-  name: string;
-  storeId?: number;
-}
-
-export interface WalletLoginStampCard {
-  walletStampCardId: number;
-  stampCardId: number;
-  title: string;
-  goalStampCount: number;
-  designType: StampCardDesignType;
-  designJson: string | null;
-  storeName: string;
-}
-
-export interface WalletLoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  walletId: number;
-  phone: string;
-  name: string;
-  nickname: string;
-  stampCard: WalletLoginStampCard | null;
-}
-
 export interface WalletStampCardListResponse {
   customerWalletId: number;
   customerName: string;
@@ -321,39 +268,6 @@ export interface MigrationRejectResponse {
   status: string;
   rejectReason: string;
   processedAt: string;
-}
-
-// =============================================================================
-// Owner Auth Types
-// =============================================================================
-
-export interface OwnerSignupRequest {
-  email: string;
-  password: string;
-  name?: string;
-  phoneNumber: string;
-}
-
-export interface OwnerSignupResponse {
-  id: number;
-  email: string;
-  name: string | null;
-  phoneNumber: string;
-  createdAt: string;
-}
-
-export interface OwnerLoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface OwnerLoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  id: number;
-  email: string;
-  name: string | null;
-  phoneNumber: string;
 }
 
 // =============================================================================

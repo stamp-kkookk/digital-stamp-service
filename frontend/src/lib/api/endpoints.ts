@@ -7,8 +7,6 @@ export const API_ENDPOINTS = {
   // Public API (인증 불필요)
   // ==========================================================================
   PUBLIC: {
-    WALLET_REGISTER: '/api/public/wallet/register',
-    WALLET_LOGIN: '/api/public/wallet/login',
     STORE_INFO: (storeId: number) => `/api/public/stores/${storeId}`,
     STORES: '/api/public/stores',
     CHECK_NICKNAME: '/api/public/wallet/check-nickname',
@@ -16,7 +14,6 @@ export const API_ENDPOINTS = {
     OAUTH_LOGIN: '/api/public/oauth/login',
     OAUTH_COMPLETE_CUSTOMER_SIGNUP: '/api/public/oauth/complete-customer-signup',
     OAUTH_COMPLETE_OWNER_SIGNUP: '/api/public/oauth/complete-owner-signup',
-    OAUTH_TERMINAL_SELECT: '/api/public/oauth/terminal-select',
   },
 
   // ==========================================================================
@@ -51,10 +48,6 @@ export const API_ENDPOINTS = {
   // Owner API (Owner Token 필요)
   // ==========================================================================
   OWNER: {
-    // Auth
-    SIGNUP: '/api/owner/auth/signup',
-    LOGIN: '/api/owner/auth/login',
-
     // Stores
     STORES: '/api/owner/stores',
     STORE: (storeId: number) => `/api/owner/stores/${storeId}`,

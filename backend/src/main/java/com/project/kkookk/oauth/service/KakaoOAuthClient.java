@@ -21,7 +21,7 @@ public class KakaoOAuthClient implements OAuthProviderClient {
     private static final String TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private static final String USERINFO_URL = "https://kapi.kakao.com/v2/user/me";
 
-    private final OAuthProperties oAuthProperties;
+    private final OAuthProperties authProperties;
     private final RestClient oauthRestClient;
 
     @Override
@@ -33,8 +33,8 @@ public class KakaoOAuthClient implements OAuthProviderClient {
     private String exchangeCode(String code, String redirectUri) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", oAuthProperties.getKakao().getClientId());
-        params.add("client_secret", oAuthProperties.getKakao().getClientSecret());
+        params.add("client_id", authProperties.getKakao().getClientId());
+        params.add("client_secret", authProperties.getKakao().getClientSecret());
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
 

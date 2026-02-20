@@ -1,17 +1,13 @@
 /**
  * Auth API Service for KKOOKK
- * Handles wallet registration and store info
+ * Handles nickname/phone checks and store info
  */
 
-import { postRaw, getRaw } from '@/lib/api/client';
+import { getRaw } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
   NicknameCheckResponse,
   PhoneCheckResponse,
-  WalletRegisterRequest,
-  WalletRegisterResponse,
-  WalletLoginRequest,
-  WalletLoginResponse,
   StorePublicInfoResponse,
 } from '@/types/api';
 
@@ -30,28 +26,6 @@ export async function checkPhone(phone: string): Promise<PhoneCheckResponse> {
   return getRaw<PhoneCheckResponse>(
     API_ENDPOINTS.PUBLIC.CHECK_PHONE,
     { phone }
-  );
-}
-
-// =============================================================================
-// Public API - Wallet
-// =============================================================================
-
-export async function registerWallet(
-  data: WalletRegisterRequest
-): Promise<WalletRegisterResponse> {
-  return postRaw<WalletRegisterResponse, WalletRegisterRequest>(
-    API_ENDPOINTS.PUBLIC.WALLET_REGISTER,
-    data
-  );
-}
-
-export async function loginWallet(
-  data: WalletLoginRequest
-): Promise<WalletLoginResponse> {
-  return postRaw<WalletLoginResponse, WalletLoginRequest>(
-    API_ENDPOINTS.PUBLIC.WALLET_LOGIN,
-    data
   );
 }
 

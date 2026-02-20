@@ -5,5 +5,5 @@ import jakarta.validation.constraints.NotBlank;
 public record CompleteOwnerSignupRequest(
         @NotBlank String tempToken,
         @NotBlank String name,
-        @NotBlank String nickname,
+        String nickname,
         @NotBlank String phone) {}

@@ -8,20 +8,15 @@ import com.project.kkookk.oauth.controller.dto.CompleteCustomerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.CompleteOwnerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginResponse;
-import com.project.kkookk.oauth.controller.dto.TerminalSelectRequest;
 import com.project.kkookk.oauth.domain.OAuthAccount;
 import com.project.kkookk.oauth.domain.OAuthProvider;
 import com.project.kkookk.oauth.repository.OAuthAccountRepository;
 import com.project.kkookk.owner.domain.OwnerAccount;
 import com.project.kkookk.owner.repository.OwnerAccountRepository;
-import com.project.kkookk.store.domain.Store;
-import com.project.kkookk.store.domain.StoreStatus;
-import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.CustomerWalletService;
 import io.jsonwebtoken.Claims;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +31,6 @@ public class OAuthService {
     private final OAuthAccountRepository oauthAccountRepository;
     private final OwnerAccountRepository ownerAccountRepository;
     private final CustomerWalletRepository customerWalletRepository;
-    private final StoreRepository storeRepository;
     private final CustomerWalletService customerWalletService;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
@@ -46,7 +40,6 @@ public class OAuthService {
             OAuthAccountRepository oauthAccountRepository,
             OwnerAccountRepository ownerAccountRepository,
             CustomerWalletRepository customerWalletRepository,
-            StoreRepository storeRepository,
             CustomerWalletService customerWalletService,
             JwtUtil jwtUtil,
             RefreshTokenService refreshTokenService,
@@ -56,7 +49,6 @@ public class OAuthService {
         this.oauthAccountRepository = oauthAccountRepository;
         this.ownerAccountRepository = ownerAccountRepository;
         this.customerWalletRepository = customerWalletRepository;
-        this.storeRepository = storeRepository;
         this.customerWalletService = customerWalletService;
         this.jwtUtil = jwtUtil;
         this.refreshTokenService = refreshTokenService;
@@ -93,22 +85,25 @@ public class OAuthService {
 
         String phone = request.phone().replaceAll("[^0-9]", "");
 
-        // Check duplicates
-        if (customerWalletRepository.existsByPhone(phone)) {
-            throw new BusinessException(ErrorCode.WALLET_PHONE_DUPLICATED);
-        }
-        if (customerWalletRepository.existsByNickname(request.nickname())) {
-            throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
-        }
+        // Check if wallet already exists with this phone (link existing)
+        Optional<CustomerWallet> existingWallet = customerWalletRepository.findByPhone(phone);
+        CustomerWallet wallet;
+        if (existingWallet.isPresent()) {
+            wallet = existingWallet.get();
+        } else {
+            // Check duplicates for new wallet
+            if (customerWalletRepository.existsByNickname(request.nickname())) {
+                throw new BusinessException(ErrorCode.WALLET_NICKNAME_DUPLICATED);
+            }
 
-        // Create CustomerWallet
-        CustomerWallet wallet =
-                CustomerWallet.builder()
-                        .phone(phone)
-                        .name(request.name())
-                        .nickname(request.nickname())
-                        .build();
-        CustomerWallet savedWallet = customerWalletRepository.save(wallet);
+            wallet =
+                    CustomerWallet.builder()
+                            .phone(phone)
+                            .name(request.name())
+                            .nickname(request.nickname())
+                            .build();
+            wallet = customerWalletRepository.save(wallet);
+        }
 
         // Link or create OAuthAccount for wallet
         String email = claims.get("email", String.class);
@@ -124,32 +119,33 @@ public class OAuthService {
                                                 .email(email)
                                                 .name(oauthName)
                                                 .build());
-        oauthAccount.linkCustomer(savedWallet.getId());
+        if (oauthAccount.getCustomerWalletId() == null) {
+            oauthAccount.linkCustomer(wallet.getId());
+        }
         oauthAccountRepository.save(oauthAccount);
 
         // Auto-create stamp card if storeId provided
         if (request.storeId() != null) {
-            customerWalletService.ensureWalletStampCardForStore(
-                    savedWallet.getId(), request.storeId());
+            customerWalletService.ensureWalletStampCardForStore(wallet.getId(), request.storeId());
         }
 
         // Generate tokens
-        String accessToken = jwtUtil.generateCustomerToken(savedWallet.getId());
-        String refreshToken = refreshTokenService.issueCustomerRefreshToken(savedWallet.getId());
+        String accessToken = jwtUtil.generateCustomerToken(wallet.getId());
+        String refreshToken = refreshTokenService.issueCustomerRefreshToken(wallet.getId());
 
         log.info(
                 "[OAuth Customer Signup] walletId={}, provider={}, storeId={}",
-                savedWallet.getId(),
+                wallet.getId(),
                 provider,
                 request.storeId());
 
         return OAuthLoginResponse.existingCustomer(
                 accessToken,
                 refreshToken,
-                savedWallet.getId(),
-                savedWallet.getName(),
-                savedWallet.getNickname(),
-                savedWallet.getPhone());
+                wallet.getId(),
+                wallet.getName(),
+                wallet.getNickname(),
+                wallet.getPhone());
     }
 
     @Transactional
@@ -158,16 +154,27 @@ public class OAuthService {
         String providerId = claims.get("providerId", String.class);
         OAuthProvider provider = OAuthProvider.valueOf(claims.get("provider", String.class));
 
-        // Create OwnerAccount (no password, OAuth only)
         String email = claims.get("email", String.class);
-        OwnerAccount owner =
-                OwnerAccount.builder()
-                        .email(email)
-                        .name(request.name())
-                        .nickname(request.nickname())
-                        .phoneNumber(request.phone().replaceAll("[^0-9]", ""))
-                        .build();
-        OwnerAccount savedOwner = ownerAccountRepository.save(owner);
+
+        // Check if owner already exists with this email (link existing)
+        Optional<OwnerAccount> existingOwner = ownerAccountRepository.findByEmail(email);
+        OwnerAccount owner;
+        if (existingOwner.isPresent()) {
+            owner = existingOwner.get();
+        } else {
+            String nickname =
+                    (request.nickname() != null && !request.nickname().isBlank())
+                            ? request.nickname()
+                            : request.name();
+            owner =
+                    OwnerAccount.builder()
+                            .email(email)
+                            .name(request.name())
+                            .nickname(nickname)
+                            .phoneNumber(request.phone().replaceAll("[^0-9]", ""))
+                            .build();
+            owner = ownerAccountRepository.save(owner);
+        }
 
         // Link or create OAuthAccount for owner
         String oauthName = claims.get("oauthName", String.class);
@@ -182,68 +189,26 @@ public class OAuthService {
                                                 .email(email)
                                                 .name(oauthName)
                                                 .build());
-        oauthAccount.linkOwner(savedOwner.getId());
+        if (oauthAccount.getOwnerAccountId() == null) {
+            oauthAccount.linkOwner(owner.getId());
+        }
         oauthAccountRepository.save(oauthAccount);
 
         // Generate tokens
-        String accessToken =
-                jwtUtil.generateOwnerToken(savedOwner.getId(), email, savedOwner.isAdmin());
+        String accessToken = jwtUtil.generateOwnerToken(owner.getId(), email, owner.isAdmin());
         String refreshToken =
-                refreshTokenService.issueOwnerRefreshToken(
-                        savedOwner.getId(), email, savedOwner.isAdmin());
+                refreshTokenService.issueOwnerRefreshToken(owner.getId(), email, owner.isAdmin());
 
-        log.info("[OAuth Owner Signup] ownerId={}, provider={}", savedOwner.getId(), provider);
+        log.info("[OAuth Owner Signup] ownerId={}, provider={}", owner.getId(), provider);
 
         return OAuthLoginResponse.existingOwner(
                 accessToken,
                 refreshToken,
-                savedOwner.getId(),
-                savedOwner.getName(),
-                savedOwner.getNickname(),
-                savedOwner.getEmail(),
-                savedOwner.getPhoneNumber());
-    }
-
-    @Transactional
-    public OAuthLoginResponse terminalSelect(TerminalSelectRequest request) {
-        Claims claims = validateTempToken(request.tempToken());
-        Long ownerId = Long.parseLong(claims.get("ownerId", String.class));
-
-        OwnerAccount owner =
-                ownerAccountRepository
-                        .findById(ownerId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.OAUTH_OWNER_NOT_FOUND));
-
-        Store store =
-                storeRepository
-                        .findByIdAndOwnerAccountId(request.storeId(), ownerId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
-
-        if (!store.isLive()) {
-            throw new BusinessException(ErrorCode.STORE_NOT_OPERATIONAL);
-        }
-
-        String accessToken = jwtUtil.generateOwnerToken(ownerId, owner.getEmail(), owner.isAdmin());
-        String refreshToken =
-                refreshTokenService.issueOwnerRefreshToken(
-                        ownerId, owner.getEmail(), owner.isAdmin());
-
-        log.info("[OAuth Terminal Select] ownerId={}, storeId={}", ownerId, store.getId());
-
-        return new OAuthLoginResponse(
-                false,
-                null,
-                null,
-                null,
-                accessToken,
-                refreshToken,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+                owner.getId(),
+                owner.getName(),
+                owner.getNickname(),
+                owner.getEmail(),
+                owner.getPhoneNumber());
     }
 
     private OAuthLoginResponse handleExistingUser(
@@ -252,7 +217,6 @@ public class OAuthService {
         return switch (role) {
             case "CUSTOMER" -> handleExistingCustomer(oauthAccount, storeId);
             case "OWNER" -> handleExistingOwner(oauthAccount);
-            case "TERMINAL" -> handleExistingTerminal(oauthAccount);
             default -> throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         };
     }
@@ -266,7 +230,8 @@ public class OAuthService {
                             oauthAccount.getName(),
                             oauthAccount.getEmail());
             String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "CUSTOMER");
-            return OAuthLoginResponse.newUser(tempToken, oauthAccount.getName(), oauthAccount.getEmail());
+            return OAuthLoginResponse.newUser(
+                    tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
 
         CustomerWallet wallet =
@@ -309,7 +274,8 @@ public class OAuthService {
                             oauthAccount.getName(),
                             oauthAccount.getEmail());
             String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "OWNER");
-            return OAuthLoginResponse.newUser(tempToken, oauthAccount.getName(), oauthAccount.getEmail());
+            return OAuthLoginResponse.newUser(
+                    tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
 
         OwnerAccount owner =
@@ -338,41 +304,15 @@ public class OAuthService {
                 owner.getPhoneNumber());
     }
 
-    private OAuthLoginResponse handleExistingTerminal(OAuthAccount oauthAccount) {
-        if (oauthAccount.getOwnerAccountId() == null) {
-            return OAuthLoginResponse.terminalOwnerNotFound();
-        }
-
-        Long ownerId = oauthAccount.getOwnerAccountId();
-        List<Store> stores =
-                storeRepository.findByOwnerAccountIdAndStatusNot(ownerId, StoreStatus.DELETED);
-
-        if (stores.isEmpty()) {
-            return OAuthLoginResponse.terminalOwnerNotFound();
-        }
-
-        String tempToken = generateTerminalTempToken(ownerId);
-        List<OAuthLoginResponse.StoreItem> storeItems =
-                stores.stream()
-                        .map(s -> new OAuthLoginResponse.StoreItem(s.getId(), s.getName()))
-                        .toList();
-
-        return OAuthLoginResponse.terminalOwnerFound(tempToken, ownerId, storeItems);
-    }
-
     private OAuthLoginResponse handleNewUser(
             OAuthUserInfo userInfo, OAuthProvider provider, String role) {
-
-        if ("TERMINAL".equals(role)) {
-            return OAuthLoginResponse.terminalOwnerNotFound();
-        }
 
         String tempToken = generateTempToken(userInfo, provider, role);
         return OAuthLoginResponse.newUser(tempToken, userInfo.name(), userInfo.email());
     }
 
     private String generateTempToken(OAuthUserInfo userInfo, OAuthProvider provider, String role) {
-        java.util.Map<String, Object> claims = new java.util.HashMap<>();
+        java.util.HashMap<String, Object> claims = new java.util.HashMap<>();
         claims.put("purpose", "oauth_signup");
         claims.put("provider", provider.name());
         claims.put("providerId", userInfo.id());
@@ -383,14 +323,6 @@ public class OAuthService {
         if (userInfo.email() != null) {
             claims.put("email", userInfo.email());
         }
-
-        return jwtUtil.generateTempToken(claims);
-    }
-
-    private String generateTerminalTempToken(Long ownerId) {
-        java.util.Map<String, Object> claims = new java.util.HashMap<>();
-        claims.put("purpose", "terminal_select");
-        claims.put("ownerId", String.valueOf(ownerId));
 
         return jwtUtil.generateTempToken(claims);
     }

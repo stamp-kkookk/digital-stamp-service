@@ -1,19 +1,15 @@
 /**
- * OAuthCompleteSignupForm
- * Customer 전용 OAuth 2차 가입 폼 (이름, 닉네임, 전화번호)
- * 사장님 가입은 OwnerCompleteSignupForm 사용
+ * OwnerCompleteSignupForm
+ * 사장님 전용 OAuth 2차 가입 폼 (파란색 테마)
+ * 이메일(프리필/읽기전용), 이름(프리필), 전화번호
  */
 
 import { useAuth } from "@/app/providers/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { kkookkToast } from "@/components/ui/Toast";
-import { checkNickname, checkPhone } from "@/features/auth/api/authApi";
-import { useOAuthCompleteCustomerSignup } from "@/features/auth/hooks/useOAuth";
-import {
-  saveOriginStoreId,
-  useCustomerNavigate,
-} from "@/hooks/useCustomerNavigate";
+import { checkPhone } from "@/features/auth/api/authApi";
+import { useOAuthCompleteOwnerSignup } from "@/features/auth/hooks/useOAuth";
 import {
   formatPhoneNumber,
   hasInvalidPhoneChars,
@@ -21,52 +17,37 @@ import {
 } from "@/lib/utils/format";
 import type { ErrorResponse } from "@/types/api";
 import type { AxiosError } from "axios";
-import { Check, Sparkles } from "lucide-react";
+import { Briefcase, Check } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-export interface SignupLocationState {
-  tempToken: string;
-  oauthName?: string;
-  oauthEmail?: string;
-  provider?: string;
-  showSignup?: boolean;
-}
+import type { SignupLocationState } from "./OAuthCompleteSignupForm";
 
 type Step = "input" | "success";
 
-interface OAuthCompleteSignupFormProps {
+interface OwnerCompleteSignupFormProps {
   signupState: SignupLocationState;
 }
 
-export function OAuthCompleteSignupForm({
+export function OwnerCompleteSignupForm({
   signupState,
-}: OAuthCompleteSignupFormProps) {
+}: OwnerCompleteSignupFormProps) {
   const navigate = useNavigate();
-  const { storeId } = useCustomerNavigate();
   const { refreshAuthState } = useAuth();
 
   const [step, setStep] = useState<Step>("input");
   const [name, setName] = useState(signupState.oauthName ?? "");
-  const [nickname, setNickname] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
-  const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [isCheckingPhone, setIsCheckingPhone] = useState(false);
 
-  const customerSignup = useOAuthCompleteCustomerSignup();
+  const ownerSignup = useOAuthCompleteOwnerSignup();
 
   const phoneDigitCount = stripPhoneToDigits(phone).length;
   const isPhoneComplete = phoneDigitCount >= 10 && phoneDigitCount <= 11;
   const isFormValid =
-    name.trim() !== "" &&
-    nickname.trim() !== "" &&
-    isPhoneComplete &&
-    !phoneError &&
-    !nameError &&
-    !nicknameError;
+    name.trim() !== "" && isPhoneComplete && !phoneError && !nameError;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
@@ -78,19 +59,6 @@ export function OAuthCompleteSignupForm({
     setPhone(formatPhoneNumber(rawValue));
   };
 
-  const handleNicknameBlur = async () => {
-    if (!nickname.trim()) return;
-    setNicknameError(null);
-    try {
-      const result = await checkNickname(nickname.trim());
-      if (!result.available) {
-        setNicknameError("이미 사용 중인 닉네임입니다");
-      }
-    } catch {
-      // ignore
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
@@ -99,7 +67,6 @@ export function OAuthCompleteSignupForm({
 
     const phoneDigits = stripPhoneToDigits(phone);
 
-    // Phone duplicate check
     setIsCheckingPhone(true);
     try {
       const result = await checkPhone(phoneDigits);
@@ -113,65 +80,58 @@ export function OAuthCompleteSignupForm({
     }
     setIsCheckingPhone(false);
 
-    const onSuccess = () => {
-      refreshAuthState();
-      kkookkToast.success("회원가입이 완료되었습니다");
-      setStep("success");
-    };
-
-    const onError = (err: unknown) => {
-      const axiosError = err as AxiosError<ErrorResponse>;
-      const errorCode = axiosError?.response?.data?.code;
-      if (errorCode === "WALLET_002") {
-        setNicknameError("이미 사용 중인 닉네임입니다");
-      } else if (errorCode === "WALLET_001") {
-        setPhoneError("이미 등록된 번호입니다");
-      } else {
-        setError("가입에 실패했습니다. 다시 시도해주세요.");
-      }
-    };
-
-    customerSignup.mutate(
+    ownerSignup.mutate(
       {
         tempToken: signupState.tempToken,
         name: name.trim(),
-        nickname: nickname.trim(),
         phone: phoneDigits,
-        storeId: storeId ? Number(storeId) : undefined,
       },
-      { onSuccess, onError },
+      {
+        onSuccess: () => {
+          refreshAuthState();
+          kkookkToast.success("사장님 계정이 생성되었습니다");
+          setStep("success");
+        },
+        onError: (err: unknown) => {
+          const axiosError = err as AxiosError<ErrorResponse>;
+          const errorCode = axiosError?.response?.data?.code;
+          if (errorCode === "WALLET_001") {
+            setPhoneError("이미 등록된 번호입니다");
+          } else {
+            setError("가입에 실패했습니다. 다시 시도해주세요.");
+          }
+        },
+      },
     );
   };
-
-  const isPending = customerSignup.isPending;
 
   if (step === "success") {
     return (
       <>
         <div className="flex flex-col items-center justify-center py-8">
-          <div className="flex items-center justify-center w-20 h-20 mb-6 duration-300 bg-green-100 rounded-full animate-in zoom-in">
-            <Check size={40} className="text-green-600" strokeWidth={3} />
+          <div className="flex items-center justify-center w-20 h-20 mb-6 duration-300 bg-kkookk-indigo-100 rounded-full animate-in zoom-in">
+            <Check
+              size={40}
+              className="text-kkookk-indigo-500"
+              strokeWidth={3}
+            />
           </div>
           <h2 className="mb-3 text-xl font-bold text-center text-kkookk-navy">
             환영합니다!
             <br />
-            멤버십이 생성되었어요.
+            사장님 계정이 생성되었어요.
           </h2>
           <p className="text-sm text-center text-kkookk-steel whitespace-pre-line">
-            {"이제 스탬프를 적립하고\n다양한 혜택을 받아보세요."}
+            {"매장을 등록하고\n스탬프 카드를 만들어보세요."}
           </p>
         </div>
         <Button
-          onClick={() => {
-            if (storeId) saveOriginStoreId(storeId);
-            navigate("/customer/wallet");
-          }}
-          variant="primary"
+          onClick={() => navigate("/owner/stores")}
+          variant="secondary"
           size="full"
-          className="shadow-lg shadow-orange-200"
         >
-          <Sparkles size={20} className="text-white" />
-          내 지갑 확인하기
+          <Briefcase size={20} className="text-white" />
+          백오피스 시작하기
         </Button>
       </>
     );
@@ -179,7 +139,7 @@ export function OAuthCompleteSignupForm({
 
   return (
     <>
-      <p className="mb-1 text-sm font-medium text-kkookk-orange-500">
+      <p className="mb-1 text-sm font-medium text-kkookk-indigo-500">
         처음 방문하셨네요!
       </p>
       <h2 className="mb-2 text-xl font-bold text-kkookk-navy">
@@ -189,6 +149,14 @@ export function OAuthCompleteSignupForm({
       </h2>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <Input
+          type="email"
+          label="이메일"
+          value={signupState.oauthEmail ?? ""}
+          disabled
+          className="bg-slate-50 text-kkookk-steel cursor-not-allowed"
+        />
+
         <Input
           type="text"
           label="이름"
@@ -205,19 +173,7 @@ export function OAuthCompleteSignupForm({
           placeholder="홍길동"
           autoComplete="name"
           error={nameError ?? undefined}
-        />
-
-        <Input
-          type="text"
-          label="닉네임 (매장에서 불릴 이름)"
-          value={nickname}
-          onChange={(e) => {
-            setNickname(e.target.value);
-            if (nicknameError) setNicknameError(null);
-          }}
-          onBlur={handleNicknameBlur}
-          placeholder="길동이"
-          error={nicknameError ?? undefined}
+          className="focus:border-kkookk-indigo-500"
         />
 
         <Input
@@ -229,16 +185,17 @@ export function OAuthCompleteSignupForm({
           autoComplete="tel"
           maxLength={13}
           error={phoneError ?? undefined}
+          className="focus:border-kkookk-indigo-500"
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <Button
           type="submit"
-          variant="primary"
+          variant="secondary"
           size="full"
-          disabled={!isFormValid || isCheckingPhone || isPending}
-          isLoading={isCheckingPhone || isPending}
+          disabled={!isFormValid || isCheckingPhone || ownerSignup.isPending}
+          isLoading={isCheckingPhone || ownerSignup.isPending}
           className="mt-4"
         >
           가입 완료

@@ -4,7 +4,6 @@ import com.project.kkookk.oauth.controller.dto.CompleteCustomerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.CompleteOwnerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginResponse;
-import com.project.kkookk.oauth.controller.dto.TerminalSelectRequest;
 import com.project.kkookk.oauth.service.OAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,32 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OAuthController {
 
-    private final OAuthService oAuthService;
+    private final OAuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<OAuthLoginResponse> login(@Valid @RequestBody OAuthLoginRequest request) {
-        OAuthLoginResponse response = oAuthService.login(request);
+        OAuthLoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/complete-customer-signup")
     public ResponseEntity<OAuthLoginResponse> completeCustomerSignup(
             @Valid @RequestBody CompleteCustomerSignupRequest request) {
-        OAuthLoginResponse response = oAuthService.completeCustomerSignup(request);
+        OAuthLoginResponse response = authService.completeCustomerSignup(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/complete-owner-signup")
     public ResponseEntity<OAuthLoginResponse> completeOwnerSignup(
             @Valid @RequestBody CompleteOwnerSignupRequest request) {
-        OAuthLoginResponse response = oAuthService.completeOwnerSignup(request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/terminal-select")
-    public ResponseEntity<OAuthLoginResponse> terminalSelect(
-            @Valid @RequestBody TerminalSelectRequest request) {
-        OAuthLoginResponse response = oAuthService.terminalSelect(request);
+        OAuthLoginResponse response = authService.completeOwnerSignup(request);
         return ResponseEntity.ok(response);
     }
 }

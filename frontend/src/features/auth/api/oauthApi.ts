@@ -1,26 +1,20 @@
 /**
  * OAuth API Service
- * Handles OAuth login, signup completion, and terminal selection
+ * Handles OAuth login and signup completion
  */
 
 import { postRaw } from '@/lib/api/client';
-import type { OAuthProviderType } from '../utils/oauthUrl';
 
 // =============================================================================
 // Types
 // =============================================================================
 
 export interface OAuthLoginRequest {
-  provider: OAuthProviderType;
+  provider: string;
   code: string;
   redirectUri: string;
   role: string;
   storeId?: number;
-}
-
-export interface OAuthStoreItem {
-  id: number;
-  name: string;
 }
 
 export interface OAuthLoginResponse {
@@ -35,8 +29,6 @@ export interface OAuthLoginResponse {
   nickname?: string;
   email?: string;
   phone?: string;
-  ownerId?: number;
-  stores?: OAuthStoreItem[];
 }
 
 export interface CompleteCustomerSignupRequest {
@@ -50,13 +42,8 @@ export interface CompleteCustomerSignupRequest {
 export interface CompleteOwnerSignupRequest {
   tempToken: string;
   name: string;
-  nickname: string;
+  nickname?: string;
   phone: string;
-}
-
-export interface TerminalSelectRequest {
-  tempToken: string;
-  storeId: number;
 }
 
 // =============================================================================
@@ -83,13 +70,6 @@ export async function completeOwnerSignup(
 ): Promise<OAuthLoginResponse> {
   return postRaw<OAuthLoginResponse, CompleteOwnerSignupRequest>(
     `${OAUTH_BASE}/complete-owner-signup`,
-    data,
-  );
-}
-
-export async function terminalSelect(data: TerminalSelectRequest): Promise<OAuthLoginResponse> {
-  return postRaw<OAuthLoginResponse, TerminalSelectRequest>(
-    `${OAUTH_BASE}/terminal-select`,
     data,
   );
 }

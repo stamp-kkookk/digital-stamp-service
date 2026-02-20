@@ -60,12 +60,6 @@ export function OAuthCallbackPage() {
         clearOAuthState();
 
         if (response.isNewUser) {
-          if (role === 'TERMINAL') {
-            kkookkToast.error('사장님 계정을 먼저 등록해주세요.');
-            navigate('/terminal/login', { replace: true });
-            return;
-          }
-
           // New user → signup form with tempToken
           const signupState = {
             tempToken: response.tempToken,
@@ -82,19 +76,6 @@ export function OAuthCallbackPage() {
           } else if (role === 'OWNER') {
             navigate('/owner/login', { state: { ...signupState, showSignup: true }, replace: true });
           }
-          return;
-        }
-
-        // Terminal: store selection needed
-        if (role === 'TERMINAL' && response.stores && response.tempToken) {
-          navigate('/terminal/stores', {
-            state: {
-              tempToken: response.tempToken,
-              ownerId: response.ownerId,
-              stores: response.stores,
-            },
-            replace: true,
-          });
           return;
         }
 

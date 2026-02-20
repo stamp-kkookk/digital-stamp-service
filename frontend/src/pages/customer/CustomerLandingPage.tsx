@@ -68,10 +68,7 @@ export function CustomerLandingPage() {
             >
               <ChevronLeft size={18} /> 돌아가기
             </button>
-            <OAuthCompleteSignupForm
-              userRole="customer"
-              signupState={locationState}
-            />
+            <OAuthCompleteSignupForm signupState={locationState} />
           </div>
         ) : (
           <>

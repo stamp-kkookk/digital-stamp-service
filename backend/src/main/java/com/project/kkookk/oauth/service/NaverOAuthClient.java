@@ -21,7 +21,7 @@ public class NaverOAuthClient implements OAuthProviderClient {
     private static final String TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
     private static final String USERINFO_URL = "https://openapi.naver.com/v1/nid/me";
 
-    private final OAuthProperties oAuthProperties;
+    private final OAuthProperties authProperties;
     private final RestClient oauthRestClient;
 
     @Override
@@ -33,8 +33,8 @@ public class NaverOAuthClient implements OAuthProviderClient {
     private String exchangeCode(String code, String redirectUri) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", oAuthProperties.getNaver().getClientId());
-        params.add("client_secret", oAuthProperties.getNaver().getClientSecret());
+        params.add("client_id", authProperties.getNaver().getClientId());
+        params.add("client_secret", authProperties.getNaver().getClientSecret());
         params.add("code", code);
         params.add("state", "STATE");
 

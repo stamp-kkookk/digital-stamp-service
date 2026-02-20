@@ -1,7 +1,6 @@
 package com.project.kkookk.oauth.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OAuthLoginResponse(
@@ -15,28 +14,12 @@ public record OAuthLoginResponse(
         String name,
         String nickname,
         String email,
-        String phone,
-        Long ownerId,
-        List<StoreItem> stores) {
-
-    public record StoreItem(Long id, String name) {}
+        String phone) {
 
     public static OAuthLoginResponse newUser(
             String tempToken, String oauthName, String oauthEmail) {
         return new OAuthLoginResponse(
-                true,
-                tempToken,
-                oauthName,
-                oauthEmail,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+                true, tempToken, oauthName, oauthEmail, null, null, null, null, null, null, null);
     }
 
     public static OAuthLoginResponse existingCustomer(
@@ -57,9 +40,7 @@ public record OAuthLoginResponse(
                 name,
                 nickname,
                 null,
-                phone,
-                null,
-                null);
+                phone);
     }
 
     public static OAuthLoginResponse existingOwner(
@@ -81,20 +62,6 @@ public record OAuthLoginResponse(
                 name,
                 nickname,
                 email,
-                phone,
-                null,
-                null);
-    }
-
-    public static OAuthLoginResponse terminalOwnerFound(
-            String tempToken, Long ownerId, List<StoreItem> stores) {
-        return new OAuthLoginResponse(
-                false, tempToken, null, null, null, null, null, null, null, null, null, ownerId,
-                stores);
-    }
-
-    public static OAuthLoginResponse terminalOwnerNotFound() {
-        return new OAuthLoginResponse(
-                true, null, null, null, null, null, null, null, null, null, null, null, null);
+                phone);
     }
 }

@@ -21,7 +21,7 @@ public class GoogleOAuthClient implements OAuthProviderClient {
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
     private static final String USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
 
-    private final OAuthProperties oAuthProperties;
+    private final OAuthProperties authProperties;
     private final RestClient oauthRestClient;
 
     @Override
@@ -33,8 +33,8 @@ public class GoogleOAuthClient implements OAuthProviderClient {
     private String exchangeCode(String code, String redirectUri) {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
-        params.add("client_id", oAuthProperties.getGoogle().getClientId());
-        params.add("client_secret", oAuthProperties.getGoogle().getClientSecret());
+        params.add("client_id", authProperties.getGoogle().getClientId());
+        params.add("client_secret", authProperties.getGoogle().getClientSecret());
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
 

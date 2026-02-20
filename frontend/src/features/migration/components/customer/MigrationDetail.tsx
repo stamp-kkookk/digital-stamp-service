@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { useMigrationStatus } from "@/features/migration/hooks/useMigration";
 import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { formatShortDate } from "@/lib/utils/format";
-import { Check, ChevronLeft, Clock, Loader2, X } from "lucide-react";
+import { Check, Clock, Loader2, X } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 export function MigrationDetail() {

@@ -8,11 +8,9 @@ import {
   oauthLogin,
   completeCustomerSignup,
   completeOwnerSignup,
-  terminalSelect,
   type OAuthLoginRequest,
   type CompleteCustomerSignupRequest,
   type CompleteOwnerSignupRequest,
-  type TerminalSelectRequest,
 } from '../api/oauthApi';
 import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
 
@@ -75,17 +73,6 @@ export function useOAuthCompleteOwnerSignup() {
           email: response.email,
           phone: response.phone,
         });
-      }
-    },
-  });
-}
-
-export function useOAuthTerminalSelect() {
-  return useMutation({
-    mutationFn: (data: TerminalSelectRequest) => terminalSelect(data),
-    onSuccess: (response) => {
-      if (response.accessToken && response.refreshToken) {
-        setAuthToken(response.accessToken, response.refreshToken, 'terminal');
       }
     },
   });

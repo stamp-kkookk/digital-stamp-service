@@ -113,7 +113,6 @@ apiClient.interceptors.response.use(
       // Skip refresh for public endpoints and auth refresh endpoint
       if (
         originalRequest.url?.startsWith('/api/public/') ||
-        originalRequest.url?.startsWith('/api/owner/auth/') ||
         originalRequest.url === '/api/auth/refresh'
       ) {
         return Promise.reject(error);

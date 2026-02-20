@@ -7,10 +7,8 @@
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { OAuthButtons } from "../components/OAuthButtons";
-import {
-  OAuthCompleteSignupForm,
-  type SignupLocationState,
-} from "../components/OAuthCompleteSignupForm";
+import type { SignupLocationState } from "../components/OAuthCompleteSignupForm";
+import { OwnerCompleteSignupForm } from "../components/OwnerCompleteSignupForm";
 
 export function OwnerLoginPage() {
   const navigate = useNavigate();
@@ -30,10 +28,7 @@ export function OwnerLoginPage() {
             >
               <ChevronLeft size={18} /> 돌아가기
             </button>
-            <OAuthCompleteSignupForm
-              userRole="owner"
-              signupState={locationState}
-            />
+            <OwnerCompleteSignupForm signupState={locationState} />
           </>
         ) : (
           <>
@@ -62,7 +57,7 @@ export function OwnerLoginPage() {
 
       {!showSignup && (
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           className="flex items-center gap-1 mt-4 text-sm text-kkookk-steel hover:text-kkookk-indigo"
         >
           <ChevronLeft size={16} /> 초기 화면으로
