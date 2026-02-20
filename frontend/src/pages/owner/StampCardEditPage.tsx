@@ -22,12 +22,22 @@ import {
   useUpdateStampCard,
 } from '@/features/store-management/hooks/useStampCard';
 import type { UpdateStampCardRequest, StampCardDesignType } from '@/types/api';
-import type { StampCardDesign } from '@/types/domain';
-import { useState, useMemo } from 'react';
+import type { StampCardDesign, V2TemplateId } from '@/types/domain';
+import { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { kkookkToast } from '@/components/ui/Toast';
+import { parseDesignJsonV2 } from '@/features/wallet/utils/cardDesign';
+import { STAMP_CARD_TEMPLATES, getTemplateById } from '@/features/store-management/data/stampCardTemplates';
+import type { DesignJsonV2 } from '@/features/wallet/types/designV2';
+import { StampCardBackV2 } from '@/features/wallet/components/StampCardBackV2';
+import { StampCardFrontV2 } from '@/features/wallet/components/StampCardFrontV2';
+import { StampCardDesigner } from '@/features/store-management/components/designer/StampCardDesigner';
 
 const COLOR_OPTIONS = ['orange', 'indigo', 'emerald', 'purple', 'rose'] as const;
+
+function isV2Template(template: string): template is V2TemplateId {
+  return template.startsWith('v2-');
+}
 
 function getColorClass(color: string, type: 'bg' | 'shadow' = 'bg') {
   const colorMap: Record<string, string> = {
@@ -51,6 +61,30 @@ function cardToDesign(card: {
   let color = 'orange';
   let backgroundImage: string | null = null;
   let stampImage: string | null = null;
+  let designV2: DesignJsonV2 | undefined;
+
+  // CUSTOM v2: parse designJson and find matching template
+  if (card.designType === 'CUSTOM' && card.designJson) {
+    const v2 = parseDesignJsonV2(card.designJson);
+    if (v2) {
+      designV2 = v2;
+      // Try to find matching template ID
+      const matchingTemplate = STAMP_CARD_TEMPLATES.find(
+        (tpl) => JSON.stringify(tpl.design.front.background) === JSON.stringify(v2.front.background),
+      );
+      return {
+        template: (matchingTemplate?.id as StampCardDesign['template']) ?? 'v2-blank',
+        color: 'orange',
+        cardName: card.title,
+        maxStamps: card.goalStampCount,
+        reward: card.rewardName || '',
+        backgroundImage: null,
+        stampImage: null,
+        textColor: 'black',
+        designV2,
+      };
+    }
+  }
 
   if (card.designJson) {
     try {
@@ -94,6 +128,40 @@ export function StampCardEditPage() {
   const activeDesign = design ?? initialDesign;
 
   const goBack = () => navigate(`/owner/stores/${storeId}`);
+
+  /** v2 선택 시 적용 중인 DesignJsonV2 */
+  const activeV2Design = useMemo<DesignJsonV2 | null>(() => {
+    const d = design ?? initialDesign;
+    if (!d || !isV2Template(d.template)) return null;
+    if (d.designV2) return d.designV2;
+    const tpl = getTemplateById(d.template);
+    return tpl?.design ?? null;
+  }, [design, initialDesign]);
+
+  const handleDesignerChange = useCallback(
+    (updated: DesignJsonV2) => {
+      setDesign((prev) => {
+        const base = prev ?? initialDesign;
+        if (!base) return prev;
+        return { ...base, designV2: updated };
+      });
+    },
+    [initialDesign],
+  );
+
+  const handleSelectV2Template = (templateId: V2TemplateId) => {
+    const tpl = getTemplateById(templateId);
+    if (!tpl) return;
+    const base = design ?? initialDesign;
+    if (!base) return;
+    setDesign({
+      ...base,
+      template: templateId,
+      maxStamps: tpl.goalStampCount,
+      cardName: base.cardName,
+      designV2: tpl.design,
+    });
+  };
 
   // --- Loading ---
   if (isLoading) {
@@ -184,18 +252,22 @@ export function StampCardEditPage() {
   };
 
   const handleSubmit = () => {
-    const designType: StampCardDesignType =
-      d.template === 'custom' ? 'IMAGE' : 'COLOR';
+    let designType: StampCardDesignType;
+    let designJson: string;
 
-    const designJson =
-      designType === 'IMAGE'
-        ? JSON.stringify({
-            backgroundImage: d.backgroundImage,
-            stampImage: d.stampImage,
-          })
-        : JSON.stringify({
-            color: d.color,
-          });
+    if (d.template.startsWith('v2-') && d.designV2) {
+      designType = 'CUSTOM';
+      designJson = JSON.stringify(d.designV2);
+    } else if (d.template === 'custom') {
+      designType = 'IMAGE';
+      designJson = JSON.stringify({
+        backgroundImage: d.backgroundImage,
+        stampImage: d.stampImage,
+      });
+    } else {
+      designType = 'COLOR';
+      designJson = JSON.stringify({ color: d.color });
+    }
 
     const data: UpdateStampCardRequest = {
       title: d.cardName,
@@ -221,8 +293,46 @@ export function StampCardEditPage() {
     );
   };
 
+  const isV2 = isV2Template(d.template);
+  const showDesignerFullscreen = isV2 && step === 2 && activeV2Design;
+
   return (
     <div className="flex flex-col h-full">
+      {showDesignerFullscreen ? (
+        /* ── v2 에디터 전체화면 ── */
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex items-center gap-4 p-4 bg-white border-b border-slate-200">
+            <button
+              onClick={() => setStep(1)}
+              className="flex items-center gap-1 text-sm text-kkookk-steel hover:text-kkookk-navy"
+            >
+              <ChevronLeft size={16} /> 템플릿 선택
+            </button>
+            <div className="w-px h-6 bg-slate-200" />
+            <div className="flex items-center gap-3 flex-1">
+              <label htmlFor="card-name-editor" className="text-sm font-bold text-kkookk-navy shrink-0">
+                카드 이름
+              </label>
+              <input
+                id="card-name-editor"
+                value={d.cardName}
+                onChange={(e) => updateDesign({ cardName: e.target.value })}
+                className="w-60 px-3 py-1.5 text-sm border rounded-lg border-slate-200 focus:border-kkookk-indigo focus:outline-none"
+              />
+            </div>
+            <span className="text-xs text-kkookk-steel">
+              도장을 드래그하여 위치를 조정하세요
+            </span>
+          </div>
+          <div className="flex-1 p-6 overflow-y-auto bg-kkookk-sand">
+            <StampCardDesigner
+              key={d.template}
+              initialDesign={activeV2Design}
+              onDesignChange={handleDesignerChange}
+            />
+          </div>
+        </div>
+      ) : (
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel - Form */}
         <div className="w-[400px] bg-white border-r border-slate-200 p-8 overflow-y-auto">
@@ -242,10 +352,12 @@ export function StampCardEditPage() {
           {step === 1 && (
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-kkookk-navy">템플릿 선택</h3>
+
+              {/* 기존 2종: 기본형 + 이미지형 */}
               <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => updateDesign({ template: 'basic' })}
+                  onClick={() => updateDesign({ template: 'basic', designV2: undefined })}
                   className={`p-4 border rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors text-left ${
                     d.template === 'basic'
                       ? 'border-kkookk-indigo ring-2 ring-blue-100'
@@ -268,7 +380,7 @@ export function StampCardEditPage() {
 
                 <button
                   type="button"
-                  onClick={() => updateDesign({ template: 'custom' })}
+                  onClick={() => updateDesign({ template: 'custom', designV2: undefined })}
                   className={`p-4 border rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors text-left ${
                     d.template === 'custom'
                       ? 'border-kkookk-indigo ring-2 ring-blue-100'
@@ -289,6 +401,36 @@ export function StampCardEditPage() {
                     이미지형 (커스텀)
                   </p>
                 </button>
+              </div>
+
+              {/* v2 커스텀 템플릿 갤러리 */}
+              <div>
+                <h4 className="mb-3 text-sm font-bold text-kkookk-navy">디자인 템플릿</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {STAMP_CARD_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() => handleSelectV2Template(tpl.id as V2TemplateId)}
+                      className={`p-3 border rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors text-left ${
+                        d.template === tpl.id
+                          ? 'border-kkookk-indigo ring-2 ring-blue-100'
+                          : 'border-slate-200'
+                      }`}
+                    >
+                      <div className="mb-2 overflow-hidden rounded-lg aspect-[1.58/1]">
+                        <StampCardBackV2
+                          design={tpl.design}
+                          stampCount={3}
+                          className="w-full h-full"
+                        />
+                      </div>
+                      <p className="text-xs font-medium text-center text-kkookk-navy">
+                        {tpl.nameKo}
+                      </p>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -448,101 +590,120 @@ export function StampCardEditPage() {
                   {d.cardName}
                 </h2>
 
-                {/* Card preview */}
-                <div
-                  className={`rounded-2xl aspect-[1.58/1] mb-6 shadow-lg relative overflow-hidden transition-all duration-300 ${
-                    d.template === 'basic'
-                      ? `${getColorClass(d.color)} ${getColorClass(d.color, 'shadow')}`
-                      : d.backgroundImage
-                        ? 'shadow-md'
-                        : 'bg-slate-100 border border-slate-200 shadow-sm'
-                  }`}
-                  style={
-                    d.template === 'custom' && d.backgroundImage
-                      ? {
-                          backgroundImage: `url(${d.backgroundImage})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }
-                      : {}
-                  }
-                >
-                  {d.template === 'custom' && d.backgroundImage && (
-                    <div className="absolute inset-0 bg-black/10" />
-                  )}
-
-                  {d.template === 'basic' && (
-                    <>
-                      <div
-                        className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-[0.08]"
-                        style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
-                      />
-                      <img
-                        src="/image/cat_pace.png"
-                        alt=""
-                        aria-hidden="true"
-                        className="absolute -right-6 -bottom-6 opacity-[0.07] w-40 h-40 object-cover -rotate-12"
-                      />
-                      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/[0.08] to-transparent" />
-                    </>
-                  )}
-
-                  {d.template === 'custom' && !d.backgroundImage && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-300">
-                      <ImageIcon size={40} strokeWidth={1.2} />
-                      <span className="text-xs font-medium text-slate-400">
-                        배경 이미지를 업로드해 주세요
-                      </span>
+                {/* Card preview — v2 or v1 */}
+                {isV2 && activeV2Design ? (
+                  <>
+                    <div className="mb-4 overflow-hidden rounded-2xl aspect-[1.58/1] shadow-lg">
+                      <StampCardFrontV2 design={activeV2Design} className="w-full h-full" />
                     </div>
-                  )}
-                </div>
-
-                {/* Stamp board preview */}
-                <h3 className="mb-2 text-sm font-bold text-kkookk-steel">스탬프 보드</h3>
-                <div
-                  className={`grid grid-cols-5 gap-2 p-3 rounded-xl relative overflow-hidden transition-all ${
-                    d.template === 'basic' ? 'bg-kkookk-sand' : 'bg-slate-50'
-                  }`}
-                >
-                  {Array.from({ length: d.maxStamps }).map((_, i) => (
+                    <h3 className="mb-2 text-sm font-bold text-kkookk-steel">스탬프 보드</h3>
+                    <div className="overflow-hidden rounded-xl">
+                      <StampCardBackV2
+                        design={activeV2Design}
+                        stampCount={3}
+                        className="w-full"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
                     <div
-                      key={i}
-                      className={`aspect-square rounded-full flex items-center justify-center text-[10px] font-bold overflow-hidden relative z-10 ${
-                        i < 3
-                          ? d.template === 'basic'
-                            ? `${getColorClass(d.color)} text-white`
-                            : d.textColor === 'black'
-                              ? 'bg-kkookk-navy text-white'
-                              : 'bg-white border border-slate-200 text-kkookk-navy shadow-sm'
-                          : 'bg-white border border-slate-200 text-slate-300'
+                      className={`rounded-2xl aspect-[1.58/1] mb-6 shadow-lg relative overflow-hidden transition-all duration-300 ${
+                        d.template === 'basic'
+                          ? `${getColorClass(d.color)} ${getColorClass(d.color, 'shadow')}`
+                          : d.backgroundImage
+                            ? 'shadow-md'
+                            : 'bg-slate-100 border border-slate-200 shadow-sm'
                       }`}
-                    >
-                      {i < 3 ? (
-                        d.template === 'custom' && d.stampImage ? (
-                          <img src={d.stampImage} alt="stamp" className="object-cover w-full h-full" />
-                        ) : (
-                          <Check
-                            size={10}
-                            className={
-                              d.template === 'custom' && i < 3
-                                ? d.textColor === 'black'
-                                  ? 'text-white'
-                                  : 'text-kkookk-navy'
-                                : 'text-white'
+                      style={
+                        d.template === 'custom' && d.backgroundImage
+                          ? {
+                              backgroundImage: `url(${d.backgroundImage})`,
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
                             }
+                          : {}
+                      }
+                    >
+                      {d.template === 'custom' && d.backgroundImage && (
+                        <div className="absolute inset-0 bg-black/10" />
+                      )}
+
+                      {d.template === 'basic' && (
+                        <>
+                          <div
+                            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-[0.08]"
+                            style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
                           />
-                        )
-                      ) : (
-                        i + 1
+                          <img
+                            src="/image/cat_pace.png"
+                            alt=""
+                            aria-hidden="true"
+                            className="absolute -right-6 -bottom-6 opacity-[0.07] w-40 h-40 object-cover -rotate-12"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/[0.08] to-transparent" />
+                        </>
+                      )}
+
+                      {d.template === 'custom' && !d.backgroundImage && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-slate-300">
+                          <ImageIcon size={40} strokeWidth={1.2} />
+                          <span className="text-xs font-medium text-slate-400">
+                            배경 이미지를 업로드해 주세요
+                          </span>
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
+
+                    {/* Stamp board preview */}
+                    <h3 className="mb-2 text-sm font-bold text-kkookk-steel">스탬프 보드</h3>
+                    <div
+                      className={`grid grid-cols-5 gap-2 p-3 rounded-xl relative overflow-hidden transition-all ${
+                        d.template === 'basic' ? 'bg-kkookk-sand' : 'bg-slate-50'
+                      }`}
+                    >
+                      {Array.from({ length: d.maxStamps }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`aspect-square rounded-full flex items-center justify-center text-[10px] font-bold overflow-hidden relative z-10 ${
+                            i < 3
+                              ? d.template === 'basic'
+                                ? `${getColorClass(d.color)} text-white`
+                                : d.textColor === 'black'
+                                  ? 'bg-kkookk-navy text-white'
+                                  : 'bg-white border border-slate-200 text-kkookk-navy shadow-sm'
+                              : 'bg-white border border-slate-200 text-slate-300'
+                          }`}
+                        >
+                          {i < 3 ? (
+                            d.template === 'custom' && d.stampImage ? (
+                              <img src={d.stampImage} alt="stamp" className="object-cover w-full h-full" />
+                            ) : (
+                              <Check
+                                size={10}
+                                className={
+                                  d.template === 'custom' && i < 3
+                                    ? d.textColor === 'black'
+                                      ? 'text-white'
+                                      : 'text-kkookk-navy'
+                                    : 'text-white'
+                                }
+                              />
+                            )
+                          ) : (
+                            i + 1
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+      )}
 
       {/* Bottom navigation */}
       <div className="flex justify-between p-4 bg-white border-t border-slate-200">

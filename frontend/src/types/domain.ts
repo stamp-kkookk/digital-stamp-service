@@ -2,6 +2,8 @@
  * Domain Types for KKOOKK Stamp/Reward System
  */
 
+import type { DesignJsonV2 } from '@/features/wallet/types/designV2';
+
 // =============================================================================
 // Stamp Card Types
 // =============================================================================
@@ -24,6 +26,7 @@ export interface StampCard {
   backgroundImage?: string | null;
   stampImage?: string | null;
   expiryDays?: number;
+  designJsonRaw?: string | null;
 }
 
 export interface AdminStampCard {
@@ -155,7 +158,17 @@ export interface AuthFormData {
 // Design/Template Types (for Stamp Card Creation)
 // =============================================================================
 
-export type TemplateType = 'basic' | 'premium' | 'custom';
+export type V2TemplateId =
+  | 'v2-haze'
+  | 'v2-soyo'
+  | 'v2-guhl'
+  | 'v2-dabang'
+  | 'v2-puff'
+  | 'v2-tang'
+  | 'v2-noir'
+  | 'v2-night-library';
+
+export type TemplateType = 'basic' | 'premium' | 'custom' | V2TemplateId;
 export type ColorTheme = 'orange' | 'indigo' | 'emerald' | 'purple' | 'rose';
 export type TextColorOption = 'black' | 'white';
 
@@ -168,4 +181,5 @@ export interface StampCardDesign {
   backgroundImage: string | null;
   stampImage: string | null;
   textColor: TextColorOption;
+  designV2?: DesignJsonV2;
 }

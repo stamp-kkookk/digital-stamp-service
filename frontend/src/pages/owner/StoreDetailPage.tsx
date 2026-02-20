@@ -27,7 +27,11 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { isDesignV2, parseDesignJsonV2 } from "@/features/wallet/utils/cardDesign";
+import { StampCardFrontV2 } from "@/features/wallet/components/StampCardFrontV2";
+import { StampCardBackV2 } from "@/features/wallet/components/StampCardBackV2";
 import { kkookkToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import {
@@ -72,6 +76,12 @@ const COLOR_GRADIENT_MAP: Record<string, [string, string]> = {
   purple: ["#a855f7", "#7c3aed"],
 };
 
+const flipTransition = {
+  type: 'spring' as const,
+  stiffness: 180,
+  damping: 22,
+};
+
 function ActiveCardPreview({
   designType,
   designJson,
@@ -81,6 +91,9 @@ function ActiveCardPreview({
   designJson: string | null;
   designLoading: boolean;
 }) {
+  // Rules of Hooks: 조건 분기 전에 선언
+  const [flipped, setFlipped] = useState(false);
+
   // 디자인 정보 로딩 중
   if (designLoading) {
     return (
@@ -89,6 +102,56 @@ function ActiveCardPreview({
         <p className="mt-2 text-xs text-slate-400">디자인 로딩 중...</p>
       </div>
     );
+  }
+
+  // v2 CUSTOM 카드 — 클릭 플립 미리보기
+  if (designType === "CUSTOM" && isDesignV2(designJson)) {
+    const v2Design = parseDesignJsonV2(designJson);
+    if (v2Design) {
+      return (
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          <div
+            className="w-72 cursor-pointer"
+            style={{ perspective: '1200px' }}
+            role="button"
+            tabIndex={0}
+            onClick={() => setFlipped((v) => !v)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFlipped((v) => !v); } }}
+          >
+            <motion.div
+              className="relative"
+              style={{ transformStyle: 'preserve-3d' }}
+              animate={{ rotateY: flipped ? 180 : 0 }}
+              transition={flipTransition}
+            >
+              {/* 불투명 백킹 (투과 방지) */}
+              <div
+                className="absolute inset-0 rounded-2xl bg-white"
+                style={{ transform: 'translateZ(-1px)', backfaceVisibility: 'hidden' }}
+              />
+              <div
+                className="absolute inset-0 rounded-2xl bg-white"
+                style={{ transform: 'rotateY(180deg) translateZ(-1px)', backfaceVisibility: 'hidden' }}
+              />
+
+              {/* 앞면 */}
+              <div style={{ backfaceVisibility: 'hidden' }}>
+                <StampCardFrontV2 design={v2Design} />
+              </div>
+
+              {/* 뒷면 */}
+              <div
+                className="absolute inset-0"
+                style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+              >
+                <StampCardBackV2 design={v2Design} stampCount={3} />
+              </div>
+            </motion.div>
+          </div>
+          <p className="text-[10px] text-kkookk-steel">클릭하여 뒤집기</p>
+        </div>
+      );
+    }
   }
 
   const design = parseDesignJson(designJson);
