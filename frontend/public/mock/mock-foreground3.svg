@@ -1,33 +1,90 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
   <defs>
-    <symbol id="s" viewBox="0 0 24 24">
-      <path d="M4,10 L4,18 Q4,21 7,21 L15,21 Q18,21 18,18 L18,10" fill="none" stroke="white" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M18,13 Q21,13 21,15.5 Q21,18 18,17" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M8,8 Q9,5 10,8" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M12,7 Q13,3 14,7" fill="none" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Filled square seal stamp (印鑑) -->
+    <symbol id="seal3f" viewBox="0 0 70 70">
+      <rect x="5" y="5" width="60" height="60" rx="3" fill="#3B2A1A" opacity="0.85"/>
+      <rect x="9" y="9" width="52" height="52" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
+      <text x="35" y="42" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="18" font-weight="700">印</text>
+    </symbol>
+    <!-- Ghost square seal stamp -->
+    <symbol id="seal3g" viewBox="0 0 70 70">
+      <rect x="5" y="5" width="60" height="60" rx="3" fill="none" stroke="#3B2A1A" stroke-width="1" opacity="0.12"/>
+      <rect x="9" y="9" width="52" height="52" rx="1" fill="none" stroke="#3B2A1A" stroke-width="0.6" opacity="0.08"/>
+      <text x="35" y="42" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="18" font-weight="700" opacity="0.1">印</text>
     </symbol>
   </defs>
-  <rect width="1296" height="832" rx="20" fill="#F5F9F0"/>
-  <rect x="20" y="20" width="1256" height="792" rx="14" fill="none" stroke="#5A9E3C" stroke-opacity="0.15" stroke-width="2"/>
-  <!-- Leaf decorations (like 카페나무) -->
-  <g stroke="#5A9E3C" fill="none" stroke-width="1.8" stroke-linecap="round" opacity="0.15">
-    <path d="M60,50 Q70,120 50,200 M55,100 Q30,80 25,60 Q35,55 55,100 M52,140 Q28,125 22,100 Q32,98 52,140"/>
-    <path d="M1236,780 Q1226,710 1246,630 M1241,730 Q1266,748 1271,770 Q1261,775 1241,730 M1244,690 Q1268,705 1274,730 Q1264,732 1244,690"/>
+  <!-- Kraft paper card -->
+  <rect width="1296" height="832" rx="20" fill="#E8DCC8"/>
+  <!-- Double border -->
+  <rect x="24" y="24" width="1248" height="784" rx="0" fill="none" stroke="#3B2A1A" stroke-opacity="0.2" stroke-width="2"/>
+  <rect x="34" y="34" width="1228" height="764" rx="0" fill="none" stroke="#3B2A1A" stroke-opacity="0.1" stroke-width="1"/>
+  <!-- Title -->
+  <text x="648" y="62" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="22" letter-spacing="6">— 구활자인쇄소 적립권 —</text>
+  <text x="648" y="98" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="15" opacity="0.6">열 잔의 기록이 쌓이면 한 잔의 선물로</text>
+
+  <!-- Ink splatter dots scattered across the card -->
+  <g fill="#3B2A1A" opacity="0.06">
+    <circle cx="180" cy="150" r="2"/><circle cx="350" cy="180" r="1.5"/>
+    <circle cx="520" cy="140" r="1"/><circle cx="800" cy="170" r="2.5"/>
+    <circle cx="1050" cy="145" r="1.5"/><circle cx="250" cy="700" r="2"/>
+    <circle cx="600" cy="680" r="1.5"/><circle cx="900" cy="710" r="1"/>
+    <circle cx="1100" cy="690" r="2"/><circle cx="400" cy="450" r="1.5"/>
+    <circle cx="700" cy="500" r="1"/><circle cx="950" cy="400" r="2"/>
   </g>
-  <text x="648" y="55" text-anchor="middle" fill="#2D6B3F" font-family="sans-serif" font-size="30" font-weight="700">초록잎 티하우스 커피쿠폰</text>
-  <text x="648" y="88" text-anchor="middle" fill="#5A9E3C" font-family="sans-serif" font-size="18" opacity="0.7">9잔 적립 시 차 한 잔 무료</text>
-  <!-- All filled (8) + reward -->
-  <circle cx="323" cy="227" r="52" fill="#8BBF6A"/><use href="#s" x="307" y="211" width="32" height="32"/>
-  <circle cx="648" cy="227" r="52" fill="#8BBF6A"/><use href="#s" x="632" y="211" width="32" height="32"/>
-  <circle cx="973" cy="227" r="52" fill="#8BBF6A"/><use href="#s" x="957" y="211" width="32" height="32"/>
-  <circle cx="323" cy="420" r="52" fill="#8BBF6A"/><use href="#s" x="307" y="404" width="32" height="32"/>
-  <circle cx="648" cy="420" r="52" fill="#8BBF6A"/><use href="#s" x="632" y="404" width="32" height="32"/>
-  <circle cx="973" cy="420" r="52" fill="#8BBF6A"/><use href="#s" x="957" y="404" width="32" height="32"/>
-  <circle cx="323" cy="613" r="52" fill="#8BBF6A"/><use href="#s" x="307" y="597" width="32" height="32"/>
-  <circle cx="648" cy="613" r="52" fill="#8BBF6A"/><use href="#s" x="632" y="597" width="32" height="32"/>
-  <!-- Reward -->
-  <circle cx="973" cy="613" r="52" fill="#2D6B3F"/>
-  <text x="973" y="610" text-anchor="middle" fill="white" font-family="sans-serif" font-size="14" font-weight="700">무료</text>
-  <text x="973" y="628" text-anchor="middle" fill="white" font-family="sans-serif" font-size="14" font-weight="700">음료</text>
-  <text x="648" y="760" text-anchor="middle" fill="#2D6B3F" font-family="sans-serif" font-size="18" opacity="0.55">9잔 마시면 차 한 잔을 무료로 드려요</text>
+
+  <!-- Stamp 1 (filled) - slight tilt right -->
+  <g transform="translate(160, 180) rotate(3)">
+    <use href="#seal3f" x="0" y="0" width="65" height="65"/>
+  </g>
+
+  <!-- Stamp 2 (filled) - slight tilt left -->
+  <g transform="translate(370, 155) rotate(-5)">
+    <use href="#seal3f" x="0" y="0" width="60" height="60"/>
+  </g>
+
+  <!-- Stamp 3 (filled) - almost straight, slightly larger -->
+  <g transform="translate(560, 195) rotate(1)">
+    <use href="#seal3f" x="0" y="0" width="68" height="68"/>
+  </g>
+
+  <!-- Stamp 4 (filled) - tilted right -->
+  <g transform="translate(790, 165) rotate(7)">
+    <use href="#seal3f" x="0" y="0" width="62" height="62"/>
+  </g>
+
+  <!-- Stamp 5 (filled) - slight tilt left -->
+  <g transform="translate(1020, 190) rotate(-3)">
+    <use href="#seal3f" x="0" y="0" width="64" height="64"/>
+  </g>
+
+  <!-- Stamp 6 (filled) - lower row, tilt right -->
+  <g transform="translate(210, 420) rotate(4)">
+    <use href="#seal3f" x="0" y="0" width="66" height="66"/>
+  </g>
+
+  <!-- Stamp 7 (filled) - lower row, tilted left more -->
+  <g transform="translate(440, 450) rotate(-8)">
+    <use href="#seal3f" x="0" y="0" width="60" height="60"/>
+  </g>
+
+  <!-- Stamp 8 (ghost) - lower row -->
+  <g transform="translate(660, 415) rotate(2)">
+    <use href="#seal3g" x="0" y="0" width="63" height="63"/>
+  </g>
+
+  <!-- Stamp 9 (ghost) - lower row -->
+  <g transform="translate(870, 445) rotate(-4)">
+    <use href="#seal3g" x="0" y="0" width="61" height="61"/>
+  </g>
+
+  <!-- Reward: special square seal -->
+  <g transform="translate(1060, 430) rotate(2)">
+    <rect width="72" height="72" rx="3" fill="#3B2A1A"/>
+    <rect x="4" y="4" width="64" height="64" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
+    <text x="36" y="30" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="12" letter-spacing="1">한 잔</text>
+    <text x="36" y="50" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="15" font-weight="700">증정</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="648" y="755" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="14" opacity="0.35">활자처럼 한 잔 한 잔 정성을 새기다</text>
 </svg>

@@ -4,7 +4,6 @@
  */
 
 import { useState } from "react";
-import { Coffee } from "lucide-react";
 
 export interface StampCardPreviewProps {
   foregroundImage: string;
@@ -18,8 +17,6 @@ export function StampCardPreview({
   foregroundImage,
   backgroundImage,
   storeName,
-  stampCount,
-  expiryDays,
 }: StampCardPreviewProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 
@@ -34,78 +31,35 @@ export function StampCardPreview({
     }
   };
 
-  // 스탬프 카드 콘텐츠 (재사용)
+  // 스탬프 카드 콘텐츠 (배경 이미지만) — 지갑 홈 StampCardFront 질감 적용
   const stampCardContent = (
     <div
-      className="w-full aspect-[1.58/1] rounded-none p-4 text-white shadow-luxury relative overflow-hidden bg-cover bg-center border border-white/15"
+      className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden relative select-none texture-cardstock shadow-cardstock bg-cover bg-center"
       style={{ backgroundImage: `url(${backgroundImage})` }}
     >
-      {/* 배경 그라데이션 오버레이 (가독성 향상) */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/30 to-black/10 rounded-none" />
-
-      {/* 상단 하이라이트 */}
-      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/40 to-transparent" />
-
-      {/* StampCardItem 스타일 */}
-      <div className="relative z-10 flex flex-col justify-between h-full">
-        {/* 헤더 */}
-        <div className="flex items-start justify-between">
-          <span className="text-base font-bold drop-shadow-lg">
-            {storeName}
-          </span>
-          <span className="bg-white/25 px-2.5 py-1 rounded-full text-[10px] backdrop-blur-md font-semibold border border-white/20 shadow-sm">
-            D-{expiryDays}
-          </span>
-        </div>
-
-        {/* 푸터 */}
-        <div>
-          <p className="text-white/70 text-[10px] font-medium mb-1 tracking-wide uppercase">
-            현재 스탬프
-          </p>
-          <div className="flex items-baseline gap-1">
-            <p className="text-4xl font-extrabold leading-none text-white drop-shadow-lg tracking-tight">
-              {stampCount}
-            </p>
-            <span className="text-lg font-semibold text-white/80">개</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 배경 장식 요소 */}
-      <>
-        {/* KKOOKK 텍스트 로고 - 왼쪽 상단 */}
-        <img
-          src="/logo/logo_text_customer.png"
-          alt=""
-          aria-hidden="true"
-          className="absolute -left-8 -top-8 opacity-[0.08] w-48 h-48 object-contain"
-          style={{ filter: 'brightness(0) invert(1)' }}
-        />
-        {/* 배경 아이콘 - 오른쪽 하단 */}
-        <Coffee
-          className="absolute w-24 h-24 transform -right-2 -bottom-3 text-white/8 rotate-12"
-          strokeWidth={0.8}
-        />
-      </>
-
-      {/* 장식 요소 */}
-      <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-kkookk-orange-500/5 blur-2xl" />
+      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20 pointer-events-none" />
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{
+          boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.08), inset 0 1px 1px rgba(255,255,255,0.15)',
+        }}
+      />
     </div>
   );
 
-  // 스탬프 시트 콘텐츠 (재사용)
+  // 스탬프 시트 콘텐츠 (쿠폰 시트) — 지갑 홈 StampCardBack 질감 적용
   const stampSheetContent = (
     <div
-      className="w-full aspect-[1.58/1] rounded-none shadow-card-stack relative overflow-hidden border border-white/10"
-      style={{
-        backgroundImage: `url(${foregroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="w-full aspect-[1.58/1] rounded-2xl overflow-hidden relative select-none texture-cardstock-white shadow-cardstock bg-cover bg-center"
+      style={{ backgroundImage: `url(${foregroundImage})` }}
     >
-      {/* 상단 하이라이트 */}
-      <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/30 to-transparent" />
+      <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-slate-200/80 pointer-events-none" />
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{
+          boxShadow: 'inset 0 -1px 2px rgba(0,0,0,0.04), inset 0 1px 1px rgba(255,255,255,0.6)',
+        }}
+      />
     </div>
   );
 
@@ -114,7 +68,7 @@ export function StampCardPreview({
       {/* Mobile Version (< md) - 3D Flip */}
       <div
         className="md:hidden perspective-1000 cursor-pointer
-          w-[360px] h-[200px]"
+          w-[320px] h-[200px]"
         onClick={handleFlip}
         onKeyDown={handleKeyDown}
         role="button"
@@ -140,7 +94,7 @@ export function StampCardPreview({
 
       {/* Desktop Version (>= md) - Layered Design */}
       <div
-        className="hidden md:block relative p-5 transition-all duration-500 bg-white/0 backdrop-blur-sm group rounded-none
+        className="hidden md:block relative p-5 transition-all duration-500 bg-white/0 group
           w-[473px] h-[425px]
           lg:w-[540px] lg:h-[486px]"
       >

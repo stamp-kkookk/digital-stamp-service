@@ -1,33 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
   <defs>
-    <symbol id="s" viewBox="0 0 24 24">
-      <path d="M5,9 L5,18 Q5,20 7,20 L15,20 Q17,20 17,18 L17,9" fill="none" stroke="white" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
-      <path d="M17,12 Q20,12 20,15 Q20,18 17,17" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <path d="M9,7 Q10,4 11,7" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M13,6 Q14,3 15,6" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+    <symbol id="star5" viewBox="0 0 28 28">
+      <path d="M14,4 L16.5,11 L24,11 L18,15.5 L20,23 L14,18.5 L8,23 L10,15.5 L4,11 L11.5,11Z" fill="white"/>
     </symbol>
+    <symbol id="star5g" viewBox="0 0 28 28">
+      <path d="M14,4 L16.5,11 L24,11 L18,15.5 L20,23 L14,18.5 L8,23 L10,15.5 L4,11 L11.5,11Z" fill="none" stroke="#FF6B6B" stroke-width="0.8" opacity="0.15"/>
+    </symbol>
+    <!-- Glow filter for filled stamps -->
+    <filter id="glow5">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
-  <rect width="1296" height="832" rx="20" fill="#F0F9FC"/>
-  <rect x="20" y="20" width="1256" height="792" rx="14" fill="none" stroke="#4A9BB5" stroke-opacity="0.15" stroke-width="2"/>
-  <!-- Wave decoration at bottom -->
-  <g fill="none" stroke="#4A9BB5" stroke-width="1.5" opacity="0.08">
-    <path d="M0,790 Q160,770 320,790 T640,790 T960,790 T1296,790"/>
-    <path d="M0,808 Q160,788 320,808 T640,808 T960,808 T1296,808"/>
+  <!-- White card with pink accents -->
+  <rect width="1296" height="832" rx="20" fill="#FFFFFF"/>
+  <!-- Scallop inner border -->
+  <path d="M70,50 Q85,38 100,50 Q115,38 130,50 Q145,38 160,50 Q175,38 190,50 Q205,38 220,50 Q235,38 250,50 Q265,38 280,50 Q295,38 310,50 Q325,38 340,50 Q355,38 370,50 Q385,38 400,50 Q415,38 430,50 Q445,38 460,50 Q475,38 490,50 Q505,38 520,50 Q535,38 550,50 Q565,38 580,50 Q595,38 610,50 Q625,38 640,50 Q655,38 670,50 Q685,38 700,50 Q715,38 730,50 Q745,38 760,50 Q775,38 790,50 Q805,38 820,50 Q835,38 850,50 Q865,38 880,50 Q895,38 910,50 Q925,38 940,50 Q955,38 970,50 Q985,38 1000,50 Q1015,38 1030,50 Q1045,38 1060,50 Q1075,38 1090,50 Q1105,38 1120,50 Q1135,38 1150,50 Q1165,38 1180,50 Q1195,38 1210,50 Q1225,38 1226,50
+        L1226,50 Q1238,65 1226,80 Q1238,95 1226,110 Q1238,125 1226,140 Q1238,155 1226,170 Q1238,185 1226,200 Q1238,215 1226,230 Q1238,245 1226,260 Q1238,275 1226,290 Q1238,305 1226,320 Q1238,335 1226,350 Q1238,365 1226,380 Q1238,395 1226,410 Q1238,425 1226,440 Q1238,455 1226,470 Q1238,485 1226,500 Q1238,515 1226,530 Q1238,545 1226,560 Q1238,575 1226,590 Q1238,605 1226,620 Q1238,635 1226,650 Q1238,665 1226,680 Q1238,695 1226,710 Q1238,725 1226,740 Q1238,755 1226,770 Q1238,785 1226,782
+        Q1225,794 1210,782 Q1195,794 1180,782 Q1165,794 1150,782 Q1135,794 1120,782 Q1105,794 1090,782 Q1075,794 1060,782 Q1045,794 1030,782 Q1015,794 1000,782 Q985,794 970,782 Q955,794 940,782 Q925,794 910,782 Q895,794 880,782 Q865,794 850,782 Q835,794 820,782 Q805,794 790,782 Q775,794 760,782 Q745,794 730,782 Q715,794 700,782 Q685,794 670,782 Q655,794 640,782 Q625,794 610,782 Q595,794 580,782 Q565,794 550,782 Q535,794 520,782 Q505,794 490,782 Q475,794 460,782 Q445,794 430,782 Q415,794 400,782 Q385,794 370,782 Q355,794 340,782 Q325,794 310,782 Q295,794 280,782 Q265,794 250,782 Q235,794 220,782 Q205,794 190,782 Q175,794 160,782 Q145,794 130,782 Q115,794 100,782 Q85,794 70,782
+        Q58,770 70,755 Q58,740 70,725 Q58,710 70,695 Q58,680 70,665 Q58,650 70,635 Q58,620 70,605 Q58,590 70,575 Q58,560 70,545 Q58,530 70,515 Q58,500 70,485 Q58,470 70,455 Q58,440 70,425 Q58,410 70,395 Q58,380 70,365 Q58,350 70,335 Q58,320 70,305 Q58,290 70,275 Q58,260 70,245 Q58,230 70,215 Q58,200 70,185 Q58,170 70,155 Q58,140 70,125 Q58,110 70,95 Q58,80 70,65 Q58,50 70,50 Z" fill="none" stroke="#FF6B6B" stroke-opacity="0.15" stroke-width="1.5"/>
+  <!-- Confetti decorations -->
+  <g opacity="0.12">
+    <!-- Stars -->
+    <path d="M120,75 l3,-8 3,8 -7,-5 8,0Z" fill="#FF6B6B"/>
+    <path d="M1170,90 l2,-6 2,6 -5,-4 6,0Z" fill="#FFB6C1"/>
+    <path d="M150,740 l2,-6 2,6 -5,-4 6,0Z" fill="#FF6B6B"/>
+    <path d="M1140,730 l3,-8 3,8 -7,-5 8,0Z" fill="#FFB6C1"/>
+    <!-- Hearts -->
+    <path d="M200,65 Q200,58 207,58 Q214,58 214,65 L207,75 L200,65Z" fill="#FF6B6B"/>
+    <path d="M1080,80 Q1080,73 1087,73 Q1094,73 1094,80 L1087,90 L1080,80Z" fill="#FFB6C1"/>
+    <!-- Dots -->
+    <circle cx="300" cy="70" r="3" fill="#FF6B6B"/>
+    <circle cx="1000" cy="75" r="2.5" fill="#FFB6C1"/>
+    <circle cx="400" cy="760" r="2" fill="#FF6B6B"/>
+    <circle cx="900" cy="755" r="3" fill="#FFB6C1"/>
+    <circle cx="500" cy="65" r="2" fill="#FF8C94"/>
+    <circle cx="800" cy="760" r="2.5" fill="#FF8C94"/>
   </g>
-  <text x="648" y="56" text-anchor="middle" fill="#1A6B8A" font-family="sans-serif" font-size="34" font-weight="700" letter-spacing="3">COFFEE STAMP</text>
-  <text x="648" y="88" text-anchor="middle" fill="#1A6B8A" font-family="sans-serif" font-size="18" opacity="0.7">10잔 마시면 아메리카노 1잔 무료</text>
-  <!-- Row 0: all filled -->
-  <circle cx="210" cy="290" r="46" fill="#4A9BB5"/><use href="#s" x="196" y="276" width="28" height="28"/>
-  <circle cx="429" cy="290" r="46" fill="#4A9BB5"/><use href="#s" x="415" y="276" width="28" height="28"/>
-  <circle cx="648" cy="290" r="46" fill="#4A9BB5"/><use href="#s" x="634" y="276" width="28" height="28"/>
-  <circle cx="867" cy="290" r="46" fill="#4A9BB5"/><use href="#s" x="853" y="276" width="28" height="28"/>
-  <circle cx="1086" cy="290" r="46" fill="#4A9BB5"/><use href="#s" x="1072" y="276" width="28" height="28"/>
-  <!-- Row 1: 1 filled + 3 empty + reward -->
-  <circle cx="210" cy="540" r="46" fill="#4A9BB5"/><use href="#s" x="196" y="526" width="28" height="28"/>
-  <circle cx="429" cy="540" r="46" fill="none" stroke="#4A9BB5" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="8 5"/>
-  <circle cx="648" cy="540" r="46" fill="none" stroke="#4A9BB5" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="8 5"/>
-  <circle cx="867" cy="540" r="46" fill="none" stroke="#4A9BB5" stroke-opacity="0.3" stroke-width="2" stroke-dasharray="8 5"/>
-  <circle cx="1086" cy="540" r="46" fill="#1A6B8A"/>
-  <text x="1086" y="546" text-anchor="middle" fill="white" font-family="sans-serif" font-size="16" font-weight="700">FREE</text>
-  <text x="648" y="755" text-anchor="middle" fill="#1A6B8A" font-family="sans-serif" font-size="18" opacity="0.55">도장 10칸을 채우면 아메리카노 1잔 무료</text>
+  <!-- Title -->
+  <text x="648" y="62" text-anchor="middle" fill="#FF6B6B" font-family="'Arial Black', 'Helvetica', sans-serif" font-size="30" font-weight="900" letter-spacing="3">PUFF! REWARDS</text>
+  <text x="648" y="98" text-anchor="middle" fill="#FF6B6B" font-family="sans-serif" font-size="15" opacity="0.55">8번의 달콤함 뒤에 특별한 선물이!</text>
+  <!-- Row 0: 4 filled with glow rings -->
+  <circle cx="259" cy="290" r="58" fill="none" stroke="white" stroke-width="0" opacity="0"/>
+  <circle cx="259" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="259" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="245" y="276" width="28" height="28"/>
+
+  <circle cx="518" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="518" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="504" y="276" width="28" height="28"/>
+
+  <circle cx="778" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="778" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="764" y="276" width="28" height="28"/>
+
+  <circle cx="1037" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="1037" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="1023" y="276" width="28" height="28"/>
+
+  <!-- Row 1: 2 filled + 1 ghost + reward -->
+  <circle cx="259" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="259" cy="540" r="52" fill="#FF6B6B"/><use href="#star5" x="245" y="526" width="28" height="28"/>
+
+  <circle cx="518" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
+  <circle cx="518" cy="540" r="52" fill="#FF6B6B"/><use href="#star5" x="504" y="526" width="28" height="28"/>
+
+  <!-- Ghost -->
+  <circle cx="778" cy="540" r="52" fill="none" stroke="#FF6B6B" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <use href="#star5g" x="764" y="526" width="28" height="28"/>
+  <!-- Reward -->
+  <circle cx="1037" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.1" stroke-width="6"/>
+  <circle cx="1037" cy="540" r="52" fill="#FF6B6B"/>
+  <text x="1037" y="536" text-anchor="middle" fill="white" font-family="sans-serif" font-size="11" font-weight="700" letter-spacing="1">FREE</text>
+  <text x="1037" y="554" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">TREAT</text>
+  <!-- Footer -->
+  <text x="648" y="758" text-anchor="middle" fill="#FF6B6B" font-family="sans-serif" font-size="14" opacity="0.4">구름처럼 달콤한 보상이 기다려요</text>
 </svg>
