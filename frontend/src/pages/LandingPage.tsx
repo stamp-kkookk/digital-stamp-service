@@ -10,7 +10,6 @@ import {
   GuaranteeSection,
   HeroSection,
   ProblemSection,
-  ReviewSection,
   SolvingSection,
 } from "@/features/landing/components";
 import { ContactModal } from "@/features/landing/components/ContactModal";
@@ -47,7 +46,6 @@ export function LandingPage() {
           <ProblemSection />
           <SolvingSection />
           <GuaranteeSection />
-          <ReviewSection />
           <FAQSection onOpenContact={openContact} />
           {/* Footer - Inside snap container for smooth scrolling */}
           <FooterSection />
