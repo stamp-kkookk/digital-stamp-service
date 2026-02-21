@@ -159,9 +159,8 @@ export interface AuthFormData {
 // =============================================================================
 
 export type V2TemplateId =
+  | 'v2-blank'
   | 'v2-haze'
-  | 'v2-soyo'
-  | 'v2-guhl'
   | 'v2-dabang'
   | 'v2-puff'
   | 'v2-tang'

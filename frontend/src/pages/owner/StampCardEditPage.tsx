@@ -353,8 +353,8 @@ export function StampCardEditPage() {
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-kkookk-navy">템플릿 선택</h3>
 
-              {/* 기존 2종: 기본형 + 이미지형 */}
               <div className="grid grid-cols-2 gap-4">
+                {/* 컬러 */}
                 <button
                   type="button"
                   onClick={() => updateDesign({ template: 'basic', designV2: undefined })}
@@ -375,9 +375,10 @@ export function StampCardEditPage() {
                     <div className="w-16 h-2 rounded-full bg-slate-200" />
                     <div className="w-10 h-2 rounded-full bg-slate-200" />
                   </div>
-                  <p className="text-sm font-medium text-center text-kkookk-navy">기본형</p>
+                  <p className="text-sm font-medium text-center text-kkookk-navy">컬러</p>
                 </button>
 
+                {/* 이미지 */}
                 <button
                   type="button"
                   onClick={() => updateDesign({ template: 'custom', designV2: undefined })}
@@ -393,44 +394,56 @@ export function StampCardEditPage() {
                       <path d="M0 48 L30 20 L50 35 L70 15 L100 38 L120 28 L120 48 Z" className="fill-indigo-100/80" />
                       <path d="M0 48 L20 32 L45 42 L65 28 L90 40 L120 35 L120 48 Z" className="fill-sky-100/90" />
                     </svg>
-                    <div className="absolute top-2 right-2">
-                      <ImageIcon size={14} className="text-indigo-300" />
-                    </div>
                   </div>
-                  <p className="text-sm font-medium text-center text-kkookk-navy">
-                    이미지형 (커스텀)
-                  </p>
+                  <p className="text-sm font-medium text-center text-kkookk-navy">이미지</p>
                 </button>
-              </div>
 
-              {/* v2 커스텀 템플릿 갤러리 */}
-              <div>
-                <h4 className="mb-3 text-sm font-bold text-kkookk-navy">디자인 템플릿</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {STAMP_CARD_TEMPLATES.map((tpl) => (
-                    <button
-                      key={tpl.id}
-                      type="button"
-                      onClick={() => handleSelectV2Template(tpl.id as V2TemplateId)}
-                      className={`p-3 border rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors text-left ${
-                        d.template === tpl.id
-                          ? 'border-kkookk-indigo ring-2 ring-blue-100'
-                          : 'border-slate-200'
-                      }`}
-                    >
-                      <div className="mb-2 overflow-hidden rounded-lg aspect-[1.58/1]">
-                        <StampCardBackV2
-                          design={tpl.design}
-                          stampCount={3}
-                          className="w-full h-full"
-                        />
-                      </div>
-                      <p className="text-xs font-medium text-center text-kkookk-navy">
-                        {tpl.nameKo}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                {/* 직접 만들기 */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectV2Template('v2-blank' as V2TemplateId)}
+                  className={`p-4 border rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors text-left ${
+                    d.template === 'v2-blank'
+                      ? 'border-kkookk-indigo ring-2 ring-blue-100'
+                      : 'border-slate-200'
+                  }`}
+                >
+                  <div className="relative flex items-center justify-center h-24 mb-3 border rounded-lg bg-slate-50 border-slate-100 overflow-hidden">
+                    <svg viewBox="0 0 120 80" className="w-full h-full" fill="none">
+                      <defs>
+                        <pattern id="bp-grid-edit" width="10" height="10" patternUnits="userSpaceOnUse">
+                          <path d="M10,0 L0,0 L0,10" stroke="#CBD5E1" strokeWidth="0.15" fill="none" opacity="0.5" />
+                        </pattern>
+                      </defs>
+                      <rect width="120" height="80" fill="url(#bp-grid-edit)" />
+                      <rect x="14" y="10" width="52" height="32" rx="4" fill="white" stroke="#94A3B8" strokeWidth="0.4" strokeDasharray="1.5 1" />
+                      <rect x="19" y="15" width="20" height="2.5" rx="1" fill="#CBD5E1" />
+                      <rect x="19" y="20" width="14" height="2" rx="1" fill="#E2E8F0" />
+                      <circle cx="22" cy="33" r="3" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="0.4" />
+                      <circle cx="31" cy="33" r="3" fill="#DBEAFE" stroke="#93C5FD" strokeWidth="0.4" />
+                      <circle cx="40" cy="33" r="3" fill="#E2E8F0" stroke="#CBD5E1" strokeWidth="0.4" strokeDasharray="1 1" />
+                      <circle cx="49" cy="33" r="3" fill="#E2E8F0" stroke="#CBD5E1" strokeWidth="0.4" strokeDasharray="1 1" />
+                      <rect x="72" y="10" width="36" height="46" rx="3" fill="white" stroke="#E2E8F0" strokeWidth="0.4" />
+                      <rect x="76" y="14" width="16" height="1.5" rx="0.75" fill="#CBD5E1" />
+                      <circle cx="78" cy="20" r="2.5" fill="#F97316" />
+                      <circle cx="85" cy="20" r="2.5" fill="#6366F1" />
+                      <circle cx="92" cy="20" r="2.5" fill="#10B981" />
+                      <rect x="76" y="27" width="16" height="1.5" rx="0.75" fill="#CBD5E1" />
+                      <rect x="76" y="26.5" width="10" height="2.5" rx="1" fill="#818CF8" opacity="0.5" />
+                      <circle cx="86" cy="27.75" r="2" fill="white" stroke="#818CF8" strokeWidth="0.5" />
+                      <rect x="76" y="34" width="12" height="1.5" rx="0.75" fill="#CBD5E1" />
+                      <rect x="94" y="33" width="8" height="4" rx="2" fill="#818CF8" opacity="0.4" />
+                      <circle cx="100" cy="35" r="1.5" fill="white" />
+                      <g transform="translate(46, 46)">
+                        <circle cx="0" cy="2" r="4" fill="#00000008" />
+                        <circle cx="0" cy="0" r="4" fill="#BFDBFE" stroke="#3B82F6" strokeWidth="0.6" strokeDasharray="1.5 1" />
+                        <path d="M0,4 C-2,10 -8,14 -6,20" stroke="#3B82F6" strokeWidth="0.4" strokeDasharray="1 1.5" opacity="0.4" />
+                      </g>
+                      <image href="/icon/hand-click.png" x="42" y="32" width="28" height="28" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-center text-kkookk-navy">직접 만들기</p>
+                </button>
               </div>
             </div>
           )}
