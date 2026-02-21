@@ -11,5 +11,8 @@ public enum StampCardDesignType {
     IMAGE,
 
     @Schema(description = "퍼즐형 (특수형)")
-    PUZZLE
+    PUZZLE,
+
+    @Schema(description = "커스텀형 (v2 위치 기반)")
+    CUSTOM
 }

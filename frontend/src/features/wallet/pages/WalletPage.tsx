@@ -76,6 +76,7 @@ export function WalletPage() {
         stampColor: style.stampColor,
         backgroundImage: style.backgroundImage,
         stampImage: style.stampImage,
+        designJsonRaw: apiCard.designJson,
       };
     });
 
@@ -102,6 +103,7 @@ export function WalletPage() {
           stampColor: summaryStyle.stampColor,
           backgroundImage: summaryStyle.backgroundImage,
           stampImage: summaryStyle.stampImage,
+          designJsonRaw: summaryCard.designJson,
         };
         return [previewCard, ...mapped];
       }

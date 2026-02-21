@@ -1,7 +1,15 @@
 /**
  * Card design utilities
  * Parses designJson from API and maps to visual styles
+ *
+ * Version detection:
+ * - v1 COLOR: {"color":"orange"}
+ * - v1 IMAGE: {"backgroundImage":"data:...","stampImage":"data:..."}
+ * - v2 CUSTOM: {"version":2,"front":{...},"back":{stampSlots:[...],...}}
  */
+
+import type { DesignJsonV2 } from '../types/designV2';
+import { designJsonV2Schema } from '../types/designV2';
 
 export interface CardDesignStyle {
   bgGradient: string;
@@ -90,5 +98,31 @@ export function parseDesignJson(designJson: string | null): CardDesignStyle {
     };
   } catch {
     return { ...DEFAULT_COLOR, backgroundImage: null, stampImage: null };
+  }
+}
+
+/** Check if a designJson string represents v2 format */
+export function isDesignV2(designJson: string | null): boolean {
+  if (!designJson) return false;
+  try {
+    const parsed = JSON.parse(designJson);
+    return parsed.version === 2;
+  } catch {
+    return false;
+  }
+}
+
+/** Parse v2 designJson with Zod validation, returns null on failure */
+export function parseDesignJsonV2(designJson: string | null): DesignJsonV2 | null {
+  if (!designJson) return null;
+  try {
+    const parsed = JSON.parse(designJson);
+    if (parsed.version !== 2) return null;
+    const result = designJsonV2Schema.safeParse(parsed);
+    if (result.success) return result.data;
+    console.warn('DesignJson v2 validation failed:', result.error);
+    return null;
+  } catch {
+    return null;
   }
 }

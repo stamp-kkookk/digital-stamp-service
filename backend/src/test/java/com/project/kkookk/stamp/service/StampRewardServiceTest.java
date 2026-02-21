@@ -12,7 +12,7 @@ import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.domain.WalletStampCard;
-import com.project.kkookk.wallet.repository.WalletRewardRepository;
+import com.project.kkookk.wallet.repository.WalletRewardBatchRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -31,7 +31,7 @@ class StampRewardServiceTest {
 
     @InjectMocks private StampRewardService stampRewardService;
 
-    @Mock private WalletRewardRepository walletRewardRepository;
+    @Mock private WalletRewardBatchRepository walletRewardBatchRepository;
     @Mock private WalletStampCardRepository walletStampCardRepository;
 
     @Captor private ArgumentCaptor<List<WalletReward>> rewardsCaptor;
@@ -57,7 +57,7 @@ class StampRewardServiceTest {
             assertThat(result.currentWalletStampCard()).isSameAs(walletStampCard);
             assertThat(walletStampCard.getStampCount()).isEqualTo(5); // 3 + 2 = 5
             assertThat(walletStampCard.isActive()).isTrue();
-            verify(walletRewardRepository, never()).saveAll(anyList());
+            verify(walletRewardBatchRepository, never()).batchInsert(anyList());
         }
 
         @Test
@@ -67,7 +67,6 @@ class StampRewardServiceTest {
             WalletStampCard walletStampCard = createWalletStampCard(1L, 100L, 1L, 10L, 8);
             StampCard stampCard = createStampCard(10L, 1L, 10, 30);
 
-            given(walletRewardRepository.saveAll(anyList())).willAnswer(i -> i.getArgument(0));
             given(walletStampCardRepository.save(any(WalletStampCard.class)))
                     .willAnswer(
                             i -> {
@@ -91,7 +90,7 @@ class StampRewardServiceTest {
             assertThat(result.currentWalletStampCard()).isNotSameAs(walletStampCard);
             assertThat(result.currentWalletStampCard().getStampCount()).isEqualTo(0);
             assertThat(result.currentWalletStampCard().isActive()).isTrue();
-            verify(walletRewardRepository).saveAll(rewardsCaptor.capture());
+            verify(walletRewardBatchRepository).batchInsert(rewardsCaptor.capture());
             assertThat(rewardsCaptor.getValue()).hasSize(1);
         }
 
@@ -102,7 +101,6 @@ class StampRewardServiceTest {
             WalletStampCard walletStampCard = createWalletStampCard(1L, 100L, 1L, 10L, 8);
             StampCard stampCard = createStampCard(10L, 1L, 10, 30);
 
-            given(walletRewardRepository.saveAll(anyList())).willAnswer(i -> i.getArgument(0));
             given(walletStampCardRepository.save(any(WalletStampCard.class)))
                     .willAnswer(
                             i -> {
@@ -132,7 +130,6 @@ class StampRewardServiceTest {
             WalletStampCard walletStampCard = createWalletStampCard(1L, 100L, 1L, 10L, 8);
             StampCard stampCard = createStampCard(10L, 1L, 10, 30);
 
-            given(walletRewardRepository.saveAll(anyList())).willAnswer(i -> i.getArgument(0));
             given(walletStampCardRepository.save(any(WalletStampCard.class)))
                     .willAnswer(
                             i -> {
@@ -153,7 +150,7 @@ class StampRewardServiceTest {
             assertThat(walletStampCard.isActive()).isFalse();
             // 새 카드에 초과분 이월 (8 + 25) % 10 = 3
             assertThat(result.currentWalletStampCard().getStampCount()).isEqualTo(3);
-            verify(walletRewardRepository).saveAll(rewardsCaptor.capture());
+            verify(walletRewardBatchRepository).batchInsert(rewardsCaptor.capture());
             assertThat(rewardsCaptor.getValue()).hasSize(3);
         }
 
@@ -164,7 +161,6 @@ class StampRewardServiceTest {
             WalletStampCard walletStampCard = createWalletStampCard(1L, 100L, 1L, 10L, 9);
             StampCard stampCard = createStampCard(10L, 1L, 10, 30);
 
-            given(walletRewardRepository.saveAll(anyList())).willAnswer(i -> i.getArgument(0));
             given(walletStampCardRepository.save(any(WalletStampCard.class)))
                     .willAnswer(
                             i -> {
@@ -192,7 +188,6 @@ class StampRewardServiceTest {
             WalletStampCard walletStampCard = createWalletStampCard(1L, 100L, 1L, 10L, 9);
             StampCard stampCard = createStampCard(10L, 1L, 10, null);
 
-            given(walletRewardRepository.saveAll(anyList())).willAnswer(i -> i.getArgument(0));
             given(walletStampCardRepository.save(any(WalletStampCard.class)))
                     .willAnswer(
                             i -> {
@@ -228,7 +223,7 @@ class StampRewardServiceTest {
             assertThat(result.currentWalletStampCard()).isSameAs(walletStampCard);
             assertThat(walletStampCard.getStampCount()).isEqualTo(5);
             assertThat(walletStampCard.isActive()).isTrue();
-            verify(walletRewardRepository, never()).saveAll(anyList());
+            verify(walletRewardBatchRepository, never()).batchInsert(anyList());
         }
     }
 
