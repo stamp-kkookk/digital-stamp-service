@@ -378,7 +378,7 @@ export interface QrCodeResponse {
 // =============================================================================
 
 export type StampCardStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
-export type StampCardDesignType = 'COLOR' | 'IMAGE' | 'PUZZLE';
+export type StampCardDesignType = 'COLOR' | 'IMAGE' | 'PUZZLE' | 'CUSTOM';
 
 export interface CreateStampCardRequest {
   title: string;

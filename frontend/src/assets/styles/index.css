@@ -350,7 +350,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
   opacity: 0.06;
   mix-blend-mode: soft-light;
   pointer-events: none;
@@ -358,14 +358,30 @@ body {
   z-index: 1;
 }
 
-/* Cardstock edge thickness - bottom/right shadow for physical depth */
+/* Cardstock linen sub-texture */
+.texture-cardstock::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='linen'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.4 0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23linen)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Cardstock edge thickness - 4-layer shadow for physical depth */
 .shadow-cardstock {
   box-shadow:
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    0 4px 8px -2px rgba(0, 0, 0, 0.08),
-    0 8px 16px -4px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+    0 6px 12px -3px rgba(0, 0, 0, 0.08),
+    0 12px 24px -6px rgba(139, 92, 46, 0.06),
+    0 20px 40px -10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 1px 0 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    inset -1px 0 0 rgba(0, 0, 0, 0.03);
 }
 
 /* White cardstock (back side) - subtle paper grain */

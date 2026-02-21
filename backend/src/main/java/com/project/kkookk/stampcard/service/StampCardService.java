@@ -1,5 +1,7 @@
 package com.project.kkookk.stampcard.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.kkookk.stampcard.controller.dto.CreateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.StampCardListResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
@@ -7,6 +9,7 @@ import com.project.kkookk.stampcard.controller.dto.StampCardSummary;
 import com.project.kkookk.stampcard.controller.dto.UpdateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.UpdateStampCardStatusRequest;
 import com.project.kkookk.stampcard.domain.StampCard;
+import com.project.kkookk.stampcard.domain.StampCardDesignType;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedException;
@@ -27,17 +30,21 @@ public class StampCardService {
 
     private final StampCardRepository stampCardRepository;
     private final WalletStampCardRepository walletStampCardRepository;
+    private final ObjectMapper objectMapper;
 
     public StampCardService(
             StampCardRepository stampCardRepository,
-            WalletStampCardRepository walletStampCardRepository) {
+            WalletStampCardRepository walletStampCardRepository,
+            ObjectMapper objectMapper) {
         this.stampCardRepository = stampCardRepository;
         this.walletStampCardRepository = walletStampCardRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional
     public StampCardResponse create(Long storeId, CreateStampCardRequest request) {
         log.info("Creating stamp card for store: {}", storeId);
+        validateCustomDesignJson(request.designType(), request.designJson());
 
         StampCard stampCard =
                 StampCard.builder()
@@ -85,6 +92,7 @@ public class StampCardService {
             throw new StampCardUpdateNotAllowedException();
         }
 
+        validateCustomDesignJson(request.designType(), request.designJson());
         stampCard.update(
                 request.title(),
                 request.goalStampCount(),
@@ -140,6 +148,33 @@ public class StampCardService {
 
         stampCardRepository.delete(stampCard);
         log.info("Deleted stamp card: {}", id);
+    }
+
+    private void validateCustomDesignJson(StampCardDesignType designType, String designJson) {
+        if (designType != StampCardDesignType.CUSTOM) {
+            return;
+        }
+        if (designJson == null || designJson.isBlank()) {
+            throw new IllegalArgumentException("CUSTOM designType requires designJson");
+        }
+        try {
+            JsonNode root = objectMapper.readTree(designJson);
+            if (!root.has("version") || root.get("version").asInt() != 2) {
+                throw new IllegalArgumentException("CUSTOM designJson must have version: 2");
+            }
+            JsonNode back = root.get("back");
+            if (back == null || !back.has("stampSlots") || !back.get("stampSlots").isArray()) {
+                throw new IllegalArgumentException(
+                        "CUSTOM designJson must have back.stampSlots array");
+            }
+            if (back.get("stampSlots").isEmpty()) {
+                throw new IllegalArgumentException("back.stampSlots must not be empty");
+            }
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid CUSTOM designJson: " + e.getMessage());
+        }
     }
 
     private StampCard findByIdAndStoreId(Long id, Long storeId) {

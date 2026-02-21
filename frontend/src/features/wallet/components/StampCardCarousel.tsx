@@ -13,7 +13,10 @@ import { cn } from '@/lib/utils'
 import type { StampCard } from '@/types/domain'
 import { StampCardFront } from './StampCardFront'
 import { StampCardBack } from './StampCardBack'
+import { StampCardFrontV2 } from './StampCardFrontV2'
+import { StampCardBackV2 } from './StampCardBackV2'
 import { CardInfoPanel } from './CardInfoPanel'
+import { isDesignV2, parseDesignJsonV2 } from '../utils/cardDesign'
 
 interface StampCardCarouselProps {
     cards: StampCard[]
@@ -317,7 +320,13 @@ export function StampCardCarousel({
 
                                     {/* 앞면 */}
                                     <div style={{ backfaceVisibility: 'hidden' }}>
-                                        <StampCardFront card={card} />
+                                        {(() => {
+                                            const v2Design = isDesignV2(card.designJsonRaw)
+                                                ? parseDesignJsonV2(card.designJsonRaw!)
+                                                : null;
+                                            if (v2Design) return <StampCardFrontV2 design={v2Design} />;
+                                            return <StampCardFront card={card} />;
+                                        })()}
                                     </div>
 
                                     {/* 뒷면 */}
@@ -328,14 +337,46 @@ export function StampCardCarousel({
                                             transform: 'rotateY(180deg)',
                                         }}
                                     >
-                                        <StampCardBack
-                                            card={card}
-                                            onStampRequest={
-                                                i === currentIndex ? () => onStampRequest?.(card) : undefined
+                                        {(() => {
+                                            const v2Design = isDesignV2(card.designJsonRaw)
+                                                ? parseDesignJsonV2(card.designJsonRaw!)
+                                                : null;
+                                            if (v2Design) {
+                                                return (
+                                                    <StampCardBackV2
+                                                        design={v2Design}
+                                                        stampCount={card.current}
+                                                        onStampRequest={
+                                                            i === currentIndex
+                                                                ? () => onStampRequest?.(card)
+                                                                : undefined
+                                                        }
+                                                        animatingStampIndex={
+                                                            i === currentIndex ? animatingStampIndex : undefined
+                                                        }
+                                                        onAnimationComplete={
+                                                            i === currentIndex ? onAnimationComplete : undefined
+                                                        }
+                                                    />
+                                                );
                                             }
-                                            animatingStampIndex={i === currentIndex ? animatingStampIndex : undefined}
-                                            onAnimationComplete={i === currentIndex ? onAnimationComplete : undefined}
-                                        />
+                                            return (
+                                                <StampCardBack
+                                                    card={card}
+                                                    onStampRequest={
+                                                        i === currentIndex
+                                                            ? () => onStampRequest?.(card)
+                                                            : undefined
+                                                    }
+                                                    animatingStampIndex={
+                                                        i === currentIndex ? animatingStampIndex : undefined
+                                                    }
+                                                    onAnimationComplete={
+                                                        i === currentIndex ? onAnimationComplete : undefined
+                                                    }
+                                                />
+                                            );
+                                        })()}
                                     </div>
                                 </motion.div>
                             </div>
