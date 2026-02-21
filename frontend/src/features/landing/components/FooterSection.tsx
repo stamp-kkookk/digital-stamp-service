@@ -52,7 +52,7 @@ export function FooterSection() {
             </div>
             <div className="flex items-center justify-center w-10 h-10 bg-[#383838] rounded-lg">
               <a
-                href="https://www.instagram.com"
+                href="https://www.instagram.com/zette.am/"
                 target="_blank"
                 className="transition-opacity hover:opacity-80"
               >
@@ -83,17 +83,8 @@ export function FooterSection() {
         </div>
 
         <div className="pt-8 border-t border-white/20">
-          <div className="space-y-2 text-xs text-center text-white/50 md:text-left">
-            <p>
-              (주)꾸욱 | 대표: 안희찬, 정준영, 김나현 | 사업자등록번호:
-              123-45-67890
-            </p>
-            <p>
-              통신판매업신고번호: 2026-서울강남-01234 | 주소: 서울특별시 강남구
-              테헤란로 123, 45층
-            </p>
-            <p>이메일: contact@kkookk.io</p>
-            <p className="pt-2">© 2026 KKOOKK. All rights reserved.</p>
+          <div className="text-xs text-center text-white/50 md:text-left">
+            <p>© 2026 KKOOKK. All rights reserved.</p>
           </div>
         </div>
       </div>

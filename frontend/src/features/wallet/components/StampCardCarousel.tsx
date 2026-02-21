@@ -66,9 +66,9 @@ export function StampCardCarousel({
     const scaleRefs = useRef<(HTMLDivElement | null)[]>([])
     const currentIndexRef = useRef(currentIndex)
     const isScrolling = useRef(false)
-    const scrollTimeout = useRef<ReturnType<typeof setTimeout>>()
+    const scrollTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
     const wheelAccum = useRef(0)
-    const wheelTimer = useRef<ReturnType<typeof setTimeout>>()
+    const wheelTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
     const containerWidth = typeof window !== 'undefined' ? window.innerWidth : 375
     const cardWidth = Math.min(containerWidth * CARD_WIDTH_RATIO, CARD_MAX_WIDTH)

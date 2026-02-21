@@ -30,24 +30,32 @@
                  └────────────────────┘      └──────────────────┘
 ```
 
-## Authentication
+## Authentication (OAuth 전용)
 
-### JWT 토큰 4종
+### JWT 토큰 2종 + Refresh
 
 | 토큰 | Claims | TTL | 발급 경로 |
 |------|--------|-----|----------|
-| OWNER | `sub: ownerId, email, type: OWNER` | 1시간 | `/api/owner/auth/login` |
-| ADMIN | `sub: ownerId, email, admin: true, type: OWNER` | 1시간 | `/api/owner/auth/login` (admin 계정) |
-| CUSTOMER | `sub: walletId, type: CUSTOMER` | 1시간 | `/api/public/wallet/login` |
-| STEPUP | `sub: walletId, type: STEPUP` | 10분 | `/api/public/otp/verify` |
+| OWNER | `sub: ownerId, email, type: OWNER` | 1시간 | OAuth 로그인/가입 |
+| ADMIN | `sub: ownerId, email, admin: true, type: OWNER` | 1시간 | OAuth 로그인 (admin 계정) |
+| CUSTOMER | `sub: walletId, type: CUSTOMER` | 1시간 | OAuth 로그인/가입 |
+| Refresh Token | `userId, type` | 7일 | OAuth 로그인/가입 시 발급 |
 
-### 인증 흐름
+### 인증 흐름 (OAuth)
+
+```
+1. Frontend → OAuth Provider (Google/Kakao/Naver) 인증
+2. Provider → Frontend 콜백 (authorization code)
+3. Frontend → POST /api/public/oauth/login {provider, code, redirectUri, role}
+4. Backend → Provider API로 사용자 정보 조회
+5. OAuthAccount 조회/생성 → JWT + Refresh Token 발급
+```
 
 ```
 Request → JwtAuthenticationFilter
            ├─ Extract Bearer token
            ├─ Validate signature + expiry
-           ├─ Parse TokenType (OWNER/CUSTOMER/STEPUP)
+           ├─ Parse TokenType (OWNER/CUSTOMER)
            └─ Create Principal (OwnerPrincipal / CustomerPrincipal)
                └─ Set SecurityContext
 ```
@@ -56,14 +64,14 @@ Request → JwtAuthenticationFilter
 
 | Principal | Fields | Roles |
 |-----------|--------|-------|
-| CustomerPrincipal | `walletId`, `stepUp` | `ROLE_CUSTOMER`, `ROLE_STEPUP` (조건부) |
+| CustomerPrincipal | `walletId` | `ROLE_CUSTOMER` |
 | OwnerPrincipal | `ownerId`, `email`, `admin` | `ROLE_OWNER`, `ROLE_ADMIN` (조건부: admin=true) |
 
 ### Security URL Patterns
 
 ```
-/api/owner/auth/**   → PERMIT_ALL (로그인/회원가입)
-/api/public/**       → PERMIT_ALL (OTP, 지갑, 매장 공개)
+/api/auth/refresh    → PERMIT_ALL (토큰 갱신)
+/api/public/**       → PERMIT_ALL (OAuth, 지갑 체크, 매장 공개)
 /api/customer/**     → hasRole("CUSTOMER")
 /api/admin/**        → hasRole("ADMIN")
 /api/owner/**        → hasRole("OWNER")
@@ -72,6 +80,10 @@ Request → JwtAuthenticationFilter
 ## Domain Relationships
 
 ```
+OAuthAccount (dual-link)
+ ├─ customerWalletId (nullable) → CustomerWallet
+ └─ ownerAccountId (nullable) → OwnerAccount
+
 OwnerAccount (admin: boolean)
  └─ Store (1:N)
      ├─ placeRef, iconImageBase64, category, description
@@ -137,19 +149,13 @@ Customer                Backend                Owner 백오피스
 ```
 Customer                Backend
    │                       │
-   ├─POST /otp/request────>│
-   │<─OTP 코드─────────────│
-   ├─POST /otp/verify─────>│
-   │<─StepUp 토큰──────────│
-   │                        │
    │ [리워드 정보 표시]       │
    │ [사장님 확인 모달]       │
    │ "되돌릴 수 없는 작업"    │
    │ 사장님/직원 확인 후      │
    │                        │
    ├─POST /redeems─────────>│
-   │ (walletRewardId,       │
-   │  StepUp 헤더)          ├─Reward→REDEEMED
+   │ (walletRewardId)       ├─Reward→REDEEMED
    │                        ├─Create RedeemEvent
    │<─200 {redeemed}───────│
 ```
@@ -159,7 +165,6 @@ Customer                Backend
 ```
 Customer                Backend                Owner
    │                       │                       │
-   ├─[OTP 인증 완료]        │                       │
    │                        │                       │
    ├─POST /migrations─────>│                       │
    │ (Base64 이미지,         │                       │
@@ -205,15 +210,15 @@ Controller (@Valid request)
 | 카테고리 | 예시 | HTTP |
 |---------|------|------|
 | Common | INVALID_INPUT_VALUE, INTERNAL_SERVER_ERROR | 400, 500 |
-| Auth | UNAUTHORIZED, ACCESS_DENIED, OWNER_LOGIN_FAILED | 401, 403 |
+| Auth | UNAUTHORIZED, ACCESS_DENIED | 401, 403 |
 | StampCard | STAMP_CARD_NOT_FOUND, STAMP_CARD_ALREADY_ACTIVE | 404, 409 |
 | Store | STORE_NOT_FOUND, STORE_INACTIVE, STORE_NOT_OPERATIONAL, STORE_STATUS_TRANSITION_INVALID, STORE_PLACE_REF_DUPLICATED, STORE_ICON_TOO_LARGE, STORE_PHONE_INVALID | 404, 403, 409, 400, 413 |
 | Admin | ADMIN_ACCESS_DENIED | 403 |
 | External | KAKAO_API_ERROR | 500 |
 | Issuance | ISSUANCE_REQUEST_NOT_FOUND, ISSUANCE_REQUEST_EXPIRED | 404, 410 |
-| OTP | OTP_RATE_LIMIT_EXCEEDED, OTP_INVALID, OTP_EXPIRED | 429, 401 |
+| OAuth | OAUTH_CODE_EXCHANGE_FAILED, OAUTH_USERINFO_FAILED, OAUTH_INVALID_TEMP_TOKEN | 502, 401 |
 | Wallet | CUSTOMER_WALLET_NOT_FOUND, CUSTOMER_WALLET_BLOCKED | 404, 403 |
-| Redeem | STEPUP_REQUIRED, REWARD_NOT_FOUND, REWARD_EXPIRED | 403, 404, 410 |
+| Redeem | REWARD_NOT_FOUND, REWARD_EXPIRED | 404, 410 |
 | Migration | MIGRATION_NOT_FOUND, MIGRATION_IMAGE_TOO_LARGE | 404, 413 |
 
 ## Feature Package Convention
@@ -230,7 +235,7 @@ backend/src/main/java/com/project/kkookk/
 ├── admin/               # 관리자 (매장 승인/정지, Audit Log)
 ├── issuance/            # 적립 요청/승인
 ├── migration/           # 종이 스탬프 이전
-├── otp/                 # OTP 인증
+├── oauth/               # OAuth 인증 (Google, Kakao, Naver)
 ├── owner/               # 사장님 계정
 ├── qrcode/              # QR 코드 생성
 ├── redeem/              # 리워드 사용
@@ -273,5 +278,5 @@ Page (라우트 레벨)
 ```
 client.ts        → Axios 인스턴스 (getRaw, postRaw, putRaw, patchRaw, delRaw)
 endpoints.ts     → API_ENDPOINTS (URL 상수) + QUERY_KEYS (캐시 키 팩토리)
-tokenManager.ts  → Auth/StepUp 토큰 관리 (localStorage)
+tokenManager.ts  → Auth 토큰 관리 (localStorage)
 ```

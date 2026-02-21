@@ -44,34 +44,33 @@
   <text x="648" y="62" text-anchor="middle" fill="#FF6B6B" font-family="'Arial Black', 'Helvetica', sans-serif" font-size="30" font-weight="900" letter-spacing="3">PUFF! REWARDS</text>
   <text x="648" y="98" text-anchor="middle" fill="#FF6B6B" font-family="sans-serif" font-size="15" opacity="0.55">8번의 달콤함 뒤에 특별한 선물이!</text>
   <!-- Row 0: 4 filled with glow rings -->
-  <circle cx="259" cy="290" r="58" fill="none" stroke="white" stroke-width="0" opacity="0"/>
-  <circle cx="259" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="259" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="245" y="276" width="28" height="28"/>
+  <circle cx="259" cy="290" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="259" cy="290" r="78" fill="#FF6B6B"/><use href="#star5" x="237" y="268" width="44" height="44"/>
 
-  <circle cx="518" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="518" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="504" y="276" width="28" height="28"/>
+  <circle cx="518" cy="290" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="518" cy="290" r="78" fill="#FF6B6B"/><use href="#star5" x="496" y="268" width="44" height="44"/>
 
-  <circle cx="778" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="778" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="764" y="276" width="28" height="28"/>
+  <circle cx="778" cy="290" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="778" cy="290" r="78" fill="#FF6B6B"/><use href="#star5" x="756" y="268" width="44" height="44"/>
 
-  <circle cx="1037" cy="290" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="1037" cy="290" r="52" fill="#FF6B6B"/><use href="#star5" x="1023" y="276" width="28" height="28"/>
+  <circle cx="1037" cy="290" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="1037" cy="290" r="78" fill="#FF6B6B"/><use href="#star5" x="1015" y="268" width="44" height="44"/>
 
   <!-- Row 1: 2 filled + 1 ghost + reward -->
-  <circle cx="259" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="259" cy="540" r="52" fill="#FF6B6B"/><use href="#star5" x="245" y="526" width="28" height="28"/>
+  <circle cx="259" cy="540" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="259" cy="540" r="78" fill="#FF6B6B"/><use href="#star5" x="237" y="518" width="44" height="44"/>
 
-  <circle cx="518" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="6"/>
-  <circle cx="518" cy="540" r="52" fill="#FF6B6B"/><use href="#star5" x="504" y="526" width="28" height="28"/>
+  <circle cx="518" cy="540" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.08" stroke-width="8"/>
+  <circle cx="518" cy="540" r="78" fill="#FF6B6B"/><use href="#star5" x="496" y="518" width="44" height="44"/>
 
   <!-- Ghost -->
-  <circle cx="778" cy="540" r="52" fill="none" stroke="#FF6B6B" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="4,4"/>
-  <use href="#star5g" x="764" y="526" width="28" height="28"/>
+  <circle cx="778" cy="540" r="78" fill="none" stroke="#FF6B6B" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="4,4"/>
+  <use href="#star5g" x="756" y="518" width="44" height="44"/>
   <!-- Reward -->
-  <circle cx="1037" cy="540" r="56" fill="none" stroke="#FF6B6B" stroke-opacity="0.1" stroke-width="6"/>
-  <circle cx="1037" cy="540" r="52" fill="#FF6B6B"/>
-  <text x="1037" y="536" text-anchor="middle" fill="white" font-family="sans-serif" font-size="11" font-weight="700" letter-spacing="1">FREE</text>
-  <text x="1037" y="554" text-anchor="middle" fill="white" font-family="sans-serif" font-size="13" font-weight="700">TREAT</text>
+  <circle cx="1037" cy="540" r="84" fill="none" stroke="#FF6B6B" stroke-opacity="0.1" stroke-width="8"/>
+  <circle cx="1037" cy="540" r="78" fill="#FF6B6B"/>
+  <text x="1037" y="532" text-anchor="middle" fill="white" font-family="sans-serif" font-size="15" font-weight="700" letter-spacing="1">FREE</text>
+  <text x="1037" y="556" text-anchor="middle" fill="white" font-family="sans-serif" font-size="18" font-weight="700">TREAT</text>
   <!-- Footer -->
   <text x="648" y="758" text-anchor="middle" fill="#FF6B6B" font-family="sans-serif" font-size="14" opacity="0.4">구름처럼 달콤한 보상이 기다려요</text>
 </svg>

@@ -39,3 +39,14 @@ jwt:
   access-token-expiration: 3600000
   refresh-token-expiration: 604800000
   stepup-token-expiration: 600000
+
+oauth:
+  google:
+    client-id: test-google-client-id
+    client-secret: test-google-client-secret
+  kakao:
+    client-id: test-kakao-client-id
+    client-secret: test-kakao-client-secret
+  naver:
+    client-id: test-naver-client-id
+    client-secret: test-naver-client-secret

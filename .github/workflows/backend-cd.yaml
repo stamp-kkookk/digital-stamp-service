@@ -1,0 +1,147 @@
+name: Backend CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-cd.yaml'
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: '17'
+  AWS_REGION: ap-northeast-2
+  WORKING_DIRECTORY: backend
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build JAR (skip tests — already passed in CI)
+        run: ./gradlew bootJar --no-daemon
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload JAR to S3
+        id: upload
+        run: |
+          JAR_FILE=$(ls build/libs/kkookk-*.jar | grep -v plain | head -1)
+          JAR_NAME=$(basename "$JAR_FILE")
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          S3_KEY="backend/${TIMESTAMP}-${JAR_NAME}"
+
+          aws s3 cp "$JAR_FILE" "s3://${{ secrets.S3_ARTIFACTS_BUCKET }}/${S3_KEY}"
+
+          # Also upload as "latest" for easy reference
+          aws s3 cp "$JAR_FILE" "s3://${{ secrets.S3_ARTIFACTS_BUCKET }}/backend/kkookk-latest.jar"
+
+          echo "s3_key=${S3_KEY}" >> "$GITHUB_OUTPUT"
+          echo "Uploaded: ${S3_KEY}"
+
+      - name: Deploy via SSM
+        id: ssm
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "${{ secrets.BACKEND_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=['/opt/kkookk/deploy.sh ${{ steps.upload.outputs.s3_key }}']" \
+            --timeout-seconds 300 \
+            --comment "CD deploy: ${{ github.sha }}" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "command_id=${COMMAND_ID}" >> "$GITHUB_OUTPUT"
+          echo "SSM Command ID: ${COMMAND_ID}"
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for SSM command to complete..."
+          aws ssm wait command-executed \
+            --command-id "${{ steps.ssm.outputs.command_id }}" \
+            --instance-id "${{ secrets.BACKEND_INSTANCE_ID }}" \
+            || true
+
+          # Get command result
+          RESULT=$(aws ssm get-command-invocation \
+            --command-id "${{ steps.ssm.outputs.command_id }}" \
+            --instance-id "${{ secrets.BACKEND_INSTANCE_ID }}" \
+            --query "Status" \
+            --output text)
+
+          echo "Deployment status: ${RESULT}"
+
+          if [ "$RESULT" != "Success" ]; then
+            echo "::error::Deployment failed with status: ${RESULT}"
+
+            # Print command output for debugging
+            aws ssm get-command-invocation \
+              --command-id "${{ steps.ssm.outputs.command_id }}" \
+              --instance-id "${{ secrets.BACKEND_INSTANCE_ID }}" \
+              --query "StandardOutputContent" \
+              --output text
+
+            aws ssm get-command-invocation \
+              --command-id "${{ steps.ssm.outputs.command_id }}" \
+              --instance-id "${{ secrets.BACKEND_INSTANCE_ID }}" \
+              --query "StandardErrorContent" \
+              --output text
+
+            exit 1
+          fi
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_WEBHOOK }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            curl -X POST "$SLACK_WEBHOOK_URL" \
+              -H 'Content-type: application/json' \
+              --data "{
+                \"text\": \"Backend CD Failed\",
+                \"blocks\": [
+                  {
+                    \"type\": \"header\",
+                    \"text\": { \"type\": \"plain_text\", \"text\": \"Backend Deploy Failed\", \"emoji\": true }
+                  },
+                  {
+                    \"type\": \"section\",
+                    \"text\": { \"type\": \"mrkdwn\", \"text\": \"*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${GITHUB_SHA::7}>\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>\" }
+                  }
+                ]
+              }"
+          fi

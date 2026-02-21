@@ -27,10 +27,10 @@ export function CustomerHistoryPage() {
   // query param 우선, 없으면 sessionStorage/URL fallback
   const storeIdNum = Number(searchParams.get('storeId')) || (defaultStoreId ? Number(defaultStoreId) : undefined);
 
-  // 스탬프 적립 이력 (StepUp 필요)
+  // 스탬프 적립 이력
   const { data: stampData, isLoading: stampLoading } = useStampHistory(storeIdNum);
 
-  // 리워드 사용 이력 (StepUp 필요)
+  // 리워드 사용 이력
   const { data: redeemData, isLoading: redeemLoading } = useRedeemHistory(storeIdNum);
 
   const isLoading = stampLoading || redeemLoading;
