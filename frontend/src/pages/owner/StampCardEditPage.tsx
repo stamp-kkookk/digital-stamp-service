@@ -22,7 +22,7 @@ import {
   useUpdateStampCard,
 } from '@/features/store-management/hooks/useStampCard';
 import type { UpdateStampCardRequest, StampCardDesignType } from '@/types/api';
-import type { StampCardDesign } from '@/types/domain';
+import type { StampCardDesign, ColorTheme } from '@/types/domain';
 import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { kkookkToast } from '@/components/ui/Toast';
@@ -48,7 +48,7 @@ function cardToDesign(card: {
   designType: StampCardDesignType;
   designJson: string | null;
 }): StampCardDesign {
-  let color = 'orange';
+  let color: ColorTheme = 'orange';
   let backgroundImage: string | null = null;
   let stampImage: string | null = null;
 
@@ -56,7 +56,7 @@ function cardToDesign(card: {
     try {
       const parsed = JSON.parse(card.designJson);
       if (card.designType === 'COLOR') {
-        color = parsed.color || 'orange';
+        color = (parsed.color as ColorTheme) || 'orange';
       } else if (card.designType === 'IMAGE') {
         backgroundImage = parsed.backgroundImage || null;
         stampImage = parsed.stampImage || null;
