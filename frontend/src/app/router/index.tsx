@@ -65,9 +65,9 @@ export const router = createBrowserRouter([
     element: <RoleSelectionPage />,
   },
 
-  // OAuth 콜백
+  // OAuth 완료 (백엔드 OAuth 플로우 후 리다이렉트)
   {
-    path: "/oauth/callback",
+    path: "/oauth/complete",
     element: <OAuthCallbackPage />,
   },
 

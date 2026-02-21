@@ -85,27 +85,9 @@ resource "aws_cloudfront_distribution" "main" {
     max_ttl     = 0
   }
 
-  # --- /oauth/* behavior: Forward to Gateway ---
-  ordered_cache_behavior {
-    path_pattern           = "/oauth/*"
-    target_origin_id       = "gateway-api"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
-
-    forwarded_values {
-      query_string = true
-      headers      = ["Authorization", "Content-Type", "Accept", "Origin", "Host"]
-      cookies {
-        forward = "all"
-      }
-    }
-
-    min_ttl     = 0
-    default_ttl = 0
-    max_ttl     = 0
-  }
+  # /oauth/* is now a frontend SPA route (/oauth/complete).
+  # Backend OAuth callbacks are at /api/public/oauth2/callback/* (covered by /api/*).
+  # No separate /oauth/* behavior needed — falls through to default S3 behavior.
 
   # SPA: custom error response to handle client-side routing
   custom_error_response {

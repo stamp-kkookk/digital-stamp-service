@@ -1,53 +1,20 @@
 /**
  * OAuth URL Builder
- * Generates provider-specific OAuth authorization URLs
+ * Generates backend OAuth authorization URL (backend-handled flow)
  */
 
 export type OAuthProviderType = 'GOOGLE' | 'KAKAO' | 'NAVER';
 
-const OAUTH_CONFIG = {
-  GOOGLE: {
-    authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
-    scope: 'openid profile email',
-  },
-  KAKAO: {
-    authUrl: 'https://kauth.kakao.com/oauth/authorize',
-    scope: 'profile_nickname',
-  },
-  NAVER: {
-    authUrl: 'https://nid.naver.com/oauth2.0/authorize',
-    scope: '',
-  },
-} as const;
-
-const OAUTH_CLIENT_IDS: Record<OAuthProviderType, string> = {
-  GOOGLE: import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '',
-  KAKAO: import.meta.env.VITE_KAKAO_CLIENT_ID ?? '',
-  NAVER: import.meta.env.VITE_NAVER_CLIENT_ID ?? '',
-};
-
-export function getOAuthRedirectUri(): string {
-  return `${window.location.origin}/oauth/callback`;
-}
-
-export function buildOAuthUrl(provider: OAuthProviderType): string {
-  const config = OAUTH_CONFIG[provider];
-  const clientId = OAUTH_CLIENT_IDS[provider];
-  const redirectUri = getOAuthRedirectUri();
-  const state = provider;
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    state,
-  });
-
-  if (config.scope) {
-    params.set('scope', config.scope);
+export function getOAuthAuthorizeUrl(
+  provider: OAuthProviderType,
+  role: string,
+  storeId?: string,
+): string {
+  let url = `/api/public/oauth2/authorization/${provider.toLowerCase()}?role=${role}`;
+  if (storeId) {
+    url += `&storeId=${storeId}`;
   }
-
-  return `${config.authUrl}?${params.toString()}`;
+  return url;
 }
 
 export interface OAuthSessionState {

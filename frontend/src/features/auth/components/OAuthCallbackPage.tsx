@@ -1,27 +1,24 @@
 /**
  * OAuthCallbackPage
- * Handles OAuth redirect callback after provider authorization
- * URL: /oauth/callback?code=...&state=...
+ * Handles OAuth completion after backend-handled OAuth flow
+ * URL: /oauth/complete?code=...&role=...&storeId=...
+ *   or /oauth/complete?error=...
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { useOAuthLogin } from '../hooks/useOAuth';
-import {
-  getOAuthState,
-  clearOAuthState,
-  getOAuthRedirectUri,
-  type OAuthProviderType,
-} from '../utils/oauthUrl';
+import { useExchangeOAuthCode } from '../hooks/useOAuth';
+import { getOAuthState, clearOAuthState } from '../utils/oauthUrl';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
 import { kkookkToast } from '@/components/ui/Toast';
 
 export function OAuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { refreshAuthState } = useAuth();
-  const oauthLogin = useOAuthLogin();
+  const exchangeCode = useExchangeOAuthCode();
   const calledRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,33 +26,29 @@ export function OAuthCallbackPage() {
     if (calledRef.current) return;
     calledRef.current = true;
 
+    // Check for error from backend
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      clearOAuthState();
+      return;
+    }
+
+    // Exchange code for tokens
     const code = searchParams.get('code');
-    const state = searchParams.get('state');
-
     if (!code) {
-      setError('인가 코드가 없습니다.');
+      setError('교환 코드가 없습니다.');
       return;
     }
 
-    // Restore session state
+    // Get role/storeId from URL params (set by backend redirect) or session storage fallback
     const oauthState = getOAuthState();
-    if (!oauthState) {
-      setError('세션이 만료되었습니다. 다시 시도해주세요.');
-      return;
-    }
+    const role = searchParams.get('role') || oauthState?.role || 'CUSTOMER';
+    const storeId = searchParams.get('storeId') || oauthState?.storeId;
 
-    const provider = (state as OAuthProviderType) || oauthState.provider;
-    const { role, storeId } = oauthState;
-
-    const performLogin = async () => {
+    const performExchange = async () => {
       try {
-        const response = await oauthLogin.mutateAsync({
-          provider,
-          code,
-          redirectUri: getOAuthRedirectUri(),
-          role,
-          storeId: storeId ? Number(storeId) : undefined,
-        });
+        const response = await exchangeCode.mutateAsync(code);
 
         clearOAuthState();
 
@@ -65,7 +58,6 @@ export function OAuthCallbackPage() {
             tempToken: response.tempToken,
             oauthName: response.oauthName,
             oauthEmail: response.oauthEmail,
-            provider,
           };
 
           if (role === 'CUSTOMER') {
@@ -79,7 +71,18 @@ export function OAuthCallbackPage() {
           return;
         }
 
-        // Existing user → logged in
+        // Existing user → save tokens and log in
+        const tokenType = role === 'OWNER' ? 'owner' : 'customer';
+        if (response.accessToken && response.refreshToken) {
+          setAuthToken(response.accessToken, response.refreshToken, tokenType);
+          setUserInfo({
+            id: response.id!,
+            name: response.name,
+            nickname: response.nickname,
+            email: response.email,
+            phone: response.phone,
+          });
+        }
         refreshAuthState();
 
         if (role === 'CUSTOMER') {
@@ -98,7 +101,7 @@ export function OAuthCallbackPage() {
       }
     };
 
-    performLogin();
+    performExchange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 

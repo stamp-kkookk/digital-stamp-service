@@ -1,6 +1,6 @@
 /**
  * OAuth API Service
- * Handles OAuth login and signup completion
+ * Handles OAuth token exchange and signup completion
  */
 
 import { postRaw } from '@/lib/api/client';
@@ -9,12 +9,8 @@ import { postRaw } from '@/lib/api/client';
 // Types
 // =============================================================================
 
-export interface OAuthLoginRequest {
-  provider: string;
+export interface OAuthExchangeRequest {
   code: string;
-  redirectUri: string;
-  role: string;
-  storeId?: number;
 }
 
 export interface OAuthLoginResponse {
@@ -52,8 +48,8 @@ export interface CompleteOwnerSignupRequest {
 
 const OAUTH_BASE = '/api/public/oauth';
 
-export async function oauthLogin(data: OAuthLoginRequest): Promise<OAuthLoginResponse> {
-  return postRaw<OAuthLoginResponse, OAuthLoginRequest>(`${OAUTH_BASE}/login`, data);
+export async function exchangeOAuthCode(code: string): Promise<OAuthLoginResponse> {
+  return postRaw<OAuthLoginResponse, OAuthExchangeRequest>(`${OAUTH_BASE}/token`, { code });
 }
 
 export async function completeCustomerSignup(

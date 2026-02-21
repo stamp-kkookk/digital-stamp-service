@@ -1,9 +1,12 @@
 package com.project.kkookk.oauth.controller;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.oauth.controller.dto.CompleteCustomerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.CompleteOwnerSignupRequest;
-import com.project.kkookk.oauth.controller.dto.OAuthLoginRequest;
+import com.project.kkookk.oauth.controller.dto.OAuthExchangeRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginResponse;
+import com.project.kkookk.oauth.service.OAuthExchangeCodeStore;
 import com.project.kkookk.oauth.service.OAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class OAuthController {
 
     private final OAuthService authService;
+    private final OAuthExchangeCodeStore exchangeCodeStore;
 
-    @PostMapping("/login")
-    public ResponseEntity<OAuthLoginResponse> login(@Valid @RequestBody OAuthLoginRequest request) {
-        OAuthLoginResponse response = authService.login(request);
+    @PostMapping("/token")
+    public ResponseEntity<OAuthLoginResponse> exchangeToken(
+            @Valid @RequestBody OAuthExchangeRequest request) {
+        OAuthLoginResponse response =
+                exchangeCodeStore
+                        .exchange(request.code())
+                        .orElseThrow(
+                                () -> new BusinessException(ErrorCode.OAUTH_EXCHANGE_CODE_INVALID));
         return ResponseEntity.ok(response);
     }
 
