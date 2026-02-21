@@ -13,7 +13,6 @@ import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.oauth.controller.dto.CompleteCustomerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.CompleteOwnerSignupRequest;
-import com.project.kkookk.oauth.controller.dto.OAuthLoginRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginResponse;
 import com.project.kkookk.oauth.domain.OAuthAccount;
 import com.project.kkookk.oauth.domain.OAuthProvider;
@@ -25,11 +24,11 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.CustomerWalletService;
 import io.jsonwebtoken.Claims;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,26 +43,8 @@ class OAuthServiceTest {
     @Mock private CustomerWalletService customerWalletService;
     @Mock private JwtUtil jwtUtil;
     @Mock private RefreshTokenService refreshTokenService;
-    @Mock private GoogleOAuthClient googleOAuthClient;
-    @Mock private KakaoOAuthClient kakaoOAuthClient;
-    @Mock private NaverOAuthClient naverOAuthClient;
 
-    private OAuthService oauthService;
-
-    @BeforeEach
-    void setUp() {
-        oauthService =
-                new OAuthService(
-                        oauthAccountRepository,
-                        ownerAccountRepository,
-                        customerWalletRepository,
-                        customerWalletService,
-                        jwtUtil,
-                        refreshTokenService,
-                        googleOAuthClient,
-                        kakaoOAuthClient,
-                        naverOAuthClient);
-    }
+    @InjectMocks private OAuthService oauthService;
 
     private CustomerWallet createWallet(Long id, String phone, String name, String nickname) {
         CustomerWallet wallet =
@@ -111,27 +92,26 @@ class OAuthServiceTest {
     }
 
     @Nested
-    @DisplayName("login")
-    class LoginTest {
+    @DisplayName("processOAuth2Login")
+    class ProcessOAuth2LoginTest {
 
         @Test
         @DisplayName("신규 사용자 - CUSTOMER 역할로 회원가입 플로우 반환")
-        void login_NewUser_Customer_ReturnsNewUserResponse() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "CUSTOMER", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
-
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
+        void processOAuth2Login_NewUser_Customer_ReturnsNewUserResponse() {
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
                     .willReturn(Optional.empty());
             given(jwtUtil.generateTempToken(any())).willReturn("temp-token");
 
-            OAuthLoginResponse response = oauthService.login(request);
+            OAuthLoginResponse response =
+                    oauthService.processOAuth2Login(
+                            OAuthProvider.GOOGLE,
+                            "google-123",
+                            "Test User",
+                            "test@example.com",
+                            "CUSTOMER",
+                            null);
 
             assertThat(response.isNewUser()).isTrue();
             assertThat(response.tempToken()).isEqualTo("temp-token");
@@ -141,18 +121,11 @@ class OAuthServiceTest {
 
         @Test
         @DisplayName("기존 Customer 사용자 - 로그인 성공")
-        void login_ExistingCustomer_ReturnsTokens() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "CUSTOMER", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
+        void processOAuth2Login_ExistingCustomer_ReturnsTokens() {
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", 10L, null);
             CustomerWallet wallet = createWallet(10L, "01012345678", "Test", "tester");
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
@@ -161,7 +134,14 @@ class OAuthServiceTest {
             given(jwtUtil.generateCustomerToken(10L)).willReturn("access-token");
             given(refreshTokenService.issueCustomerRefreshToken(10L)).willReturn("refresh-token");
 
-            OAuthLoginResponse response = oauthService.login(request);
+            OAuthLoginResponse response =
+                    oauthService.processOAuth2Login(
+                            OAuthProvider.GOOGLE,
+                            "google-123",
+                            "Test User",
+                            "test@example.com",
+                            "CUSTOMER",
+                            null);
 
             assertThat(response.isNewUser()).isFalse();
             assertThat(response.accessToken()).isEqualTo("access-token");
@@ -171,12 +151,7 @@ class OAuthServiceTest {
 
         @Test
         @DisplayName("기존 Customer가 차단된 경우 - 예외 발생")
-        void login_BlockedCustomer_ThrowsException() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "CUSTOMER", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
+        void processOAuth2Login_BlockedCustomer_ThrowsException() {
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", 10L, null);
             CustomerWallet wallet = createWallet(10L, "01012345678", "Test", "tester");
@@ -185,33 +160,32 @@ class OAuthServiceTest {
                     "status",
                     com.project.kkookk.wallet.domain.CustomerWalletStatus.BLOCKED);
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
                     .willReturn(Optional.of(oauthAccount));
             given(customerWalletRepository.findById(10L)).willReturn(Optional.of(wallet));
 
-            assertThatThrownBy(() -> oauthService.login(request))
+            assertThatThrownBy(
+                            () ->
+                                    oauthService.processOAuth2Login(
+                                            OAuthProvider.GOOGLE,
+                                            "google-123",
+                                            "Test User",
+                                            "test@example.com",
+                                            "CUSTOMER",
+                                            null))
                     .isInstanceOf(BusinessException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CUSTOMER_WALLET_BLOCKED);
         }
 
         @Test
         @DisplayName("기존 Owner 사용자 - 로그인 성공")
-        void login_ExistingOwner_ReturnsTokens() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "OWNER", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
+        void processOAuth2Login_ExistingOwner_ReturnsTokens() {
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", null, 5L);
             OwnerAccount owner = createOwner(5L, "test@example.com", "Test Owner", "ownerNick");
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
@@ -222,7 +196,14 @@ class OAuthServiceTest {
             given(refreshTokenService.issueOwnerRefreshToken(5L, "test@example.com", false))
                     .willReturn("owner-refresh");
 
-            OAuthLoginResponse response = oauthService.login(request);
+            OAuthLoginResponse response =
+                    oauthService.processOAuth2Login(
+                            OAuthProvider.GOOGLE,
+                            "google-123",
+                            "Test User",
+                            "test@example.com",
+                            "OWNER",
+                            null);
 
             assertThat(response.isNewUser()).isFalse();
             assertThat(response.accessToken()).isEqualTo("owner-access");
@@ -231,24 +212,24 @@ class OAuthServiceTest {
 
         @Test
         @DisplayName("크로스 역할 - Customer만 있는 계정으로 OWNER 로그인 시 newUser 반환")
-        void login_CrossRole_CustomerOnly_OwnerLogin_ReturnsNewUser() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "OWNER", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
+        void processOAuth2Login_CrossRole_CustomerOnly_OwnerLogin_ReturnsNewUser() {
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", 10L, null);
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
                     .willReturn(Optional.of(oauthAccount));
             given(jwtUtil.generateTempToken(any())).willReturn("temp-token-owner");
 
-            OAuthLoginResponse response = oauthService.login(request);
+            OAuthLoginResponse response =
+                    oauthService.processOAuth2Login(
+                            OAuthProvider.GOOGLE,
+                            "google-123",
+                            "Test User",
+                            "test@example.com",
+                            "OWNER",
+                            null);
 
             assertThat(response.isNewUser()).isTrue();
             assertThat(response.tempToken()).isEqualTo("temp-token-owner");
@@ -256,46 +237,36 @@ class OAuthServiceTest {
 
         @Test
         @DisplayName("잘못된 역할 - 예외 발생")
-        void login_InvalidRole_ThrowsException() {
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE, "auth-code", "http://redirect", "INVALID", null);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
+        void processOAuth2Login_InvalidRole_ThrowsException() {
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", null, null);
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
                     .willReturn(Optional.of(oauthAccount));
 
-            assertThatThrownBy(() -> oauthService.login(request))
+            assertThatThrownBy(
+                            () ->
+                                    oauthService.processOAuth2Login(
+                                            OAuthProvider.GOOGLE,
+                                            "google-123",
+                                            "Test User",
+                                            "test@example.com",
+                                            "INVALID",
+                                            null))
                     .isInstanceOf(BusinessException.class)
                     .hasFieldOrPropertyWithValue("errorCode", ErrorCode.INVALID_INPUT_VALUE);
         }
 
         @Test
         @DisplayName("storeId가 있으면 ensureWalletStampCard 호출")
-        void login_WithStoreId_EnsuresWalletStampCard() {
+        void processOAuth2Login_WithStoreId_EnsuresWalletStampCard() {
             Long storeId = 99L;
-            OAuthLoginRequest request =
-                    new OAuthLoginRequest(
-                            OAuthProvider.GOOGLE,
-                            "auth-code",
-                            "http://redirect",
-                            "CUSTOMER",
-                            storeId);
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo("google-123", "Test User", "test@example.com");
             OAuthAccount oauthAccount =
                     createOAuthAccount(1L, OAuthProvider.GOOGLE, "google-123", 10L, null);
             CustomerWallet wallet = createWallet(10L, "01012345678", "Test", "tester");
 
-            given(googleOAuthClient.getUserInfo("auth-code", "http://redirect"))
-                    .willReturn(userInfo);
             given(
                             oauthAccountRepository.findByProviderAndProviderId(
                                     OAuthProvider.GOOGLE, "google-123"))
@@ -304,7 +275,13 @@ class OAuthServiceTest {
             given(jwtUtil.generateCustomerToken(10L)).willReturn("access-token");
             given(refreshTokenService.issueCustomerRefreshToken(10L)).willReturn("refresh-token");
 
-            oauthService.login(request);
+            oauthService.processOAuth2Login(
+                    OAuthProvider.GOOGLE,
+                    "google-123",
+                    "Test User",
+                    "test@example.com",
+                    "CUSTOMER",
+                    storeId);
 
             verify(customerWalletService).ensureWalletStampCardForStore(10L, storeId);
         }

@@ -5,18 +5,17 @@
 
 import { useMutation } from '@tanstack/react-query';
 import {
-  oauthLogin,
+  exchangeOAuthCode,
   completeCustomerSignup,
   completeOwnerSignup,
-  type OAuthLoginRequest,
   type CompleteCustomerSignupRequest,
   type CompleteOwnerSignupRequest,
 } from '../api/oauthApi';
 import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
 
-export function useOAuthLogin() {
+export function useExchangeOAuthCode() {
   return useMutation({
-    mutationFn: (data: OAuthLoginRequest) => oauthLogin(data),
+    mutationFn: (code: string) => exchangeOAuthCode(code),
     onSuccess: (response) => {
       if (!response.isNewUser && response.accessToken && response.refreshToken) {
         // Determine token type from role context
