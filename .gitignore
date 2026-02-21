@@ -3,3 +3,11 @@
 .npm-cache/
 .vscode
 .DS_Store
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/.terraform.lock.hcl
+infra/terraform.tfvars
+infra/*.auto.tfvars
