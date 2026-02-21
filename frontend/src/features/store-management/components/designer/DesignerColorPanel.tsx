@@ -1,30 +1,40 @@
 /**
  * DesignerColorPanel
- * 배경색(컬러피커) + 이미지 업로드 + 도장 색상(컬러피커)
+ * 배경 탭: 색상 또는 이미지 이지선다 UI
  */
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ImagePlus, X } from 'lucide-react';
-import type { Background, StampStyle } from '@/features/wallet/types/designV2';
+import type { Background } from '@/features/wallet/types/designV2';
 
 interface DesignerColorPanelProps {
-  editingSide: 'front' | 'back';
   background: Background;
-  stampStyle: StampStyle;
   onBackgroundChange: (bg: Background) => void;
-  onStampStyleChange: (patch: Partial<StampStyle>) => void;
 }
 
-const MAX_IMAGE_SIZE = 500_000; // ~500KB base64
+const MAX_IMAGE_SIZE = 5_000_000; // ~5MB base64
 
 export function DesignerColorPanel({
-  editingSide,
   background,
-  stampStyle,
   onBackgroundChange,
-  onStampStyleChange,
 }: DesignerColorPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [bgMode, setBgMode] = useState<'color' | 'image'>(
+    background.type === 'image' ? 'image' : 'color',
+  );
+
+  // Sync mode when background changes externally
+  useEffect(() => {
+    setBgMode(background.type === 'image' ? 'image' : 'color');
+  }, [background.type]);
+
+  const handleModeChange = (mode: 'color' | 'image') => {
+    setBgMode(mode);
+    if (mode === 'color' && background.type === 'image') {
+      onBackgroundChange({ type: 'color', value: '#FFFFFF' });
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,7 +46,7 @@ export function DesignerColorPanel({
     reader.onload = () => {
       const result = reader.result as string;
       if (result.length > MAX_IMAGE_SIZE) {
-        alert('이미지가 너무 큽니다. 500KB 이하의 이미지를 사용해주세요.');
+        alert('이미지가 너무 큽니다. 5MB 이하의 이미지를 사용해주세요.');
         return;
       }
       onBackgroundChange({ type: 'image', value: result });
@@ -50,70 +60,89 @@ export function DesignerColorPanel({
 
   return (
     <div className="space-y-4">
+      {/* Color / Image toggle */}
       <div>
-        <label htmlFor="bg-color" className="block mb-2 text-xs font-bold text-kkookk-navy">
-          {editingSide === 'front' ? '앞면' : '뒷면'} 배경색
-        </label>
-        <input
-          id="bg-color"
-          type="color"
-          value={bgColor}
-          onChange={(e) => onBackgroundChange({ type: 'color', value: e.target.value })}
-          className="w-full h-8 rounded-lg border border-slate-200 cursor-pointer"
-        />
-      </div>
-
-      {/* Image background */}
-      <div>
-        <span className="block mb-2 text-xs font-bold text-kkookk-navy">배경 이미지</span>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        {background.type === 'image' ? (
-          <div className="relative">
-            <img
-              src={background.value}
-              alt="배경 미리보기"
-              className="w-full h-16 object-cover rounded-lg border border-slate-200"
-            />
-            <button
-              type="button"
-              onClick={() => onBackgroundChange({ type: 'color', value: '#FFFFFF' })}
-              className="absolute top-1 right-1 p-0.5 rounded-full bg-white/80 hover:bg-red-100 text-red-500 border border-slate-200"
-              title="이미지 제거"
-            >
-              <X size={12} />
-            </button>
-          </div>
-        ) : (
+        <span className="block mb-2 text-xs font-bold text-kkookk-navy">배경 유형</span>
+        <div className="flex border rounded-lg border-slate-200 overflow-hidden">
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg border-2 border-dashed border-slate-300 text-kkookk-steel hover:border-blue-400 hover:text-blue-600 transition-colors"
+            onClick={() => handleModeChange('color')}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+              bgMode === 'color'
+                ? 'bg-kkookk-navy text-white'
+                : 'bg-white text-kkookk-steel hover:bg-slate-50'
+            }`}
           >
-            <ImagePlus size={14} />
-            이미지 업로드
+            색상
           </button>
-        )}
-        <p className="mt-1 text-[10px] text-kkookk-steel">PNG, JPG, WebP (500KB 이하)</p>
+          <button
+            type="button"
+            onClick={() => handleModeChange('image')}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium transition-colors ${
+              bgMode === 'image'
+                ? 'bg-kkookk-navy text-white'
+                : 'bg-white text-kkookk-steel hover:bg-slate-50'
+            }`}
+          >
+            이미지
+          </button>
+        </div>
       </div>
 
-      {editingSide === 'back' && (
+      {/* Color picker */}
+      {bgMode === 'color' && (
         <div>
-          <label htmlFor="stamp-color" className="block mb-2 text-xs font-bold text-kkookk-navy">
-            도장 색상
+          <label htmlFor="bg-color" className="block mb-2 text-xs font-bold text-kkookk-navy">
+            배경색
           </label>
           <input
-            id="stamp-color"
+            id="bg-color"
             type="color"
-            value={stampStyle.filledColor}
-            onChange={(e) => onStampStyleChange({ filledColor: e.target.value })}
+            value={bgColor}
+            onChange={(e) => onBackgroundChange({ type: 'color', value: e.target.value })}
             className="w-full h-8 rounded-lg border border-slate-200 cursor-pointer"
           />
+        </div>
+      )}
+
+      {/* Image upload */}
+      {bgMode === 'image' && (
+        <div>
+          <span className="block mb-2 text-xs font-bold text-kkookk-navy">이미지</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          {background.type === 'image' ? (
+            <div className="relative">
+              <img
+                src={background.value}
+                alt="배경 미리보기"
+                className="w-full h-16 object-cover rounded-lg border border-slate-200"
+              />
+              <button
+                type="button"
+                onClick={() => onBackgroundChange({ type: 'color', value: '#FFFFFF' })}
+                className="absolute top-1 right-1 p-0.5 rounded-full bg-white/80 hover:bg-red-100 text-red-500 border border-slate-200"
+                title="이미지 제거"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg border-2 border-dashed border-slate-300 text-kkookk-steel hover:border-blue-400 hover:text-blue-600 transition-colors"
+            >
+              <ImagePlus size={14} />
+              이미지 업로드
+            </button>
+          )}
+          <p className="mt-1 text-[10px] text-kkookk-steel">PNG, JPG, WebP (5MB 이하)</p>
         </div>
       )}
     </div>

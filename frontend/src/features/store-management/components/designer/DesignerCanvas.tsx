@@ -45,7 +45,8 @@ type DragTarget =
   | { type: 'element'; index: number; startX: number; startY: number; origX: number; origY: number }
   | { type: 'line-endpoint'; index: number; originX: number; originY: number }
   | { type: 'all'; startX: number; startY: number }
-  | { type: 'slot-resize'; order: number; startY: number; origSize: number };
+  | { type: 'slot-resize'; order: number; startY: number; origSize: number }
+  | { type: 'element-resize'; index: number; startX: number; startY: number; origWidth: number; origHeight: number; origFontSize: number };
 
 const SNAP_GRID = 5; // snap to 5% grid
 
@@ -283,6 +284,24 @@ export function DesignerCanvas({
     [svgPointFromEvent],
   );
 
+  // Element resize handle
+  const handleElementResizeMouseDown = useCallback(
+    (e: React.MouseEvent, el: DesignElement, index: number) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setDragging({
+        type: 'element-resize',
+        index,
+        startX: svgPointFromEvent(e)?.x ?? 0,
+        startY: svgPointFromEvent(e)?.y ?? 0,
+        origWidth: el.width || 10,
+        origHeight: el.height || 10,
+        origFontSize: Number(el.style?.fontSize || 5),
+      });
+    },
+    [svgPointFromEvent],
+  );
+
   // Canvas background mousedown — shift starts move-all
   const handleCanvasMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -327,6 +346,22 @@ export function DesignerCanvas({
         const ey = pt.y - dragging.originY;
         const content = `M0,0 L${Math.round(ex * 100) / 100},${Math.round(ey * 100) / 100}`;
         onElementUpdatePreview(editingSide, dragging.index, { content });
+        return;
+      }
+
+      if (dragging.type === 'element-resize') {
+        const dx = pt.x - dragging.startX;
+        const dy = pt.y - dragging.startY;
+        const el = elements[dragging.index];
+        if (el?.type === 'shape') {
+          const newW = Math.max(2, Math.min(100, dragging.origWidth + dx));
+          const newH = Math.max(2, Math.min(100, dragging.origHeight + dy));
+          onElementUpdatePreview(editingSide, dragging.index, { width: Math.round(newW * 10) / 10, height: Math.round(newH * 10) / 10 });
+        } else if (el?.type === 'text') {
+          const scale = Math.max(0.3, 1 + dy * 0.05);
+          const newSize = Math.max(1, Math.min(20, dragging.origFontSize * scale));
+          onElementUpdatePreview(editingSide, dragging.index, { style: { ...el.style, fontSize: String(Math.round(newSize * 10) / 10) } });
+        }
         return;
       }
 
@@ -402,6 +437,23 @@ export function DesignerCanvas({
         return;
       }
 
+      if (dragging.type === 'element-resize' && pt) {
+        const dx = pt.x - dragging.startX;
+        const dy = pt.y - dragging.startY;
+        const el = elements[dragging.index];
+        if (el?.type === 'shape') {
+          const newW = Math.max(2, Math.min(100, dragging.origWidth + dx));
+          const newH = Math.max(2, Math.min(100, dragging.origHeight + dy));
+          onElementUpdateCommit(editingSide, dragging.index, { width: Math.round(newW * 10) / 10, height: Math.round(newH * 10) / 10 });
+        } else if (el?.type === 'text') {
+          const scale = Math.max(0.3, 1 + dy * 0.05);
+          const newSize = Math.max(1, Math.min(20, dragging.origFontSize * scale));
+          onElementUpdateCommit(editingSide, dragging.index, { style: { ...el.style, fontSize: String(Math.round(newSize * 10) / 10) } });
+        }
+        setDragging(null);
+        return;
+      }
+
       if (dragging.type === 'slot' || dragging.type === 'element') {
         // Use the last alignment-snapped position from handleMouseMove
         const pos = lastSnappedPos.current;
@@ -434,10 +486,18 @@ export function DesignerCanvas({
     if (dragging) {
       if (dragging.type === 'all') onMoveAllCommit(0, 0);
       if (dragging.type === 'slot-resize') onSlotResizeCommit(dragging.order, dragging.origSize);
+      if (dragging.type === 'element-resize') {
+        const el = elements[dragging.index];
+        if (el?.type === 'shape') {
+          onElementUpdateCommit(editingSide, dragging.index, { width: dragging.origWidth, height: dragging.origHeight });
+        } else if (el?.type === 'text') {
+          onElementUpdateCommit(editingSide, dragging.index, { style: { ...el.style, fontSize: String(dragging.origFontSize) } });
+        }
+      }
       setDragging(null);
       setAlignGuides([]);
     }
-  }, [dragging, onMoveAllCommit, onSlotResizeCommit]);
+  }, [dragging, onMoveAllCommit, onSlotResizeCommit, onElementUpdateCommit, editingSide, elements]);
 
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
@@ -455,24 +515,43 @@ export function DesignerCanvas({
   const isSelected = (index: number) =>
     selectedElement?.side === editingSide && selectedElement.index === index;
 
-  // Element selection indicator
+  // Element selection indicator with resize handle
   const renderElementSelection = (el: DesignElement, index: number) => {
+    const PAD = 2; // padding around element for border
+
     if (el.type === 'text') {
-      const w = el.content.length * Number(el.style?.fontSize || 4) * 0.6;
-      const h = Number(el.style?.fontSize || 4) * 1.2;
+      const fontSize = Number(el.style?.fontSize || 4);
+      const w = Math.max(fontSize * 2, el.content.length * fontSize * 0.85);
+      const h = fontSize * 1.5;
       const anchor = el.style?.textAnchor || 'start';
       const offsetX = anchor === 'middle' ? -w / 2 : anchor === 'end' ? -w : 0;
+      const bx = el.x + offsetX - PAD;
+      const by = el.y - h / 2 - PAD;
+      const bw = w + PAD * 2;
+      const bh = h + PAD * 2;
       return (
-        <rect
-          x={el.x + offsetX - 1}
-          y={el.y - h / 2 - 1}
-          width={w + 2}
-          height={h + 2}
-          fill="none"
-          stroke="#3B82F6"
-          strokeWidth={0.4}
-          strokeDasharray="1.5 1"
-        />
+        <g>
+          <rect
+            x={bx} y={by} width={bw} height={bh}
+            fill="none" stroke="#3B82F6" strokeWidth={0.4} strokeDasharray="1.5 1"
+          />
+          {/* Resize handle at bottom-right */}
+          <g
+            onMouseDown={(e) => handleElementResizeMouseDown(e, el, index)}
+            className="cursor-nwse-resize"
+          >
+            <rect
+              x={bx + bw - 2} y={by + bh - 2}
+              width={3} height={3} rx={0.5}
+              fill="#3B82F6" stroke="white" strokeWidth={0.3}
+            />
+            <rect
+              x={bx + bw - 4} y={by + bh - 4}
+              width={7} height={7}
+              fill="transparent"
+            />
+          </g>
+        </g>
       );
     }
 
@@ -504,17 +583,32 @@ export function DesignerCanvas({
     }
 
     // shape
+    const sw = el.width || 10;
+    const sh = el.height || 10;
     return (
-      <rect
-        x={el.x - 1}
-        y={el.y - 1}
-        width={(el.width || 10) + 2}
-        height={(el.height || 10) + 2}
-        fill="none"
-        stroke="#3B82F6"
-        strokeWidth={0.4}
-        strokeDasharray="1.5 1"
-      />
+      <g>
+        <rect
+          x={el.x - PAD} y={el.y - PAD}
+          width={sw + PAD * 2} height={sh + PAD * 2}
+          fill="none" stroke="#3B82F6" strokeWidth={0.4} strokeDasharray="1.5 1"
+        />
+        {/* Resize handle at bottom-right */}
+        <g
+          onMouseDown={(e) => handleElementResizeMouseDown(e, el, index)}
+          className="cursor-nwse-resize"
+        >
+          <rect
+            x={el.x + sw - 1} y={el.y + sh - 1}
+            width={3} height={3} rx={0.5}
+            fill="#3B82F6" stroke="white" strokeWidth={0.3}
+          />
+          <rect
+            x={el.x + sw - 3} y={el.y + sh - 3}
+            width={7} height={7}
+            fill="transparent"
+          />
+        </g>
+      </g>
     );
   };
 
@@ -646,73 +740,82 @@ export function DesignerCanvas({
                 slot={slot}
                 style={design.back.stampStyle}
                 filled={slot.order <= 3}
+                isDesigner
               />
-              {selectedSlot === slot.order && (
-                <g>
-                  <circle
-                    cx={slot.x}
-                    cy={slot.y}
-                    r={slot.size / 2 + 1.5}
-                    fill="none"
-                    stroke="#3B82F6"
-                    strokeWidth={0.5}
-                    strokeDasharray="1.5 1"
-                  />
-                  {/* Size label above slot */}
-                  <text
-                    x={slot.x}
-                    y={slot.y - slot.size / 2 - 2.5}
-                    textAnchor="middle"
-                    dominantBaseline="auto"
-                    fontSize={2.8}
-                    fontWeight="bold"
-                    fill="#3B82F6"
-                  >
-                    {slot.size.toFixed(1)}
-                  </text>
-                  {/* Resize handle — pill shape at bottom */}
-                  <g
-                    onMouseDown={(e) => handleSlotResizeMouseDown(e, slot)}
-                    className="cursor-ns-resize"
-                  >
-                    <rect
-                      x={slot.x - 2}
-                      y={slot.y + slot.size / 2 + 0.5}
-                      width={4}
-                      height={2.5}
-                      rx={1}
-                      fill="#3B82F6"
-                      stroke="white"
-                      strokeWidth={0.3}
-                    />
-                    {/* Grip lines */}
-                    <line
-                      x1={slot.x - 0.8}
-                      y1={slot.y + slot.size / 2 + 1.35}
-                      x2={slot.x + 0.8}
-                      y2={slot.y + slot.size / 2 + 1.35}
-                      stroke="white"
-                      strokeWidth={0.25}
-                    />
-                    <line
-                      x1={slot.x - 0.8}
-                      y1={slot.y + slot.size / 2 + 1.95}
-                      x2={slot.x + 0.8}
-                      y2={slot.y + slot.size / 2 + 1.95}
-                      stroke="white"
-                      strokeWidth={0.25}
-                    />
-                    {/* Larger invisible hit area */}
-                    <rect
-                      x={slot.x - 4}
-                      y={slot.y + slot.size / 2 - 1}
-                      width={8}
-                      height={6}
-                      fill="transparent"
-                    />
+              {selectedSlot === slot.order && (() => {
+                const stampShape = design.back.stampStyle.shape;
+                const r = slot.size / 2 + 1.5;
+                const borderRx = stampShape === 'circle' ? r : stampShape === 'rounded-square' ? r * 0.25 : 0;
+                return (
+                  <g>
+                    {stampShape === 'circle' ? (
+                      <circle
+                        cx={slot.x}
+                        cy={slot.y}
+                        r={r}
+                        fill="none"
+                        stroke="#3B82F6"
+                        strokeWidth={0.5}
+                        strokeDasharray="1.5 1"
+                      />
+                    ) : (
+                      <rect
+                        x={slot.x - r}
+                        y={slot.y - r}
+                        width={r * 2}
+                        height={r * 2}
+                        rx={borderRx}
+                        ry={borderRx}
+                        fill="none"
+                        stroke="#3B82F6"
+                        strokeWidth={0.5}
+                        strokeDasharray="1.5 1"
+                      />
+                    )}
+                    {/* Resize handle — pill shape at bottom */}
+                    <g
+                      onMouseDown={(e) => handleSlotResizeMouseDown(e, slot)}
+                      className="cursor-ns-resize"
+                    >
+                      <rect
+                        x={slot.x - 2}
+                        y={slot.y + slot.size / 2 + 0.5}
+                        width={4}
+                        height={2.5}
+                        rx={1}
+                        fill="#3B82F6"
+                        stroke="white"
+                        strokeWidth={0.3}
+                      />
+                      {/* Grip lines */}
+                      <line
+                        x1={slot.x - 0.8}
+                        y1={slot.y + slot.size / 2 + 1.35}
+                        x2={slot.x + 0.8}
+                        y2={slot.y + slot.size / 2 + 1.35}
+                        stroke="white"
+                        strokeWidth={0.25}
+                      />
+                      <line
+                        x1={slot.x - 0.8}
+                        y1={slot.y + slot.size / 2 + 1.95}
+                        x2={slot.x + 0.8}
+                        y2={slot.y + slot.size / 2 + 1.95}
+                        stroke="white"
+                        strokeWidth={0.25}
+                      />
+                      {/* Larger invisible hit area */}
+                      <rect
+                        x={slot.x - 4}
+                        y={slot.y + slot.size / 2 - 1}
+                        width={8}
+                        height={6}
+                        fill="transparent"
+                      />
+                    </g>
                   </g>
-                </g>
-              )}
+                );
+              })()}
             </g>
           ))}
       </svg>

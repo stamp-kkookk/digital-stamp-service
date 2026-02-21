@@ -26,7 +26,7 @@ export const stampStyleSchema = z.object({
   shape: z.enum(['circle', 'square', 'rounded-square']),
   filledColor: z.string(),
   emptyColor: z.string(),
-  emptyStyle: z.enum(['solid', 'dashed', 'outline']),
+  emptyStyle: z.enum(['solid', 'dashed', 'outline', 'none']),
   icon: z.string().nullable(),
   customSvgPath: z.string().nullable(),
   customIcon: z.string().nullable(),

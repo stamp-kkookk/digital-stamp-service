@@ -34,7 +34,7 @@ export function StampCardDesigner({ initialDesign, onDesignChange }: StampCardDe
   const [selectedElement, setSelectedElement] = useState<SelectedElement | null>(null);
   const [showElementEditor, setShowElementEditor] = useState(false);
   const [editingSide, setEditingSide] = useState<'front' | 'back'>('back');
-  const [activeTab, setActiveTab] = useState<'elements' | 'colors' | 'style'>('elements');
+  const [activeTab, setActiveTab] = useState<'elements' | 'background' | 'stamp'>('elements');
   const [lastClickPos, setLastClickPos] = useState<{ x: number; y: number } | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(false);
 
@@ -199,15 +199,18 @@ export function StampCardDesigner({ initialDesign, onDesignChange }: StampCardDe
     setLastClickPos({ x, y });
   }, []);
 
-  // Element CRUD — place at last click position if available
+  // Element CRUD — place at last click position if available, auto-select new element
   const handleAddElement = useCallback(
     (element: DesignElement) => {
       const placed = lastClickPos
         ? { ...element, x: lastClickPos.x, y: lastClickPos.y }
         : element;
       dispatch({ type: 'ADD_ELEMENT', side: editingSide, element: placed });
+      const newIndex = design[editingSide].elements.length;
+      setSelectedElement({ side: editingSide, index: newIndex });
+      setShowElementEditor(true);
     },
-    [dispatch, editingSide, lastClickPos],
+    [dispatch, editingSide, lastClickPos, design],
   );
 
   const handleUpdateElement = useCallback(
@@ -242,13 +245,13 @@ export function StampCardDesigner({ initialDesign, onDesignChange }: StampCardDe
 
   const tabs = [
     { id: 'elements' as const, label: '요소' },
-    { id: 'colors' as const, label: '색상' },
-    ...(editingSide === 'back' ? [{ id: 'style' as const, label: '도장 스타일' }] : []),
+    { id: 'background' as const, label: '배경' },
+    ...(editingSide === 'back' ? [{ id: 'stamp' as const, label: '도장' }] : []),
   ];
 
   // Auto-switch tab if current tab is hidden
   useEffect(() => {
-    if (editingSide === 'front' && activeTab === 'style') {
+    if (editingSide === 'front' && activeTab === 'stamp') {
       setActiveTab('elements');
     }
   }, [editingSide, activeTab]);
@@ -377,17 +380,14 @@ export function StampCardDesigner({ initialDesign, onDesignChange }: StampCardDe
               />
             )}
 
-            {activeTab === 'colors' && (
+            {activeTab === 'background' && (
               <DesignerColorPanel
-                editingSide={editingSide}
                 background={design[editingSide].background}
-                stampStyle={design.back.stampStyle}
                 onBackgroundChange={handleBackgroundChange}
-                onStampStyleChange={(patch) => dispatch({ type: 'SET_STAMP_STYLE', style: patch })}
               />
             )}
 
-            {activeTab === 'style' && editingSide === 'back' && (
+            {activeTab === 'stamp' && editingSide === 'back' && (
               <DesignerStampStylePanel
                 stampStyle={design.back.stampStyle}
                 onChange={(patch) => dispatch({ type: 'SET_STAMP_STYLE', style: patch })}
