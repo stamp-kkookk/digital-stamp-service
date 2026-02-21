@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 import { useExchangeOAuthCode } from '../hooks/useOAuth';
 import { getOAuthState, clearOAuthState } from '../utils/oauthUrl';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
 import { kkookkToast } from '@/components/ui/Toast';
 
 export function OAuthCallbackPage() {
@@ -70,7 +71,18 @@ export function OAuthCallbackPage() {
           return;
         }
 
-        // Existing user → logged in
+        // Existing user → save tokens and log in
+        const tokenType = role === 'OWNER' ? 'owner' : 'customer';
+        if (response.accessToken && response.refreshToken) {
+          setAuthToken(response.accessToken, response.refreshToken, tokenType);
+          setUserInfo({
+            id: response.id!,
+            name: response.name,
+            nickname: response.nickname,
+            email: response.email,
+            phone: response.phone,
+          });
+        }
         refreshAuthState();
 
         if (role === 'CUSTOMER') {
