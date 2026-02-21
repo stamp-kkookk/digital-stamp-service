@@ -103,7 +103,7 @@ export function MobileFrame({
                             <MenuLink
                                 icon={<BookOpen size={20} />}
                                 label="개인정보처리방침"
-                                onClick={onPrivacyPolicy}
+                                onClick={onPrivacyPolicy ?? (() => {})}
                             />
                             <div className="flex items-center gap-3 px-6 py-4 text-slate-400">
                                 <Info size={20} />
