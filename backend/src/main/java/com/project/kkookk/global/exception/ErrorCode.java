@@ -102,6 +102,8 @@ public enum ErrorCode {
             HttpStatus.BAD_GATEWAY, "OAUTH_USERINFO_FAILED", "OAuth 사용자 정보 조회에 실패했습니다"),
     OAUTH_INVALID_TEMP_TOKEN(
             HttpStatus.UNAUTHORIZED, "OAUTH_INVALID_TEMP_TOKEN", "유효하지 않은 임시 토큰입니다"),
+    OAUTH_EXCHANGE_CODE_INVALID(
+            HttpStatus.UNAUTHORIZED, "OAUTH_EXCHANGE_CODE_INVALID", "유효하지 않은 교환 코드입니다"),
     OAUTH_OWNER_NOT_FOUND(HttpStatus.NOT_FOUND, "OAUTH_OWNER_NOT_FOUND", "사장님 계정을 먼저 등록해주세요"),
 
     // StampCard (additional)
