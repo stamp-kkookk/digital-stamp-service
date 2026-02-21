@@ -1,0 +1,551 @@
+/**
+ * API DTOs for KKOOKK Backend Integration
+ * Based on api-docs.md
+ */
+
+// =============================================================================
+// Common Types
+// =============================================================================
+
+export interface ErrorResponse {
+  code: string;
+  message: string;
+  timestamp: string;
+  errors?: FieldError[];
+}
+
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
+export interface PageInfo {
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
+
+// =============================================================================
+// Token Refresh Types
+// =============================================================================
+
+export interface TokenRefreshRequest {
+  refreshToken: string;
+}
+
+export interface TokenRefreshResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
+// =============================================================================
+// Wallet Types
+// =============================================================================
+
+export interface NicknameCheckResponse {
+  available: boolean;
+}
+
+export interface PhoneCheckResponse {
+  available: boolean;
+}
+
+export interface WalletStampCardListResponse {
+  customerWalletId: number;
+  customerName: string;
+  stampCards: WalletStampCardSummary[];
+}
+
+export interface WalletStampCardStore {
+  storeId: number;
+  storeName: string;
+}
+
+export interface WalletStampCardSummary {
+  walletStampCardId: number;
+  stampCardId: number;
+  title: string;
+  currentStampCount: number;
+  goalStampCount: number;
+  progressPercentage: number;
+  nextRewardName: string | null;
+  nextRewardQuantity: number | null;
+  stampsToNextReward: number;
+  expiresAt: string;
+  status: string;
+  designJson: string | null;
+  store: WalletStampCardStore;
+  lastStampedAt: string | null;
+}
+
+export type StampCardSortType = 'LAST_STAMPED' | 'CREATED' | 'PROGRESS';
+
+export type StampHistoryEventType = 'ISSUED' | 'REVOKED' | 'EXPIRED' | 'MIGRATED';
+
+export interface StampHistoryItem {
+  id: number;
+  type: StampHistoryEventType;
+  delta: number;
+  reason: string;
+  occurredAt: string;
+}
+
+export interface EventPageInfo {
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
+
+export interface StampHistoryResponse {
+  events: StampHistoryItem[];
+  pageInfo: EventPageInfo;
+}
+
+export interface WalletRewardItem {
+  id: number;
+  store: WalletStampCardStore;
+  rewardName: string;
+  stampCardTitle: string;
+  status: WalletRewardStatus;
+  issuedAt: string;
+  expiresAt: string;
+  redeemedAt: string | null;
+  designType: string | null;
+  designJson: string | null;
+}
+
+export interface WalletRewardListResponse {
+  rewards: WalletRewardItem[];
+  pageInfo: PageInfo;
+}
+
+export type CustomerRedeemEventResult = 'SUCCESS' | 'FAILED';
+
+export interface RedeemHistoryItem {
+  id: number;
+  walletRewardId: number;
+  store: WalletStampCardStore;
+  result: CustomerRedeemEventResult;
+  occurredAt: string;
+}
+
+export interface RedeemHistoryResponse {
+  events: RedeemHistoryItem[];
+  pageInfo: PageInfo;
+}
+
+// =============================================================================
+// Issuance Types
+// =============================================================================
+
+export interface CreateIssuanceRequest {
+  storeId: number;
+  walletStampCardId: number;
+  idempotencyKey: string;
+}
+
+export type IssuanceRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+
+export interface IssuanceRequestResponse {
+  id: number;
+  status: IssuanceRequestStatus;
+  expiresAt: string;
+  remainingSeconds: number;
+  currentStampCount: number;
+  rewardsIssued: number | null;
+  createdAt: string;
+}
+
+// =============================================================================
+// Redeem Types
+// =============================================================================
+
+export interface RedeemRewardRequest {
+  walletRewardId: number;
+}
+
+export interface RedeemRewardResponse {
+  walletRewardId: number;
+  redeemEventId: number;
+  rewardName: string;
+  redeemedAt: string;
+}
+
+// =============================================================================
+// Migration Types
+// =============================================================================
+
+export interface CreateMigrationRequest {
+  storeId: number;
+  imageData: string;
+  claimedStampCount: number;
+}
+
+export type StampMigrationStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'CANCELED';
+
+// Customer: full migration detail (with base64 imageData)
+export interface MigrationRequestResponse {
+  id: number;
+  customerWalletId: number;
+  storeId: number;
+  status: StampMigrationStatus;
+  imageData: string;
+  claimedStampCount: number;
+  approvedStampCount: number | null;
+  rejectReason: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+  slaMessage: string;
+}
+
+// Customer: list item (no imageData)
+export interface MigrationListItemResponse {
+  id: number;
+  storeId: number;
+  storeName: string;
+  status: StampMigrationStatus;
+  claimedStampCount: number;
+  approvedStampCount: number | null;
+  rejectReason: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+}
+
+// Owner: migration list item (returned in { migrations: [...] } wrapper)
+export interface MigrationSummary {
+  id: number;
+  customerPhone: string;
+  customerName: string;
+  claimedStampCount: number;
+  status: StampMigrationStatus;
+  requestedAt: string;
+}
+
+// Owner: migration detail (with hosted imageUrl)
+export interface MigrationDetailResponse {
+  id: number;
+  customerWalletId: number;
+  customerPhone: string;
+  customerName: string;
+  imageUrl: string;
+  claimedStampCount: number;
+  status: StampMigrationStatus;
+  approvedStampCount: number | null;
+  rejectReason: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+}
+
+export interface MigrationApproveRequest {
+  approvedStampCount: number;
+}
+
+export interface MigrationApproveResponse {
+  id: number;
+  status: string;
+  approvedStampCount: number;
+  processedAt: string;
+}
+
+export interface MigrationRejectRequest {
+  rejectReason: string;
+}
+
+export interface MigrationRejectResponse {
+  id: number;
+  status: string;
+  rejectReason: string;
+  processedAt: string;
+}
+
+// =============================================================================
+// Store Types
+// =============================================================================
+
+export type StoreStatus = 'DRAFT' | 'LIVE' | 'SUSPENDED' | 'DELETED';
+
+export interface StoreCreateRequest {
+  name: string;
+  address?: string;
+  phone?: string;
+  placeRef?: string;
+  iconImageBase64?: string;
+  description?: string;
+}
+
+export interface StoreUpdateRequest {
+  name: string;
+  address?: string;
+  phone?: string;
+  description?: string;
+  iconImageBase64?: string;
+  placeRef?: string;
+}
+
+export interface StoreResponse {
+  id: number;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  placeRef: string | null;
+  iconImageBase64: string | null;
+  description: string | null;
+  status: StoreStatus;
+  createdAt: string;
+  updatedAt: string;
+  ownerAccountId: number;
+}
+
+// =============================================================================
+// Place Search Types
+// =============================================================================
+
+export interface PlaceSearchResult {
+  placeName: string;
+  address: string;
+  roadAddress: string;
+  phone: string;
+  placeUrl: string;
+  kakaoPlaceId: string;
+}
+
+// =============================================================================
+// Admin Types
+// =============================================================================
+
+export type StoreAuditAction = 'CREATED' | 'APPROVED' | 'SUSPENDED' | 'UNSUSPENDED' | 'DELETED' | 'UPDATED';
+export type PerformerType = 'OWNER' | 'ADMIN';
+
+export interface AdminStoreResponse {
+  id: number;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  placeRef: string | null;
+  iconImageBase64: string | null;
+  description: string | null;
+  status: StoreStatus;
+  hasActiveStampCard: boolean;
+  ownerAccountId: number;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminStoreStatusChangeRequest {
+  status: StoreStatus;
+  reason?: string;
+}
+
+export interface StoreAuditLogResponse {
+  id: number;
+  storeId: number;
+  action: StoreAuditAction;
+  previousStatus: StoreStatus | null;
+  newStatus: StoreStatus | null;
+  performedBy: number | null;
+  performedByType: PerformerType;
+  detail: string | null;
+  createdAt: string;
+}
+
+export interface StorePublicInfoResponse {
+  storeId: number;
+  storeName: string;
+  activeStampCardCount: number;
+}
+
+export interface QrCodeResponse {
+  qrCodeBase64: string;
+}
+
+// =============================================================================
+// StampCard Types
+// =============================================================================
+
+export type StampCardStatus = 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
+export type StampCardDesignType = 'COLOR' | 'IMAGE' | 'PUZZLE';
+
+export interface CreateStampCardRequest {
+  title: string;
+  goalStampCount: number;
+  requiredStamps?: number;
+  rewardName?: string;
+  rewardQuantity?: number;
+  expireDays?: number;
+  designType?: StampCardDesignType;
+  designJson?: string;
+}
+
+export interface UpdateStampCardRequest {
+  title?: string;
+  goalStampCount?: number;
+  requiredStamps?: number;
+  rewardName?: string;
+  rewardQuantity?: number;
+  expireDays?: number;
+  designType?: StampCardDesignType;
+  designJson?: string;
+}
+
+export interface StampCardResponse {
+  id: number;
+  title: string;
+  status: StampCardStatus;
+  goalStampCount: number;
+  requiredStamps: number;
+  rewardName: string | null;
+  rewardQuantity: number | null;
+  expireDays: number | null;
+  designType: StampCardDesignType;
+  designJson: string | null;
+  storeId: number;
+  issued: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StampCardSummary {
+  id: number;
+  title: string;
+  status: StampCardStatus;
+  goalStampCount: number;
+  rewardName: string | null;
+  rewardQuantity: number | null;
+  expireDays: number | null;
+  designType: StampCardDesignType;
+  createdAt: string;
+}
+
+export interface StampCardListResponse {
+  content: StampCardSummary[];
+  page: PageInfo;
+}
+
+export interface StampCardStatusUpdateRequest {
+  status: StampCardStatus;
+}
+
+// =============================================================================
+// Statistics Types
+// =============================================================================
+
+export interface DailyStampCount {
+  date: string;
+  count: number;
+}
+
+export interface StoreStatisticsResponse {
+  startDate: string;
+  endDate: string;
+  totalStamps: number;
+  totalRewardsIssued: number;
+  totalRewardsRedeemed: number;
+  activeUsers: number;
+  dailyTrend: DailyStampCount[];
+}
+
+// =============================================================================
+// Stamp Events Types (Owner)
+// =============================================================================
+
+export type StampEventType = 'ISSUED' | 'MIGRATED' | 'MANUAL_ADJUST';
+
+export interface StampEventResponse {
+  id: number;
+  walletStampCardId: number;
+  customerNickname: string;
+  customerPhone: string;
+  type: StampEventType;
+  delta: number;
+  reason: string;
+  occurredAt: string;
+}
+
+// =============================================================================
+// Redeem Events Types (Owner)
+// =============================================================================
+
+export type OwnerRedeemEventResult = 'SUCCESS' | 'FAILED';
+
+export interface RedeemEventResponse {
+  id: number;
+  walletRewardId: number;
+  customerNickname: string;
+  customerPhone: string;
+  rewardName: string;
+  stampCardTitle: string;
+  result: OwnerRedeemEventResult;
+  occurredAt: string;
+}
+
+// =============================================================================
+// Approval Types (Owner Issuance Approval)
+// =============================================================================
+
+export interface PendingIssuanceRequestItem {
+  id: number;
+  customerName: string;
+  customerNickname: string;
+  maskedPhone: string;
+  requestedAt: string;
+  elapsedSeconds: number;
+  remainingSeconds: number;
+}
+
+export interface PendingIssuanceRequestListResponse {
+  items: PendingIssuanceRequestItem[];
+  count: number;
+}
+
+export interface IssuanceApprovalResponse {
+  id: number;
+  status: 'APPROVED';
+  processedAt: string;
+  stampDelta: number;
+  currentStampCount: number;
+}
+
+export interface IssuanceRejectionResponse {
+  id: number;
+  status: 'REJECTED';
+  processedAt: string;
+}
+
+
+// =============================================================================
+// Enums (Wallet Reward)
+// =============================================================================
+
+export type WalletRewardStatus = 'AVAILABLE' | 'REDEEMING' | 'REDEEMED' | 'EXPIRED';
+
+// =============================================================================
+// Store Summary Types (Customer)
+// =============================================================================
+
+export interface StoreSummaryStampCard {
+  stampCardId: number;
+  title: string;
+  rewardName: string | null;
+  goalStampCount: number;
+  designJson: string | null;
+}
+
+export interface StoreSummaryResponse {
+  storeName: string;
+  stampCard: StoreSummaryStampCard | null;
+}

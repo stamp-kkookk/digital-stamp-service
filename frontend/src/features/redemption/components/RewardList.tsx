@@ -1,0 +1,86 @@
+/**
+ * RewardList 컴포넌트
+ * 리워드 보관함의 리워드 목록 (API 연동)
+ */
+
+import type { Reward } from "@/types/domain";
+import type { WalletRewardItem } from "@/types/api";
+import { ChevronLeft, Gift, Info, Loader2 } from "lucide-react";
+import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
+import { RewardCard } from "./RewardCard";
+import { useWalletRewards } from "@/features/wallet/hooks/useWallet";
+import { formatShortDate } from "@/lib/utils/format";
+
+function mapReward(item: WalletRewardItem): Reward {
+  const isUsed = item.status === "REDEEMED" || item.status === "EXPIRED";
+  return {
+    id: String(item.id),
+    storeName: item.store.storeName,
+    stampCardTitle: item.stampCardTitle,
+    name: item.rewardName,
+    expiry: formatShortDate(new Date(item.expiresAt)),
+    isUsed,
+    designJson: item.designJson,
+  };
+}
+
+export function RewardList() {
+  const { customerNavigate } = useCustomerNavigate();
+  const { data, isLoading } = useWalletRewards();
+
+  const rewards: Reward[] =
+    data?.rewards?.map((item) => mapReward(item)) ?? [];
+
+  const handleRedeem = (reward: Reward) => {
+    customerNavigate(`/redeems/${reward.id}/use`);
+  };
+
+  return (
+    <div className="relative flex flex-col h-full pt-6">
+      {/* 헤더 */}
+      <div className="px-6 py-3 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center sticky top-0 z-10 -mt-6 pt-6">
+        <button
+          onClick={() => customerNavigate("/wallet")}
+          className="p-2 -ml-2 text-kkookk-steel hover:text-kkookk-navy"
+          aria-label="뒤로 가기"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <h1 className="ml-2 text-lg font-bold text-kkookk-navy">
+          리워드 보관함
+        </h1>
+      </div>
+
+      {/* 리워드 목록 */}
+      <div className="p-6 space-y-4 overflow-y-auto">
+        {/* 안내 문구 */}
+        <div className="flex items-center gap-1.5 text-kkookk-steel">
+          <Info size={12} className="shrink-0 opacity-60" />
+          <p className="text-[11px] leading-relaxed">리워드 사용 시 사장님 확인이 필요합니다.</p>
+        </div>
+
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-kkookk-steel">
+            <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
+            <p>리워드를 불러오는 중...</p>
+          </div>
+        ) : rewards.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-kkookk-steel">
+            <Gift size={48} className="opacity-20 mb-4" />
+            <p>보관함이 비어있습니다.</p>
+          </div>
+        ) : (
+          rewards.map((reward) => (
+            <RewardCard
+              key={reward.id}
+              reward={reward}
+              onRedeem={reward.isUsed ? undefined : () => handleRedeem(reward)}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default RewardList;

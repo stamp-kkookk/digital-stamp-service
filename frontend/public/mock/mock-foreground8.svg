@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
+  <defs>
+    <!-- Filled star (bright with glow) -->
+    <filter id="starglow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <symbol id="star8f" viewBox="0 0 40 40">
+      <path d="M20,5 L23,16 L34,16 L25,22 L28,33 L20,27 L12,33 L15,22 L6,16 L17,16Z" fill="#E8D5A8" filter="url(#starglow)"/>
+    </symbol>
+    <!-- Ghost star (outline only) -->
+    <symbol id="star8g" viewBox="0 0 40 40">
+      <path d="M20,5 L23,16 L34,16 L25,22 L28,33 L20,27 L12,33 L15,22 L6,16 L17,16Z" fill="none" stroke="#6B8DA6" stroke-width="0.8" opacity="0.2"/>
+    </symbol>
+  </defs>
+  <!-- Midnight card -->
+  <rect width="1296" height="832" rx="20" fill="#0F1D38"/>
+  <rect x="24" y="24" width="1248" height="784" rx="14" fill="none" stroke="#6B8DA6" stroke-opacity="0.12" stroke-width="1"/>
+
+  <!-- Star field background dots -->
+  <g fill="#C0C8D0">
+    <circle cx="85" cy="95" r="1" opacity="0.12"/><circle cx="210" cy="45" r="0.8" opacity="0.1"/>
+    <circle cx="380" cy="72" r="1.2" opacity="0.08"/><circle cx="520" cy="55" r="0.7" opacity="0.15"/>
+    <circle cx="730" cy="48" r="1" opacity="0.1"/><circle cx="900" cy="68" r="0.8" opacity="0.12"/>
+    <circle cx="1050" cy="42" r="1.1" opacity="0.08"/><circle cx="1200" cy="75" r="0.9" opacity="0.1"/>
+    <circle cx="120" cy="180" r="0.7" opacity="0.1"/><circle cx="340" cy="200" r="0.9" opacity="0.06"/>
+    <circle cx="980" cy="170" r="1" opacity="0.08"/><circle cx="1160" cy="210" r="0.8" opacity="0.1"/>
+    <circle cx="60" cy="400" r="0.9" opacity="0.08"/><circle cx="180" cy="480" r="1.1" opacity="0.06"/>
+    <circle cx="1100" cy="380" r="0.7" opacity="0.1"/><circle cx="1230" cy="500" r="1" opacity="0.08"/>
+    <circle cx="100" cy="620" r="0.8" opacity="0.1"/><circle cx="300" cy="700" r="1" opacity="0.06"/>
+    <circle cx="500" cy="740" r="0.7" opacity="0.08"/><circle cx="800" cy="720" r="0.9" opacity="0.1"/>
+    <circle cx="1000" cy="750" r="1.1" opacity="0.06"/><circle cx="1180" cy="680" r="0.8" opacity="0.08"/>
+    <circle cx="450" cy="150" r="0.6" opacity="0.12"/><circle cx="850" cy="160" r="0.9" opacity="0.07"/>
+    <circle cx="670" cy="700" r="0.8" opacity="0.09"/><circle cx="150" cy="340" r="1" opacity="0.07"/>
+    <circle cx="1140" cy="450" r="0.7" opacity="0.09"/><circle cx="75" cy="550" r="0.8" opacity="0.08"/>
+    <circle cx="1220" cy="620" r="0.6" opacity="0.11"/><circle cx="400" cy="500" r="0.7" opacity="0.05"/>
+  </g>
+
+  <!-- Title -->
+  <text x="648" y="60" text-anchor="middle" fill="#C0C8D0" font-family="'Georgia', serif" font-size="24" letter-spacing="4">밤의 서재 독서 카드</text>
+  <text x="648" y="95" text-anchor="middle" fill="#6B8DA6" font-family="sans-serif" font-size="15" opacity="0.6">6번의 밤독서, 특별한 음료 한 잔</text>
+
+  <!-- Constellation connection lines (silver) — forming an open book shape -->
+  <g stroke="#6B8DA6" stroke-opacity="0.25" stroke-width="1.2" fill="none">
+    <!-- Book spine: star1 -> star2 (top center to bottom center) -->
+    <line x1="648" y1="240" x2="648" y2="550"/>
+    <!-- Left page: star1 -> star3 (top center to upper left) -->
+    <line x1="648" y1="240" x2="370" y2="340"/>
+    <!-- Left page bottom: star3 -> star5 (upper left to lower left) -->
+    <line x1="370" y1="340" x2="370" y2="520"/>
+    <!-- Left page close: star5 -> star2 (lower left to bottom center) -->
+    <line x1="370" y1="520" x2="648" y2="550"/>
+    <!-- Right page: star1 -> star4 (top center to upper right) -->
+    <line x1="648" y1="240" x2="926" y2="340"/>
+    <!-- Right page bottom: star4 -> star6 (upper right to lower right) -->
+    <line x1="926" y1="340" x2="926" y2="520"/>
+    <!-- Right page close: star6 -> star2 (lower right to bottom center) -->
+    <line x1="926" y1="520" x2="648" y2="550"/>
+  </g>
+
+  <!-- Star 1: top center (filled) - book top -->
+  <use href="#star8f" x="616" y="208" width="65" height="65"/>
+  <!-- Star 3: upper left (filled) - left page top -->
+  <use href="#star8f" x="338" y="308" width="65" height="65"/>
+  <!-- Star 4: upper right (filled) - right page top -->
+  <use href="#star8f" x="894" y="308" width="65" height="65"/>
+  <!-- Star 5: lower left (filled) - left page bottom -->
+  <use href="#star8f" x="338" y="488" width="65" height="65"/>
+  <!-- Star 6: lower right (ghost) - right page bottom -->
+  <use href="#star8g" x="894" y="488" width="65" height="65"/>
+
+  <!-- Star 2: bottom center (reward) - book bottom -->
+  <g transform="translate(648, 550)">
+    <circle r="40" fill="#3A5570" stroke="#6B8DA6" stroke-width="1" stroke-opacity="0.3"/>
+    <text x="0" y="-6" text-anchor="middle" fill="#C0C8D0" font-family="'Georgia', serif" font-size="14" letter-spacing="1">밤의</text>
+    <text x="0" y="14" text-anchor="middle" fill="#C0C8D0" font-family="'Georgia', serif" font-size="17" font-weight="700">선물</text>
+  </g>
+
+  <!-- Constellation name label -->
+  <text x="648" y="650" text-anchor="middle" fill="#6B8DA6" font-family="'Georgia', serif" font-size="13" letter-spacing="6" opacity="0.35">— 독서자리 —</text>
+
+  <!-- Footer -->
+  <text x="648" y="755" text-anchor="middle" fill="#6B8DA6" font-family="sans-serif" font-size="14" opacity="0.35">고요한 밤, 책과 함께하는 시간</text>
+</svg>

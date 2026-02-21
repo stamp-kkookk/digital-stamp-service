@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="kkookk"/>
+
+    <!-- ==================== -->
+    <!-- local, test 프로파일  -->
+    <!-- ==================== -->
+    <springProfile name="local | test">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%X{correlationId:-no-cid}] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- Loki push (local에서도 모니터링 스택 테스트 가능) -->
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>application=${APP_NAME},level=%level,tokenType=%X{tokenType:-none}</pattern>
+                </label>
+                <message class="net.logstash.logback.layout.LogstashLayout">
+                    <includeMdcKeyName>correlationId</includeMdcKeyName>
+                    <includeMdcKeyName>requestMethod</includeMdcKeyName>
+                    <includeMdcKeyName>requestUri</includeMdcKeyName>
+                    <includeMdcKeyName>clientIp</includeMdcKeyName>
+                    <includeMdcKeyName>tokenType</includeMdcKeyName>
+                    <includeMdcKeyName>userId</includeMdcKeyName>
+                    <includeMdcKeyName>flowType</includeMdcKeyName>
+                    <includeMdcKeyName>flowId</includeMdcKeyName>
+                </message>
+            </format>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+    <!-- ==================== -->
+    <!-- prod 프로파일         -->
+    <!-- ==================== -->
+    <springProfile name="prod">
+        <!-- JSON stdout -->
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>correlationId</includeMdcKeyName>
+                <includeMdcKeyName>requestMethod</includeMdcKeyName>
+                <includeMdcKeyName>requestUri</includeMdcKeyName>
+                <includeMdcKeyName>clientIp</includeMdcKeyName>
+                <includeMdcKeyName>tokenType</includeMdcKeyName>
+                <includeMdcKeyName>userId</includeMdcKeyName>
+                <includeMdcKeyName>flowType</includeMdcKeyName>
+                <includeMdcKeyName>flowId</includeMdcKeyName>
+            </encoder>
+        </appender>
+
+        <!-- Loki push -->
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <http>
+                <url>${LOKI_URL:-http://localhost:3100}/loki/api/v1/push</url>
+            </http>
+            <format>
+                <label>
+                    <pattern>application=${APP_NAME},level=%level,tokenType=%X{tokenType:-none}</pattern>
+                </label>
+                <message class="net.logstash.logback.layout.LogstashLayout">
+                    <includeMdcKeyName>correlationId</includeMdcKeyName>
+                    <includeMdcKeyName>requestMethod</includeMdcKeyName>
+                    <includeMdcKeyName>requestUri</includeMdcKeyName>
+                    <includeMdcKeyName>clientIp</includeMdcKeyName>
+                    <includeMdcKeyName>tokenType</includeMdcKeyName>
+                    <includeMdcKeyName>userId</includeMdcKeyName>
+                    <includeMdcKeyName>flowType</includeMdcKeyName>
+                    <includeMdcKeyName>flowId</includeMdcKeyName>
+                </message>
+            </format>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+</configuration>

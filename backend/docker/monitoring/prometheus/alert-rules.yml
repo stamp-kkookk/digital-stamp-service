@@ -1,0 +1,131 @@
+groups:
+  - name: kkookk-error-rate
+    rules:
+      - alert: HighErrorRate_5xx
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "5xx error rate exceeded 5%"
+          description: "Current 5xx rate: {{ $value | humanizePercentage }}"
+
+      - alert: HighErrorRate_4xx
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"4.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "4xx error rate exceeded 20%"
+          description: "Current 4xx rate: {{ $value | humanizePercentage }}"
+
+  - name: kkookk-latency
+    rules:
+      - alert: PollingLatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_server_requests_seconds_bucket{uri=~"/api/.*(pending|issuance-requests|redeem-sessions).*", method="GET"}[3m])) by (le)
+          ) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Polling P99 latency exceeded 100ms"
+          description: "Current P99: {{ $value | humanizeDuration }}"
+
+      - alert: ApprovalLatencyHigh
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_server_requests_seconds_bucket{uri=~"/api/.*(approve|reject).*", method="POST"}[3m])) by (le)
+          ) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Approval P99 latency exceeded 200ms"
+          description: "Current P99: {{ $value | humanizeDuration }}"
+
+  - name: kkookk-jvm
+    rules:
+      - alert: JvmMemoryHigh
+        expr: |
+          jvm_memory_used_bytes{area="heap"}
+          /
+          jvm_memory_max_bytes{area="heap"} > 0.80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM heap usage exceeded 80%"
+          description: "Current heap usage: {{ $value | humanizePercentage }}"
+
+      - alert: JvmMemoryCritical
+        expr: |
+          jvm_memory_used_bytes{area="heap"}
+          /
+          jvm_memory_max_bytes{area="heap"} > 0.95
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "JVM heap usage exceeded 95% (DANGER)"
+          description: "Current heap usage: {{ $value | humanizePercentage }}"
+
+  - name: kkookk-hikari
+    rules:
+      - alert: HikariPoolExhaustion
+        expr: |
+          hikaricp_connections_active
+          /
+          hikaricp_connections_max > 0.80
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HikariCP pool usage exceeded 80%"
+          description: "Active ratio: {{ $value | humanizePercentage }}"
+
+      - alert: HikariPendingConnections
+        expr: hikaricp_connections_pending > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HikariCP pending connections exceeded 5"
+          description: "Current pending: {{ $value }}"
+
+  - name: kkookk-business
+    rules:
+      - alert: IssuanceExpireRateHigh
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{uri=~".*issuance.*", status="410"}[15m]))
+            /
+            sum(rate(http_server_requests_seconds_count{uri=~".*issuance.*"}[15m]))
+          ) > 0.30
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Issuance expire rate exceeded 30%"
+          description: "Current expire rate: {{ $value | humanizePercentage }}"
+
+      - alert: OtpRateLimitSpike
+        expr: |
+          sum(rate(http_server_requests_seconds_count{uri=~".*otp.*", status="429"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "OTP rate limit spike detected"
+          description: "Rate limit occurrences increasing"

@@ -1,0 +1,36 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: slack-log-critical
+    receivers:
+      - uid: slack-log-critical-1
+        type: slack
+        settings:
+          url: SLACK_WEBHOOK_CRITICAL_PLACEHOLDER
+          title: "[LOG-CRITICAL] {{ .CommonLabels.alertname }}"
+          text: |
+            {{ range .Alerts }}
+            *Status*: {{ .Status | toUpper }}
+            *Alert*: {{ .Labels.alertname }}
+            *Severity*: {{ .Labels.severity }}
+            *Summary*: {{ .Annotations.summary }}
+            *Description*: {{ .Annotations.description }}
+            {{ end }}
+
+  - orgId: 1
+    name: slack-log-warning
+    receivers:
+      - uid: slack-log-warning-1
+        type: slack
+        settings:
+          url: SLACK_WEBHOOK_WARNING_PLACEHOLDER
+          title: "[LOG-WARNING] {{ .CommonLabels.alertname }}"
+          text: |
+            {{ range .Alerts }}
+            *Status*: {{ .Status | toUpper }}
+            *Alert*: {{ .Labels.alertname }}
+            *Severity*: {{ .Labels.severity }}
+            *Summary*: {{ .Annotations.summary }}
+            *Description*: {{ .Annotations.description }}
+            {{ end }}

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
+  <defs>
+    <!-- Citrus segment texture lines -->
+    <pattern id="seglines" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="8" y2="8" stroke="white" stroke-width="0.3" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <!-- Light lime card -->
+  <rect width="1296" height="832" rx="20" fill="#EEFABC"/>
+  <rect x="24" y="24" width="1248" height="784" rx="14" fill="none" stroke="#2D1B4E" stroke-opacity="0.08" stroke-width="2"/>
+  <!-- Title -->
+  <text x="648" y="62" text-anchor="middle" fill="#2D1B4E" font-family="'Arial Black', 'Helvetica', sans-serif" font-size="32" font-weight="900" letter-spacing="2">TANG! STAMP</text>
+  <text x="648" y="98" text-anchor="middle" fill="#2D1B4E" font-family="sans-serif" font-size="15" opacity="0.5">5잔 마시면 상큼한 선물이 톡!</text>
+
+  <!-- Outer rind circle -->
+  <circle cx="648" cy="416" r="230" fill="#2D1B4E" opacity="0.06"/>
+  <circle cx="648" cy="416" r="225" fill="none" stroke="#2D1B4E" stroke-opacity="0.1" stroke-width="2"/>
+  <!-- Pith ring -->
+  <circle cx="648" cy="416" r="215" fill="none" stroke="#EEFABC" stroke-width="4"/>
+
+  <!-- Wedge 0: top (filled) — -88° to -20° -->
+  <path d="M650.8,336 L655,216.1 A200,200 0 0,1 835.9,347.6 L723.2,388.6 A80,80 0 0,0 650.8,336Z"
+        fill="#C5E84D" stroke="#EEFABC" stroke-width="3"/>
+  <!-- Citrus segment detail line -->
+  <line x1="648" y1="416" x2="745" y2="230" stroke="white" stroke-width="1" opacity="0.2"/>
+
+  <!-- Wedge 1: upper right (filled) — -16° to 52° -->
+  <path d="M724.9,393.9 L840.3,360.9 A200,200 0 0,1 771.1,573.6 L697.3,479 A80,80 0 0,0 724.9,393.9Z"
+        fill="#C5E84D" stroke="#EEFABC" stroke-width="3"/>
+  <line x1="648" y1="416" x2="830" y2="467" stroke="white" stroke-width="1" opacity="0.2"/>
+
+  <!-- Wedge 2: bottom (filled) — 56° to 124° -->
+  <path d="M692.7,482.3 L759.8,581.8 A200,200 0 0,1 536.2,581.8 L603.3,482.3 A80,80 0 0,0 692.7,482.3Z"
+        fill="#C5E84D" stroke="#EEFABC" stroke-width="3"/>
+  <line x1="648" y1="416" x2="648" y2="616" stroke="white" stroke-width="1" opacity="0.2"/>
+
+  <!-- Wedge 3: lower left (ghost) — 128° to 196° -->
+  <path d="M598.7,479 L524.9,573.6 A200,200 0 0,1 455.7,360.9 L571.1,393.9 A80,80 0 0,0 598.7,479Z"
+        fill="none" stroke="#2D1B4E" stroke-opacity="0.12" stroke-width="2" stroke-dasharray="6,4"/>
+  <line x1="648" y1="416" x2="466" y2="467" stroke="#2D1B4E" stroke-width="0.5" opacity="0.06"/>
+
+  <!-- Wedge 4: upper left (ghost) — 200° to 268° -->
+  <path d="M572.8,388.6 L460.1,347.6 A200,200 0 0,1 641,216.1 L645.2,336 A80,80 0 0,0 572.8,388.6Z"
+        fill="none" stroke="#2D1B4E" stroke-opacity="0.12" stroke-width="2" stroke-dasharray="6,4"/>
+  <line x1="648" y1="416" x2="551" y2="230" stroke="#2D1B4E" stroke-width="0.5" opacity="0.06"/>
+
+  <!-- Center reward circle -->
+  <circle cx="648" cy="416" r="70" fill="#2D1B4E"/>
+  <circle cx="648" cy="416" r="65" fill="none" stroke="#C5E84D" stroke-width="1.5" stroke-opacity="0.4"/>
+  <text x="648" y="410" text-anchor="middle" fill="#C5E84D" font-family="sans-serif" font-size="13" font-weight="700">FREE</text>
+  <text x="648" y="430" text-anchor="middle" fill="#EEFABC" font-family="sans-serif" font-size="15" font-weight="700">JUICE</text>
+
+  <!-- Pop art burst lines around the wheel -->
+  <g stroke="#2D1B4E" stroke-opacity="0.04" stroke-width="1.5">
+    <line x1="648" y1="140" x2="648" y2="170"/>
+    <line x1="870" y1="220" x2="890" y2="205"/>
+    <line x1="920" y1="416" x2="950" y2="416"/>
+    <line x1="870" y1="610" x2="890" y2="625"/>
+    <line x1="648" y1="660" x2="648" y2="690"/>
+    <line x1="426" y1="610" x2="406" y2="625"/>
+    <line x1="376" y1="416" x2="346" y2="416"/>
+    <line x1="426" y1="220" x2="406" y2="205"/>
+  </g>
+
+  <!-- Footer -->
+  <text x="648" y="758" text-anchor="middle" fill="#2D1B4E" font-family="sans-serif" font-size="14" opacity="0.35">신선함을 모으는 재미, TANG!</text>
+</svg>

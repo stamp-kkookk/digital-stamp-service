@@ -1,0 +1,382 @@
+@import "tailwindcss";
+
+button {
+  cursor: pointer;
+}
+
+/* ============================================
+   SHADCN UI CSS VARIABLES
+   Mapped to KKOOKK brand colors for consistency
+   ============================================ */
+@layer base {
+  :root {
+    /* Background colors */
+    --background: 250 249 246; /* kkookk-paper (#faf9f6) */
+    --foreground: 26 28 30; /* kkookk-navy (#1a1c1e) */
+
+    /* Card colors */
+    --card: 255 255 255; /* white */
+    --card-foreground: 26 28 30; /* kkookk-navy */
+
+    /* Popover colors */
+    --popover: 255 255 255; /* white */
+    --popover-foreground: 26 28 30; /* kkookk-navy */
+
+    /* Primary color - KKOOKK Orange */
+    --primary: 255 77 0; /* kkookk-orange-500 (#ff4d00) */
+    --primary-foreground: 255 255 255; /* white */
+
+    /* Secondary color - KKOOKK Indigo */
+    --secondary: 46 88 255; /* kkookk-indigo (#2e58ff) */
+    --secondary-foreground: 255 255 255; /* white */
+
+    /* Muted colors */
+    --muted: 245 245 240; /* kkookk-sand (#f5f5f0) */
+    --muted-foreground: 100 116 139; /* kkookk-steel (#64748b) */
+
+    /* Accent colors */
+    --accent: 255 255 237; /* kkookk-orange-50 (#fff7ed) */
+    --accent-foreground: 255 77 0; /* kkookk-orange-500 */
+
+    /* Destructive/Error colors */
+    --destructive: 220 38 38; /* kkookk-red (#dc2626) */
+    --destructive-foreground: 255 255 255; /* white */
+
+    /* Border and input colors */
+    --border: 100 116 139 / 0.2; /* kkookk-steel with opacity */
+    --input: 100 116 139 / 0.2; /* kkookk-steel with opacity */
+    --ring: 255 77 0; /* kkookk-orange-500 for focus rings */
+
+    /* Border radius - KKOOKK uses rounded-2xl (16px) by default */
+    --radius: 1rem; /* 16px */
+  }
+
+  .dark {
+    /* Dark mode support (optional, KKOOKK doesn't use dark mode yet) */
+    --background: 26 28 30; /* kkookk-navy */
+    --foreground: 250 249 246; /* kkookk-paper */
+    --card: 26 28 30;
+    --card-foreground: 250 249 246;
+    --popover: 26 28 30;
+    --popover-foreground: 250 249 246;
+    --primary: 255 77 0;
+    --primary-foreground: 255 255 255;
+    --secondary: 46 88 255;
+    --secondary-foreground: 255 255 255;
+    --muted: 100 116 139 / 0.2;
+    --muted-foreground: 245 245 240;
+    --accent: 124 45 18; /* kkookk-orange-900 */
+    --accent-foreground: 255 255 255;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+    --border: 100 116 139 / 0.3;
+    --input: 100 116 139 / 0.3;
+    --ring: 255 77 0;
+  }
+}
+
+@theme {
+  /* KKOOKK Orange Scale */
+  --color-kkookk-orange-50: #fff7ed;
+  --color-kkookk-orange-100: #ffedd5;
+  --color-kkookk-orange-200: #fed7aa;
+  --color-kkookk-orange-500: #ff4d00;
+  --color-kkookk-orange-600: #ea580c;
+  --color-kkookk-orange-900: #7c2d12;
+
+  /* KKOOKK Indigo Scale (Owner Persona) */
+  --color-kkookk-indigo-50: #eef2ff;
+  --color-kkookk-indigo-100: #e0e7ff;
+  --color-kkookk-indigo-200: #c7d2fe;
+  --color-kkookk-indigo-500: #2e58ff;
+
+  /* Status */
+  --color-kkookk-red: #dc2626;
+  --color-kkookk-amber: #f59e0b;
+
+  /* Global */
+  --color-kkookk-paper: #faf9f6;
+  --color-kkookk-navy: #1a1c1e;
+
+  /* Owner Persona */
+  --color-kkookk-indigo: #2e58ff;
+  --color-kkookk-steel: #64748b;
+
+  /* Customer Persona */
+  --color-kkookk-sand: #f5f5f0;
+  --color-kkookk-yellow: #ffd600;
+
+  /* Typography */
+  --font-family-pretendard: "Pretendard Variable", -apple-system, sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-family-pretendard);
+  background-color: var(--color-kkookk-paper);
+  color: var(--color-kkookk-navy);
+  min-height: 100vh;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Common utilities */
+@layer utilities {
+  /* Hide scrollbar but keep scroll functionality */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Safe area utilities for mobile devices */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  .p-safe {
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+      env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  }
+
+  .btn-primary {
+    @apply px-6 font-semibold text-white transition-all h-14 rounded-2xl bg-kkookk-orange-500 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-6 font-semibold text-white transition-all h-14 rounded-2xl bg-kkookk-indigo active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply px-6 font-semibold transition-all border-2 h-14 rounded-2xl border-kkookk-orange-500 text-kkookk-orange-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-6 font-semibold transition-all h-14 rounded-2xl text-kkookk-orange-600 hover:bg-kkookk-orange-50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Toast animations */
+  @keyframes enter {
+    from {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes leave {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+  }
+
+  .animate-enter {
+    animation: enter 0.3s ease-out;
+  }
+
+  .animate-leave {
+    animation: leave 0.2s ease-in forwards;
+  }
+}
+
+/* Custom animations for Owner Store List page */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUpBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+
+@keyframes pulseBadge {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slideUpBottom {
+  animation: slideUpBottom 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 3s ease-in-out infinite;
+}
+
+.animate-pulse-badge {
+  animation: pulseBadge 2s ease-in-out infinite;
+}
+
+/* ============================================
+   3D TRANSFORM UTILITIES
+   For FlipCard component
+   ============================================ */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* ============================================
+   LUXURY EFFECTS
+   Premium glass morphism and shadows
+   ============================================ */
+.glass-luxury {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.glass-card-front {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.shadow-luxury {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.shadow-card-stack {
+  box-shadow:
+    0 8px 16px -4px rgba(0, 0, 0, 0.1),
+    0 16px 32px -8px rgba(0, 0, 0, 0.15),
+    0 32px 64px -16px rgba(0, 0, 0, 0.1);
+}
+
+/* Subtle grain texture overlay */
+.texture-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Cardstock texture - real cafe stamp card feel */
+.texture-cardstock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.06;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Cardstock edge thickness - bottom/right shadow for physical depth */
+.shadow-cardstock {
+  box-shadow:
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 4px 8px -2px rgba(0, 0, 0, 0.08),
+    0 8px 16px -4px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* White cardstock (back side) - subtle paper grain */
+.texture-cardstock-white::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}

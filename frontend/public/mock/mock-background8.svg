@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise8">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.08"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Midnight blue base -->
+  <rect width="1240" height="790" fill="#0C1B33"/>
+  <!-- Noise texture -->
+  <rect width="1240" height="790" filter="url(#noise8)" opacity="0.3"/>
+  <!-- Moon geometric lineart -->
+  <g transform="translate(620, 280)" fill="none" stroke="#C0C8D0" stroke-width="1.5" stroke-linecap="round">
+    <!-- Crescent moon -->
+    <circle cx="0" cy="0" r="60" stroke="#6B8DA6" stroke-width="2"/>
+    <circle cx="20" cy="-15" r="50" fill="#0C1B33" stroke="none"/>
+    <!-- Moon inner glow -->
+    <circle cx="-10" cy="5" r="55" fill="#6B8DA6" opacity="0.05"/>
+  </g>
+  <!-- Star geometric shapes -->
+  <g fill="none" stroke="#C0C8D0" stroke-width="1" opacity="0.3">
+    <path d="M350,150 L354,140 L358,150 L368,146 L358,150 L354,160 L350,150 L340,146Z"/>
+    <path d="M900,200 L904,190 L908,200 L918,196 L908,200 L904,210 L900,200 L890,196Z"/>
+    <path d="M250,500 L253,493 L256,500 L263,497 L256,500 L253,507 L250,500 L243,497Z"/>
+    <path d="M980,450 L983,443 L986,450 L993,447 L986,450 L983,457 L980,450 L973,447Z"/>
+  </g>
+  <!-- Small star dots -->
+  <g fill="#C0C8D0" opacity="0.25">
+    <circle cx="150" cy="100" r="2"/><circle cx="450" cy="80" r="1.5"/>
+    <circle cx="800" cy="120" r="2"/><circle cx="1100" cy="180" r="1.8"/>
+    <circle cx="180" cy="600" r="1.5"/><circle cx="1060" cy="550" r="2"/>
+  </g>
+  <!-- Simple book icon -->
+  <g transform="translate(620, 420)" fill="none" stroke="#6B8DA6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5">
+    <path d="M-20,15 L-20,-15 Q0,-20 0,-15 L0,15 Q0,10 -20,15"/>
+    <path d="M20,15 L20,-15 Q0,-20 0,-15 L0,15 Q0,10 20,15"/>
+  </g>
+  <!-- Brand name -->
+  <text x="620" y="530" text-anchor="middle" fill="#C0C8D0" font-family="'Georgia', serif" font-size="52" font-weight="700" letter-spacing="4">밤의 서재</text>
+  <!-- Subtitle -->
+  <text x="620" y="575" text-anchor="middle" fill="#6B8DA6" font-family="sans-serif" font-size="14" letter-spacing="6" opacity="0.6">NIGHT READING LOUNGE</text>
+</svg>

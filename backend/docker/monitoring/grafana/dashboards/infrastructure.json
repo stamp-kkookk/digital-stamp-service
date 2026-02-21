@@ -1,0 +1,195 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "Process CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 15 }, "unit": "percentunit", "max": 1 },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "process_cpu_usage{application=\"kkookk\"}", "legendFormat": "App CPU", "refId": "A" },
+        { "expr": "system_cpu_usage{application=\"kkookk\"}", "legendFormat": "System CPU", "refId": "B" }
+      ]
+    },
+    {
+      "title": "JVM Heap Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 10, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 20 }, "unit": "bytes" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(jvm_memory_used_bytes{application=\"kkookk\",area=\"heap\"}) by (id)", "legendFormat": "Used ({{id}})", "refId": "A" },
+        { "expr": "sum(jvm_memory_max_bytes{application=\"kkookk\",area=\"heap\"})", "legendFormat": "Max", "refId": "B" },
+        { "expr": "sum(jvm_memory_committed_bytes{application=\"kkookk\",area=\"heap\"})", "legendFormat": "Committed", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Heap %",
+      "type": "gauge",
+      "gridPos": { "h": 7, "w": 3, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.7 }, { "color": "red", "value": 0.9 }] } },
+        "overrides": []
+      },
+      "targets": [{ "expr": "sum(jvm_memory_used_bytes{application=\"kkookk\",area=\"heap\"}) / sum(jvm_memory_max_bytes{application=\"kkookk\",area=\"heap\"})", "refId": "A" }]
+    },
+    {
+      "title": "Non-Heap",
+      "type": "stat",
+      "gridPos": { "h": 7, "w": 3, "x": 21, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "targets": [{ "expr": "sum(jvm_memory_used_bytes{application=\"kkookk\",area=\"nonheap\"})", "refId": "A" }]
+    },
+    {
+      "title": "GC Pause Duration",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "s" },
+        "overrides": []
+      },
+      "targets": [{ "expr": "rate(jvm_gc_pause_seconds_sum{application=\"kkookk\"}[1m])", "legendFormat": "{{action}} ({{cause}})", "refId": "A" }]
+    },
+    {
+      "title": "JVM Threads",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "jvm_threads_live_threads{application=\"kkookk\"}", "legendFormat": "Live", "refId": "A" },
+        { "expr": "jvm_threads_daemon_threads{application=\"kkookk\"}", "legendFormat": "Daemon", "refId": "B" },
+        { "expr": "jvm_threads_peak_threads{application=\"kkookk\"}", "legendFormat": "Peak", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Loaded Classes",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 7 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "jvm_classes_loaded_classes{application=\"kkookk\"}", "legendFormat": "Loaded", "refId": "A" },
+        { "expr": "jvm_classes_unloaded_classes_total{application=\"kkookk\"}", "legendFormat": "Unloaded Total", "refId": "B" }
+      ]
+    },
+    {
+      "title": "HikariCP Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 15 }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "hikaricp_connections_active{application=\"kkookk\"}", "legendFormat": "Active", "refId": "A" },
+        { "expr": "hikaricp_connections_idle{application=\"kkookk\"}", "legendFormat": "Idle", "refId": "B" },
+        { "expr": "hikaricp_connections_pending{application=\"kkookk\"}", "legendFormat": "Pending", "refId": "C" },
+        { "expr": "hikaricp_connections_max{application=\"kkookk\"}", "legendFormat": "Max", "refId": "D" }
+      ]
+    },
+    {
+      "title": "HikariCP Pool %",
+      "type": "gauge",
+      "gridPos": { "h": 7, "w": 4, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "max": 1, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 0.7 }, { "color": "red", "value": 0.9 }] } },
+        "overrides": []
+      },
+      "targets": [{ "expr": "hikaricp_connections_active{application=\"kkookk\"} / hikaricp_connections_max{application=\"kkookk\"}", "refId": "A" }]
+    },
+    {
+      "title": "HikariCP Acquire / Create Time",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "s" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "rate(hikaricp_connections_acquire_seconds_sum{application=\"kkookk\"}[1m]) / rate(hikaricp_connections_acquire_seconds_count{application=\"kkookk\"}[1m])", "legendFormat": "Avg Acquire", "refId": "A" },
+        { "expr": "rate(hikaricp_connections_creation_seconds_sum{application=\"kkookk\"}[1m]) / rate(hikaricp_connections_creation_seconds_count{application=\"kkookk\"}[1m])", "legendFormat": "Avg Create", "refId": "B" }
+      ]
+    },
+    {
+      "title": "Caffeine Cache Hit Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "percentunit", "max": 1 },
+        "overrides": []
+      },
+      "targets": [{ "expr": "sum by (cache) (rate(cache_gets_total{application=\"kkookk\",result=\"hit\"}[5m])) / sum by (cache) (rate(cache_gets_total{application=\"kkookk\"}[5m]))", "legendFormat": "{{cache}}", "refId": "A" }]
+    },
+    {
+      "title": "Caffeine Cache Size / Evictions",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 21 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "short" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "cache_size{application=\"kkookk\"}", "legendFormat": "Size ({{cache}})", "refId": "A" },
+        { "expr": "rate(cache_evictions_total{application=\"kkookk\"}[5m])", "legendFormat": "Evictions/s ({{cache}})", "refId": "B" }
+      ]
+    },
+    {
+      "title": "Log Events by Level (ERROR / WARN spikes)",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 28 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20, "drawStyle": "bars", "stacking": { "mode": "normal" } }, "unit": "short" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "ERROR" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "WARN" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] }
+        ]
+      },
+      "targets": [
+        { "expr": "sum(rate(logback_events_total{application=\"kkookk\",level=\"error\"}[1m]))", "legendFormat": "ERROR", "refId": "A" },
+        { "expr": "sum(rate(logback_events_total{application=\"kkookk\",level=\"warn\"}[1m]))", "legendFormat": "WARN", "refId": "B" }
+      ]
+    },
+    {
+      "title": "Recent Infrastructure Logs (WARN + ERROR)",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 34 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\",level=~\"ERROR|WARN\"}", "refId": "A" }]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["kkookk", "infrastructure"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "KKOOKK - Infrastructure",
+  "uid": "kkookk-infra",
+  "version": 2
+}

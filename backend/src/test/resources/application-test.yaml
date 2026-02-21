@@ -1,0 +1,52 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  security:
+    user:
+      name: test
+      password: test
+
+  h2:
+    console:
+      enabled: false
+
+app:
+  storage:
+    local-path: ${java.io.tmpdir}/kkookk-test-storage
+  qr-base-url: "http://localhost:5176"
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-minimum-256-bits-required-for-testing
+  access-token-expiration: 3600000
+  refresh-token-expiration: 604800000
+  stepup-token-expiration: 600000
+
+oauth:
+  google:
+    client-id: test-google-client-id
+    client-secret: test-google-client-secret
+  kakao:
+    client-id: test-kakao-client-id
+    client-secret: test-kakao-client-secret
+  naver:
+    client-id: test-naver-client-id
+    client-secret: test-naver-client-secret
