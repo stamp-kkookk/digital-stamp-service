@@ -4,7 +4,7 @@
  */
 
 import {
-  buildOAuthUrl,
+  getOAuthAuthorizeUrl,
   saveOAuthState,
   type OAuthProviderType,
 } from "../utils/oauthUrl";
@@ -51,7 +51,7 @@ export function OAuthButtons({ userRole, storeId }: OAuthButtonsProps) {
   const handleClick = (provider: OAuthProviderType) => {
     saveOAuthState({ provider, role: userRole, storeId });
     // eslint-disable-next-line react-hooks/immutability
-    window.location.href = buildOAuthUrl(provider);
+    window.location.href = getOAuthAuthorizeUrl(provider, userRole, storeId);
   };
 
   return (

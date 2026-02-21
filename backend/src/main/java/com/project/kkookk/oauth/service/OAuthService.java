@@ -6,7 +6,6 @@ import com.project.kkookk.global.security.RefreshTokenService;
 import com.project.kkookk.global.util.JwtUtil;
 import com.project.kkookk.oauth.controller.dto.CompleteCustomerSignupRequest;
 import com.project.kkookk.oauth.controller.dto.CompleteOwnerSignupRequest;
-import com.project.kkookk.oauth.controller.dto.OAuthLoginRequest;
 import com.project.kkookk.oauth.controller.dto.OAuthLoginResponse;
 import com.project.kkookk.oauth.domain.OAuthAccount;
 import com.project.kkookk.oauth.domain.OAuthProvider;
@@ -17,8 +16,8 @@ import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.CustomerWalletService;
 import io.jsonwebtoken.Claims;
-import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class OAuthService {
 
     private final OAuthAccountRepository oauthAccountRepository;
@@ -34,46 +34,25 @@ public class OAuthService {
     private final CustomerWalletService customerWalletService;
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
-    private final Map<OAuthProvider, OAuthProviderClient> providerClients;
-
-    public OAuthService(
-            OAuthAccountRepository oauthAccountRepository,
-            OwnerAccountRepository ownerAccountRepository,
-            CustomerWalletRepository customerWalletRepository,
-            CustomerWalletService customerWalletService,
-            JwtUtil jwtUtil,
-            RefreshTokenService refreshTokenService,
-            GoogleOAuthClient googleOAuthClient,
-            KakaoOAuthClient kakaoOAuthClient,
-            NaverOAuthClient naverOAuthClient) {
-        this.oauthAccountRepository = oauthAccountRepository;
-        this.ownerAccountRepository = ownerAccountRepository;
-        this.customerWalletRepository = customerWalletRepository;
-        this.customerWalletService = customerWalletService;
-        this.jwtUtil = jwtUtil;
-        this.refreshTokenService = refreshTokenService;
-        this.providerClients =
-                Map.of(
-                        OAuthProvider.GOOGLE, googleOAuthClient,
-                        OAuthProvider.KAKAO, kakaoOAuthClient,
-                        OAuthProvider.NAVER, naverOAuthClient);
-    }
 
     @Transactional
-    public OAuthLoginResponse login(OAuthLoginRequest request) {
-        OAuthProviderClient client = providerClients.get(request.provider());
-        OAuthUserInfo userInfo = client.getUserInfo(request.code(), request.redirectUri());
+    public OAuthLoginResponse processOAuth2Login(
+            OAuthProvider provider,
+            String providerId,
+            String name,
+            String email,
+            String role,
+            Long storeId) {
+
+        String normalizedRole = role.toUpperCase();
 
         Optional<OAuthAccount> existing =
-                oauthAccountRepository.findByProviderAndProviderId(
-                        request.provider(), userInfo.id());
-
-        String role = request.role().toUpperCase();
+                oauthAccountRepository.findByProviderAndProviderId(provider, providerId);
 
         if (existing.isPresent()) {
-            return handleExistingUser(existing.get(), role, request.storeId());
+            return handleExistingUser(existing.get(), normalizedRole, storeId);
         } else {
-            return handleNewUser(userInfo, request.provider(), role);
+            return handleNewUser(provider, providerId, name, email, normalizedRole, storeId);
         }
     }
 
@@ -224,12 +203,14 @@ public class OAuthService {
     private OAuthLoginResponse handleExistingCustomer(OAuthAccount oauthAccount, Long storeId) {
         if (oauthAccount.getCustomerWalletId() == null) {
             // Owner로만 등록된 OAuth 계정 → Customer 회원가입 플로우
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo(
+            String tempToken =
+                    generateTempToken(
                             oauthAccount.getProviderId(),
                             oauthAccount.getName(),
-                            oauthAccount.getEmail());
-            String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "CUSTOMER");
+                            oauthAccount.getEmail(),
+                            oauthAccount.getProvider(),
+                            "CUSTOMER",
+                            storeId);
             return OAuthLoginResponse.newUser(
                     tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
@@ -268,12 +249,14 @@ public class OAuthService {
     private OAuthLoginResponse handleExistingOwner(OAuthAccount oauthAccount) {
         if (oauthAccount.getOwnerAccountId() == null) {
             // Customer로만 등록된 OAuth 계정 → Owner 회원가입 플로우
-            OAuthUserInfo userInfo =
-                    new OAuthUserInfo(
+            String tempToken =
+                    generateTempToken(
                             oauthAccount.getProviderId(),
                             oauthAccount.getName(),
-                            oauthAccount.getEmail());
-            String tempToken = generateTempToken(userInfo, oauthAccount.getProvider(), "OWNER");
+                            oauthAccount.getEmail(),
+                            oauthAccount.getProvider(),
+                            "OWNER",
+                            null);
             return OAuthLoginResponse.newUser(
                     tempToken, oauthAccount.getName(), oauthAccount.getEmail());
         }
@@ -305,23 +288,37 @@ public class OAuthService {
     }
 
     private OAuthLoginResponse handleNewUser(
-            OAuthUserInfo userInfo, OAuthProvider provider, String role) {
+            OAuthProvider provider,
+            String providerId,
+            String name,
+            String email,
+            String role,
+            Long storeId) {
 
-        String tempToken = generateTempToken(userInfo, provider, role);
-        return OAuthLoginResponse.newUser(tempToken, userInfo.name(), userInfo.email());
+        String tempToken = generateTempToken(providerId, name, email, provider, role, storeId);
+        return OAuthLoginResponse.newUser(tempToken, name, email);
     }
 
-    private String generateTempToken(OAuthUserInfo userInfo, OAuthProvider provider, String role) {
+    private String generateTempToken(
+            String providerId,
+            String name,
+            String email,
+            OAuthProvider provider,
+            String role,
+            Long storeId) {
         java.util.HashMap<String, Object> claims = new java.util.HashMap<>();
         claims.put("purpose", "oauth_signup");
         claims.put("provider", provider.name());
-        claims.put("providerId", userInfo.id());
+        claims.put("providerId", providerId);
         claims.put("role", role);
-        if (userInfo.name() != null) {
-            claims.put("oauthName", userInfo.name());
+        if (name != null) {
+            claims.put("oauthName", name);
         }
-        if (userInfo.email() != null) {
-            claims.put("email", userInfo.email());
+        if (email != null) {
+            claims.put("email", email);
+        }
+        if (storeId != null) {
+            claims.put("storeId", storeId);
         }
 
         return jwtUtil.generateTempToken(claims);

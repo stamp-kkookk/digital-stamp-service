@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
     STORES: '/api/public/stores',
     CHECK_NICKNAME: '/api/public/wallet/check-nickname',
     CHECK_PHONE: '/api/public/wallet/check-phone',
-    OAUTH_LOGIN: '/api/public/oauth/login',
+    OAUTH_TOKEN: '/api/public/oauth/token',
     OAUTH_COMPLETE_CUSTOMER_SIGNUP: '/api/public/oauth/complete-customer-signup',
     OAUTH_COMPLETE_OWNER_SIGNUP: '/api/public/oauth/complete-owner-signup',
   },
