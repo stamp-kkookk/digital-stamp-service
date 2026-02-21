@@ -7,8 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Mail, MessageCircle, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-const KAKAO_OPEN_CHAT_URL = "https://open.kakao.com/o/gqnX1Qei";
-const CONTACT_EMAIL = "contact@kkookk.io";
+const KAKAO_OPEN_CHAT_URL = "https://open.kakao.com/o/shsXOqhi";
+const CONTACT_EMAIL = "stampkkookk@gmail.com";
 
 interface ContactModalProps {
   isOpen: boolean;

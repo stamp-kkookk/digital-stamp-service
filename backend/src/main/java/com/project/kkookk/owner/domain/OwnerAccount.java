@@ -22,26 +22,29 @@ public class OwnerAccount extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String passwordHash;
 
     @Column(length = 100)
     private String name;
 
-    @Column(nullable = false)
+    @Column(length = 50)
+    private String nickname;
+
     private String phoneNumber;
 
     @Column(nullable = false)
     private boolean admin;
 
     @Builder
-    private OwnerAccount(String email, String passwordHash, String name, String phoneNumber) {
+    private OwnerAccount(
+            String email, String passwordHash, String name, String nickname, String phoneNumber) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
+        this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.admin = false;
     }

@@ -18,10 +18,6 @@ public enum ErrorCode {
     // Auth
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "ACCESS_DENIED", "접근 권한이 없습니다"),
-    OWNER_EMAIL_DUPLICATED(HttpStatus.CONFLICT, "OWNER_EMAIL_DUPLICATED", "이미 사용 중인 이메일입니다"),
-    OWNER_LOGIN_ID_DUPLICATED(
-            HttpStatus.CONFLICT, "OWNER_LOGIN_ID_DUPLICATED", "이미 사용 중인 로그인 ID입니다"),
-    OWNER_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "OWNER_LOGIN_FAILED", "이메일 또는 비밀번호가 올바르지 않습니다"),
     REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_INVALID", "유효하지 않은 리프레시 토큰입니다"),
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_EXPIRED", "리프레시 토큰이 만료되었습니다"),
 
@@ -66,12 +62,6 @@ public enum ErrorCode {
     ISSUANCE_REQUEST_NOT_PENDING(
             HttpStatus.BAD_REQUEST, "ISSUANCE_REQUEST_NOT_PENDING", "처리 대기 중인 요청이 아닙니다"),
 
-    // OTP
-    OTP_RATE_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "OTP_001", "OTP 요청 제한을 초과했습니다"),
-    OTP_EXPIRED(HttpStatus.UNAUTHORIZED, "OTP_002", "OTP가 만료되었습니다"),
-    OTP_INVALID(HttpStatus.UNAUTHORIZED, "OTP_003", "OTP가 일치하지 않습니다"),
-    OTP_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "OTP_004", "OTP 시도 횟수를 초과했습니다"),
-
     // Wallet
     WALLET_PHONE_DUPLICATED(HttpStatus.CONFLICT, "WALLET_001", "이미 등록된 전화번호입니다"),
     WALLET_NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "WALLET_002", "이미 사용 중인 닉네임입니다"),
@@ -90,7 +80,6 @@ public enum ErrorCode {
     ISSUANCE_REQUEST_EXPIRED(HttpStatus.GONE, "ISSUANCE_REQUEST_EXPIRED", "요청이 만료되었습니다"),
 
     // Redeem
-    STEPUP_REQUIRED(HttpStatus.FORBIDDEN, "STEPUP_REQUIRED", "OTP 인증이 필요합니다"),
     REWARD_NOT_FOUND(HttpStatus.NOT_FOUND, "REWARD_NOT_FOUND", "리워드를 찾을 수 없습니다"),
     REWARD_NOT_AVAILABLE(HttpStatus.CONFLICT, "REWARD_NOT_AVAILABLE", "사용 가능한 리워드가 아닙니다"),
     REWARD_EXPIRED(HttpStatus.GONE, "REWARD_EXPIRED", "리워드 유효기간이 만료되었습니다"),
@@ -105,6 +94,15 @@ public enum ErrorCode {
             HttpStatus.FORBIDDEN, "MIGRATION_ACCESS_DENIED", "다른 고객의 마이그레이션 요청에 접근할 수 없습니다"),
     MIGRATION_IMAGE_TOO_LARGE(
             HttpStatus.PAYLOAD_TOO_LARGE, "MIGRATION_IMAGE_TOO_LARGE", "이미지 크기가 너무 큽니다 (최대 5MB)"),
+
+    // OAuth
+    OAUTH_CODE_EXCHANGE_FAILED(
+            HttpStatus.BAD_GATEWAY, "OAUTH_CODE_EXCHANGE_FAILED", "OAuth 인가 코드 교환에 실패했습니다"),
+    OAUTH_USERINFO_FAILED(
+            HttpStatus.BAD_GATEWAY, "OAUTH_USERINFO_FAILED", "OAuth 사용자 정보 조회에 실패했습니다"),
+    OAUTH_INVALID_TEMP_TOKEN(
+            HttpStatus.UNAUTHORIZED, "OAUTH_INVALID_TEMP_TOKEN", "유효하지 않은 임시 토큰입니다"),
+    OAUTH_OWNER_NOT_FOUND(HttpStatus.NOT_FOUND, "OAUTH_OWNER_NOT_FOUND", "사장님 계정을 먼저 등록해주세요"),
 
     // StampCard (additional)
     NO_ACTIVE_STAMP_CARD(HttpStatus.CONFLICT, "NO_ACTIVE_STAMP_CARD", "활성 스탬프 카드가 없습니다");

@@ -21,16 +21,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @SecurityRequirement(name = "bearerAuth")
 public interface CustomerRedeemApi {
 
-    @Operation(summary = "리워드 사용", description = "리워드를 즉시 사용 처리합니다. StepUp 인증 필수")
+    @Operation(summary = "리워드 사용", description = "리워드를 즉시 사용 처리합니다.")
     @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
                 description = "리워드 사용 성공",
                 content = @Content(schema = @Schema(implementation = RedeemRewardResponse.class))),
-        @ApiResponse(
-                responseCode = "403",
-                description = "StepUp 인증 필요",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "404",
                 description = "리워드 없음",

@@ -6,16 +6,16 @@
 
 | 토큰 유형 | 발급 경로 | 용도 | TTL |
 |-----------|----------|------|-----|
-| JWT (Customer) | `POST /api/public/wallet/login` | `/api/customer/**` 엔드포인트 | 1시간 |
-| JWT (Owner) | `POST /api/owner/auth/login` | `/api/owner/**` 엔드포인트 | 1시간 |
-| JWT (Admin) | `POST /api/owner/auth/login` (admin=true) | `/api/admin/**` 엔드포인트 | 1시간 |
-| StepUp Token | `POST /api/public/otp/verify` | 민감 Customer 작업 (리딤, 마이그레이션, 히스토리) | 10분 |
+| JWT (Customer) | OAuth 로그인 | `/api/customer/**` 엔드포인트 | 1시간 |
+| JWT (Owner) | OAuth 로그인 | `/api/owner/**` 엔드포인트 | 1시간 |
+| JWT (Admin) | OAuth 로그인 (admin=true) | `/api/admin/**` 엔드포인트 | 1시간 |
+| Refresh Token | OAuth 로그인/가입 시 발급 | JWT 갱신 | 7일 |
 
 ### Security URL Patterns (SecurityConfig.java)
 
 ```
-/api/owner/auth/**           → PERMIT_ALL
-/api/public/**               → PERMIT_ALL
+/api/auth/refresh            → PERMIT_ALL
+/api/public/**               → PERMIT_ALL (OAuth, 지갑 체크, 매장)
 /api/customer/**             → hasRole("CUSTOMER")
 /api/admin/**                → hasRole("ADMIN")
 /api/owner/**                → hasRole("OWNER")
@@ -40,30 +40,29 @@
 | 204 | No Content | 삭제 성공 |
 | 400 | Bad Request | 유효성 검증 실패 |
 | 401 | Unauthorized | 토큰 없음/만료/불일치 |
-| 403 | Forbidden | 권한 부족, StepUp 필요, 지갑 차단 |
+| 403 | Forbidden | 권한 부족, 지갑 차단 |
 | 404 | Not Found | 리소스 미존재 |
 | 409 | Conflict | 중복 데이터, 상태 충돌 |
 | 410 | Gone | TTL 만료 (적립/리딤 요청) |
 | 413 | Payload Too Large | 이미지 5MB 초과 |
-| 429 | Too Many Requests | OTP 요청 제한 초과 |
 
 ---
 
 ## Public API (인증 불필요)
 
-### OTP
+### OAuth 인증
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/public/otp/request` | `OtpController.requestOtp()` | OTP 코드 요청 (Rate limit: 1/min) |
-| POST | `/api/public/otp/verify` | `OtpController.verifyOtp()` | OTP 검증 -> StepUp 토큰 발급 (10분 TTL, 최대 3회 시도) |
+| POST | `/api/public/oauth/login` | `OAuthController.login()` | OAuth 로그인 (Google/Kakao/Naver). 기존 사용자면 JWT 발급, 신규면 tempToken 발급 |
+| POST | `/api/public/oauth/complete-customer-signup` | `OAuthController.completeCustomerSignup()` | OAuth 고객 가입 완료 (이름, 닉네임, 전화번호) |
+| POST | `/api/public/oauth/complete-owner-signup` | `OAuthController.completeOwnerSignup()` | OAuth 사장님 가입 완료 (이름, 닉네임, 전화번호) |
+| POST | `/api/auth/refresh` | `RefreshTokenController.refresh()` | Refresh 토큰으로 Access 토큰 갱신 |
 
-### Customer 지갑 등록/로그인
+### Customer 지갑 체크
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/public/wallet/register` | `WalletController.register()` | 신규 고객 지갑 등록 (OTP 인증 후) |
-| POST | `/api/public/wallet/login` | `WalletController.login()` | 고객 로그인 (전화번호 + 이름, storeId 선택). storeId 있으면 자동 스탬프카드 발급 및 우선 표시, 없으면 최근 적립순 정렬 |
 | GET | `/api/public/wallet/check-nickname?nickname={nickname}` | `WalletController.checkNickname()` | 닉네임 중복 체크 |
 | GET | `/api/public/wallet/check-phone?phone={phone}` | `WalletController.checkPhone()` | 전화번호 중복 체크 |
 
@@ -86,13 +85,13 @@
 | GET | `/api/customer/issuance-requests/{id}` | `CustomerIssuanceController.getIssuanceRequest()` | 적립 요청 상태 조회 (폴링용, 2-3초 간격) |
 | POST | `/api/customer/issuance-requests/{id}/cancel` | `CustomerIssuanceController.cancelIssuanceRequest()` | 적립 요청 취소 (PENDING만 가능, 409 on conflict) |
 
-### 리딤 (Redeem) - StepUp 필요
+### 리딤 (Redeem)
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/customer/redeems` | `CustomerRedeemController.redeemReward()` | 리워드 즉시 사용 (StepUp 필수) |
+| POST | `/api/customer/redeems` | `CustomerRedeemController.redeemReward()` | 리워드 즉시 사용 |
 
-### 마이그레이션 (Migration) - StepUp 필요
+### 마이그레이션 (Migration)
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
@@ -106,14 +105,14 @@
 |--------|------|---------|-------------|
 | GET | `/api/customer/wallet/my-stamp-cards` | `CustomerWalletController.getMyStampCards()` | 내 스탬프카드 목록 |
 
-### 지갑 히스토리 - StepUp 필요
+### 지갑 히스토리
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
 | GET | `/api/customer/wallet/stores/{storeId}/stamp-history` | `CustomerWalletController.getStampHistory()` | 스탬프 적립 이력 (페이지네이션) |
 | GET | `/api/customer/wallet/stores/{storeId}/redeem-history` | `CustomerWalletController.getRedeemHistory()` | 리딤 사용 이력 (페이지네이션) |
 
-### 리워드 - StepUp 필요
+### 리워드
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
@@ -122,13 +121,6 @@
 ---
 
 ## Owner API (Bearer ownerAccessToken, ROLE_OWNER)
-
-### 인증
-
-| Method | Path | Handler | Description |
-|--------|------|---------|-------------|
-| POST | `/api/owner/auth/signup` | `OwnerAuthController.signup()` | 사장님 회원가입 (이메일 + 비밀번호) |
-| POST | `/api/owner/auth/login` | `OwnerAuthController.login()` | 사장님 로그인 -> JWT 발급 |
 
 ### 매장 관리
 
@@ -195,15 +187,3 @@
 | PATCH | `/api/admin/stores/{storeId}/status` | `AdminStoreController.changeStatus()` | 매장 상태 변경 (DRAFT→LIVE 승인, LIVE→SUSPENDED 정지 등) |
 | GET | `/api/admin/stores/{storeId}/audit-logs` | `AdminStoreController.getAuditLogs()` | 매장 Audit Log 조회 |
 
----
-
-## StepUp 토큰 필요 엔드포인트 요약
-
-다음 엔드포인트는 OTP 인증 후 발급된 StepUp 토큰이 필요하다:
-- `POST /api/customer/redeems`
-- `POST /api/customer/migrations`
-- `GET /api/customer/migrations/{id}`
-- `GET /api/customer/migrations`
-- `GET /api/customer/wallet/stores/{storeId}/stamp-history`
-- `GET /api/customer/wallet/stores/{storeId}/redeem-history`
-- `GET /api/customer/wallet/rewards`
