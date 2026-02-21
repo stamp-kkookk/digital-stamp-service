@@ -63,8 +63,9 @@ jobs:
             --cache-control "no-cache, no-store, must-revalidate"
 
           # Copy any JSON files at root (e.g., manifest.json)
+          shopt -s nullglob
           for f in dist/*.json; do
-            [ -f "$f" ] && aws s3 cp "$f" "s3://${{ secrets.S3_FRONTEND_BUCKET }}/$(basename "$f")" \
+            aws s3 cp "$f" "s3://${{ secrets.S3_FRONTEND_BUCKET }}/$(basename "$f")" \
               --cache-control "no-cache, no-store, must-revalidate"
           done
 
