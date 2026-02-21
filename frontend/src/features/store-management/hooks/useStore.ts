@@ -148,6 +148,7 @@ export function useStampEvents(
         size: params.size,
       }),
     enabled: !!params.storeId,
+    refetchOnMount: 'always',
   });
 }
 
@@ -167,5 +168,6 @@ export function useRedeemEvents(
         size: params.size,
       }),
     enabled: !!params.storeId,
+    refetchOnMount: 'always',
   });
 }

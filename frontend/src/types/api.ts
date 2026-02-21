@@ -36,81 +36,28 @@ export interface PageResponse<T> {
 }
 
 // =============================================================================
-// OTP Types
+// Token Refresh Types
 // =============================================================================
 
-export interface OtpRequestDto {
-  phone: string;
+export interface TokenRefreshRequest {
+  refreshToken: string;
 }
 
-export interface OtpRequestResponse {
-  success: boolean;
-  devOtpCode: string | null;
-}
-
-export interface OtpVerifyDto {
-  phone: string;
-  code: string;
-}
-
-export interface OtpVerifyResponse {
-  verified: boolean;
-  stepUpToken: string | null;
+export interface TokenRefreshResponse {
+  accessToken: string;
+  refreshToken: string;
 }
 
 // =============================================================================
 // Wallet Types
 // =============================================================================
 
-export interface WalletRegisterRequest {
-  phone: string;
-  name: string;
-  nickname: string;
-  storeId?: number;
+export interface NicknameCheckResponse {
+  available: boolean;
 }
 
-export interface RegisteredStampCardInfo {
-  walletStampCardId: number;
-  stampCardId: number;
-  title: string;
-  goalStampCount: number;
-  designType: string;
-  designJson: string;
-  storeName: string;
-}
-
-export interface WalletRegisterResponse {
-  accessToken: string;
-  walletId: number;
-  phone: string;
-  name: string;
-  nickname: string;
-  stampCard: RegisteredStampCardInfo | null;
-}
-
-export interface WalletLoginRequest {
-  phone: string;
-  name: string;
-  storeId: number;
-}
-
-export interface WalletLoginStampCard {
-  walletStampCardId: number;
-  stampCardId: number;
-  title: string;
-  goalStampCount: number;
-  designType: StampCardDesignType;
-  designJson: string | null;
-  storeName: string;
-}
-
-export interface WalletLoginResponse {
-  accessToken: string;
-  walletId: number;
-  phone: string;
-  name: string;
-  nickname: string;
-  stampCard: WalletLoginStampCard | null;
+export interface PhoneCheckResponse {
+  available: boolean;
 }
 
 export interface WalletStampCardListResponse {
@@ -184,14 +131,12 @@ export interface WalletRewardListResponse {
   pageInfo: PageInfo;
 }
 
-export type CustomerRedeemEventType = 'REQUESTED' | 'COMPLETED';
 export type CustomerRedeemEventResult = 'SUCCESS' | 'FAILED';
 
 export interface RedeemHistoryItem {
   id: number;
-  redeemSessionId: number;
+  walletRewardId: number;
   store: WalletStampCardStore;
-  type: CustomerRedeemEventType;
   result: CustomerRedeemEventResult;
   occurredAt: string;
 }
@@ -211,7 +156,7 @@ export interface CreateIssuanceRequest {
   idempotencyKey: string;
 }
 
-export type IssuanceRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
+export type IssuanceRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
 
 export interface IssuanceRequestResponse {
   id: number;
@@ -227,19 +172,15 @@ export interface IssuanceRequestResponse {
 // Redeem Types
 // =============================================================================
 
-export interface CreateRedeemSessionRequest {
+export interface RedeemRewardRequest {
   walletRewardId: number;
 }
 
-export type RedeemSessionStatus = 'PENDING' | 'COMPLETED' | 'EXPIRED';
-
-export interface RedeemSessionResponse {
-  sessionId: number;
+export interface RedeemRewardResponse {
   walletRewardId: number;
-  status: RedeemSessionStatus;
-  expiresAt: string;
-  remainingSeconds: number;
-  createdAt: string;
+  redeemEventId: number;
+  rewardName: string;
+  redeemedAt: string;
 }
 
 // =============================================================================
@@ -273,7 +214,7 @@ export interface MigrationRequestResponse {
 export interface MigrationListItemResponse {
   id: number;
   storeId: number;
-  storeName?: string;
+  storeName: string;
   status: StampMigrationStatus;
   claimedStampCount: number;
   approvedStampCount: number | null;
@@ -330,55 +271,27 @@ export interface MigrationRejectResponse {
 }
 
 // =============================================================================
-// Owner Auth Types
-// =============================================================================
-
-export interface OwnerSignupRequest {
-  email: string;
-  password: string;
-  name?: string;
-  phoneNumber: string;
-}
-
-export interface OwnerSignupResponse {
-  id: number;
-  email: string;
-  name: string | null;
-  phoneNumber: string;
-  createdAt: string;
-}
-
-export interface OwnerLoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface OwnerLoginResponse {
-  accessToken: string;
-  id: number;
-  email: string;
-  name: string | null;
-  phoneNumber: string;
-}
-
-// =============================================================================
 // Store Types
 // =============================================================================
 
-export type StoreStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED';
+export type StoreStatus = 'DRAFT' | 'LIVE' | 'SUSPENDED' | 'DELETED';
 
 export interface StoreCreateRequest {
   name: string;
   address?: string;
   phone?: string;
-  status: StoreStatus;
+  placeRef?: string;
+  iconImageBase64?: string;
+  description?: string;
 }
 
 export interface StoreUpdateRequest {
   name: string;
   address?: string;
   phone?: string;
-  status: StoreStatus;
+  description?: string;
+  iconImageBase64?: string;
+  placeRef?: string;
 }
 
 export interface StoreResponse {
@@ -386,10 +299,68 @@ export interface StoreResponse {
   name: string;
   address: string | null;
   phone: string | null;
+  placeRef: string | null;
+  iconImageBase64: string | null;
+  description: string | null;
   status: StoreStatus;
   createdAt: string;
   updatedAt: string;
   ownerAccountId: number;
+}
+
+// =============================================================================
+// Place Search Types
+// =============================================================================
+
+export interface PlaceSearchResult {
+  placeName: string;
+  address: string;
+  roadAddress: string;
+  phone: string;
+  placeUrl: string;
+  kakaoPlaceId: string;
+}
+
+// =============================================================================
+// Admin Types
+// =============================================================================
+
+export type StoreAuditAction = 'CREATED' | 'APPROVED' | 'SUSPENDED' | 'UNSUSPENDED' | 'DELETED' | 'UPDATED';
+export type PerformerType = 'OWNER' | 'ADMIN';
+
+export interface AdminStoreResponse {
+  id: number;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  placeRef: string | null;
+  iconImageBase64: string | null;
+  description: string | null;
+  status: StoreStatus;
+  hasActiveStampCard: boolean;
+  ownerAccountId: number;
+  ownerName: string | null;
+  ownerEmail: string | null;
+  ownerPhone: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminStoreStatusChangeRequest {
+  status: StoreStatus;
+  reason?: string;
+}
+
+export interface StoreAuditLogResponse {
+  id: number;
+  storeId: number;
+  action: StoreAuditAction;
+  previousStatus: StoreStatus | null;
+  newStatus: StoreStatus | null;
+  performedBy: number | null;
+  performedByType: PerformerType;
+  detail: string | null;
+  createdAt: string;
 }
 
 export interface StorePublicInfoResponse {
@@ -443,6 +414,7 @@ export interface StampCardResponse {
   designType: StampCardDesignType;
   designJson: string | null;
   storeId: number;
+  issued: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -496,7 +468,7 @@ export type StampEventType = 'ISSUED' | 'MIGRATED' | 'MANUAL_ADJUST';
 export interface StampEventResponse {
   id: number;
   walletStampCardId: number;
-  customerName: string;
+  customerNickname: string;
   customerPhone: string;
   type: StampEventType;
   delta: number;
@@ -508,44 +480,28 @@ export interface StampEventResponse {
 // Redeem Events Types (Owner)
 // =============================================================================
 
-export type OwnerRedeemEventType = 'REQUESTED' | 'COMPLETED';
 export type OwnerRedeemEventResult = 'SUCCESS' | 'FAILED';
 
 export interface RedeemEventResponse {
   id: number;
-  redeemSessionId: number;
+  walletRewardId: number;
   customerNickname: string;
+  customerPhone: string;
   rewardName: string;
   stampCardTitle: string;
-  type: OwnerRedeemEventType;
   result: OwnerRedeemEventResult;
   occurredAt: string;
 }
 
 // =============================================================================
-// Terminal Auth Types
-// =============================================================================
-
-export interface TerminalLoginRequest {
-  email: string;
-  password: string;
-  storeId: number;
-}
-
-export interface TerminalLoginResponse {
-  accessToken: string;
-  ownerId: number;
-  storeId: number;
-  storeName: string;
-}
-
-// =============================================================================
-// Terminal Types
+// Approval Types (Owner Issuance Approval)
 // =============================================================================
 
 export interface PendingIssuanceRequestItem {
   id: number;
   customerName: string;
+  customerNickname: string;
+  maskedPhone: string;
   requestedAt: string;
   elapsedSeconds: number;
   remainingSeconds: number;
@@ -570,18 +526,6 @@ export interface IssuanceRejectionResponse {
   processedAt: string;
 }
 
-export interface PendingRedeemSessionItem {
-  sessionId: number;
-  customerNickname: string;
-  rewardName: string;
-  remainingSeconds: number;
-  createdAt: string;
-}
-
-export interface PendingRedeemSessionListResponse {
-  sessions: PendingRedeemSessionItem[];
-  totalCount: number;
-}
 
 // =============================================================================
 // Enums (Wallet Reward)

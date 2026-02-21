@@ -1,5 +1,6 @@
 package com.project.kkookk.migration.service;
 
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
@@ -10,6 +11,7 @@ import com.project.kkookk.migration.service.exception.MigrationAccessDeniedExcep
 import com.project.kkookk.migration.service.exception.MigrationAlreadyPendingException;
 import com.project.kkookk.migration.service.exception.MigrationRequestNotFoundException;
 import com.project.kkookk.migration.util.Base64ImageValidator;
+import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
 import com.project.kkookk.wallet.domain.CustomerWallet;
@@ -17,10 +19,15 @@ import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -72,10 +79,18 @@ public class CustomerMigrationService {
 
         StampMigrationRequest savedRequest = migrationRequestRepository.save(migrationRequest);
 
+        FlowMdc.setMigrationFlow(savedRequest.getId());
+        log.info(
+                "[Migration] Request created id={} walletId={} storeId={}",
+                savedRequest.getId(),
+                customerWalletId,
+                request.storeId());
+
         return MigrationRequestResponse.from(savedRequest);
     }
 
     public MigrationRequestResponse getMigrationRequest(Long customerWalletId, Long migrationId) {
+        FlowMdc.setMigrationFlow(migrationId);
 
         // 본인 소유의 마이그레이션 요청만 조회 가능
         StampMigrationRequest migrationRequest =
@@ -99,6 +114,17 @@ public class CustomerMigrationService {
                 migrationRequestRepository.findByCustomerWalletIdOrderByRequestedAtDesc(
                         customerWalletId);
 
-        return requests.stream().map(MigrationListItemResponse::from).toList();
+        Set<Long> storeIds =
+                requests.stream()
+                        .map(StampMigrationRequest::getStoreId)
+                        .collect(Collectors.toSet());
+
+        Map<Long, String> storeNameMap =
+                storeRepository.findAllById(storeIds).stream()
+                        .collect(Collectors.toMap(Store::getId, Store::getName));
+
+        return requests.stream()
+                .map(r -> MigrationListItemResponse.from(r, storeNameMap.get(r.getStoreId())))
+                .toList();
     }
 }

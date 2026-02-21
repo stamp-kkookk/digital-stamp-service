@@ -9,26 +9,44 @@ import {
   useStampCards,
   useUpdateStampCardStatus,
 } from "@/features/store-management/hooks/useStampCard";
-import { useStore } from "@/features/store-management/hooks/useStore";
+import { useStore, useDeleteStore } from "@/features/store-management/hooks/useStore";
 import type { StampCardDesignType, StampCardStatus } from "@/types/api";
-import { isAxiosError } from "axios";
 import {
   AlertCircle,
+  AlertTriangle,
   BarChart3,
   ChevronLeft,
-  Coffee,
   Edit,
   Loader2,
   MapPin,
-  Pause,
+  Pencil,
   Play,
   Plus,
   Trash2,
+  CheckCircle,
+  X,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { kkookkToast } from "@/components/ui/Toast";
+import { Button } from "@/components/ui/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Modal";
+import { StoreTabBar } from "@/features/store-management/components/StoreTabBar";
 
-type TabType = "cards" | "history" | "migrations";
+interface ConfirmDialogState {
+  open: boolean;
+  title: string;
+  description: string;
+  variant: "default" | "destructive" | "info";
+  onConfirm: () => void;
+}
 
 interface DesignData {
   color?: string;
@@ -55,19 +73,13 @@ const COLOR_GRADIENT_MAP: Record<string, [string, string]> = {
 };
 
 function ActiveCardPreview({
-  storeName,
   designType,
   designJson,
   designLoading,
-  expireDays,
-  goalStampCount,
 }: {
-  storeName: string;
   designType: StampCardDesignType;
   designJson: string | null;
   designLoading: boolean;
-  expireDays: number | null;
-  goalStampCount: number;
 }) {
   // 디자인 정보 로딩 중
   if (designLoading) {
@@ -100,35 +112,54 @@ function ActiveCardPreview({
 
   return (
     <div
-      className="relative flex flex-col h-48 p-6 overflow-hidden text-white shadow-lg w-80 rounded-xl shrink-0"
+      className="relative h-48 overflow-hidden shadow-lg w-80 rounded-xl shrink-0"
       style={bgStyle}
     >
       {hasBackgroundImage && (
-        <div className="absolute inset-0 bg-black/30 rounded-xl" />
+        <div className="absolute inset-0 bg-black/10 rounded-xl" />
       )}
-      <div className="relative z-10 flex items-start justify-between mb-4">
-        <span className="text-lg font-bold opacity-90">{storeName}</span>
-        <span className="px-2 py-1 text-xs rounded bg-white/20">
-          {expireDays ? `D-${expireDays}` : "무기한"}
-        </span>
-      </div>
-      <div className="relative z-10 flex items-end justify-between mt-auto">
-        <div>
-          <p className="mb-1 text-xs opacity-80">목표</p>
-          <p className="text-2xl font-bold">0 / {goalStampCount}</p>
-        </div>
-        <Coffee className="absolute w-16 h-16 text-white/20 -right-4 -bottom-4" />
-      </div>
+
+      {/* 단색 카드: 시그니처 고양이 장식 */}
+      {!hasBackgroundImage && (
+        <>
+          <div
+            className="absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-[0.08]"
+            style={{ background: 'radial-gradient(circle, white 0%, transparent 70%)' }}
+          />
+          <img
+            src="/image/cat_pace.png"
+            alt=""
+            aria-hidden="true"
+            className="absolute -right-6 -bottom-6 opacity-[0.07] w-40 h-40 object-cover -rotate-12"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/[0.08] to-transparent" />
+        </>
+      )}
     </div>
   );
 }
 
 export function StoreDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { storeId } = useParams<{ storeId: string }>();
-  const [storeDetailTab, setStoreDetailTab] = useState<TabType>("cards");
+  const locationMessage = (location.state as { message?: string } | null)?.message ?? null;
+  const [successMessage, setSuccessMessage] = useState<string | null>(locationMessage);
 
   const storeIdNum = Number(storeId);
+
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
+    open: false,
+    title: "",
+    description: "",
+    variant: "default",
+    onConfirm: () => {},
+  });
+
+  const openConfirm = (opts: Omit<ConfirmDialogState, "open">) =>
+    setConfirmDialog({ ...opts, open: true });
+  const closeConfirm = () =>
+    setConfirmDialog((prev) => ({ ...prev, open: false }));
 
   // API Hooks
   const {
@@ -141,6 +172,16 @@ export function StoreDetailPage() {
   });
   const deleteStampCard = useDeleteStampCard();
   const updateStatus = useUpdateStampCardStatus();
+  const deleteStore = useDeleteStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // 성공 메시지 자동 숨김 + history state 정리
+  useEffect(() => {
+    if (!successMessage) return;
+    window.history.replaceState({}, "");
+    const timer = setTimeout(() => setSuccessMessage(null), 5000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
 
   const stampCards = stampCardsData?.content ?? [];
   const activeCard = stampCards.find((c) => c.status === "ACTIVE");
@@ -179,16 +220,6 @@ export function StoreDetailPage() {
 
   const archivedCards = stampCards.filter((c) => c.status !== "ACTIVE");
 
-  const handleTabClick = (tab: TabType) => {
-    if (tab === "history") {
-      navigate(`/owner/stores/${storeId}/history`);
-    } else if (tab === "migrations") {
-      navigate(`/owner/stores/${storeId}/migrations`);
-    } else {
-      setStoreDetailTab(tab);
-    }
-  };
-
   const getStatusBadge = (status: StampCardStatus) => {
     switch (status) {
       case "DRAFT":
@@ -221,116 +252,184 @@ export function StoreDetailPage() {
   };
 
   const handleDeleteCard = (stampCardId: number) => {
-    if (confirm("정말로 이 스탬프 카드를 삭제하시겠습니까?")) {
-      deleteStampCard.mutate({ storeId: storeIdNum, stampCardId });
-    }
+    openConfirm({
+      title: "스탬프 카드 삭제",
+      description: "정말로 이 스탬프 카드를 삭제하시겠습니까?",
+      variant: "destructive",
+      onConfirm: () => {
+        closeConfirm();
+        deleteStampCard.mutate(
+          { storeId: storeIdNum, stampCardId },
+          {
+            onSuccess: () => {
+              kkookkToast.success("스탬프 카드가 삭제되었습니다");
+            },
+            onError: (err) => {
+              kkookkToast.error("삭제 실패", { description: err.message });
+            },
+          }
+        );
+      },
+    });
   };
 
-  const handleStatusChange = async (stampCardId: number, status: StampCardStatus) => {
+  const handleStatusChange = (stampCardId: number, status: StampCardStatus) => {
     const labels: Record<string, string> = {
       ACTIVE: "게시",
-      PAUSED: "일시정지",
       ARCHIVED: "보관",
       DRAFT: "초안으로 변경",
     };
-    if (!confirm(`이 스탬프 카드를 "${labels[status]}" 상태로 변경하시겠습니까?`)) {
-      return;
-    }
 
-    try {
-      await updateStatus.mutateAsync({ storeId: storeIdNum, stampCardId, status });
-    } catch (err) {
-      if (
-        status === "ACTIVE" &&
-        isAxiosError(err) &&
-        err.response?.status === 409 &&
-        activeCard
-      ) {
-        if (
-          confirm(
-            `현재 활성화된 "${activeCard.title}" 카드를 비활성화하고\n이 카드를 게시하시겠습니까?`
-          )
-        ) {
+    // 활성화 요청 + 이미 활성 카드가 있으면 → 교체 모달 1번만 표시
+    if (status === "ACTIVE" && activeCard) {
+      openConfirm({
+        title: "활성 카드 교체",
+        description: `현재 활성화된 "${activeCard.title}" 카드를 보관하고\n이 카드를 게시하시겠습니까?`,
+        variant: "info",
+        onConfirm: async () => {
+          closeConfirm();
           try {
             await updateStatus.mutateAsync({
               storeId: storeIdNum,
               stampCardId: activeCard.id,
-              status: "PAUSED",
+              status: "ARCHIVED",
             });
             await updateStatus.mutateAsync({
               storeId: storeIdNum,
               stampCardId,
               status: "ACTIVE",
             });
-          } catch (retryErr) {
-            alert(
-              `상태 변경 실패: ${retryErr instanceof Error ? retryErr.message : "알 수 없는 오류"}`
-            );
+            kkookkToast.success("활성 카드가 교체되었습니다");
+          } catch (err) {
+            kkookkToast.error("상태 변경 실패", {
+              description: err instanceof Error ? err.message : "알 수 없는 오류",
+            });
           }
-        }
-      } else {
-        alert(`상태 변경 실패: ${err instanceof Error ? err.message : "알 수 없는 오류"}`);
-      }
+        },
+      });
+      return;
     }
+
+    openConfirm({
+      title: "상태 변경",
+      description: `이 스탬프 카드를 "${labels[status]}" 상태로 변경하시겠습니까?`,
+      variant: "default",
+      onConfirm: async () => {
+        closeConfirm();
+        try {
+          await updateStatus.mutateAsync({ storeId: storeIdNum, stampCardId, status });
+          kkookkToast.success(`스탬프 카드가 "${labels[status]}" 상태로 변경되었습니다`);
+        } catch (err) {
+          kkookkToast.error("상태 변경 실패", {
+            description: err instanceof Error ? err.message : "알 수 없는 오류",
+          });
+        }
+      },
+    });
   };
 
   const handleEditCard = (stampCardId: number) => {
     navigate(`/owner/stores/${storeId}/stamp-cards/${stampCardId}/edit`);
   };
 
+  const handleDeleteStore = () => {
+    deleteStore.mutate(storeIdNum, {
+      onSuccess: () => {
+        navigate("/owner/stores", {
+          state: { message: "매장이 삭제되었습니다." },
+        });
+      },
+      onError: () => {
+        setShowDeleteConfirm(false);
+      },
+    });
+  };
+
   return (
     <div className="flex flex-col h-full">
+      {/* 성공 메시지 토스트 */}
+      {successMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-5 py-3 shadow-lg">
+          <CheckCircle size={18} className="shrink-0 text-green-600" />
+          <span className="text-sm font-medium text-green-800">{successMessage}</span>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="shrink-0 text-green-400 hover:text-green-600"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
       {/* 헤더 */}
       <div className="px-8 py-6 bg-white border-b border-slate-200">
-        <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate("/owner/stores")}
-            className="p-2 -ml-2 transition-colors rounded-full text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-50"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <div>
-            <h2 className="text-2xl font-bold text-kkookk-navy">
-              {store.name}
-            </h2>
-            <p className="flex items-center gap-1 text-sm text-kkookk-steel">
-              <MapPin size={12} /> {store.address || "주소 미등록"}
-            </p>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/owner/stores")}
+              className="p-2 -ml-2 transition-colors rounded-full text-kkookk-steel hover:text-kkookk-navy hover:bg-slate-50"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-kkookk-navy">
+                  {store.name}
+                </h2>
+                {!store.placeRef && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-amber-50 text-amber-600 border border-amber-200">
+                    장소 미연동
+                  </span>
+                )}
+              </div>
+              <p className="flex items-center gap-1 text-sm text-kkookk-steel">
+                <MapPin size={12} /> {store.address || "주소 미등록"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {store.status !== "SUSPENDED" && store.status !== "DELETED" && (
+              <button
+                onClick={() => navigate(`/owner/stores/${storeId}/edit`)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50 transition-colors"
+              >
+                <Pencil size={16} /> 매장 정보 수정
+              </button>
+            )}
+            {store.status !== "DELETED" && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+              >
+                <Trash2 size={16} /> 삭제
+              </button>
+            )}
           </div>
         </div>
 
+        {/* Store Status Banner */}
+        {store.status === "DRAFT" && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 text-sm border rounded-lg bg-gray-50 border-gray-200 text-gray-700">
+            <AlertCircle size={18} />
+            <div>
+              <p className="font-bold">승인 대기 중</p>
+              <p className="text-xs text-gray-500">운영팀에 문의하여 매장 승인을 요청하세요.</p>
+            </div>
+          </div>
+        )}
+        {store.status === "SUSPENDED" && (
+          <div className="flex items-center gap-3 px-4 py-3 mb-4 text-sm border rounded-lg bg-red-50 border-red-200 text-red-700">
+            <AlertCircle size={18} />
+            <p className="font-bold">관리자에 의해 정지된 매장입니다</p>
+          </div>
+        )}
+
         {/* 탭 */}
-        <div className="flex gap-1">
-          <button
-            onClick={() => handleTabClick("cards")}
-            className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors ${
-              storeDetailTab === "cards"
-                ? "bg-kkookk-navy text-white"
-                : "text-kkookk-steel hover:bg-slate-50"
-            }`}
-          >
-            스탬프 카드 관리
-          </button>
-          <button
-            onClick={() => handleTabClick("history")}
-            className="px-4 py-2 text-sm font-bold transition-colors rounded-lg text-kkookk-steel hover:bg-slate-50"
-          >
-            적립/사용 내역
-          </button>
-          <button
-            onClick={() => handleTabClick("migrations")}
-            className="px-4 py-2 text-sm font-bold transition-colors rounded-lg text-kkookk-steel hover:bg-slate-50"
-          >
-            전환 신청 관리
-          </button>
-        </div>
+        <StoreTabBar storeId={storeIdNum} activeTab="cards" />
       </div>
 
       {/* 카드 관리 탭 컨텐츠 */}
       <div className="flex-1 overflow-y-auto">
-        {storeDetailTab === "cards" && (
-          <>
-            {cardsLoading ? (
+        {cardsLoading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader2 className="w-8 h-8 animate-spin text-kkookk-indigo" />
               </div>
@@ -366,12 +465,9 @@ export function StoreDetailPage() {
                     <div className="flex items-center gap-8 p-6 transition-shadow bg-white border shadow-sm rounded-2xl border-slate-200 hover:shadow-md">
                       {/* 카드 미리보기 */}
                       <ActiveCardPreview
-                        storeName={store.name}
                         designType={activeCard.designType}
                         designJson={activeCardDetail?.designJson ?? null}
                         designLoading={activeCardDetailLoading}
-                        expireDays={activeCard.expireDays}
-                        goalStampCount={activeCard.goalStampCount}
                       />
 
                       {/* 카드 정보 */}
@@ -425,14 +521,6 @@ export function StoreDetailPage() {
                           className="flex items-center gap-2 px-4 py-2 text-sm font-bold border rounded-lg border-slate-200 text-kkookk-navy hover:bg-slate-50"
                         >
                           <BarChart3 size={16} /> 통계
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleStatusChange(activeCard.id, "PAUSED")
-                          }
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-yellow-700 border border-yellow-200 rounded-lg hover:bg-yellow-50"
-                        >
-                          <Pause size={16} /> 일시정지
                         </button>
                       </div>
                     </div>
@@ -500,7 +588,7 @@ export function StoreDetailPage() {
                             </td>
                             <td className="p-4 pr-6 text-right">
                               <div className="flex justify-end gap-2 transition-opacity opacity-50 group-hover:opacity-100">
-                                {(card.status === "DRAFT" || card.status === "PAUSED") && (
+                                {(card.status === "DRAFT" || card.status === "ARCHIVED") && (
                                   <button
                                     onClick={() =>
                                       handleStatusChange(card.id, "ACTIVE")
@@ -518,15 +606,13 @@ export function StoreDetailPage() {
                                 >
                                   <Edit size={16} />
                                 </button>
-                                {card.status === "DRAFT" && (
-                                  <button
-                                    onClick={() => handleDeleteCard(card.id)}
-                                    className="p-2 rounded-lg text-kkookk-steel hover:text-red-600 hover:bg-red-50"
-                                    title="삭제"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => handleDeleteCard(card.id)}
+                                  className="p-2 rounded-lg text-kkookk-steel hover:text-red-600 hover:bg-red-50"
+                                  title="삭제"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -547,9 +633,70 @@ export function StoreDetailPage() {
                 </div>
               </div>
             )}
-          </>
-        )}
       </div>
+
+      {/* 확인 다이얼로그 (상태 변경, 카드 삭제 등) */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => !open && closeConfirm()}>
+        <DialogContent showClose={false} className="max-w-sm mx-4">
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+            <DialogDescription className="whitespace-pre-line">
+              {confirmDialog.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className={confirmDialog.variant === "info" ? "border-kkookk-indigo text-kkookk-indigo hover:bg-blue-50" : undefined}
+              onClick={closeConfirm}
+            >
+              취소
+            </Button>
+            <Button
+              variant={confirmDialog.variant === "destructive" ? "destructive" : confirmDialog.variant === "info" ? "secondary" : "navy"}
+              onClick={confirmDialog.onConfirm}
+            >
+              확인
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 매장 삭제 확인 모달 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={22} className="mt-0.5 shrink-0 text-red-500" />
+              <div>
+                <h3 className="font-bold text-kkookk-navy">
+                  매장을 삭제하시겠습니까?
+                </h3>
+                <p className="mt-1.5 text-sm text-kkookk-steel">
+                  삭제된 매장은 복구할 수 없으며, 관련 스탬프 카드도 더 이상 운영되지 않습니다.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleteStore.isPending}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-kkookk-steel hover:bg-slate-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDeleteStore}
+                disabled={deleteStore.isPending}
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleteStore.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+                {deleteStore.isPending ? "삭제 중..." : "삭제"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

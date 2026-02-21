@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise3">
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.06"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Brighter warm kraft paper -->
+  <rect width="1240" height="790" fill="#EDE3D0"/>
+  <!-- Light paper texture -->
+  <rect width="1240" height="790" filter="url(#noise3)" opacity="0.25"/>
+  <!-- Double border frame -->
+  <rect x="40" y="40" width="1160" height="710" fill="none" stroke="#6B5A4A" stroke-width="2.5"/>
+  <rect x="52" y="52" width="1136" height="686" fill="none" stroke="#6B5A4A" stroke-width="0.8" opacity="0.4"/>
+  <!-- Corner ornaments -->
+  <g fill="none" stroke="#6B5A4A" stroke-width="1.2">
+    <path d="M60,60 L90,60 M60,60 L60,90"/>
+    <path d="M1180,60 L1150,60 M1180,60 L1180,90"/>
+    <path d="M60,730 L90,730 M60,730 L60,700"/>
+    <path d="M1180,730 L1150,730 M1180,730 L1180,700"/>
+  </g>
+  <!-- Vintage woodcut coffee beans -->
+  <g transform="translate(620, 280)" fill="#6B5A4A" opacity="0.55">
+    <ellipse cx="-25" cy="0" rx="22" ry="30" transform="rotate(-15)"/>
+    <path d="M-25,-28 Q-20,-5 -25,28" fill="#EDE3D0" stroke="#EDE3D0" stroke-width="2"/>
+    <ellipse cx="25" cy="0" rx="22" ry="30" transform="rotate(15)"/>
+    <path d="M25,-28 Q30,-5 25,28" fill="#EDE3D0" stroke="#EDE3D0" stroke-width="2"/>
+  </g>
+  <!-- Letterpress style typography -->
+  <text x="620" y="420" text-anchor="middle" fill="#6B5A4A" font-family="'Georgia', serif" font-size="20" letter-spacing="10">— E S T . —</text>
+  <text x="620" y="500" text-anchor="middle" fill="#5A4A3A" font-family="'Georgia', serif" font-size="56" font-weight="700" letter-spacing="4">구활자인쇄소</text>
+  <!-- Decorative line -->
+  <line x1="420" y1="540" x2="820" y2="540" stroke="#6B5A4A" stroke-width="1" opacity="0.35"/>
+  <text x="620" y="575" text-anchor="middle" fill="#6B5A4A" font-family="'Georgia', serif" font-size="16" letter-spacing="8" opacity="0.5">VINTAGE ROASTERY</text>
+</svg>

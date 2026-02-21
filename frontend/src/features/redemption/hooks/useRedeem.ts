@@ -4,36 +4,19 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createRedeemSession, completeRedeemSession } from '../api/redeemApi';
-import type { CreateRedeemSessionRequest } from '@/types/api';
+import { redeemReward } from '../api/redeemApi';
+import type { RedeemRewardRequest } from '@/types/api';
 
 // =============================================================================
-// Create Redeem Session Hook (StepUp Required)
+// Redeem Reward Hook
 // =============================================================================
 
-export function useCreateRedeemSession() {
+export function useRedeemReward() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateRedeemSessionRequest) => createRedeemSession(data),
+    mutationFn: (data: RedeemRewardRequest) => redeemReward(data),
     onSuccess: () => {
-      // Invalidate wallet rewards to reflect status change
-      queryClient.invalidateQueries({ queryKey: ['wallet', 'rewards'] });
-    },
-  });
-}
-
-// =============================================================================
-// Complete Redeem Session Hook
-// =============================================================================
-
-export function useCompleteRedeemSession() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (sessionId: number) => completeRedeemSession(sessionId),
-    onSuccess: () => {
-      // Invalidate wallet rewards and redeem history
       queryClient.invalidateQueries({ queryKey: ['wallet', 'rewards'] });
       queryClient.invalidateQueries({ queryKey: ['wallet', 'redeemHistory'] });
     },

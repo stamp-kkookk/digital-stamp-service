@@ -1,8 +1,8 @@
 # KKOOKK Project Guide
 
 ## Product
-디지털 스탬프/리워드 SaaS. 3 사용자: Customer(모바일 지갑), Owner(백오피스), Terminal(승인 태블릿).
-POS 미연동. 승인 기반: Customer 요청 -> Terminal 승인.
+디지털 스탬프/리워드 SaaS. 2 사용자: Customer(모바일 지갑), Owner(백오피스).
+POS 미연동. 승인 기반: Customer 요청 -> Owner 백오피스 승인.
 
 ## Stack
 - backend/ : Spring Boot 3.5, Java 17, JPA, MySQL 8.0 (port 8080)

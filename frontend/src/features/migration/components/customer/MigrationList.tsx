@@ -4,14 +4,14 @@
  */
 
 import { Badge } from "@/components/ui/Badge";
-import { formatShortDate } from "@/lib/utils/format";
-import type { MigrationListItemResponse, StampMigrationStatus } from "@/types/api";
-import { useState } from "react";
-import { ChevronLeft, Plus, FileText, Loader2 } from "lucide-react";
-import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
 import { useMigrationList } from "@/features/migration/hooks/useMigration";
-import { isStepUpValid } from "@/lib/api/tokenManager";
-import { StepUpVerify } from "@/components/shared/StepUpVerify";
+import { useCustomerNavigate } from "@/hooks/useCustomerNavigate";
+import { formatShortDate } from "@/lib/utils/format";
+import type {
+  MigrationListItemResponse,
+  StampMigrationStatus,
+} from "@/types/api";
+import { ChevronLeft, FileText, Loader2, Plus } from "lucide-react";
 
 function getStatusBadge(status: StampMigrationStatus) {
   switch (status) {
@@ -28,15 +28,14 @@ function getStatusBadge(status: StampMigrationStatus) {
 
 export function MigrationList() {
   const { customerNavigate } = useCustomerNavigate();
-  const [stepUpValid, setStepUpValid] = useState(isStepUpValid());
   const { data: migrations, isLoading } = useMigrationList();
 
   const items: MigrationListItemResponse[] = migrations ?? [];
 
   return (
-    <div className="flex flex-col h-full pt-12">
+    <div className="flex flex-col h-full pt-6">
       {/* 헤더 */}
-      <div className="px-6 py-4 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-between sticky top-0 z-10 -mt-12 pt-12">
+      <div className="px-6 py-3 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex items-center justify-between sticky top-0 z-10 -mt-6 pt-6">
         <div className="flex items-center">
           <button
             onClick={() => customerNavigate("/wallet")}
@@ -49,24 +48,18 @@ export function MigrationList() {
             종이 스탬프 전환
           </h1>
         </div>
-        {stepUpValid && (
-          <button
-            onClick={() => customerNavigate("/migrations/new")}
-            className="flex items-center justify-center w-8 h-8 text-white transition-colors duration-100 bg-gray-500 rounded-lg hover:bg-kkookk-orange-500"
-            aria-label="새 신청"
-          >
-            <Plus size={20} />
-          </button>
-        )}
+        <button
+          onClick={() => customerNavigate("/migrations/new")}
+          className="flex items-center justify-center w-8 h-8 text-white transition-colors duration-100 bg-gray-500 rounded-lg hover:bg-kkookk-orange-500"
+          aria-label="새 신청"
+        >
+          <Plus size={20} />
+        </button>
       </div>
 
       {/* 목록 */}
       <div className="p-6 space-y-4 overflow-y-auto">
-        {!stepUpValid ? (
-          <div className="flex items-center justify-center mt-20">
-            <StepUpVerify onVerified={() => setStepUpValid(true)} />
-          </div>
-        ) : isLoading ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center mt-20 text-kkookk-steel">
             <Loader2 size={32} className="animate-spin opacity-40 mb-4" />
             <p>내역을 불러오는 중...</p>
@@ -80,25 +73,38 @@ export function MigrationList() {
           items.map((item) => (
             <div
               key={item.id}
-              className="p-5 bg-white border shadow-sm rounded-2xl border-slate-100"
+              role="button"
+              tabIndex={0}
+              onClick={() => customerNavigate(`/migrations/${item.id}`)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && customerNavigate(`/migrations/${item.id}`)
+              }
+              className="p-5 bg-white border shadow-sm rounded-2xl border-slate-100 cursor-pointer active:scale-[0.99] transition-transform"
             >
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold text-kkookk-navy">{item.storeName}</h3>
                 {getStatusBadge(item.status)}
               </div>
               <div className="flex items-end justify-between">
-                <p className="text-sm text-kkookk-steel">
-                  신청 수량:{" "}
-                  <span className="font-bold text-kkookk-navy">
-                    {item.claimedStampCount}개
-                  </span>
+                <div>
+                  <p className="text-sm text-kkookk-steel">
+                    신청 수량:{" "}
+                    <span className="font-bold text-kkookk-navy">
+                      {item.claimedStampCount}개
+                    </span>
+                  </p>
+                </div>
+                <p className="text-end text-xs text-slate-400 shrink-0 ml-2">
                   {item.approvedStampCount != null && (
-                    <span className="text-xs text-slate-400 ml-2">
-                      (승인: {item.approvedStampCount}개)
+                    <span className="mb-2 line-clamp-2 text-xs text-green-700">
+                      승인: {item.approvedStampCount}개
                     </span>
                   )}
-                </p>
-                <p className="text-xs text-slate-400">
+                  {item.status === "REJECTED" && item.rejectReason && (
+                    <p className="mb-2 text-xs text-red-500 mt-1 line-clamp-2">
+                      반려 사유: {item.rejectReason}
+                    </p>
+                  )}
                   {formatShortDate(new Date(item.requestedAt))}
                 </p>
               </div>

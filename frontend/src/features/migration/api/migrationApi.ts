@@ -18,7 +18,7 @@ import type {
 } from '@/types/api';
 
 // =============================================================================
-// Customer Migration API (StepUp Required)
+// Customer Migration API
 // =============================================================================
 
 export async function createMigration(

@@ -28,7 +28,7 @@ public class StorePublicService {
                         .findById(storeId)
                         .orElseThrow(() -> new StoreNotFoundException("매장을 찾을 수 없습니다"));
 
-        if (!store.getStatus().equals(StoreStatus.ACTIVE)) {
+        if (!store.getStatus().isOperational()) {
             throw new StoreInactiveException("해당 매장은 현재 이용할 수 없습니다");
         }
 
@@ -40,7 +40,7 @@ public class StorePublicService {
     }
 
     public List<StoreListItemResponse> getAllActiveStores() {
-        return storeRepository.findByStatus(StoreStatus.ACTIVE).stream()
+        return storeRepository.findByStatus(StoreStatus.LIVE).stream()
                 .map(StoreListItemResponse::from)
                 .toList();
     }

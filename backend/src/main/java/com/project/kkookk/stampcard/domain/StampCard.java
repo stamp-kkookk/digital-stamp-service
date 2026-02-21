@@ -145,12 +145,6 @@ public class StampCard extends BaseTimeEntity {
         this.designJson = designJson;
     }
 
-    public void updatePartial(String title, StampCardDesignType designType, String designJson) {
-        this.title = title;
-        this.designType = designType != null ? designType : this.designType;
-        this.designJson = designJson;
-    }
-
     public static class Builder {
 
         private Long storeId;

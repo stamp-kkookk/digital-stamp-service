@@ -99,6 +99,7 @@ class StampCardControllerTest {
                         StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
+                        false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
@@ -228,6 +229,7 @@ class StampCardControllerTest {
                         StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
+                        false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
@@ -286,6 +288,7 @@ class StampCardControllerTest {
                         StampCardDesignType.IMAGE,
                         "{\"theme\": \"new\"}",
                         storeId,
+                        false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
@@ -324,6 +327,7 @@ class StampCardControllerTest {
                         StampCardDesignType.COLOR,
                         "{\"theme\": \"coffee\"}",
                         storeId,
+                        false,
                         LocalDateTime.now(),
                         LocalDateTime.now());
 

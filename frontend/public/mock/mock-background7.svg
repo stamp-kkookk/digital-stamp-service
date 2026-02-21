@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise7">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.1"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Deep charcoal base -->
+  <rect width="1240" height="790" fill="#1A1A1A"/>
+  <!-- Noise texture -->
+  <rect width="1240" height="790" filter="url(#noise7)" opacity="0.3"/>
+  <!-- Gold line frame -->
+  <rect x="50" y="50" width="1140" height="690" fill="none" stroke="#C9A96E" stroke-width="1" opacity="0.3"/>
+  <!-- Geometric diamond pattern -->
+  <g fill="none" stroke="#C9A96E" stroke-width="0.8" opacity="0.1">
+    <path d="M620,100 L680,160 L620,220 L560,160Z"/>
+    <path d="M620,60 L720,160 L620,260 L520,160Z"/>
+    <path d="M200,600 L240,640 L200,680 L160,640Z"/>
+    <path d="M1040,600 L1080,640 L1040,680 L1000,640Z"/>
+  </g>
+  <!-- Gold monoline cocktail glass -->
+  <g transform="translate(620, 310)" fill="none" stroke="#C9A96E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Glass bowl -->
+    <path d="M-45,-45 L0,25 L45,-45"/>
+    <!-- Liquid surface -->
+    <path d="M-35,-35 Q0,-25 35,-35" stroke-width="1" opacity="0.5"/>
+    <!-- Stem -->
+    <line x1="0" y1="25" x2="0" y2="60"/>
+    <!-- Base -->
+    <line x1="-25" y1="60" x2="25" y2="60"/>
+    <!-- Garnish - small diamond -->
+    <path d="M40,-42 L48,-34 L40,-26 L32,-34Z" fill="#C9A96E" opacity="0.4"/>
+  </g>
+  <!-- Brand name -->
+  <text x="620" y="490" text-anchor="middle" fill="#C9A96E" font-family="'Georgia', serif" font-size="80" font-weight="700" letter-spacing="20">NOIR</text>
+  <!-- Subtitle -->
+  <text x="620" y="535" text-anchor="middle" fill="#C9A96E" font-family="sans-serif" font-size="14" letter-spacing="8" opacity="0.5">BAR &amp; LOUNGE</text>
+</svg>

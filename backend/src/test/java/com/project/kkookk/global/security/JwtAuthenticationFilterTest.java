@@ -75,75 +75,6 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("유효한 JWT 토큰으로 인증 성공 - TERMINAL 토큰")
-    void doFilterInternal_Success_ValidTerminalToken() throws ServletException, IOException {
-        // given
-        String token = "valid.jwt.token";
-        String bearerToken = "Bearer " + token;
-        Long ownerId = 1L;
-        String email = "owner@example.com";
-        Long storeId = 10L;
-
-        request.addHeader("Authorization", bearerToken);
-
-        given(jwtUtil.validateToken(token)).willReturn(true);
-        given(jwtUtil.getTokenType(token)).willReturn(TokenType.TERMINAL);
-        given(jwtUtil.getSubjectId(token)).willReturn(ownerId);
-        given(jwtUtil.getEmail(token)).willReturn(email);
-        given(jwtUtil.getStoreId(token)).willReturn(storeId);
-
-        // when
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        // then
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
-        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .isInstanceOf(TerminalPrincipal.class);
-
-        TerminalPrincipal principal =
-                (TerminalPrincipal)
-                        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        assertThat(principal.getOwnerId()).isEqualTo(ownerId);
-        assertThat(principal.getEmail()).isEqualTo(email);
-        assertThat(principal.getStoreId()).isEqualTo(storeId);
-        assertThat(principal.getAuthorities()).hasSize(1);
-
-        verify(filterChain).doFilter(request, response);
-    }
-
-    @Test
-    @DisplayName("유효한 JWT 토큰으로 인증 성공 - STEPUP 토큰")
-    void doFilterInternal_Success_ValidStepUpToken() throws ServletException, IOException {
-        // given
-        String token = "valid.jwt.token";
-        String bearerToken = "Bearer " + token;
-        Long walletId = 1L;
-
-        request.addHeader("Authorization", bearerToken);
-
-        given(jwtUtil.validateToken(token)).willReturn(true);
-        given(jwtUtil.getTokenType(token)).willReturn(TokenType.STEPUP);
-        given(jwtUtil.getSubjectId(token)).willReturn(walletId);
-
-        // when
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        // then
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
-        assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                .isInstanceOf(CustomerPrincipal.class);
-
-        CustomerPrincipal principal =
-                (CustomerPrincipal)
-                        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        assertThat(principal.getWalletId()).isEqualTo(walletId);
-        assertThat(principal.isStepUp()).isTrue();
-        assertThat(principal.getAuthorities()).hasSize(2); // ROLE_CUSTOMER + ROLE_STEPUP
-
-        verify(filterChain).doFilter(request, response);
-    }
-
-    @Test
     @DisplayName("유효한 JWT 토큰으로 인증 성공 - CUSTOMER 토큰")
     void doFilterInternal_Success_ValidCustomerToken() throws ServletException, IOException {
         // given
@@ -169,8 +100,7 @@ class JwtAuthenticationFilterTest {
                 (CustomerPrincipal)
                         SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         assertThat(principal.getWalletId()).isEqualTo(walletId);
-        assertThat(principal.isStepUp()).isFalse();
-        assertThat(principal.getAuthorities()).hasSize(1); // ROLE_CUSTOMER only
+        assertThat(principal.getAuthorities()).hasSize(1); // ROLE_CUSTOMER
 
         verify(filterChain).doFilter(request, response);
     }

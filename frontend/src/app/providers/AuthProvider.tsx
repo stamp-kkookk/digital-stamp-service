@@ -15,10 +15,7 @@ import {
   getAuthToken,
   getTokenType,
   getUserInfo,
-  isStepUpValid,
-  getStepUpRemainingSeconds,
   clearAuthToken,
-  clearStepUpToken,
   type TokenType,
   type UserInfo,
 } from '@/lib/api/tokenManager';
@@ -32,14 +29,11 @@ interface AuthState {
   isLoading: boolean;
   tokenType: TokenType | null;
   user: UserInfo | null;
-  hasStepUp: boolean;
-  stepUpRemainingSeconds: number;
 }
 
 interface AuthContextValue extends AuthState {
   logout: () => void;
   refreshAuthState: () => void;
-  clearStepUp: () => void;
 }
 
 // =============================================================================
@@ -62,8 +56,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading: true,
     tokenType: null,
     user: null,
-    hasStepUp: false,
-    stepUpRemainingSeconds: 0,
   });
 
   // Refresh auth state from localStorage
@@ -71,16 +63,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const token = getAuthToken();
     const tokenType = getTokenType();
     const user = getUserInfo();
-    const hasStepUp = isStepUpValid();
-    const stepUpRemainingSeconds = getStepUpRemainingSeconds();
 
     setState({
       isAuthenticated: !!token,
       isLoading: false,
       tokenType,
       user,
-      hasStepUp,
-      stepUpRemainingSeconds,
     });
   }, []);
 
@@ -89,42 +77,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const token = getAuthToken();
     const tokenType = getTokenType();
     const user = getUserInfo();
-    const hasStepUp = isStepUpValid();
-    const stepUpRemainingSeconds = getStepUpRemainingSeconds();
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({
       isAuthenticated: !!token,
       isLoading: false,
       tokenType,
       user,
-      hasStepUp,
-      stepUpRemainingSeconds,
     });
   }, []);
-
-  // Periodically check StepUp token expiry
-  useEffect(() => {
-    if (!state.hasStepUp) return;
-
-    const interval = setInterval(() => {
-      const remaining = getStepUpRemainingSeconds();
-      if (remaining <= 0) {
-        clearStepUpToken();
-        setState((prev) => ({
-          ...prev,
-          hasStepUp: false,
-          stepUpRemainingSeconds: 0,
-        }));
-      } else {
-        setState((prev) => ({
-          ...prev,
-          stepUpRemainingSeconds: remaining,
-        }));
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [state.hasStepUp]);
 
   // Logout handler
   const logout = useCallback(() => {
@@ -134,26 +95,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading: false,
       tokenType: null,
       user: null,
-      hasStepUp: false,
-      stepUpRemainingSeconds: 0,
     });
-  }, []);
-
-  // Clear StepUp token
-  const clearStepUp = useCallback(() => {
-    clearStepUpToken();
-    setState((prev) => ({
-      ...prev,
-      hasStepUp: false,
-      stepUpRemainingSeconds: 0,
-    }));
   }, []);
 
   const value: AuthContextValue = {
     ...state,
     logout,
     refreshAuthState,
-    clearStepUp,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -163,6 +111,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 // Hook
 // =============================================================================
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (!context) {

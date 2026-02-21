@@ -13,12 +13,18 @@ import {
   ReviewSection,
   SolvingSection,
 } from "@/features/landing/components";
+import { ContactModal } from "@/features/landing/components/ContactModal";
 import { LandingHeader } from "@/features/landing/components/LandingHeader";
 import { ScrollIndicator } from "@/features/landing/components/ScrollIndicator";
 import { FloatingConsultButton } from "@/features/landing/components/FloatingConsultButton";
 import { ScrollToTop } from "@/components/shared/ScrollToTop";
+import { useCallback, useState } from "react";
 
 export function LandingPage() {
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const openContact = useCallback(() => setIsContactOpen(true), []);
+  const closeContact = useCallback(() => setIsContactOpen(false), []);
+
   return (
     <>
       <ScrollToTop />
@@ -30,7 +36,10 @@ export function LandingPage() {
         <ScrollIndicator />
 
         {/* Floating Consult Button */}
-        <FloatingConsultButton />
+        <FloatingConsultButton onOpenContact={openContact} />
+
+        {/* Contact Modal */}
+        <ContactModal isOpen={isContactOpen} onClose={closeContact} />
 
         {/* Main Content - Scroll Snap Container (스크롤바 숨김) */}
         <main className="snap-y snap-proximity overflow-y-auto h-screen [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -39,7 +48,7 @@ export function LandingPage() {
           <SolvingSection />
           <GuaranteeSection />
           <ReviewSection />
-          <FAQSection />
+          <FAQSection onOpenContact={openContact} />
           {/* Footer - Inside snap container for smooth scrolling */}
           <FooterSection />
         </main>

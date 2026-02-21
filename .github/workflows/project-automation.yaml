@@ -6,7 +6,7 @@ on:
 
 env:
   ORGANIZATION: stamp-kkookk
-  PROJECT_NUMBER: 2
+  PROJECT_NUMBER: 6
 
 jobs:
   move-to-review:

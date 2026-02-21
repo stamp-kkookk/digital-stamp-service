@@ -76,4 +76,28 @@ public interface CustomerIssuanceApi {
     ResponseEntity<IssuanceRequestResponse> getIssuanceRequest(
             @Parameter(description = "요청 ID", example = "1") @PathVariable Long id,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
+
+    @Operation(summary = "적립 요청 취소", description = "대기 중인 적립 요청을 고객이 취소합니다. PENDING 상태에서만 가능")
+    @ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "취소 성공",
+                content =
+                        @Content(schema = @Schema(implementation = IssuanceRequestResponse.class))),
+        @ApiResponse(
+                responseCode = "403",
+                description = "본인 요청이 아님",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "404",
+                description = "요청 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "409",
+                description = "이미 처리된 요청",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<IssuanceRequestResponse> cancelIssuanceRequest(
+            @Parameter(description = "요청 ID", example = "1") @PathVariable Long id,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 }

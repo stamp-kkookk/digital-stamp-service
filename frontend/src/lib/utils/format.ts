@@ -25,11 +25,12 @@ export function formatDate(date: Date | string | number): string {
 }
 
 /**
- * 날짜를 한국 날짜시간 형식으로 포맷 (M월 D일 HH:MM)
+ * 날짜를 한국 날짜시간 형식으로 포맷 (YYYY년 M월 D일 HH:MM)
  */
 export function formatDateTime(date: Date | string | number): string {
   const d = new Date(date);
   return d.toLocaleString('ko-KR', {
+    year: 'numeric',
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
@@ -63,11 +64,40 @@ export function formatShortDate(date: Date | string | number): string {
 }
 
 /**
- * 전화번호 마스킹 (010-1234-5678 -> 010-****-5678)
+ * 전화번호 마스킹 (010-1234-5678 -> 010-****-5678, 01012345678 -> 010-****-5678)
  */
 export function maskPhone(phone: string): string {
   if (!phone) return '010-****-0000';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length >= 10) {
+    return `${digits.slice(0, 3)}-****-${digits.slice(-4)}`;
+  }
   return phone.replace(/(\d{3})-\d{4}-(\d{4})/, '$1-****-$2');
+}
+
+/**
+ * 전화번호에서 숫자만 추출
+ */
+export function stripPhoneToDigits(phone: string): string {
+  return phone.replace(/\D/g, '');
+}
+
+/**
+ * 전화번호 자동 포맷 (3-4-4: 010-1234-5678)
+ * 입력값에서 숫자만 추출하여 하이픈 포맷으로 변환
+ */
+export function formatPhoneNumber(value: string): string {
+  const digits = stripPhoneToDigits(value);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+}
+
+/**
+ * 전화번호 입력에 숫자/하이픈/공백 외 문자가 포함되어 있는지 검사
+ */
+export function hasInvalidPhoneChars(value: string): boolean {
+  return /[^\d\s-]/.test(value);
 }
 
 /**

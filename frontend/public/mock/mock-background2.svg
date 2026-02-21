@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise2">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.08"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Sage green base -->
+  <rect width="1240" height="790" fill="#8B9D83"/>
+  <!-- Texture -->
+  <rect width="1240" height="790" filter="url(#noise2)" opacity="0.4"/>
+  <!-- Single tea leaf monoline drawing -->
+  <g transform="translate(620, 300)" fill="none" stroke="#FFF8F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+    <!-- Leaf stem -->
+    <path d="M0,80 Q-5,40 0,0 Q5,-40 -3,-70"/>
+    <!-- Leaf shape - organic curves -->
+    <path d="M0,0 Q-45,-10 -50,-45 Q-48,-75 -3,-70"/>
+    <path d="M0,0 Q40,-15 42,-50 Q38,-72 -3,-70"/>
+    <!-- Leaf veins -->
+    <path d="M0,0 Q-20,-25 -30,-50" stroke-width="1" opacity="0.5"/>
+    <path d="M0,0 Q15,-30 22,-55" stroke-width="1" opacity="0.5"/>
+  </g>
+  <!-- Brand name -->
+  <text x="620" y="500" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="28" letter-spacing="12">소요</text>
+  <text x="620" y="550" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="52" font-weight="700" letter-spacing="14">SOYO</text>
+  <!-- Subtitle -->
+  <text x="620" y="590" text-anchor="middle" fill="#FFF8F0" font-family="sans-serif" font-size="14" letter-spacing="6" opacity="0.6">T E A  H O U S E</text>
+</svg>

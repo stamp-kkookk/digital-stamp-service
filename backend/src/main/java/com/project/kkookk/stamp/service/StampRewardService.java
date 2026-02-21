@@ -24,16 +24,20 @@ public class StampRewardService {
      * 스탬프 적립 후 리워드 발급 처리
      *
      * @param walletStampCard 고객의 스탬프카드
-     * @param activeStampCard 현재 ACTIVE인 매장의 스탬프카드 정책
+     * @param linkedStampCard 고객이 적립 중인 원본 스탬프카드 (리워드 기준)
+     * @param activeStampCard 현재 ACTIVE인 매장의 스탬프카드 (완료 후 새 카드 생성용)
      * @param delta 추가되는 스탬프 수
      * @return 처리 결과 (발급된 리워드, 현재 WalletStampCard)
      */
     public StampAccumulationResult processStampAccumulation(
-            WalletStampCard walletStampCard, StampCard activeStampCard, int delta) {
+            WalletStampCard walletStampCard,
+            StampCard linkedStampCard,
+            StampCard activeStampCard,
+            int delta) {
 
         int currentCount = walletStampCard.getStampCount();
         int newTotal = currentCount + delta;
-        int goalStampCount = activeStampCard.getGoalStampCount();
+        int goalStampCount = linkedStampCard.getGoalStampCount();
 
         // 리워드 발급 개수 계산
         int rewardCount = newTotal / goalStampCount;
@@ -43,16 +47,16 @@ public class StampRewardService {
         WalletStampCard currentWalletStampCard = walletStampCard;
 
         if (rewardCount > 0) {
-            // 리워드 발급
+            // 리워드 발급 (원본 스탬프카드 기준)
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime expiresAt = calculateExpiresAt(activeStampCard, now);
+            LocalDateTime expiresAt = calculateExpiresAt(linkedStampCard, now);
 
             for (int i = 0; i < rewardCount; i++) {
                 WalletReward reward =
                         WalletReward.builder()
                                 .walletId(walletStampCard.getCustomerWalletId())
-                                .stampCardId(activeStampCard.getId())
-                                .storeId(activeStampCard.getStoreId())
+                                .stampCardId(linkedStampCard.getId())
+                                .storeId(linkedStampCard.getStoreId())
                                 .issuedAt(now)
                                 .expiresAt(expiresAt)
                                 .build();
@@ -62,7 +66,7 @@ public class StampRewardService {
             walletRewardBatchRepository.batchInsert(issuedRewards);
 
             // 기존 WalletStampCard 완료 처리
-            walletStampCard.setStampCount(goalStampCount); // 목표 달성 상태로
+            walletStampCard.setStampCount(goalStampCount);
             walletStampCard.complete();
 
             // 새 WalletStampCard 생성 (현재 ACTIVE인 StampCard 기준)

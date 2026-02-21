@@ -1,0 +1,19 @@
+# =============================================================================
+# KKOOKK Terraform Variables
+# Copy this file to terraform.tfvars and fill in the values.
+# =============================================================================
+
+aws_region    = "ap-northeast-2"
+key_pair_name = "kkookk-key" # Must be created in AWS Console first
+
+# Your IP for SSH access (find at https://checkip.amazonaws.com)
+allowed_ssh_cidrs = ["YOUR_IP/32"]
+
+# Custom domain (leave empty to use CloudFront default domain)
+domain_name    = "kkookk.com"
+route53_zone_id = "" # Fill after creating hosted zone
+
+# RDS credentials
+db_username = "kkookkuser"
+db_password = "CHANGE_ME_TO_A_STRONG_PASSWORD"
+db_name     = "kkookkdb"

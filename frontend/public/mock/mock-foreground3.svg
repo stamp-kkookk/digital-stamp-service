@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
+  <defs>
+    <!-- Filled square seal stamp (印鑑) -->
+    <symbol id="seal3f" viewBox="0 0 70 70">
+      <rect x="5" y="5" width="60" height="60" rx="3" fill="#3B2A1A" opacity="0.85"/>
+      <rect x="9" y="9" width="52" height="52" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
+      <text x="35" y="42" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="18" font-weight="700">印</text>
+    </symbol>
+    <!-- Ghost square seal stamp -->
+    <symbol id="seal3g" viewBox="0 0 70 70">
+      <rect x="5" y="5" width="60" height="60" rx="3" fill="none" stroke="#3B2A1A" stroke-width="1" opacity="0.12"/>
+      <rect x="9" y="9" width="52" height="52" rx="1" fill="none" stroke="#3B2A1A" stroke-width="0.6" opacity="0.08"/>
+      <text x="35" y="42" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="18" font-weight="700" opacity="0.1">印</text>
+    </symbol>
+  </defs>
+  <!-- Kraft paper card -->
+  <rect width="1296" height="832" rx="20" fill="#E8DCC8"/>
+  <!-- Double border -->
+  <rect x="24" y="24" width="1248" height="784" rx="0" fill="none" stroke="#3B2A1A" stroke-opacity="0.2" stroke-width="2"/>
+  <rect x="34" y="34" width="1228" height="764" rx="0" fill="none" stroke="#3B2A1A" stroke-opacity="0.1" stroke-width="1"/>
+  <!-- Title -->
+  <text x="648" y="62" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="22" letter-spacing="6">— 구활자인쇄소 적립권 —</text>
+  <text x="648" y="98" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="15" opacity="0.6">열 잔의 기록이 쌓이면 한 잔의 선물로</text>
+
+  <!-- Ink splatter dots scattered across the card -->
+  <g fill="#3B2A1A" opacity="0.06">
+    <circle cx="180" cy="150" r="2"/><circle cx="350" cy="180" r="1.5"/>
+    <circle cx="520" cy="140" r="1"/><circle cx="800" cy="170" r="2.5"/>
+    <circle cx="1050" cy="145" r="1.5"/><circle cx="250" cy="700" r="2"/>
+    <circle cx="600" cy="680" r="1.5"/><circle cx="900" cy="710" r="1"/>
+    <circle cx="1100" cy="690" r="2"/><circle cx="400" cy="450" r="1.5"/>
+    <circle cx="700" cy="500" r="1"/><circle cx="950" cy="400" r="2"/>
+  </g>
+
+  <!-- Stamp 1 (filled) - slight tilt right -->
+  <g transform="translate(143, 163) rotate(3)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 2 (filled) - slight tilt left -->
+  <g transform="translate(350, 135) rotate(-5)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 3 (filled) - almost straight, slightly larger -->
+  <g transform="translate(544, 179) rotate(1)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 4 (filled) - tilted right -->
+  <g transform="translate(771, 146) rotate(7)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 5 (filled) - slight tilt left -->
+  <g transform="translate(1002, 172) rotate(-3)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 6 (filled) - lower row, tilt right -->
+  <g transform="translate(193, 403) rotate(4)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 7 (filled) - lower row, tilted left more -->
+  <g transform="translate(420, 430) rotate(-8)">
+    <use href="#seal3f" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 8 (ghost) - lower row -->
+  <g transform="translate(642, 396) rotate(2)">
+    <use href="#seal3g" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Stamp 9 (ghost) - lower row -->
+  <g transform="translate(852, 425) rotate(-4)">
+    <use href="#seal3g" x="0" y="0" width="100" height="100"/>
+  </g>
+
+  <!-- Reward: special square seal -->
+  <g transform="translate(1040, 410) rotate(2)">
+    <rect width="110" height="110" rx="3" fill="#3B2A1A"/>
+    <rect x="5" y="5" width="100" height="100" rx="1" fill="none" stroke="#E8DCC8" stroke-width="1.2" opacity="0.6"/>
+    <text x="55" y="45" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="16" letter-spacing="1">한 잔</text>
+    <text x="55" y="72" text-anchor="middle" fill="#E8DCC8" font-family="'Georgia', serif" font-size="22" font-weight="700">증정</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="648" y="755" text-anchor="middle" fill="#3B2A1A" font-family="'Georgia', serif" font-size="14" opacity="0.35">활자처럼 한 잔 한 잔 정성을 새기다</text>
+</svg>

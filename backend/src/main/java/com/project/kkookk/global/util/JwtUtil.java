@@ -6,9 +6,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,25 +23,16 @@ public class JwtUtil {
 
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_EMAIL = "email";
-    private static final String CLAIM_STORE_ID = "storeId";
+    private static final String CLAIM_ADMIN = "admin";
 
     private final JwtProperties jwtProperties;
 
     /** Owner 백오피스용 토큰 생성 */
-    public String generateOwnerToken(Long ownerId, String email) {
+    public String generateOwnerToken(Long ownerId, String email, boolean isAdmin) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenType.OWNER.name());
         claims.put(CLAIM_EMAIL, email);
-
-        return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
-    }
-
-    /** Terminal 매장단말용 토큰 생성 */
-    public String generateTerminalToken(Long ownerId, String email, Long storeId) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenType.TERMINAL.name());
-        claims.put(CLAIM_EMAIL, email);
-        claims.put(CLAIM_STORE_ID, storeId);
+        claims.put(CLAIM_ADMIN, isAdmin);
 
         return generateToken(ownerId, claims, jwtProperties.getAccessTokenExpiration());
     }
@@ -48,14 +43,6 @@ public class JwtUtil {
         claims.put(CLAIM_TYPE, TokenType.CUSTOMER.name());
 
         return generateToken(walletId, claims, jwtProperties.getAccessTokenExpiration());
-    }
-
-    /** Customer StepUp 토큰 생성 (OTP 인증 후 민감 기능용) */
-    public String generateStepUpToken(Long walletId) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(CLAIM_TYPE, TokenType.STEPUP.name());
-
-        return generateToken(walletId, claims, jwtProperties.getStepupTokenExpiration());
     }
 
     /** 공통 토큰 생성 메서드 */
@@ -88,16 +75,17 @@ public class JwtUtil {
         return Long.parseLong(claims.getSubject());
     }
 
-    /** 토큰에서 이메일 추출 (Owner, Terminal용) */
+    /** 토큰에서 이메일 추출 (Owner용) */
     public String getEmail(String token) {
         Claims claims = parseToken(token);
         return claims.get(CLAIM_EMAIL, String.class);
     }
 
-    /** 토큰에서 매장 ID 추출 (Terminal용) */
-    public Long getStoreId(String token) {
+    /** 토큰에서 Admin 여부 추출 (Owner용) */
+    public boolean getIsAdmin(String token) {
         Claims claims = parseToken(token);
-        return claims.get(CLAIM_STORE_ID, Long.class);
+        Boolean admin = claims.get(CLAIM_ADMIN, Boolean.class);
+        return admin != null && admin;
     }
 
     public Claims parseToken(String token) {
@@ -122,29 +110,48 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // ========== 하위 호환용 메서드 (Deprecated) ==========
+    /** 임시 토큰 생성 (OAuth 가입 프로세스용, 10분 만료) */
+    public String generateTempToken(Map<String, Object> claims) {
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + 600_000); // 10 minutes
 
-    /**
-     * @deprecated Use {@link #generateOwnerToken(Long, String)} instead
-     */
-    @Deprecated
-    public String generateAccessToken(Long ownerId, String email) {
-        return generateOwnerToken(ownerId, email);
+        return Jwts.builder()
+                .claims(claims)
+                .subject("temp")
+                .issuedAt(now)
+                .expiration(expirationDate)
+                .signWith(getSigningKey())
+                .compact();
     }
 
-    /**
-     * @deprecated Use {@link #generateCustomerToken(Long)} instead
-     */
-    @Deprecated
-    public String generateCustomerAccessToken(Long walletId, String phone) {
-        return generateCustomerToken(walletId);
+    // ========== RefreshToken 관련 메서드 ==========
+
+    /** RefreshToken 생성 (UUID 기반, JWT 아님) */
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
-    /**
-     * @deprecated Use {@link #getSubjectId(String)} instead
-     */
-    @Deprecated
-    public Long getOwnerIdFromToken(String token) {
-        return getSubjectId(token);
+    /** RefreshToken SHA-256 해싱 (DB 저장용) */
+    public String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    /** RefreshToken 만료 여부 확인 */
+    public boolean isRefreshTokenExpired(LocalDateTime expiresAt) {
+        return LocalDateTime.now().isAfter(expiresAt);
     }
 }

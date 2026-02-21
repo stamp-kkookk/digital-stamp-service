@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1296 832">
+  <!-- Mustard card -->
+  <rect width="1296" height="832" rx="20" fill="#F0DCA0"/>
+  <!-- Dashed outer border frame -->
+  <rect x="30" y="30" width="1236" height="772" rx="12" fill="none" stroke="#8C2F2F" stroke-opacity="0.2" stroke-width="2" stroke-dasharray="8,4"/>
+  <rect x="40" y="40" width="1216" height="752" rx="8" fill="none" stroke="#8C2F2F" stroke-opacity="0.1" stroke-width="1"/>
+  <!-- Title - retro sign style -->
+  <text x="648" y="82" text-anchor="middle" fill="#8C2F2F" font-family="'Georgia', serif" font-size="28" font-weight="700" letter-spacing="4">다방 칠팔 단골 카드</text>
+  <text x="648" y="112" text-anchor="middle" fill="#8C2F2F" font-family="sans-serif" font-size="15" opacity="0.6">12번 방문하시면 커피 한 잔 무료!</text>
+
+  <!-- Row 0: numbers 1-4, all filled — centers at 259, 518, 778, 1037 -->
+  <rect x="214" y="195" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="259" y="253" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">1</text>
+
+  <rect x="473" y="195" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="518" y="253" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">2</text>
+
+  <rect x="733" y="195" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="778" y="253" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">3</text>
+
+  <rect x="992" y="195" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="1037" y="253" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">4</text>
+
+  <!-- Row 1: numbers 5-8, all filled -->
+  <rect x="214" y="375" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="259" y="433" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">5</text>
+
+  <rect x="473" y="375" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="518" y="433" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">6</text>
+
+  <rect x="733" y="375" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="778" y="433" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">7</text>
+
+  <rect x="992" y="375" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="1037" y="433" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">8</text>
+
+  <!-- Row 2: 9-10 filled, 11 ghost, 12 reward -->
+  <rect x="214" y="555" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="259" y="613" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">9</text>
+
+  <rect x="473" y="555" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <text x="518" y="613" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="36" font-weight="700">10</text>
+
+  <!-- Ghost slot 11 -->
+  <rect x="733" y="555" width="90" height="90" rx="12" fill="none" stroke="#8C2F2F" stroke-opacity="0.15" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="778" y="613" text-anchor="middle" fill="#8C2F2F" fill-opacity="0.2" font-family="'Georgia', serif" font-size="36" font-weight="700">11</text>
+
+  <!-- Reward slot - special -->
+  <rect x="992" y="555" width="90" height="90" rx="12" fill="#8C2F2F"/>
+  <rect x="996" y="559" width="82" height="82" rx="9" fill="none" stroke="#F0DCA0" stroke-width="1" stroke-dasharray="3,2" stroke-opacity="0.4"/>
+  <text x="1037" y="593" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="13">무료</text>
+  <text x="1037" y="615" text-anchor="middle" fill="#F0DCA0" font-family="'Georgia', serif" font-size="17" font-weight="700">커피</text>
+
+  <!-- Decorative corner numbers (retro ticket feel) -->
+  <text x="60" y="78" fill="#8C2F2F" fill-opacity="0.08" font-family="'Georgia', serif" font-size="40" font-weight="700">78</text>
+  <text x="1190" y="78" fill="#8C2F2F" fill-opacity="0.08" font-family="'Georgia', serif" font-size="40" font-weight="700">78</text>
+  <text x="60" y="790" fill="#8C2F2F" fill-opacity="0.08" font-family="'Georgia', serif" font-size="40" font-weight="700">78</text>
+  <text x="1190" y="790" fill="#8C2F2F" fill-opacity="0.08" font-family="'Georgia', serif" font-size="40" font-weight="700">78</text>
+
+  <!-- Footer -->
+  <text x="648" y="755" text-anchor="middle" fill="#8C2F2F" font-family="sans-serif" font-size="14" opacity="0.4">칠팔 다방의 단골이 되어주셔서 감사합니다</text>
+</svg>

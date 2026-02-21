@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public record StampEventResponse(
         @Schema(description = "이벤트 ID", example = "1") Long id,
         @Schema(description = "지갑 스탬프카드 ID", example = "10") Long walletStampCardId,
-        @Schema(description = "고객 이름", example = "홍길동") String customerName,
+        @Schema(description = "고객 닉네임", example = "길동이") String customerNickname,
         @Schema(description = "고객 전화번호", example = "010-1234-5678") String customerPhone,
         @Schema(description = "이벤트 타입", example = "EARN") StampEventType type,
         @Schema(description = "스탬프 변화량", example = "1") Integer delta,
@@ -20,7 +20,7 @@ public record StampEventResponse(
         return new StampEventResponse(
                 projection.getId(),
                 projection.getWalletStampCardId(),
-                projection.getCustomerName(),
+                projection.getCustomerNickname(),
                 projection.getCustomerPhone(),
                 projection.getType(),
                 projection.getDelta(),

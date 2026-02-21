@@ -9,28 +9,30 @@ import com.project.kkookk.stampcard.controller.dto.UpdateStampCardStatusRequest;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
-import com.project.kkookk.stampcard.service.exception.StampCardAlreadyActiveException;
 import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedException;
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
 import com.project.kkookk.stampcard.service.exception.StampCardUpdateNotAllowedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.project.kkookk.wallet.repository.WalletStampCardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class StampCardService {
 
-    private static final Logger log = LoggerFactory.getLogger(StampCardService.class);
-
     private final StampCardRepository stampCardRepository;
+    private final WalletStampCardRepository walletStampCardRepository;
 
-    public StampCardService(StampCardRepository stampCardRepository) {
+    public StampCardService(
+            StampCardRepository stampCardRepository,
+            WalletStampCardRepository walletStampCardRepository) {
         this.stampCardRepository = stampCardRepository;
+        this.walletStampCardRepository = walletStampCardRepository;
     }
 
     @Transactional
@@ -53,7 +55,7 @@ public class StampCardService {
         StampCard saved = stampCardRepository.save(stampCard);
         log.info("Created stamp card with id: {}", saved.getId());
 
-        return StampCardResponse.from(saved);
+        return StampCardResponse.from(saved, false);
     }
 
     public StampCardListResponse getList(Long storeId, StampCardStatus status, Pageable pageable) {
@@ -70,32 +72,31 @@ public class StampCardService {
 
     public StampCardResponse getById(Long storeId, Long id) {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
-        return StampCardResponse.from(stampCard);
+        boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
+        return StampCardResponse.from(stampCard, issued);
     }
 
     @Transactional
     public StampCardResponse update(Long storeId, Long id, UpdateStampCardRequest request) {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
-        if (stampCard.isActive()) {
-            stampCard.updatePartial(request.title(), request.designType(), request.designJson());
-            log.info("Partially updated active stamp card: {}", id);
-        } else if (stampCard.isDraft() || stampCard.getStatus() == StampCardStatus.PAUSED) {
-            stampCard.update(
-                    request.title(),
-                    request.goalStampCount(),
-                    request.requiredStamps(),
-                    request.rewardName(),
-                    request.rewardQuantity(),
-                    request.expireDays(),
-                    request.designType(),
-                    request.designJson());
-            log.info("Fully updated stamp card: {}", id);
-        } else {
+        boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
+        if (issued) {
             throw new StampCardUpdateNotAllowedException();
         }
 
-        return StampCardResponse.from(stampCard);
+        stampCard.update(
+                request.title(),
+                request.goalStampCount(),
+                request.requiredStamps(),
+                request.rewardName(),
+                request.rewardQuantity(),
+                request.expireDays(),
+                request.designType(),
+                request.designJson());
+        log.info("Fully updated stamp card: {}", id);
+
+        return StampCardResponse.from(stampCard, false);
     }
 
     @Transactional
@@ -110,24 +111,30 @@ public class StampCardService {
         }
 
         if (newStatus == StampCardStatus.ACTIVE) {
-            boolean hasActiveCard =
-                    stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
-            if (hasActiveCard) {
-                throw new StampCardAlreadyActiveException();
-            }
+            stampCardRepository
+                    .findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE)
+                    .ifPresent(
+                            activeCard -> {
+                                activeCard.updateStatus(StampCardStatus.ARCHIVED);
+                                log.info(
+                                        "[StampCard] Auto-archived existing active card id={}",
+                                        activeCard.getId());
+                            });
         }
 
         stampCard.updateStatus(newStatus);
-        log.info("Updated stamp card {} status from {} to {}", id, currentStatus, newStatus);
+        log.info("[StampCard] Status transition id={} from={} to={}", id, currentStatus, newStatus);
 
-        return StampCardResponse.from(stampCard);
+        boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
+        return StampCardResponse.from(stampCard, issued);
     }
 
     @Transactional
     public void delete(Long storeId, Long id) {
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
-        if (!stampCard.isDraft()) {
+        boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
+        if (issued) {
             throw new StampCardDeleteNotAllowedException();
         }
 

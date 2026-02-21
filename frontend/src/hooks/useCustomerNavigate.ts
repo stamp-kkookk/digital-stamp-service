@@ -27,13 +27,10 @@ export function useCustomerNavigate() {
   const storeId = urlStoreId || sessionStorage.getItem(STORE_ID_KEY) || undefined;
 
   const customerNavigate = useCallback(
-    (path: string) => {
+    (path: string, options?: { state?: unknown; replace?: boolean }) => {
       const p = path.startsWith('/') ? path : `/${path}`;
-      if (urlStoreId) {
-        navigate(`/stores/${urlStoreId}/customer${p}`);
-      } else {
-        navigate(`/customer${p}`);
-      }
+      const to = urlStoreId ? `/stores/${urlStoreId}/customer${p}` : `/customer${p}`;
+      navigate(to, options);
     },
     [navigate, urlStoreId],
   );

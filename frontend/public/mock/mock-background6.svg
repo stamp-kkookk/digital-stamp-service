@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise6">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.07"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+    <!-- Halftone dot pattern -->
+    <pattern id="halftone" width="12" height="12" patternUnits="userSpaceOnUse">
+      <circle cx="6" cy="6" r="2" fill="#2D1B4E" opacity="0.12"/>
+    </pattern>
+  </defs>
+  <!-- Lime green base -->
+  <rect width="1240" height="790" fill="#C5E84D"/>
+  <!-- Halftone overlay -->
+  <rect width="1240" height="790" fill="url(#halftone)"/>
+  <!-- Texture -->
+  <rect width="1240" height="790" filter="url(#noise6)" opacity="0.3"/>
+  <!-- Bold citrus cross-section graphic -->
+  <g transform="translate(620, 340)">
+    <!-- Outer rind -->
+    <circle cx="0" cy="0" r="110" fill="#2D1B4E" opacity="0.12"/>
+    <circle cx="0" cy="0" r="100" fill="#C5E84D" stroke="#2D1B4E" stroke-width="3"/>
+    <!-- Inner flesh -->
+    <circle cx="0" cy="0" r="85" fill="#D4F060"/>
+    <!-- Segments -->
+    <g stroke="#C5E84D" stroke-width="4" fill="none">
+      <line x1="0" y1="-85" x2="0" y2="85"/>
+      <line x1="-85" y1="0" x2="85" y2="0"/>
+      <line x1="-60" y1="-60" x2="60" y2="60"/>
+      <line x1="60" y1="-60" x2="-60" y2="60"/>
+    </g>
+    <!-- Center -->
+    <circle cx="0" cy="0" r="12" fill="#C5E84D"/>
+  </g>
+  <!-- Bold typography -->
+  <text x="620" y="560" text-anchor="middle" fill="#2D1B4E" font-family="'Arial Black', 'Helvetica', sans-serif" font-size="120" font-weight="900" letter-spacing="-2">TANG!</text>
+  <!-- Subtitle -->
+  <text x="620" y="610" text-anchor="middle" fill="#2D1B4E" font-family="sans-serif" font-size="16" letter-spacing="8" opacity="0.5">JUICE &amp; FRUITS</text>
+</svg>

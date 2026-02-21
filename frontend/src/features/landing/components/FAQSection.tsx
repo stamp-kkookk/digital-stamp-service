@@ -6,7 +6,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const faqs = [
   {
@@ -22,17 +21,17 @@ const faqs = [
   {
     question: "고객은 앱을 설치해야 하나요?",
     answer:
-      "아니요, 고객은 별도의 앱을 설치할 필요가 없습니다. 스마트폰 카메라로 QR코드를 스캔하면 웹에서 바로 이용할 수 있습니다. 더 편리한 사용을 원하시면, '홈 화면에 추가' 기능을 통해 앱처럼 바탕화면에 아이콘을 만들고 빠르게 접속할 수도 있습니다. (PWA 지원)",
+      "아니요, 고객은 별도의 앱을 설치할 필요가 없습니다! 스마트폰 카메라로 QR코드를 스캔하면 웹에서 바로 이용할 수 있습니다.",
   },
   {
     question: "스탬프 디자인은 직접 만들 수 있나요?",
     answer:
-      "もちろん! 사장님께서 직접 스탬프의 색상, 로고, 배경 이미지를 커스터마이징하여 가게의 브랜드 아이덴티티를 담은 특별한 스탬프 카드를 만들 수 있습니다. 3분이면 충분합니다.",
+      "네, 사장님께서 직접 스탬프의 색상, 로고, 배경 이미지를 커스터마이징하여 가게의 브랜드 아이덴티티를 담은 특별한 스탬프 카드를 만들 수 있습니다. 3분이면 충분합니다!",
   },
   {
     question: "기존에 쓰던 종이 쿠폰 고객들은 어떻게 옮기나요?",
     answer:
-      "사장님 백오피스에서 기존 종이 쿠폰을 사용하던 단골 고객을 위한 스탬프 수동 지급 기능을 제공합니다. 고객이 종이 쿠폰을 가져오면, 사장님께서 직접 확인 후 해당 개수만큼 디지털 스탬프를 바로 적립해줄 수 있습니다.",
+      "고객이 기존 종이 쿠폰을 디지털 스탬프로 전환 신청할 수 있는 기능을 제공합니다. 종이 스탬프 전환 탭에서 쿠폰 사진을 첨부하고 스탬프 개수를 입력해 제출하면, 사장님 확인 후 승인 시 디지털 스탬프가 반영됩니다.",
   },
 ];
 
@@ -57,7 +56,11 @@ const itemVariants = {
   },
 };
 
-export function FAQSection() {
+interface FAQSectionProps {
+  onOpenContact?: () => void;
+}
+
+export function FAQSection({ onOpenContact }: FAQSectionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
@@ -151,8 +154,8 @@ export function FAQSection() {
           <p className="mb-6 text-lg text-kkookk-steel">
             지금 바로 문의주세요!
           </p>
-          <Link
-            to="/simulation"
+          <button
+            onClick={onOpenContact}
             className="relative inline-flex items-center justify-center px-8 py-3 overflow-hidden text-lg text-white transition-all duration-500 shadow-lg bg-kkookk-orange-500 rounded-2xl active:scale-95 group"
           >
             <span className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out group-hover:-translate-y-full">
@@ -164,7 +167,7 @@ export function FAQSection() {
               <ChevronRight className="ml-2" />
             </span>
             <span className="invisible">바로 문의하기</span>
-          </Link>
+          </button>
         </motion.div>
       </div>
     </motion.section>

@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -36,11 +36,11 @@ class CustomerWalletControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockBean private CustomerWalletService customerWalletService;
+    @MockitoBean private CustomerWalletService customerWalletService;
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/stamp-history - 스탬프 히스토리 조회 성공")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getStampHistory_Success() throws Exception {
         // given
         Long storeId = 1L;
@@ -73,7 +73,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/stamp-history - 유효성 검증 실패 (page < 0)")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getStampHistory_Fail_InvalidPageParameter() throws Exception {
         // given
         Long storeId = 1L;
@@ -89,7 +89,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/stamp-history - 유효성 검증 실패 (size > 100)")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getStampHistory_Fail_InvalidSizeParameter() throws Exception {
         // given
         Long storeId = 1L;
@@ -105,7 +105,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/stamp-history - 스탬프카드 없음 (404)")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getStampHistory_Fail_NotFound() throws Exception {
         // given
         Long storeId = 999L;
@@ -126,13 +126,13 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/redeem-history - 리워드 사용 히스토리 조회 성공")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getRedeemHistory_Success() throws Exception {
         // given
         Long storeId = 10L;
         StoreInfo storeInfo = new StoreInfo(storeId, "꾹꾹 카페");
         RedeemEventSummary eventSummary =
-                new RedeemEventSummary(100L, 200L, storeInfo, null, null, LocalDateTime.now());
+                new RedeemEventSummary(100L, 200L, storeInfo, null, LocalDateTime.now());
 
         PageInfo pageInfo = new PageInfo(0, 20, 1, 1, true);
 
@@ -159,7 +159,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/redeem-history - 빈 목록 조회")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getRedeemHistory_EmptyList() throws Exception {
         // given
         Long storeId = 10L;
@@ -184,7 +184,7 @@ class CustomerWalletControllerTest {
 
     @Test
     @DisplayName("GET /api/customer/wallet/stores/{storeId}/redeem-history - 유효성 검증 실패 (page < 0)")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getRedeemHistory_Fail_InvalidPageParameter() throws Exception {
         // given
         Long storeId = 10L;
@@ -201,7 +201,7 @@ class CustomerWalletControllerTest {
     @Test
     @DisplayName(
             "GET /api/customer/wallet/stores/{storeId}/redeem-history - 유효성 검증 실패 (size > 100)")
-    @WithMockCustomer(stepUp = true)
+    @WithMockCustomer
     void getRedeemHistory_Fail_InvalidSizeParameter() throws Exception {
         // given
         Long storeId = 10L;

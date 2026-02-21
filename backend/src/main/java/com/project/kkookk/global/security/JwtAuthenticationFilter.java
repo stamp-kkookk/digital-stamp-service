@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UserDetails principal = createPrincipal(token, tokenType);
 
+        MDC.put("tokenType", tokenType.name());
+        MDC.put("userId", formatUserId(tokenType, jwtUtil.getSubjectId(token)));
+
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         principal, null, principal.getAuthorities());
@@ -72,21 +76,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    private String formatUserId(TokenType tokenType, Long subjectId) {
+        return switch (tokenType) {
+            case OWNER -> "owner:" + subjectId;
+            case CUSTOMER -> "wallet:" + subjectId;
+        };
+    }
+
     private UserDetails createPrincipal(String token, TokenType tokenType) {
         Long subjectId = jwtUtil.getSubjectId(token);
 
         return switch (tokenType) {
             case OWNER -> {
                 String email = jwtUtil.getEmail(token);
-                yield OwnerPrincipal.of(subjectId, email);
+                boolean isAdmin = jwtUtil.getIsAdmin(token);
+                yield OwnerPrincipal.of(subjectId, email, isAdmin);
             }
-            case TERMINAL -> {
-                String email = jwtUtil.getEmail(token);
-                Long storeId = jwtUtil.getStoreId(token);
-                yield TerminalPrincipal.of(subjectId, email, storeId);
-            }
-            case CUSTOMER -> CustomerPrincipal.of(subjectId, false);
-            case STEPUP -> CustomerPrincipal.of(subjectId, true);
+            case CUSTOMER -> CustomerPrincipal.of(subjectId);
         };
     }
 }

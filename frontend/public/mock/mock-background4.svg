@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 790">
+  <defs>
+    <filter id="noise4">
+      <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.1"/>
+      </feComponentTransfer>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Retro mustard base -->
+  <rect width="1240" height="790" fill="#D4A04A"/>
+  <!-- Burgundy top section with arch -->
+  <path d="M0,0 L1240,0 L1240,450 Q620,350 0,450Z" fill="#8C2F2F"/>
+  <!-- Arch shape -->
+  <path d="M320,790 L320,350 Q620,180 920,350 L920,790" fill="none" stroke="#D4A04A" stroke-width="3" opacity="0.5"/>
+  <!-- Inner arch glow -->
+  <path d="M370,790 L370,380 Q620,230 870,380 L870,790" fill="#D4A04A" opacity="0.15"/>
+  <!-- Texture -->
+  <rect width="1240" height="790" filter="url(#noise4)" opacity="0.4"/>
+  <!-- Retro coffee cup icon -->
+  <g transform="translate(620, 400)" fill="none" stroke="#FFF8F0" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+    <!-- Saucer -->
+    <ellipse cx="0" cy="50" rx="50" ry="12"/>
+    <!-- Cup -->
+    <path d="M-30,0 L-25,45 Q0,55 25,45 L30,0"/>
+    <path d="M-30,0 Q0,-8 30,0"/>
+    <!-- Steam swirl -->
+    <path d="M0,-15 Q-10,-30 0,-40 Q10,-50 0,-60" stroke-width="2"/>
+  </g>
+  <!-- Brand name - retro lettering -->
+  <text x="620" y="560" text-anchor="middle" fill="#FFF8F0" font-family="'Georgia', serif" font-size="64" font-weight="700" letter-spacing="6">다방 칠팔</text>
+  <!-- Subtitle -->
+  <text x="620" y="600" text-anchor="middle" fill="#D4A04A" font-family="sans-serif" font-size="14" letter-spacing="8">SINCE 1978</text>
+  <!-- Decorative dots -->
+  <g fill="#D4A04A" opacity="0.4">
+    <circle cx="430" cy="625" r="3"/><circle cx="450" cy="625" r="3"/><circle cx="470" cy="625" r="3"/>
+    <circle cx="770" cy="625" r="3"/><circle cx="790" cy="625" r="3"/><circle cx="810" cy="625" r="3"/>
+  </g>
+</svg>

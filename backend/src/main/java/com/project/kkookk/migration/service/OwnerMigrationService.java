@@ -2,6 +2,7 @@ package com.project.kkookk.migration.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
 import com.project.kkookk.migration.controller.dto.MigrationApproveResponse;
 import com.project.kkookk.migration.controller.dto.MigrationDetailResponse;
@@ -125,18 +126,13 @@ public class OwnerMigrationService {
         validateStoreOwnership(storeId, ownerId);
         StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
 
+        FlowMdc.setMigrationFlow(migrationId);
+
         if (!migration.isSubmitted()) {
             throw new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED);
         }
 
         int stampCount = request.approvedStampCount();
-
-        // Store의 ACTIVE StampCard 조회
-        StampCard activeStampCard =
-                stampCardRepository
-                        .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
-                                storeId, StampCardStatus.ACTIVE)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.NO_ACTIVE_STAMP_CARD));
 
         // 고객의 ACTIVE WalletStampCard 조회 (비관적 락으로 동시성 제어)
         WalletStampCard walletStampCard =
@@ -148,10 +144,23 @@ public class OwnerMigrationService {
                         .orElseThrow(
                                 () -> new BusinessException(ErrorCode.WALLET_STAMP_CARD_NOT_FOUND));
 
+        // 고객이 적립 중인 원본 스탬프카드 조회 (리워드 기준)
+        StampCard linkedStampCard =
+                stampCardRepository
+                        .findById(walletStampCard.getStampCardId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.STAMP_CARD_NOT_FOUND));
+
+        // 현재 ACTIVE 스탬프카드 조회 (완료 후 새 카드 생성용, 없으면 원본 사용)
+        StampCard activeStampCard =
+                stampCardRepository
+                        .findFirstByStoreIdAndStatusOrderByCreatedAtDesc(
+                                storeId, StampCardStatus.ACTIVE)
+                        .orElse(linkedStampCard);
+
         // 스탬프 적립 및 리워드 발급 처리
         StampRewardService.StampAccumulationResult result =
                 stampRewardService.processStampAccumulation(
-                        walletStampCard, activeStampCard, stampCount);
+                        walletStampCard, linkedStampCard, activeStampCard, stampCount);
 
         // Migration 승인 처리
         migration.approve(stampCount);
@@ -160,11 +169,11 @@ public class OwnerMigrationService {
         StampEvent stampEvent =
                 StampEvent.builder()
                         .storeId(storeId)
-                        .stampCardId(activeStampCard.getId())
+                        .stampCardId(linkedStampCard.getId())
                         .walletStampCardId(result.currentWalletStampCard().getId())
                         .type(StampEventType.MIGRATED)
                         .delta(stampCount)
-                        .reason("마이그레이션 승인")
+                        .reason("종이 스탬프 전환 승인")
                         .occurredAt(LocalDateTime.now())
                         .stampMigrationRequestId(migration.getId())
                         .build();
@@ -197,6 +206,9 @@ public class OwnerMigrationService {
         }
 
         migration.reject(request.rejectReason());
+
+        FlowMdc.setMigrationFlow(migrationId);
+        log.info("[Migration] Rejected id={} reason={}", migrationId, request.rejectReason());
 
         return new MigrationRejectResponse(
                 migration.getId(),

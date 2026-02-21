@@ -4,7 +4,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createIssuanceRequest, getIssuanceRequest } from '../api/issuanceApi';
+import { createIssuanceRequest, getIssuanceRequest, cancelIssuanceRequest } from '../api/issuanceApi';
 import { QUERY_KEYS } from '@/lib/api/endpoints';
 import type { CreateIssuanceRequest } from '@/types/api';
 
@@ -45,7 +45,7 @@ export function useIssuanceRequestStatus(
     enabled: !!requestId && enabled,
     refetchInterval: (query) => {
       const data = query.state.data;
-      if (data?.status === 'PENDING' && data.remainingSeconds > 0) {
+      if (data?.status === 'PENDING') {
         return POLLING_INTERVAL_MS;
       }
 
@@ -54,6 +54,21 @@ export function useIssuanceRequestStatus(
       }
 
       return false;
+    },
+  });
+}
+
+// =============================================================================
+// Cancel Issuance Request Hook
+// =============================================================================
+
+export function useCancelIssuanceRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (requestId: number) => cancelIssuanceRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['issuance'] });
     },
   });
 }

@@ -1,0 +1,181 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [{ "expr": "process_uptime_seconds{application=\"kkookk\"}", "refId": "A" }]
+    },
+    {
+      "title": "Request Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[5m]))", "refId": "A" }]
+    },
+    {
+      "title": "5xx Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.01 },
+            { "color": "red", "value": 0.05 }
+          ]}
+        }, "overrides": []
+      },
+      "targets": [{ "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[5m]))", "refId": "A" }]
+    },
+    {
+      "title": "P99 Latency",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.2 },
+            { "color": "red", "value": 0.5 }
+          ]}
+        }, "overrides": []
+      },
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"kkookk\"}[5m])) by (le))", "refId": "A" }]
+    },
+    {
+      "title": "CPU Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.7 },
+            { "color": "red", "value": 0.9 }
+          ]}
+        }, "overrides": []
+      },
+      "targets": [{ "expr": "process_cpu_usage{application=\"kkookk\"}", "refId": "A" }]
+    },
+    {
+      "title": "Heap Usage",
+      "type": "gauge",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit", "min": 0, "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.7 },
+            { "color": "red", "value": 0.9 }
+          ]}
+        }, "overrides": []
+      },
+      "targets": [{ "expr": "sum(jvm_memory_used_bytes{application=\"kkookk\",area=\"heap\"}) / sum(jvm_memory_max_bytes{application=\"kkookk\",area=\"heap\"})", "refId": "A" }]
+    },
+    {
+      "title": "Request Rate by Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "reqps" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\"}[1m]))", "legendFormat": "Total", "refId": "A" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"2..\"}[1m]))", "legendFormat": "2xx", "refId": "B" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"4..\"}[1m]))", "legendFormat": "4xx", "refId": "C" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{application=\"kkookk\",status=~\"5..\"}[1m]))", "legendFormat": "5xx", "refId": "D" }
+      ]
+    },
+    {
+      "title": "Response Time (P50 / P95 / P99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "custom": { "lineWidth": 2, "fillOpacity": 10 }, "unit": "s" },
+        "overrides": []
+      },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{application=\"kkookk\"}[5m])) by (le))", "legendFormat": "P50", "refId": "A" },
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"kkookk\"}[5m])) by (le))", "legendFormat": "P95", "refId": "B" },
+        { "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"kkookk\"}[5m])) by (le))", "legendFormat": "P99", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Log Events by Level",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "custom": { "lineWidth": 2, "fillOpacity": 20, "drawStyle": "bars", "stacking": { "mode": "normal" } }, "unit": "short" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "ERROR" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "WARN" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "INFO" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+        ]
+      },
+      "targets": [
+        { "expr": "sum(rate(logback_events_total{application=\"kkookk\",level=\"error\"}[1m]))", "legendFormat": "ERROR", "refId": "A" },
+        { "expr": "sum(rate(logback_events_total{application=\"kkookk\",level=\"warn\"}[1m]))", "legendFormat": "WARN", "refId": "B" },
+        { "expr": "sum(rate(logback_events_total{application=\"kkookk\",level=\"info\"}[1m]))", "legendFormat": "INFO", "refId": "C" }
+      ]
+    },
+    {
+      "title": "Top 10 Slowest Endpoints (P99)",
+      "type": "table",
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "unit": "s" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "uri" }, "properties": [{ "id": "custom.width", "value": 350 }] }
+        ]
+      },
+      "options": { "sortBy": [{ "displayName": "Value", "desc": true }] },
+      "targets": [{ "expr": "topk(10, histogram_quantile(0.99, sum by (le, uri) (rate(http_server_requests_seconds_bucket{application=\"kkookk\",uri!~\"/actuator.*\"}[5m]))))", "format": "table", "instant": true, "refId": "A" }],
+      "transformations": [{ "id": "organize", "options": { "excludeByName": { "Time": true, "le": true }, "renameByName": { "uri": "URI", "Value": "P99 Latency" } } }]
+    },
+    {
+      "title": "Recent ERROR Logs",
+      "type": "logs",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 19 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\",level=\"ERROR\"}", "refId": "A" }]
+    },
+    {
+      "title": "Recent WARN Logs",
+      "type": "logs",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "sortOrder": "Descending", "enableLogDetails": true, "showLabels": false, "wrapLogMessage": true, "dedupStrategy": "none" },
+      "targets": [{ "expr": "{application=\"kkookk\",level=\"WARN\"}", "refId": "A" }]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["kkookk", "application"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "Asia/Seoul",
+  "title": "KKOOKK - Application Overview",
+  "uid": "kkookk-app-overview",
+  "version": 2
+}

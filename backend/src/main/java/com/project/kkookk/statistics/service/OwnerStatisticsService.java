@@ -16,9 +16,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,6 +42,8 @@ public class OwnerStatisticsService {
         if (!store.getOwnerAccountId().equals(ownerId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
+
+        log.info("[Statistics] Queried storeId={} period={} to={}", storeId, startDate, endDate);
 
         // 2. 기간 설정
         LocalDateTime startDateTime = startDate.atStartOfDay();

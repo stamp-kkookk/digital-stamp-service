@@ -15,6 +15,8 @@ public interface StampCardRepository extends JpaRepository<StampCard, Long> {
 
     Page<StampCard> findByStoreIdAndStatus(Long storeId, StampCardStatus status, Pageable pageable);
 
+    Optional<StampCard> findByStoreIdAndStatus(Long storeId, StampCardStatus status);
+
     boolean existsByStoreIdAndStatus(Long storeId, StampCardStatus status);
 
     Optional<StampCard> findFirstByStoreIdAndStatusOrderByCreatedAtDesc(

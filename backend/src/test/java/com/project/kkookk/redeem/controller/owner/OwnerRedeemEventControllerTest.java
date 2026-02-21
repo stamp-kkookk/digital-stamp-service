@@ -15,7 +15,6 @@ import com.project.kkookk.owner.controller.config.TestSecurityConfig;
 import com.project.kkookk.owner.controller.config.WithMockOwner;
 import com.project.kkookk.redeem.controller.owner.dto.RedeemEventResponse;
 import com.project.kkookk.redeem.domain.RedeemEventResult;
-import com.project.kkookk.redeem.domain.RedeemEventType;
 import com.project.kkookk.redeem.service.OwnerRedeemEventService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,9 +66,9 @@ class OwnerRedeemEventControllerTest {
                         1L,
                         100L,
                         "커피러버",
+                        "010-1234-5678",
                         "아메리카노 1잔",
                         "커피전문점 스탬프카드",
-                        RedeemEventType.COMPLETED,
                         RedeemEventResult.SUCCESS,
                         LocalDateTime.of(2026, 2, 4, 14, 30, 0));
 
@@ -85,11 +84,10 @@ class OwnerRedeemEventControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].id").value(1))
-                .andExpect(jsonPath("$.content[0].redeemSessionId").value(100))
+                .andExpect(jsonPath("$.content[0].walletRewardId").value(100))
                 .andExpect(jsonPath("$.content[0].customerNickname").value("커피러버"))
                 .andExpect(jsonPath("$.content[0].rewardName").value("아메리카노 1잔"))
                 .andExpect(jsonPath("$.content[0].stampCardTitle").value("커피전문점 스탬프카드"))
-                .andExpect(jsonPath("$.content[0].type").value("COMPLETED"))
                 .andExpect(jsonPath("$.content[0].result").value("SUCCESS"))
                 .andExpect(jsonPath("$.pageNumber").value(0))
                 .andExpect(jsonPath("$.pageSize").value(20))

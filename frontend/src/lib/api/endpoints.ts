@@ -7,12 +7,13 @@ export const API_ENDPOINTS = {
   // Public API (인증 불필요)
   // ==========================================================================
   PUBLIC: {
-    OTP_REQUEST: '/api/public/otp/request',
-    OTP_VERIFY: '/api/public/otp/verify',
-    WALLET_REGISTER: '/api/public/wallet/register',
-    WALLET_LOGIN: '/api/public/wallet/login',
     STORE_INFO: (storeId: number) => `/api/public/stores/${storeId}`,
     STORES: '/api/public/stores',
+    CHECK_NICKNAME: '/api/public/wallet/check-nickname',
+    CHECK_PHONE: '/api/public/wallet/check-phone',
+    OAUTH_LOGIN: '/api/public/oauth/login',
+    OAUTH_COMPLETE_CUSTOMER_SIGNUP: '/api/public/oauth/complete-customer-signup',
+    OAUTH_COMPLETE_OWNER_SIGNUP: '/api/public/oauth/complete-owner-signup',
   },
 
   // ==========================================================================
@@ -30,11 +31,10 @@ export const API_ENDPOINTS = {
     // Issuance
     ISSUANCE_REQUESTS: '/api/customer/issuance-requests',
     ISSUANCE_REQUEST: (id: number) => `/api/customer/issuance-requests/${id}`,
+    ISSUANCE_REQUEST_CANCEL: (id: number) => `/api/customer/issuance-requests/${id}/cancel`,
 
     // Redeem
-    REDEEM_SESSIONS: '/api/customer/redeem-sessions',
-    REDEEM_SESSION_COMPLETE: (sessionId: number) =>
-      `/api/customer/redeem-sessions/${sessionId}/complete`,
+    REDEEMS: '/api/customer/redeems',
 
     // Migration
     MIGRATIONS: '/api/customer/migrations',
@@ -48,10 +48,6 @@ export const API_ENDPOINTS = {
   // Owner API (Owner Token 필요)
   // ==========================================================================
   OWNER: {
-    // Auth
-    SIGNUP: '/api/owner/auth/signup',
-    LOGIN: '/api/owner/auth/login',
-
     // Stores
     STORES: '/api/owner/stores',
     STORE: (storeId: number) => `/api/owner/stores/${storeId}`,
@@ -75,27 +71,35 @@ export const API_ENDPOINTS = {
       `/api/owner/stores/${storeId}/migrations/${migrationId}/approve`,
     STORE_MIGRATION_REJECT: (storeId: number, migrationId: number) =>
       `/api/owner/stores/${storeId}/migrations/${migrationId}/reject`,
+
+    // Place Search
+    PLACE_SEARCH: '/api/owner/places/search',
+
+    // Approval (Issuance Requests)
+    ISSUANCE_REQUESTS: (storeId: number) => `/api/owner/stores/${storeId}/issuance-requests`,
+    APPROVE_ISSUANCE: (storeId: number, requestId: number) =>
+      `/api/owner/stores/${storeId}/issuance-requests/${requestId}/approve`,
+    REJECT_ISSUANCE: (storeId: number, requestId: number) =>
+      `/api/owner/stores/${storeId}/issuance-requests/${requestId}/reject`,
   },
 
   // ==========================================================================
-  // Terminal API (Terminal Token 필요)
+  // Admin API (Admin Token 필요)
   // ==========================================================================
-  TERMINAL: {
-    LOGIN: '/api/public/terminal/login',
-    ISSUANCE_REQUESTS: (storeId: number) => `/api/terminal/${storeId}/issuance-requests`,
-    APPROVE_ISSUANCE: (storeId: number, requestId: number) =>
-      `/api/terminal/${storeId}/issuance-requests/${requestId}/approve`,
-    REJECT_ISSUANCE: (storeId: number, requestId: number) =>
-      `/api/terminal/${storeId}/issuance-requests/${requestId}/reject`,
-    REDEEM_SESSIONS: (storeId: number) => `/api/terminal/${storeId}/redeem-sessions`,
-    STAMP_EVENTS: (storeId: number) => `/api/terminal/stores/${storeId}/stamp-events`,
+  ADMIN: {
+    STORES: '/api/admin/stores',
+    STORE: (storeId: number) => `/api/admin/stores/${storeId}`,
+    STORE_STATUS: (storeId: number) => `/api/admin/stores/${storeId}/status`,
+    STORE_AUDIT_LOGS: (storeId: number) => `/api/admin/stores/${storeId}/audit-logs`,
   },
+
 } as const;
 
 // Query Key Factory for TanStack Query
 export const QUERY_KEYS = {
   // Customer
   walletStampCards: (storeId: number) => ['wallet', 'stampCards', storeId] as const,
+  allWalletStampCards: () => ['wallet', 'stampCards', 'all'] as const,
   stampHistory: (storeId: number) =>
     ['wallet', 'stampHistory', storeId] as const,
   redeemHistory: (storeId: number) => ['wallet', 'redeemHistory', storeId] as const,
@@ -123,14 +127,14 @@ export const QUERY_KEYS = {
     ['owner', 'store', storeId, 'migrations'] as const,
   storeMigration: (storeId: number, migrationId: number) =>
     ['owner', 'store', storeId, 'migration', migrationId] as const,
-
-  // Terminal
   pendingIssuanceRequests: (storeId: number) =>
-    ['terminal', storeId, 'pendingIssuances'] as const,
-  pendingRedeemSessions: (storeId: number) =>
-    ['terminal', storeId, 'pendingRedeems'] as const,
-
+    ['owner', 'store', storeId, 'pendingIssuances'] as const,
   // Public
   storePublicInfo: (storeId: number) => ['public', 'store', storeId] as const,
   publicStores: () => ['public', 'stores'] as const,
+
+  // Admin
+  adminStores: (status?: string) => ['admin', 'stores', { status }] as const,
+  adminStore: (storeId: number) => ['admin', 'store', storeId] as const,
+  adminAuditLogs: (storeId: number) => ['admin', 'store', storeId, 'auditLogs'] as const,
 } as const;

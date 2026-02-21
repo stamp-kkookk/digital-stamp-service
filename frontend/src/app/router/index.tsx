@@ -3,11 +3,12 @@
  * 모든 앱 라우트를 위한 React Router 설정
  */
 
+import { AdminLayout } from "@/app/layouts/AdminLayout";
 import { CustomerLayout } from "@/app/layouts/CustomerLayout";
 import { OwnerLayout } from "@/app/layouts/OwnerLayout";
-import { TerminalLayout } from "@/app/layouts/TerminalLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { LauncherPage } from "@/pages/LauncherPage";
+import { RoleSelectionPage } from "@/pages/RoleSelectionPage";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 // 고객 페이지
@@ -15,13 +16,20 @@ import { CustomerHistoryPage } from "@/pages/customer/CustomerHistoryPage";
 import { CustomerLandingPage } from "@/pages/customer/CustomerLandingPage";
 import { CustomerSettingsPage } from "@/pages/customer/CustomerSettingsPage";
 import { CustomerStoreSelectPage } from "@/pages/customer/CustomerStoreSelectPage";
+import { DirectCustomerLoginPage } from "@/pages/customer/DirectCustomerLoginPage";
 
-// 고객 기능 컴포넌트 (페이지로 래핑될 예정)
-import { CustomerLoginForm, CustomerSignupForm } from "@/features/auth";
+// 고객 기능 컴포넌트
 import { RequestStampButton } from "@/features/issuance";
-import { MigrationForm, MigrationList } from "@/features/migration";
+import { MigrationDetail, MigrationForm, MigrationList } from "@/features/migration";
 import { RedeemScreen, RewardList } from "@/features/redemption";
-import { CardDetailView, WalletPage } from "@/features/wallet";
+import { WalletPage } from "@/features/wallet";
+
+// OAuth
+import { OAuthCallbackPage } from "@/features/auth/components/OAuthCallbackPage";
+
+// Admin 페이지
+import { AdminStoreDetailPage } from "@/pages/admin/AdminStoreDetailPage";
+import { AdminStoreListPage } from "@/pages/admin/AdminStoreListPage";
 
 // 사장님 페이지
 import { OwnerLoginPage } from "@/features/auth/pages/OwnerLoginPage";
@@ -29,21 +37,14 @@ import {
   StampCardCreatePage,
   StampCardEditPage,
   StampCardStatsPage,
+  StoreApprovalPage,
   StoreCreatePage,
   StoreDetailPage,
+  StoreEditPage,
   StoreHistoryPage,
   StoreListPage,
   StoreMigrationsPage,
 } from "@/pages/owner";
-
-// 터미널 페이지
-import {
-  TerminalApprovalPage,
-  TerminalHistoryPage,
-  TerminalLoginPage,
-  TerminalSettingsPage,
-  TerminalStoreSelectPage,
-} from "@/pages/terminal";
 
 export const router = createBrowserRouter([
   // 랜딩 페이지
@@ -58,6 +59,18 @@ export const router = createBrowserRouter([
     element: <LauncherPage />,
   },
 
+  // 역할 선택 페이지 (진입점)
+  {
+    path: "/funnel",
+    element: <RoleSelectionPage />,
+  },
+
+  // OAuth 콜백
+  {
+    path: "/oauth/callback",
+    element: <OAuthCallbackPage />,
+  },
+
   // 고객 매장 선택 (시뮬레이션 진입점)
   {
     path: "/customer/stores",
@@ -70,8 +83,15 @@ export const router = createBrowserRouter([
     element: <CustomerLayout />,
     children: [
       { index: true, element: <CustomerLandingPage /> },
-      { path: "login", element: <CustomerLoginForm /> },
-      { path: "signup", element: <CustomerSignupForm /> },
+    ],
+  },
+
+  // 직접 고객 로그인 (storeId 없음 - funnel에서 진입)
+  {
+    path: "/customer/login",
+    element: <CustomerLayout />,
+    children: [
+      { index: true, element: <DirectCustomerLoginPage /> },
     ],
   },
 
@@ -82,13 +102,13 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="wallet" replace /> },
       { path: "wallet", element: <WalletPage /> },
-      { path: "wallet/:cardId", element: <CardDetailView /> },
       { path: "wallet/:cardId/stamp", element: <RequestStampButton /> },
       { path: "history", element: <CustomerHistoryPage /> },
       { path: "redeems", element: <RewardList /> },
       { path: "redeems/:redeemId/use", element: <RedeemScreen /> },
       { path: "migrations", element: <MigrationList /> },
       { path: "migrations/new", element: <MigrationForm /> },
+      { path: "migrations/:id", element: <MigrationDetail /> },
       { path: "settings", element: <CustomerSettingsPage /> },
     ],
   },
@@ -108,8 +128,10 @@ export const router = createBrowserRouter([
       { path: "stores", element: <StoreListPage /> },
       { path: "stores/new", element: <StoreCreatePage /> },
       { path: "stores/:storeId", element: <StoreDetailPage /> },
+      { path: "stores/:storeId/edit", element: <StoreEditPage /> },
       { path: "stores/:storeId/history", element: <StoreHistoryPage /> },
       { path: "stores/:storeId/migrations", element: <StoreMigrationsPage /> },
+      { path: "stores/:storeId/approval", element: <StoreApprovalPage /> },
       {
         path: "stores/:storeId/stamp-cards/new",
         element: <StampCardCreatePage />,
@@ -125,27 +147,14 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 터미널 로그인 (레이아웃 없음)
+  // Admin 라우트
   {
-    path: "/terminal/login",
-    element: <TerminalLoginPage />,
-  },
-
-  // 터미널 매장 선택 (레이아웃 없음)
-  {
-    path: "/terminal/stores",
-    element: <TerminalStoreSelectPage />,
-  },
-
-  // 터미널 라우트 (레이아웃 포함)
-  {
-    path: "/terminal",
-    element: <TerminalLayout />,
+    path: "/admin",
+    element: <AdminLayout />,
     children: [
-      { path: ":storeId", element: <Navigate to="approval" replace /> },
-      { path: ":storeId/approval", element: <TerminalApprovalPage /> },
-      { path: ":storeId/history", element: <TerminalHistoryPage /> },
-      { path: ":storeId/settings", element: <TerminalSettingsPage /> },
+      { index: true, element: <Navigate to="stores" replace /> },
+      { path: "stores", element: <AdminStoreListPage /> },
+      { path: "stores/:storeId", element: <AdminStoreDetailPage /> },
     ],
   },
 ]);
