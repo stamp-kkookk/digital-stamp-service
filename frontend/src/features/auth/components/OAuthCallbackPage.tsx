@@ -12,6 +12,7 @@ import { useExchangeOAuthCode } from '../hooks/useOAuth';
 import { getOAuthState, clearOAuthState } from '../utils/oauthUrl';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { setAuthToken, setUserInfo } from '@/lib/api/tokenManager';
+import { saveOriginStoreId } from '@/hooks/useCustomerNavigate';
 import { kkookkToast } from '@/components/ui/Toast';
 
 export function OAuthCallbackPage() {
@@ -87,7 +88,7 @@ export function OAuthCallbackPage() {
 
         if (role === 'CUSTOMER') {
           if (storeId) {
-            sessionStorage.setItem('origin_store_id', storeId);
+            saveOriginStoreId(storeId);
           }
           navigate('/customer/wallet', { replace: true });
         } else if (role === 'OWNER') {
