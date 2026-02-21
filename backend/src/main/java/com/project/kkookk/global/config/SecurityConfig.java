@@ -1,6 +1,11 @@
 package com.project.kkookk.global.config;
 
 import com.project.kkookk.global.security.JwtAuthenticationFilter;
+import com.project.kkookk.oauth.config.CustomOAuth2AuthorizationRequestResolver;
+import com.project.kkookk.oauth.config.HttpCookieOAuth2AuthorizationRequestRepository;
+import com.project.kkookk.oauth.config.OAuth2LoginFailureHandler;
+import com.project.kkookk.oauth.config.OAuth2LoginSuccessHandler;
+import com.project.kkookk.oauth.service.CustomOAuth2UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +28,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOAuth2AuthorizationRequestResolver authorizationRequestResolver;
+    private final HttpCookieOAuth2AuthorizationRequestRepository
+            cookieAuthorizationRequestRepository;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oauth2LoginFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,6 +61,26 @@ public class SecurityConfig {
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())
+                .oauth2Login(
+                        oauth2 ->
+                                oauth2.authorizationEndpoint(
+                                                endpoint ->
+                                                        endpoint.baseUri(
+                                                                        "/api/public/oauth2/authorization")
+                                                                .authorizationRequestResolver(
+                                                                        authorizationRequestResolver)
+                                                                .authorizationRequestRepository(
+                                                                        cookieAuthorizationRequestRepository))
+                                        .redirectionEndpoint(
+                                                redirect ->
+                                                        redirect.baseUri(
+                                                                "/api/public/oauth2/callback/*"))
+                                        .userInfoEndpoint(
+                                                userInfo ->
+                                                        userInfo.userService(
+                                                                customOAuth2UserService))
+                                        .successHandler(oauth2LoginSuccessHandler)
+                                        .failureHandler(oauth2LoginFailureHandler))
                 .exceptionHandling(
                         ex ->
                                 ex.authenticationEntryPoint(
