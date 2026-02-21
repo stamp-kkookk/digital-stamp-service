@@ -22,7 +22,7 @@ export function DesignElementRenderer({ element }: DesignElementRendererProps) {
           fontSize={style.fontSize || '4'}
           fontWeight={style.fontWeight || 'normal'}
           fill={style.fill || '#333'}
-          textAnchor={style.textAnchor || 'start'}
+          textAnchor={(style.textAnchor as 'start' | 'middle' | 'end') || 'start'}
           dominantBaseline="central"
           fontFamily={style.fontFamily}
           textRendering="optimizeLegibility"

@@ -321,8 +321,8 @@ export function StampCardCarousel({
                                     {/* 앞면 */}
                                     <div style={{ backfaceVisibility: 'hidden' }}>
                                         {(() => {
-                                            const v2Design = isDesignV2(card.designJsonRaw)
-                                                ? parseDesignJsonV2(card.designJsonRaw!)
+                                            const v2Design = isDesignV2(card.designJsonRaw ?? null)
+                                                ? parseDesignJsonV2(card.designJsonRaw ?? null)
                                                 : null;
                                             if (v2Design) return <StampCardFrontV2 design={v2Design} />;
                                             return <StampCardFront card={card} />;
@@ -338,8 +338,8 @@ export function StampCardCarousel({
                                         }}
                                     >
                                         {(() => {
-                                            const v2Design = isDesignV2(card.designJsonRaw)
-                                                ? parseDesignJsonV2(card.designJsonRaw!)
+                                            const v2Design = isDesignV2(card.designJsonRaw ?? null)
+                                                ? parseDesignJsonV2(card.designJsonRaw ?? null)
                                                 : null;
                                             if (v2Design) {
                                                 return (
