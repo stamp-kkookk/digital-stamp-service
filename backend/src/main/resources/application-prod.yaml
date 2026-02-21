@@ -25,19 +25,19 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
-            redirect-uri: "{baseUrl}/api/public/oauth2/callback/{registrationId}"
+            redirect-uri: "${FRONTEND_URL}/api/public/oauth2/callback/{registrationId}"
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/api/public/oauth2/callback/{registrationId}"
+            redirect-uri: "${FRONTEND_URL}/api/public/oauth2/callback/{registrationId}"
             client-authentication-method: client_secret_post
             scope: profile_nickname
           naver:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
             authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/api/public/oauth2/callback/{registrationId}"
+            redirect-uri: "${FRONTEND_URL}/api/public/oauth2/callback/{registrationId}"
             client-authentication-method: client_secret_post
             scope: name, email
         provider:
