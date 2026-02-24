@@ -14,6 +14,7 @@ import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.domain.WalletReward;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +57,12 @@ public class CustomerRedeemService {
         }
 
         // 5. 상태 전이 (AVAILABLE → REDEEMED)
-        reward.redeem();
+        try {
+            reward.redeem();
+            walletRewardRepository.saveAndFlush(reward);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new BusinessException(ErrorCode.REWARD_NOT_AVAILABLE);
+        }
 
         // 6. 원장 적재
         RedeemEvent event =
