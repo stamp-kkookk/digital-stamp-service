@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,6 +56,8 @@ public class Store extends BaseTimeEntity {
 
     @Column(nullable = false, name = "owner_account_id")
     private Long ownerAccountId;
+
+    @Version private Long version;
 
     protected Store() {}
 
