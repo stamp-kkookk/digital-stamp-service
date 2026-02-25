@@ -74,6 +74,7 @@ public class CustomerWalletService {
 
     @Transactional
     public void ensureWalletStampCardForStore(Long walletId, Long storeId) {
+        customerWalletRepository.findByIdWithLock(walletId);
         ensureWalletStampCardExists(walletId, storeId);
     }
 
