@@ -1,5 +1,6 @@
 package com.project.kkookk.stampcard.controller;
 
+import com.project.kkookk.global.security.OwnerPrincipal;
 import com.project.kkookk.stampcard.controller.dto.CreateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.StampCardListResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,8 +39,11 @@ public class StampCardController implements StampCardApi {
     @Override
     @PostMapping
     public ResponseEntity<StampCardResponse> create(
-            @PathVariable Long storeId, @Valid @RequestBody CreateStampCardRequest request) {
-        StampCardResponse response = stampCardService.create(storeId, request);
+            @PathVariable Long storeId,
+            @Valid @RequestBody CreateStampCardRequest request,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StampCardResponse response =
+                stampCardService.create(principal.getOwnerId(), storeId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -48,16 +53,20 @@ public class StampCardController implements StampCardApi {
             @PathVariable Long storeId,
             @RequestParam(required = false) StampCardStatus status,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-                    Pageable pageable) {
-        StampCardListResponse response = stampCardService.getList(storeId, status, pageable);
+                    Pageable pageable,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StampCardListResponse response =
+                stampCardService.getList(principal.getOwnerId(), storeId, status, pageable);
         return ResponseEntity.ok(response);
     }
 
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<StampCardResponse> getById(
-            @PathVariable Long storeId, @PathVariable Long id) {
-        StampCardResponse response = stampCardService.getById(storeId, id);
+            @PathVariable Long storeId,
+            @PathVariable Long id,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StampCardResponse response = stampCardService.getById(principal.getOwnerId(), storeId, id);
         return ResponseEntity.ok(response);
     }
 
@@ -66,8 +75,10 @@ public class StampCardController implements StampCardApi {
     public ResponseEntity<StampCardResponse> update(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardRequest request) {
-        StampCardResponse response = stampCardService.update(storeId, id, request);
+            @Valid @RequestBody UpdateStampCardRequest request,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StampCardResponse response =
+                stampCardService.update(principal.getOwnerId(), storeId, id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -76,15 +87,20 @@ public class StampCardController implements StampCardApi {
     public ResponseEntity<StampCardResponse> updateStatus(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardStatusRequest request) {
-        StampCardResponse response = stampCardService.updateStatus(storeId, id, request);
+            @Valid @RequestBody UpdateStampCardStatusRequest request,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        StampCardResponse response =
+                stampCardService.updateStatus(principal.getOwnerId(), storeId, id, request);
         return ResponseEntity.ok(response);
     }
 
     @Override
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long storeId, @PathVariable Long id) {
-        stampCardService.delete(storeId, id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long storeId,
+            @PathVariable Long id,
+            @AuthenticationPrincipal OwnerPrincipal principal) {
+        stampCardService.delete(principal.getOwnerId(), storeId, id);
         return ResponseEntity.noContent().build();
     }
 }

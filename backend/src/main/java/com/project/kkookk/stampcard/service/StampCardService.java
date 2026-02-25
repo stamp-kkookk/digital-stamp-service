@@ -2,6 +2,8 @@ package com.project.kkookk.stampcard.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.stampcard.controller.dto.CreateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.StampCardListResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
@@ -16,6 +18,7 @@ import com.project.kkookk.stampcard.service.exception.StampCardDeleteNotAllowedE
 import com.project.kkookk.stampcard.service.exception.StampCardNotFoundException;
 import com.project.kkookk.stampcard.service.exception.StampCardStatusInvalidException;
 import com.project.kkookk.stampcard.service.exception.StampCardUpdateNotAllowedException;
+import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,19 +33,24 @@ public class StampCardService {
 
     private final StampCardRepository stampCardRepository;
     private final WalletStampCardRepository walletStampCardRepository;
+    private final StoreRepository storeRepository;
     private final ObjectMapper objectMapper;
 
     public StampCardService(
             StampCardRepository stampCardRepository,
             WalletStampCardRepository walletStampCardRepository,
+            StoreRepository storeRepository,
             ObjectMapper objectMapper) {
         this.stampCardRepository = stampCardRepository;
         this.walletStampCardRepository = walletStampCardRepository;
+        this.storeRepository = storeRepository;
         this.objectMapper = objectMapper;
     }
 
     @Transactional
-    public StampCardResponse create(Long storeId, CreateStampCardRequest request) {
+    public StampCardResponse create(Long ownerId, Long storeId, CreateStampCardRequest request) {
+        validateStoreOwnership(storeId, ownerId);
+
         log.info("Creating stamp card for store: {}", storeId);
         validateCustomDesignJson(request.designType(), request.designJson());
 
@@ -65,7 +73,10 @@ public class StampCardService {
         return StampCardResponse.from(saved, false);
     }
 
-    public StampCardListResponse getList(Long storeId, StampCardStatus status, Pageable pageable) {
+    public StampCardListResponse getList(
+            Long ownerId, Long storeId, StampCardStatus status, Pageable pageable) {
+        validateStoreOwnership(storeId, ownerId);
+
         Page<StampCard> page;
         if (status != null) {
             page = stampCardRepository.findByStoreIdAndStatus(storeId, status, pageable);
@@ -77,14 +88,19 @@ public class StampCardService {
         return StampCardListResponse.from(summaryPage);
     }
 
-    public StampCardResponse getById(Long storeId, Long id) {
+    public StampCardResponse getById(Long ownerId, Long storeId, Long id) {
+        validateStoreOwnership(storeId, ownerId);
+
         StampCard stampCard = findByIdAndStoreId(id, storeId);
         boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
         return StampCardResponse.from(stampCard, issued);
     }
 
     @Transactional
-    public StampCardResponse update(Long storeId, Long id, UpdateStampCardRequest request) {
+    public StampCardResponse update(
+            Long ownerId, Long storeId, Long id, UpdateStampCardRequest request) {
+        validateStoreOwnership(storeId, ownerId);
+
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
         boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
@@ -109,10 +125,20 @@ public class StampCardService {
 
     @Transactional
     public StampCardResponse updateStatus(
-            Long storeId, Long id, UpdateStampCardStatusRequest request) {
+            Long ownerId, Long storeId, Long id, UpdateStampCardStatusRequest request) {
+        StampCardStatus newStatus = request.status();
+
+        // ACTIVE 전이 시: Store 비관적 락으로 동일 매장 요청 직렬화 + 소유권 검증
+        if (newStatus == StampCardStatus.ACTIVE) {
+            storeRepository
+                    .findByIdAndOwnerAccountIdWithLock(storeId, ownerId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.STORE_ACCESS_DENIED));
+        } else {
+            validateStoreOwnership(storeId, ownerId);
+        }
+
         StampCard stampCard = findByIdAndStoreId(id, storeId);
         StampCardStatus currentStatus = stampCard.getStatus();
-        StampCardStatus newStatus = request.status();
 
         if (!currentStatus.canTransitionTo(newStatus)) {
             throw new StampCardStatusInvalidException(currentStatus, newStatus);
@@ -138,7 +164,9 @@ public class StampCardService {
     }
 
     @Transactional
-    public void delete(Long storeId, Long id) {
+    public void delete(Long ownerId, Long storeId, Long id) {
+        validateStoreOwnership(storeId, ownerId);
+
         StampCard stampCard = findByIdAndStoreId(id, storeId);
 
         boolean issued = walletStampCardRepository.existsByStampCardId(stampCard.getId());
@@ -148,6 +176,12 @@ public class StampCardService {
 
         stampCardRepository.delete(stampCard);
         log.info("Deleted stamp card: {}", id);
+    }
+
+    private void validateStoreOwnership(Long storeId, Long ownerId) {
+        storeRepository
+                .findByIdAndOwnerAccountId(storeId, ownerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_ACCESS_DENIED));
     }
 
     private void validateCustomDesignJson(StampCardDesignType designType, String designJson) {

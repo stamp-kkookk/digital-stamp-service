@@ -103,7 +103,7 @@ class StampCardControllerTest {
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
-        given(stampCardService.create(eq(storeId), any(CreateStampCardRequest.class)))
+        given(stampCardService.create(eq(1L), eq(storeId), any(CreateStampCardRequest.class)))
                 .willReturn(response);
 
         // when & then
@@ -171,7 +171,7 @@ class StampCardControllerTest {
         StampCardListResponse response =
                 StampCardListResponse.from(new PageImpl<>(List.of(summary)));
 
-        given(stampCardService.getList(eq(storeId), eq(null), any())).willReturn(response);
+        given(stampCardService.getList(eq(1L), eq(storeId), eq(null), any())).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/owner/stores/{storeId}/stamp-cards", storeId))
@@ -199,7 +199,7 @@ class StampCardControllerTest {
         StampCardListResponse response =
                 StampCardListResponse.from(new PageImpl<>(List.of(summary)));
 
-        given(stampCardService.getList(eq(storeId), eq(StampCardStatus.ACTIVE), any()))
+        given(stampCardService.getList(eq(1L), eq(storeId), eq(StampCardStatus.ACTIVE), any()))
                 .willReturn(response);
 
         // when & then
@@ -233,7 +233,7 @@ class StampCardControllerTest {
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
-        given(stampCardService.getById(storeId, cardId)).willReturn(response);
+        given(stampCardService.getById(1L, storeId, cardId)).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/owner/stores/{storeId}/stamp-cards/{id}", storeId, cardId))
@@ -249,7 +249,7 @@ class StampCardControllerTest {
         Long storeId = 1L;
         Long cardId = 999L;
 
-        given(stampCardService.getById(storeId, cardId))
+        given(stampCardService.getById(1L, storeId, cardId))
                 .willThrow(new StampCardNotFoundException());
 
         // when & then
@@ -292,7 +292,9 @@ class StampCardControllerTest {
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
-        given(stampCardService.update(eq(storeId), eq(cardId), any(UpdateStampCardRequest.class)))
+        given(
+                        stampCardService.update(
+                                eq(1L), eq(storeId), eq(cardId), any(UpdateStampCardRequest.class)))
                 .willReturn(response);
 
         // when & then
@@ -333,7 +335,10 @@ class StampCardControllerTest {
 
         given(
                         stampCardService.updateStatus(
-                                eq(storeId), eq(cardId), any(UpdateStampCardStatusRequest.class)))
+                                eq(1L),
+                                eq(storeId),
+                                eq(cardId),
+                                any(UpdateStampCardStatusRequest.class)))
                 .willReturn(response);
 
         // when & then
@@ -359,7 +364,10 @@ class StampCardControllerTest {
 
         given(
                         stampCardService.updateStatus(
-                                eq(storeId), eq(cardId), any(UpdateStampCardStatusRequest.class)))
+                                eq(1L),
+                                eq(storeId),
+                                eq(cardId),
+                                any(UpdateStampCardStatusRequest.class)))
                 .willThrow(
                         new StampCardStatusInvalidException(
                                 StampCardStatus.ARCHIVED, StampCardStatus.ACTIVE));
@@ -387,7 +395,10 @@ class StampCardControllerTest {
 
         given(
                         stampCardService.updateStatus(
-                                eq(storeId), eq(cardId), any(UpdateStampCardStatusRequest.class)))
+                                eq(1L),
+                                eq(storeId),
+                                eq(cardId),
+                                any(UpdateStampCardStatusRequest.class)))
                 .willThrow(new StampCardAlreadyActiveException());
 
         // when & then
@@ -409,7 +420,7 @@ class StampCardControllerTest {
         Long storeId = 1L;
         Long cardId = 1L;
 
-        doNothing().when(stampCardService).delete(storeId, cardId);
+        doNothing().when(stampCardService).delete(1L, storeId, cardId);
 
         // when & then
         mockMvc.perform(delete("/api/owner/stores/{storeId}/stamp-cards/{id}", storeId, cardId))
@@ -425,7 +436,7 @@ class StampCardControllerTest {
 
         doThrow(new StampCardDeleteNotAllowedException())
                 .when(stampCardService)
-                .delete(storeId, cardId);
+                .delete(1L, storeId, cardId);
 
         // when & then
         mockMvc.perform(delete("/api/owner/stores/{storeId}/stamp-cards/{id}", storeId, cardId))

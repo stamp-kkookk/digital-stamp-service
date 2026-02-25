@@ -18,8 +18,11 @@ import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
+import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletReward;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
+import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +41,7 @@ class CustomerRedeemServiceTest {
 
     @Mock private RedeemEventRepository redeemEventRepository;
     @Mock private WalletRewardRepository walletRewardRepository;
+    @Mock private CustomerWalletRepository customerWalletRepository;
     @Mock private StoreRepository storeRepository;
     @Mock private StampCardRepository stampCardRepository;
 
@@ -60,6 +64,7 @@ class CustomerRedeemServiceTest {
             StampCard stampCard = createStampCard("아메리카노 1잔");
             RedeemEvent savedEvent = createRedeemEvent();
 
+            mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.of(reward));
             given(storeRepository.findById(STORE_ID)).willReturn(Optional.of(store));
@@ -78,10 +83,23 @@ class CustomerRedeemServiceTest {
         }
 
         @Test
+        @DisplayName("차단된 지갑으로 리워드 사용 실패")
+        void redeemReward_Fail_WalletBlocked() {
+            // given
+            RedeemRewardRequest request = new RedeemRewardRequest(REWARD_ID);
+            mockBlockedWallet();
+
+            // when & then
+            assertThatThrownBy(() -> customerRedeemService.redeemReward(WALLET_ID, request))
+                    .isInstanceOf(CustomerWalletBlockedException.class);
+        }
+
+        @Test
         @DisplayName("리워드를 찾을 수 없으면 REWARD_NOT_FOUND")
         void redeemReward_RewardNotFound() {
             // given
             RedeemRewardRequest request = new RedeemRewardRequest(REWARD_ID);
+            mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.empty());
 
@@ -100,6 +118,7 @@ class CustomerRedeemServiceTest {
             WalletReward reward = createAvailableReward();
             Store store = createStore(StoreStatus.SUSPENDED);
 
+            mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.of(reward));
             given(storeRepository.findById(STORE_ID)).willReturn(Optional.of(store));
@@ -119,6 +138,7 @@ class CustomerRedeemServiceTest {
             WalletReward reward = createRedeemedReward();
             Store store = createLiveStore();
 
+            mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.of(reward));
             given(storeRepository.findById(STORE_ID)).willReturn(Optional.of(store));
@@ -138,6 +158,7 @@ class CustomerRedeemServiceTest {
             WalletReward reward = createAvailableReward();
             Store store = createLiveStore();
 
+            mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.of(reward));
             given(storeRepository.findById(STORE_ID)).willReturn(Optional.of(store));
@@ -206,5 +227,28 @@ class CustomerRedeemServiceTest {
                         .build();
         ReflectionTestUtils.setField(event, "id", 1L);
         return event;
+    }
+
+    private void mockActiveWallet() {
+        CustomerWallet wallet =
+                CustomerWallet.builder()
+                        .phone("010-0000-0000")
+                        .name("테스트")
+                        .nickname("test")
+                        .build();
+        ReflectionTestUtils.setField(wallet, "id", WALLET_ID);
+        given(customerWalletRepository.findById(WALLET_ID)).willReturn(Optional.of(wallet));
+    }
+
+    private void mockBlockedWallet() {
+        CustomerWallet wallet =
+                CustomerWallet.builder()
+                        .phone("010-0000-0000")
+                        .name("테스트")
+                        .nickname("test")
+                        .build();
+        ReflectionTestUtils.setField(wallet, "id", WALLET_ID);
+        wallet.block();
+        given(customerWalletRepository.findById(WALLET_ID)).willReturn(Optional.of(wallet));
     }
 }
