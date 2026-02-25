@@ -288,7 +288,7 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(stampCard));
-        given(stampCardRepository.findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
+        given(stampCardRepository.findByStoreIdAndStatusWithLock(storeId, StampCardStatus.ACTIVE))
                 .willReturn(Optional.empty());
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
@@ -318,7 +318,7 @@ class StampCardServiceTest {
 
         given(stampCardRepository.findByIdAndStoreId(cardId, storeId))
                 .willReturn(Optional.of(archivedCard));
-        given(stampCardRepository.findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE))
+        given(stampCardRepository.findByStoreIdAndStatusWithLock(storeId, StampCardStatus.ACTIVE))
                 .willReturn(Optional.of(existingActive));
         given(walletStampCardRepository.existsByStampCardId(archivedCard.getId()))
                 .willReturn(false);

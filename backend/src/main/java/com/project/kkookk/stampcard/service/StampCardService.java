@@ -120,7 +120,7 @@ public class StampCardService {
 
         if (newStatus == StampCardStatus.ACTIVE) {
             stampCardRepository
-                    .findByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE)
+                    .findByStoreIdAndStatusWithLock(storeId, StampCardStatus.ACTIVE)
                     .ifPresent(
                             activeCard -> {
                                 activeCard.updateStatus(StampCardStatus.ARCHIVED);
