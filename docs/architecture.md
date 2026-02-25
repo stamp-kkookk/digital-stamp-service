@@ -5,29 +5,29 @@
 ## Overview
 
 ```
-┌──────────────────┐     ┌──────────────────┐
-│  Customer Mobile │     │  Owner Desktop   │
-│  (React PWA)     │     │  (React SPA)     │
-└────────┬─────────┘     └────────┬─────────┘
-         │                        │
-         └────────────────────────┘
-                    │ HTTP (JSON)
-                        ┌─────────▼──────────┐
-                        │  Frontend (Vite)   │
-                        │  port 5173         │
-                        │  /api → :8080 proxy│
-                        └─────────┬──────────┘
-                                  │
-                        ┌─────────▼──────────┐
-                        │  Spring Boot API   │
-                        │  port 8080         │
-                        │  JWT + Security    │
-                        └──┬──────────────┬──┘
-                           │              │
-                 ┌─────────▼──────────┐   │  ┌──────────────────┐
-                 │  MySQL 8.0         │   └──│ Kakao Place API  │
-                 │  port 3306         │      │ (장소 검색)       │
-                 └────────────────────┘      └──────────────────┘
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│  Customer Mobile │  │  Owner Desktop   │  │  Admin Desktop   │
+│  (React, Mobile) │  │  (React SPA)     │  │  (React SPA)     │
+└────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘
+         │                     │                      │
+         └─────────────────────┴──────────────────────┘
+                               │ HTTP (JSON)
+                     ┌─────────▼──────────┐
+                     │  Frontend (Vite)   │
+                     │  port 5173         │
+                     │  /api → :8080 proxy│
+                     └─────────┬──────────┘
+                               │
+                     ┌─────────▼──────────┐
+                     │  Spring Boot API   │
+                     │  port 8080         │
+                     │  JWT + Security    │
+                     └──┬──────────────┬──┘
+                        │              │
+              ┌─────────▼──────────┐   │  ┌──────────────────┐
+              │  MySQL 8.0         │   └──│ Kakao Place API  │
+              │  port 3306         │      │ (장소 검색)       │
+              └────────────────────┘      └──────────────────┘
 ```
 
 ## Authentication (OAuth 전용)
@@ -88,7 +88,7 @@ OwnerAccount (admin: boolean)
  └─ Store (1:N)
      ├─ placeRef, iconImageBase64, category, description
      ├─ StampCard (1:N, max 1 ACTIVE per Store)
-     │   └─ designType: COLOR | IMAGE | PUZZLE
+     │   └─ designType: COLOR | IMAGE | PUZZLE | CUSTOM
      ├─ StoreAuditLog (1:N) - 상태 변경 이력
      ├─ IssuanceRequest (via WalletStampCard)
      └─ StampMigration (via WalletStampCard)
@@ -105,8 +105,8 @@ CustomerWallet
 
 | Enum | 값 | 전이 |
 |------|---|------|
-| StampCardStatus | `DRAFT → ACTIVE → PAUSED → ARCHIVED` | ARCHIVED는 최종 상태 |
-| IssuanceRequestStatus | `PENDING → APPROVED / REJECTED / EXPIRED` | 120s TTL |
+| StampCardStatus | `DRAFT → ACTIVE → ARCHIVED` | DRAFT→ACTIVE/ARCHIVED, ACTIVE→ARCHIVED, ARCHIVED→ACTIVE |
+| IssuanceRequestStatus | `PENDING → APPROVED / REJECTED / EXPIRED / CANCELLED` | 120s TTL, 고객 취소 가능 |
 | StampMigrationStatus | `SUBMITTED → APPROVED / REJECTED / CANCELED` | 수동 승인 |
 | WalletRewardStatus | `AVAILABLE → REDEEMED / EXPIRED` | 리워드 라이프사이클 |
 | WalletStampCardStatus | `ACTIVE → COMPLETED` | 목표 도달 시 완료 |
@@ -207,19 +207,19 @@ Controller (@Valid request)
 
 ### ErrorCode 카테고리
 
-| 카테고리 | 예시 | HTTP |
+| 카테고리 | 코드 | HTTP |
 |---------|------|------|
-| Common | INVALID_INPUT_VALUE, INTERNAL_SERVER_ERROR | 400, 500 |
-| Auth | UNAUTHORIZED, ACCESS_DENIED | 401, 403 |
-| StampCard | STAMP_CARD_NOT_FOUND, STAMP_CARD_ALREADY_ACTIVE | 404, 409 |
-| Store | STORE_NOT_FOUND, STORE_INACTIVE, STORE_NOT_OPERATIONAL, STORE_STATUS_TRANSITION_INVALID, STORE_PLACE_REF_DUPLICATED, STORE_ICON_TOO_LARGE, STORE_PHONE_INVALID | 404, 403, 409, 400, 413 |
+| Common | INVALID_INPUT_VALUE, INTERNAL_SERVER_ERROR, FILE_STORAGE_ERROR, QR_GENERATION_FAILED | 400, 500 |
+| Auth | UNAUTHORIZED, ACCESS_DENIED, REFRESH_TOKEN_INVALID, REFRESH_TOKEN_EXPIRED | 401, 403 |
+| StampCard | STAMP_CARD_NOT_FOUND, STAMP_CARD_ALREADY_ACTIVE, STAMP_CARD_STATUS_INVALID, STAMP_CARD_DELETE_NOT_ALLOWED, STAMP_CARD_ACCESS_DENIED, STAMP_CARD_UPDATE_NOT_ALLOWED, NO_ACTIVE_STAMP_CARD | 400, 403, 404, 409 |
+| Store | STORE_NOT_FOUND, STORE_INACTIVE, STORE_NOT_OPERATIONAL, STORE_STATUS_TRANSITION_INVALID, STORE_PLACE_REF_DUPLICATED, STORE_ICON_TOO_LARGE, STORE_PHONE_INVALID, STORE_UPDATE_NOT_ALLOWED, STORE_ACCESS_DENIED | 400, 403, 404, 409, 413 |
 | Admin | ADMIN_ACCESS_DENIED | 403 |
 | External | KAKAO_API_ERROR | 500 |
-| Issuance | ISSUANCE_REQUEST_NOT_FOUND, ISSUANCE_REQUEST_EXPIRED | 404, 410 |
-| OAuth | OAUTH_CODE_EXCHANGE_FAILED, OAUTH_USERINFO_FAILED, OAUTH_INVALID_TEMP_TOKEN | 502, 401 |
-| Wallet | CUSTOMER_WALLET_NOT_FOUND, CUSTOMER_WALLET_BLOCKED | 404, 403 |
-| Redeem | REWARD_NOT_FOUND, REWARD_EXPIRED | 404, 410 |
-| Migration | MIGRATION_NOT_FOUND, MIGRATION_IMAGE_TOO_LARGE | 404, 413 |
+| Issuance | ISSUANCE_REQUEST_NOT_FOUND, ISSUANCE_REQUEST_NOT_PENDING, ISSUANCE_REQUEST_ALREADY_PENDING, ISSUANCE_ALREADY_PROCESSED, ISSUANCE_REQUEST_EXPIRED | 400, 404, 409, 410 |
+| OAuth | OAUTH_CODE_EXCHANGE_FAILED, OAUTH_USERINFO_FAILED, OAUTH_INVALID_TEMP_TOKEN, OAUTH_EXCHANGE_CODE_INVALID, OAUTH_OWNER_NOT_FOUND | 401, 404, 502 |
+| Wallet | CUSTOMER_WALLET_NOT_FOUND, CUSTOMER_WALLET_BLOCKED, WALLET_STAMP_CARD_NOT_FOUND, WALLET_STAMP_CARD_ACCESS_DENIED, WALLET_PHONE_DUPLICATED, WALLET_NICKNAME_DUPLICATED | 403, 404, 409 |
+| Redeem | REWARD_NOT_FOUND, REWARD_NOT_AVAILABLE, REWARD_EXPIRED | 404, 409, 410 |
+| Migration | MIGRATION_NOT_FOUND, MIGRATION_ALREADY_PENDING, MIGRATION_ALREADY_PROCESSED, MIGRATION_ACCESS_DENIED, MIGRATION_IMAGE_TOO_LARGE | 403, 404, 409, 413 |
 
 ## Feature Package Convention
 

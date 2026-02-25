@@ -1,15 +1,18 @@
 # PRD: 꾸욱(KKOOKK) — POS 연동 없는 디지털 스탬프/리워드 SaaS
 
+> Last Updated: 2026-02-25 | 코드베이스 및 feature-specs 기준 전면 개정
+
 ---
 
 ## 1. 제품 요약
 
 - 꾸욱(KKOOKK)은 카페·소상공인을 위한 **웹 기반 디지털 스탬프/쿠폰 플랫폼**이다.
-- 고객은 앱 설치 없이 QR로 즉시 접속해 적립/리딤을 요청한다.
-- 적립/리딤 확정은 **매장(사장님 계정으로 로그인된 단말) 승인**으로 완료된다.
-- 사장님은 백오피스에서 **StampCard(스탬프 카드) 디자인/규칙 설정** 및 **로그/통계**로 재방문 구조를 만든다.
-- POS 연동 없이도 운영 가능한 “현장 승인형” 스탬프 리워드 SaaS를 목표로 한다.
+- 고객은 **QR로 매장에 진입**한 뒤, **OAuth(Google/Kakao/Naver)**로 인증하여 적립/리딤을 요청한다.
+- 적립/리딤 확정은 **매장(사장님 백오피스)에서의 승인**으로 완료된다.
+- 사장님은 백오피스에서 **StampCard 디자인/규칙 설정**, **적립 승인**, **로그/통계** 기능을 운영한다.
+- POS 연동 없이 운영 가능한 "현장 승인형" 스탬프 리워드 SaaS를 목표로 한다.
 - 도입 초기 전환 장벽을 낮추기 위해 기존 종이 스탬프를 사진으로 등록(수동 반영)하는 마이그레이션 기능을 제공한다.
+- 매장 등록은 **관리자(Admin) 승인제**로 운영하여 품질을 관리한다.
 
 ---
 
@@ -19,36 +22,23 @@
 
 - 적립 요청 → 승인 완료율
 - 리딤 요청 → 사용 완료율
-- 재방문율(D7 / D30)
-- 리워드 사용률(리딤율)
-- 부정 시도 차단율(만료/중복/레이트리밋/스텝업 인증으로 실패한 비율)
-- CS 이슈 해결 리드타임(적립/리딤 누락/이전 등록 처리)
+- 재방문율 (D7 / D30)
+- 리워드 사용률 (리딤율)
+- 부정 시도 차단율 (만료/중복/TTL/멱등성으로 차단된 비율)
+- CS 이슈 해결 리드타임 (적립/리딤 누락, 이전 등록 처리)
 
 ### 2.2 퍼널 KPI
 
-1. 매장 진입(Scan)
-2. (최초 1회) OTP 완료 + 프로필 입력
-3. 지갑 생성/접속
+1. 매장 진입 (QR Scan)
+2. (최초 1회) OAuth 인증 + 프로필 입력 (이름, 닉네임, 전화번호)
+3. 지갑 생성 / 접속
 4. 적립 요청 생성
 5. 매장 승인
 6. 적립 완료
-7. 리딤(사용하기)
-8. **OTP(스텝업 인증) 완료**
-9. 2차 확인 모달 → 사장님 확인(고객폰에서 누름)
-10. 사용 완료
-11. (선택) 기존 종이 스탬프 사진 등록 → 수동 반영 완료
-
-**[보조 퍼널 — 툴바(민감 기능) 접근]**
-
-A1. 툴바 접근(아이콘/탭 클릭)
-
-A2. **OTP(스텝업) 완료 → “툴바 접근 토큰(StepUp Token)” 발급**
-
-A3. 툴바 탭 진입
-
-- 스탬프 적립내역/리딤 사용내역
-- 스탬프 마이그레이션
-- 리딤 보관함
+7. 리워드 달성 → 리딤(사용하기)
+8. 확인 모달 → 사장님 확인 (고객 폰에서 누름)
+9. 사용 완료
+10. (선택) 기존 종이 스탬프 사진 등록 → 수동 반영 완료
 
 ---
 
@@ -57,23 +47,31 @@ A3. 툴바 탭 진입
 ### 3.1 테넌트 구조
 
 - **OwnerAccount(사장님 계정)** → **Store(매장)** N개 → **StampCard** N개
-- 고객은 **Wallet(지갑)** 단위로 여러 Store/StampCard를 보유
+- 고객은 **CustomerWallet(지갑)** 단위로 여러 Store/StampCard를 보유
+- **OAuthAccount**가 양방향 링크로 Owner와 Customer를 연결 (동일 소셜 계정으로 양쪽 역할 가능)
 
 ### 3.2 사용자 유형
 
-- **사장님(Owner)**: 백오피스 + 매장 단말에서 운영/승인 수행
-- **고객(Customer)**: QR로 접속해 조회/적립 요청/리딤 요청 수행
+| 유형 | 인증 | 역할 | 주요 동작 |
+|------|------|------|----------|
+| **사장님(Owner)** | OAuth (Google/Kakao/Naver) | `ROLE_OWNER` | 매장 관리, StampCard 운영, 적립 승인, 마이그레이션 승인, 통계 조회 |
+| **고객(Customer)** | OAuth (Google/Kakao/Naver) | `ROLE_CUSTOMER` | 적립 요청, 리딤 요청, 마이그레이션 신청, 지갑 조회 |
+| **관리자(Admin)** | OAuth (admin 계정) | `ROLE_ADMIN` | 매장 승인/정지, 감사 로그 조회 |
 
-> 매장 운영은 “사장님 계정 1개”로 통합(직원도 동일 계정 사용)
+> 매장 운영은 "사장님 계정 1개"로 통합 (직원도 동일 계정 사용)
 
 ---
 
 ## 4. 플랫폼 구성
 
-- 고객 Web(모바일)
-- 사장님 백오피스 Web(PC)
-- 매장 단말 Web(태블릿/PC/스마트폰)
-  - 사장님 계정으로 로그인해 승인 화면을 상시 띄워 운영
+| 플랫폼 | 환경 | 용도 |
+|--------|------|------|
+| **고객 Web** | 모바일 퍼스트 | QR 진입 → 지갑 → 적립/리딤 |
+| **사장님 백오피스 Web** | 데스크톱 퍼스트 | 매장 관리, StampCard 운영, 적립 승인, 통계 |
+| **관리자 Web** | 데스크톱 | 매장 승인/정지, 감사 로그 |
+
+- 적립 승인은 사장님 백오피스의 승인 화면에서 처리 (별도 터미널 없음)
+- 리딤은 고객 폰 화면에서 사장님이 직접 확인 버튼을 누르는 방식
 
 ---
 
@@ -81,337 +79,362 @@ A3. 툴바 탭 진입
 
 ### 5.1 사장님 온보딩 (Backoffice)
 
-1. 사장님 회원가입/로그인
-2. 매장 등록 (N개 가능)
-3. **StampCard 생성**(템플릿 → 디자인 → 규칙)
-4. 매장 고정 QR 생성(storeId 기반)
-5. 매장 단말 로그인 → 승인 화면 상시 운영
-6. 테스트 적립/리딤 시뮬레이션
+1. OAuth 회원가입 (Google/Kakao/Naver) → 이름, 닉네임, 전화번호 입력
+2. 매장 등록 (카카오 장소 검색으로 placeRef 연동, N개 가능)
+3. **Admin 승인 대기** (DRAFT → Admin이 LIVE로 전환)
+4. **StampCard 생성** (디자인 타입 선택 → 규칙 설정 → DRAFT → ACTIVE 활성화)
+5. 매장 고정 QR 생성 (storeId 기반)
+6. 백오피스 승인 화면에서 적립 승인 운영 시작
 
 ### 5.2 고객 플로우 (Customer)
 
-- QR → 매장 StampCard로 즉시 접근
-- (최초 1회) 전화번호 OTP + 이름 + 닉네임 입력 → 지갑 생성
-- 이후 재방문/조회: 전화번호 + 이름 → 지갑 접근(조회 가능)
-- 지갑 진입 시 현재 매장 Active StampCard가 기본 노출되며, 보유한 다른 StampCard는 좌/우 슬라이딩 또는 ‘전체 카드 보기(목록 UI)’로 탐색 가능
-- 적립하기 → 승인 대기 → 매장 승인 → 적립 완료
-- 리워드 달성 시 사용하기 → **리딤 시 토큰 인증 필요** → 2차 확인 모달 → 사장님 확인 → 사용 완료
-- (선택) **기존 종이 스탬프 사진 등록** → 운영측(우리/사장님)이 확인 후 **스탬프 반영**
-- 고객은 지갑 내 “툴바”를 통해 아래 탭에 접근할 수 있다:
-  - **스탬프 적립내역/리딤 사용내역**
-  - **스탬프 마이그레이션**
-  - **리딤 보관함**
-- **툴바 진입/탭 접근은 OTP(스텝업) 인증 필수**이며, 인증 성공 시 **툴바 접근에 사용하는 토큰(StepUp Token)** 이 발급된다.
-- StepUp Token 유효 시간 내에는 툴바 탭 이동 시 재인증 없이 접근 가능하며, 만료 시 재인증이 필요하다.
+1. QR → 매장 페이지로 즉시 접근
+2. (최초 1회) OAuth 로그인 → 이름 + 닉네임 + 전화번호 입력 → 지갑 생성
+3. 이후 재방문: OAuth 로그인 → 지갑 접근 (로그인 시 해당 매장의 Active StampCard 자동 등록)
+4. 지갑 진입 시 현재 매장의 Active StampCard가 기본 노출, 보유한 다른 StampCard는 목록으로 탐색 가능
+5. 적립하기 → 승인 대기 (폴링) → 매장 승인 → 적립 완료
+6. 리워드 달성 시 자동 발급 → 사용하기 → 확인 모달 → 사장님 확인 → 사용 완료
+7. (선택) 기존 종이 스탬프 사진 등록 → 사장님 확인 후 스탬프 반영
+8. 스탬프 적립내역 / 리딤 사용내역 / 리워드 보관함 조회
 
 ---
 
 # 6. 기능 요구사항 (Functional Requirements)
 
-## 6.1 고객 Web — “스탬프 지갑”
+## 6.1 고객 Web — "스탬프 지갑"
 
-### 6.1.1 진입/인증
+### 6.1.1 진입 / 인증
 
-### QR 진입
+#### QR 진입
 
-- QR 링크는 `storeId` 포함
-- 진입 시 해당 매장의 Active StampCard를 기본 표시
+- QR 링크는 `storeId` 포함 (`/stores/:storeId/customer`)
+- 진입 시 해당 매장의 공개 정보(매장명, 아이콘, Active StampCard) 표시
+- 비로그인 상태에서도 매장 정보 조회 가능 (Public API)
 
-### 최초 1회 등록(강화)
+#### OAuth 인증
 
-- 입력: 전화번호 + OTP + 이름 + 닉네임
-- 생성: Wallet 생성
+- **지원 Provider**: Google, Kakao, Naver
+- **인증 흐름**:
+  1. Frontend → OAuth Provider 인증 (Consent Screen)
+  2. Provider → Frontend 콜백 (authorization code)
+  3. Frontend → `POST /api/public/oauth/login` (provider, code, redirectUri, role=CUSTOMER)
+  4. Backend → Provider API로 사용자 정보 조회
+  5. 기존 사용자: JWT + Refresh Token 발급
+  6. 신규 사용자: Temp Token 발급 (10분 TTL) → 추가 정보 입력 화면으로 이동
 
-### 이후 지갑 접근(조회 목적)
+#### 최초 1회 가입 완료
 
-- 입력: **전화번호 + 이름**
-- 방어(필수):
-  - IP/디바이스/번호 레이트리밋
-  - 실패 누적 시 쿨다운
-  - 의심 패턴 시 “추가 인증 필요” 안내
+- OAuth 인증 후 Temp Token을 가지고 추가 정보 입력:
+  - 이름, 닉네임(중복 체크), 전화번호(중복 체크)
+- `POST /api/public/oauth/complete-customer-signup` → CustomerWallet 생성 + JWT 발급
+- 로그인 시 현재 매장의 Active StampCard가 있으면 WalletStampCard 자동 생성
 
-### 스텝업 인증 정책(필수)
+#### 토큰 관리
 
-- 아래 액션은 **항상 OTP 인증 완료 상태(스텝업)** 에서만 가능:
-  - **리워드 사용(리딤)**
-  - **툴바 기능 접근(민감 기능 게이트)**
-    - 스탬프 적립내역/리딤 사용내역
-    - 스탬프 마이그레이션
-    - 리딤 보관함
-  - (옵션) 지갑 내 개인정보 수정, 계정 복구
-- OTP 인증 성공 시 서버는 **StepUp Token(툴바/민감기능 접근 토큰)** 을 발급한다.
-  - 이 토큰은 민감 기능 API 호출 시 함께 전달되어야 하며, **짧은 TTL로 만료**된다(예: 10분).
-  - 만료 시: 툴바 접근/리딤/마이그레이션 등 민감 기능 재시도 시 **OTP 재인증**으로 StepUp Token 재발급
+| 토큰 | TTL | 용도 |
+|------|-----|------|
+| Customer JWT | 1시간 | `/api/customer/**` API 접근 |
+| Refresh Token | 7일 | JWT 갱신 (`POST /api/auth/refresh`) |
+| Temp Token | 10분 | 가입 완료 전 임시 토큰 |
 
 ---
 
 ### 6.1.2 지갑 홈
 
-- StampCard 목록(진행률, 만료, 다음 보상)
-- (선택)리워드 보관함(사용 가능/만료 임박)
-- (선택)적립/사용 히스토리
-- (선택) “기존 종이 스탬프 등록하기” 진입 버튼
-- **StampCard 탐색 UI/UX**
-  - 고객이 스탬프 지갑에 진입하면, 기본으로 **현재 매장(storeId)의 Active StampCard**를 메인 카드로 노출한다.
-  - 동시에 고객이 보유한 **다른 매장의 StampCard들도 좌/우 슬라이딩(캐러셀)으로 탐색 가능**하도록 구성한다.
-    - UX 의도: “스탬프 카드”라는 물성(카드형 UI)을 살려, 지갑을 넘기듯 탐색하게 한다.
-    - 카드에 표시되는 최소 정보: 매장명, 진행률(현재 스탬프 수/목표), 다음 리워드, 만료(있다면), CTA(적립/사용 가능 여부)
-  - 슬라이딩 시 해당 카드의 컨텍스트(storeId, stampCardId)가 전환
-- 고객이 보유한 StampCard가 많아질 경우 캐러셀만으로 탐색이 비효율적일 수 있으므로, StampCard를 직관적으로 한 번에 볼 수 있는 “목록 보기 UI”를 제공
-- 지갑 홈에서는 **카드 캐러셀(1번 방식)을 기본 탐색 UI**로 유지하되, 아래 중 1개 이상의 방식으로 목록 UI에 접근할 수 있어야 한다(택1 또는 병행):
-  - 캐러셀 상단 우측 **“전체 카드 보기”** 버튼(아이콘: grid/list)
-- 목록 보기 UI에서 제공할 것(최소):
-  - 매장명/카드 썸네일/진행률
-  - 정렬(최근 사용/진행률 높은 순/가까운 만료)
-  - 검색(매장명)
-  - 카드 선택 시 해당 카드로 이동(캐러셀 뷰로 포커스 이동 또는 카드 상세로 이동)
-- **툴바(민감 기능 게이트)**
-  - 지갑 화면에는 “툴바(민감 기능)” 진입 UI(예: 상단 아이콘/하단 탭)를 제공한다.
-  - 툴바 진입 시 **StepUp Token 유무를 확인**하며, 미보유/만료 상태라면 OTP 인증으로 이동한다.
-  - 툴바 탭 구성:
-    1. **스탬프 적립내역/리딤 사용내역**
-    2. **스탬프 마이그레이션**
-    3. **리딤 보관함**
-  - 툴바 내 각 탭의 데이터 조회/액션은 모두 StepUp Token이 유효할 때만 가능하다.
-
-- 지갑 홈 화면에는 **“카드 캐러셀(1번 방식)” 중심으로만 핵심 정보를 노출**한다.
-- 캐러셀 외의 상세 기능(내역/마이그레이션/보관함 상세 등)은 **툴바로 이동**한다.
-- 단, “많은 카드 상황”을 대비해 **지갑 홈에 ‘목록 보기 UI’로 가는 진입점은 반드시 남긴다**.
+- **StampCard 목록**: 보유 중인 스탬프카드를 목록으로 표시
+  - 카드에 표시되는 정보: 매장명, 진행률(현재 스탬프/목표), 리워드명, 상태(ACTIVE/COMPLETED)
+  - 정렬 옵션: 최근 적립순(LAST_STAMPED) / 생성순(CREATED) / 진행률순(PROGRESS)
+- **적립하기**: 현재 매장의 Active StampCard에서 적립 요청 생성
+- **리워드 보관함**: 사용 가능한 리워드 목록 (AVAILABLE/REDEEMED/EXPIRED 필터)
+- **히스토리**: 매장별 스탬프 적립 이력 / 리딤 사용 이력 (페이지네이션, 무한 스크롤)
+- **마이그레이션**: 기존 종이 스탬프 이전 요청 생성 / 목록 조회
 
 ---
 
-### 6.1.3 스탬프 적립 (직원 승인 기반) — Polling 고정
+### 6.1.3 스탬프 적립 (사장님 승인 기반) — Polling 고정
 
-### 고객 화면 플로우
+#### 고객 화면 플로우
 
-1. “적립하기” 클릭
-2. `IssuanceRequest` 생성(1회성, TTL)
-3. “승인 대기 중” 화면(상태 자동 갱신)
+1. "적립하기" 클릭
+2. `IssuanceRequest` 생성 (TTL: 120초, idempotencyKey 기반 중복 방지)
+   - 동일 WalletStampCard에 PENDING 요청이 이미 있으면 해당 요청 반환 (멱등성)
+3. "승인 대기 중" 화면 (상태 자동 갱신)
 4. 매장 승인 시 자동 완료
 
-### 승인 대기 화면 UX(필수)
+#### 승인 대기 화면 UX
 
-- “적립 승인 대기 중” + 남은 시간(카운트다운)
-- 상태 자동 갱신 방식: **Polling 고정**
-  - 예: 2~3초 간격으로 `IssuanceRequest.status` 조회
+- "적립 승인 대기 중" + 남은 시간 (카운트다운)
+- 상태 자동 갱신: **Polling 고정** (2~3초 간격으로 `IssuanceRequest.status` 조회)
 - TTL 만료 시 재요청 유도
-- 하단에 “요청번호”는 CS 대응용으로만 작게 노출
+- 하단에 "요청번호"는 CS 대응용으로만 작게 노출
+- 고객이 직접 **취소** 가능 (PENDING → CANCELLED)
 
-### 매장 단말 플로우
+#### 사장님 백오피스 플로우
 
-- 승인 대기 목록에서 해당 요청 승인/거절
+- 승인 대기 목록에서 해당 요청 **승인/거절**
+- 승인 시: stampCount +1, StampEvent(ISSUED) 원장 기록
+- 목표 도달 시: WalletReward 자동 발급 + WalletStampCard → COMPLETED → 새 ACTIVE 카드 자동 생성 (카드 사이클링)
 
-### 최소 부정 방지(필수)
+#### IssuanceRequest 상태 머신
 
-- TTL 60~120초, 1회성, 멱등성
-- Wallet+Store 쿨다운/일일 제한
-- IP/디바이스 레이트리밋
+```
+PENDING → APPROVED   (사장님 승인)
+PENDING → REJECTED   (사장님 거절)
+PENDING → EXPIRED    (120초 TTL 만료, lazy expiration)
+PENDING → CANCELLED  (고객 직접 취소)
+```
+
+#### 부정 방지
+
+- TTL 120초, 1회성, idempotencyKey 기반 멱등성
+- 동일 WalletStampCard에 PENDING 요청 중복 불가
+- Store가 LIVE 상태여야 요청 가능
+- Pessimistic lock으로 동시성 제어
 
 ---
 
-### 6.1.4 리워드 사용(리딤) — OTP + "2차 확인 모달" + 단일 API(필수)
+### 6.1.4 리워드 사용(리딤) — 확인 모달 + 단일 API
 
-### 목표
+#### 목표
 
-- 고객이 리워드에서 [사용하기]로 "사용 요청"을 만든다.
-- **사용 완료는 매장 측이 고객 폰에서 확인 동작을 수행해야만 확정**된다.
-- 고객 혼자 실수로 누르거나 악용하는 것을 막는 장치를 **필수**로 제공한다.
+- 고객이 리워드에서 [사용하기]로 즉시 사용을 요청한다.
+- **사장님이 고객 폰 화면에서 확인 동작을 수행해야만 확정**된다.
+- 고객 혼자 실수로 누르거나 악용하는 것을 막는 확인 모달을 제공한다.
 
-### 전체 플로우
+#### 전체 플로우
 
-1. 고객이 리워드 상세에서 **[사용하기]** 클릭
-2. 시스템이 **OTP(스텝업 인증) / StepUp Token 상태** 확인
-   - 미인증/만료이면: OTP 인증 플로우로 이동 → 완료 후 **StepUp Token 발급** → 3) 진행
-3. 고객 화면이 "매장 확인 화면"으로 전환
-4. **매장 측 확인 동작 완료** → 단일 API(`POST /api/customer/redeems`) 호출 → 사용 완료 처리
+1. 고객이 리워드 목록에서 **[사용하기]** 클릭
+2. "매장 확인 화면"으로 전환
+3. 사장님이 **"매장 확인(사장님 전용)"** 버튼 클릭
+4. **2차 확인 모달**: "되돌릴 수 없습니다. 매장에서 확인 후 진행해 주세요." → [취소] / [확인]
+5. 확인 시 `POST /api/customer/redeems` 호출 → WalletReward: AVAILABLE → REDEEMED + RedeemEvent 원장 기록
+6. 사용 완료 화면 표시
 
-### 고객 "매장 확인 화면" UI(필수)
+#### WalletReward 상태 머신
 
-- 제목: "매장에서 확인해 주세요"
-- 안내 문구: **"사장님이 눌러주세요"**
-- 버튼: **"매장 확인(사장님 전용)"**
-- 안전장치(필수):
-  - **(필수) 2차 확인 모달**
-    - 문구: "지금 사용 처리하면 되돌릴 수 없습니다. 매장에서 확인 후 진행해 주세요."
-    - 버튼: [취소] / [확인]
+```
+AVAILABLE → REDEEMED  (사용 완료)
+AVAILABLE → EXPIRED   (유효기간 만료)
+```
 
-### 매장 측 확인 방식(필수)
+#### 분쟁/오류 대응
 
-- 매장 측은 고객 폰 화면에서 **"매장 확인(사장님 전용)" 버튼 클릭 → 2차 확인 모달 승인**까지 진행한다.
-- 완료 시 서버는 `WalletReward` 상태를 `AVAILABLE → REDEEMED`로 전환하고 `RedeemEvent` 원장 로그 기록.
-
-### 분쟁/오류 대응(필수)
-
-- 사용 완료 기록은 "시간/매장/StampCard/리워드/walletRewardId"로 조회 가능해야 함
-- 중복 사용 방지(멱등성): 동일 리워드는 1회만 `REDEEMED`
+- 사용 완료 기록은 시간/매장/StampCard/리워드/walletRewardId로 조회 가능
+- 중복 사용 방지 (멱등성): 동일 리워드는 1회만 REDEEMED
+- 매장이 LIVE 상태여야 리딤 가능
+- 리워드 유효기간 만료 시 410 응답
 
 ---
 
 ### 6.1.5 기존 종이 스탬프 사진 등록 — (수동 반영)
 
-### 목적
+#### 목적
 
-- 서비스 도입 이전에 고객이 종이 쿠폰에 모아둔 스탬프를 **전환 장벽 없이 디지털로 이전**할 수 있게 한다.
-- 초기에는 자동 인식(OCR) 없이 **운영자가 사진을 보고 수동으로 스탬프 수를 반영**한다.
+- 서비스 도입 이전에 고객이 종이 쿠폰에 모아둔 스탬프를 **전환 장벽 없이 디지털로 이전**한다.
+- 초기에는 자동 인식(OCR) 없이 **사장님이 사진을 보고 수동으로 스탬프 수를 반영**한다.
 
-### 고객 플로우
+#### 고객 플로우
 
-1. 지갑 홈 → “기존 종이 스탬프 등록하기”
-2. 매장 선택(= 현재 store 컨텍스트 기본) + StampCard 선택(Active 1개면 자동)
-3. 사진 업로드(종이 스탬프 카드 사진)
-4. 안내 문구:
-   - “사진 확인 후 반영까지 시간이 걸릴 수 있어요(예: 24~48시간).”
-   - “악용 방지를 위해 1회 또는 제한된 횟수만 신청 가능할 수 있어요.”
-5. 제출 완료 → 상태 화면에서 처리 진행 상태 확인
+1. 마이그레이션 화면 → **[+]** 버튼으로 생성 화면 진입
+2. 매장 선택 (해당 매장의 Active StampCard로 발급됨)
+3. 사진 업로드 (Base64 인코딩, 최대 5MB)
+4. 주장 스탬프 수 입력
+5. 안내 문구: "사진 확인 후 반영까지 시간이 걸릴 수 있어요 (예: 24~48시간)."
+6. 제출 완료 → 마이그레이션 요청 리스트에서 처리 진행 상태 확인
 
-### 고객 플로우
+#### 사장님 플로우 (백오피스)
 
-1. 툴바 → **“스탬프 마이그레이션” 탭** 진입 → + 버튼을 눌러 생성화면 진입
-2. 매장 선택 (해당 매장의 Actice Stamp Card로 발급됨)
-3. 사진 업로드(종이 스탬프 카드 사진)
-4. 안내 문구:
-   - “사진 확인 후 반영까지 시간이 걸릴 수 있어요(예: 24~48시간).”
-   - “악용 방지를 위해 1회 또는 제한된 횟수만 신청 가능할 수 있어요.”
-5. 제출 완료 → 스탬프 마이그레이션 요청 리스트에서 처리 진행 상태 확인
-
-- “스탬프 마이그레이션” 탭/신청은 **툴바 민감 기능으로 분류**되며, StepUp Token 유효 상태에서만 가능하다.
-
-### 운영/사장님 플로우(초기 운영 방식)
-
-- 백오피스에 “이전 요청 목록” 제공
-- 목록에서 사진 확인 → “인정 스탬프 수 입력” → 반영(승인) / 반려(사유)
+- "이전 요청 목록"에서 SUBMITTED 상태의 요청 조회
+- 목록에서 사진 확인 → **"인정 스탬프 수 입력"** → 반영(승인) / 반려(사유)
 - 반영 시:
-  - `WalletStampCard.stampCount`를 **추가 증가**
-  - `StampEvent(type=MIGRATED)` 기록(원장으로 남김)
+  - `WalletStampCard.stampCount`를 **추가 증가** (사장님이 인정한 수만큼)
+  - `StampEvent(type=MIGRATED)` 기록 (원장으로 남김)
+  - 목표 도달 시 WalletReward 자동 발급 (적립과 동일 로직)
 - 반려 시: 반려 사유 저장 + 고객에게 상태 표시
 
-### 정책(필수, 악용 방지)
+#### StampMigrationRequest 상태 머신
 
-- (MVP 정책 선택)
-  - Wallet당 **이전 요청 1회 제한**(또는 Store당 1회)
-  - 제출 후 **처리 완료/반려 전까지 재신청 불가**
-- 사진 보관
-  - 저장 기간 정책 필요(예: 30일 후 삭제)
-  - 개인정보/민감정보 가능성(영수증/메모 등) 안내 문구 포함
+```
+SUBMITTED → APPROVED   (사장님 승인 + 스탬프 반영)
+SUBMITTED → REJECTED   (사장님 반려)
+SUBMITTED → CANCELED   (고객 취소)
+```
 
-### 데이터 모델(추가 엔티티)
+#### 정책 (악용 방지)
 
-- `StampMigrationRequest`
-  - `id`, `walletId`, `storeId`, `stampCardId`
-  - `imageUrl`
-  - `status` (SUBMITTED / APPROVED / REJECTED / CANCELED)
-  - `requestedAt`, `processedAt`
-  - `approvedStampCount` (운영 입력)
-  - `rejectReason` (옵션)
+- 동일 고객+매장 조합에 SUBMITTED 상태의 요청이 있으면 신규 요청 불가
+- BLOCKED 지갑은 마이그레이션 요청 불가
+- 이미지 크기 제한: 5MB (413 Payload Too Large)
 
 ---
 
-## 6.2 사장님 백오피스 Web — “StampCard/운영/통계”
+## 6.2 사장님 백오피스 Web
 
-### 6.2.1 매장/StampCard 관리
+### 6.2.1 매장 관리
 
-- 매장 목록(Stores) 화면 (신규/필수)
-  - 사장님이 등록한 **N개의 매장(Store)** 을 한 화면에서 조회할 수 있다.
-  - 매장 목록은 카드/테이블 형태로 제공하며, 각 매장 row에 최소 다음 정보를 표시한다:
-    - **매장명(name)**
-    - **주소(address)**
-    - **활성(Active) StampCard 개수**
-    - **QR 포스터 다운로드 버튼**
-    - **관리 버튼(매장 상세/운영 진입)**
-  - **[매장 추가]** 버튼으로 매장을 추가할 수 있다.
-  - 매장 상태는 **영업(OPEN) / 영업종료(CLOSED)** 두 가지를 가진다.
-    - 영업종료(CLOSED) 상태에서는 고객 QR 유입은 가능하되(정책 선택), 기본 행동(적립/리딤 요청 생성)은 제한할 수 있다(권장).
-- 매장 관리(상세) 화면 (신규/필수)
-  - 매장 목록에서 **[관리]** 버튼을 누르면 해당 매장의 관리(상세) 화면으로 이동한다.
-  - 이 화면은 **“현재 운영 중인 Active StampCard”를 가장 먼저 보여주는 구조**를 가진다.
-  - 메인 영역: Active StampCard (필수)
-    - 현재 매장의 **Active 상태 StampCard 1개**를 메인에 노출한다.
-    - Active StampCard에는 최소 다음 정보가 표시되어야 한다:
-      - 카드명, 적립 규칙 요약(N회→리워드), 보상의 유효기간, 상태(Active)
-  - 보관함/초안 영역: StampCard 컬렉션 (필수)
-    - Active 메인 영역 아래에 StampCard를 **상태별로 구분**해 보여준다.
-      - **초안(Draft)**
-      - **보관함(Active / Paused / Archived)**
-        _(Active는 일반적으로 1개 운영이 원칙이지만, 정책/이력상 Active 목록에 포함될 수 있음)_
-    - 각 StampCard row/card에 제공해야 하는 기본 기능:
-      - **[수정] [삭제]**
-      - 상태 전환: Draft → Active(활성화), Active → Paused(일시중지), Paused → Active(재개), Active/Paused → Archived(보관)
-      - 상태 전환 시 확인 모달(필수): “고객에게 즉시 노출/차단될 수 있음” 고지
-  - Active가 없는 경우의 처리(필수)
-    - 해당 매장에 **Active StampCard가 존재하지 않으면**, 관리 화면 메인 영역에 다음을 안내한다:
-      - 안내 문구: `현재 운영 중인 스탬프 카드가 없습니다. 활성화할 카드를 선택해 주세요.`
-      - CTA: **[초안에서 활성화]** 또는 **[새 StampCard 만들기]**
-    - 이때 사장님은 Draft/Paused 중 하나를 **Active로 변경**할 수 있어야 한다.
+#### 매장 목록 화면
 
-### 6.2.2 StampCard 디자인(템플릿)
+- 사장님이 등록한 **N개의 매장(Store)** 을 한 화면에서 조회 (DELETED 제외)
+- 각 매장에 표시할 정보:
+  - 매장명 (name)
+  - 주소 (address)
+  - 매장 상태 (DRAFT / LIVE / SUSPENDED)
+  - Active StampCard 유무
+  - QR 포스터 다운로드
+  - 관리 버튼 (매장 상세 진입)
+- **[매장 추가]** 버튼으로 매장 등록
 
-- StampCard 디자인은 템플릿 기반으로 생성하며, 아래 **3가지 기본 유형**을 제공한다.
-  - 기본형(컬러 선택형) — 필수
-    - **5가지 색상 중 1개를 선택**해 디자인하는 기본 템플릿
-    - 사장님이 가장 빠르게 만들 수 있는 “원클릭 생성” 경험 제공
-  - 이미지형(업로드형) — 필수
-    - 사장님이 **이미지를 업로드**하여 배경/포스터/카드 비주얼을 구성
-    - 최소 요구:
-      - 권장 이미지 비율/해상도 안내
-      - 업로드 후 미리보기 + 크롭(선택)
-  - 퍼즐형(특수형) — 확장(권장)
-    - “스탬프 판” 자체가 **퍼즐처럼 채워지는 UX**로 동작하는 템플릿
-    - 적립 시 퍼즐 조각이 하나씩 완성되는 연출/피드백 제공(게임화)
-      > 디자인 타입은 StampCard 생성 시 선택하며, 생성 후에도 타입 변경은 제한
+#### 매장 등록 (DRAFT → Admin 승인 → LIVE)
 
-### 6.2.3 AI 디자인(확장 기능)
+- 매장 생성 시 항상 **DRAFT 상태**로 생성
+- 카카오 장소 검색 API로 placeRef 연동 (`GET /api/owner/places/search`)
+- placeRef는 고유값 (중복 등록 불가)
+- Admin이 심사 후 DRAFT → LIVE로 전환해야 정상 운영 가능
 
-- 시안 생성/편집/확정
-- 정책: 필터링/고지/이력
+#### 매장 수정 제약
+
+| 매장 상태 | 수정 가능 필드 |
+|-----------|--------------|
+| DRAFT | 모든 필드 수정 가능 |
+| LIVE | description, iconImageBase64만 수정 가능 (name, address, phone, placeRef 읽기 전용) |
+| SUSPENDED | 수정 불가 |
+
+#### Store 상태 머신
+
+```
+DRAFT ──(Admin 승인)──> LIVE
+LIVE ──(Admin 정지)──> SUSPENDED
+SUSPENDED ──(Admin 해제)──> LIVE
+LIVE/SUSPENDED/DRAFT ──(Owner 삭제)──> DELETED (소프트 삭제, 최종)
+```
+
+#### 매장 감사 로그 (StoreAuditLog)
+
+- 모든 상태 변경을 기록: CREATED, STATUS_CHANGED, UPDATED, DELETED
+- 각 로그에 수행자(performerType: OWNER/ADMIN/SYSTEM), 수행자 ID, 변경 전/후 상태 기록
+
+---
+
+### 6.2.2 StampCard 관리
+
+#### 매장 관리(상세) 화면
+
+- 매장 목록에서 **[관리]** 버튼을 누르면 해당 매장의 관리 화면으로 이동
+- **메인 영역**: Active StampCard 1개를 메인에 노출
+  - 카드명, 적립 규칙 요약(N회→리워드), 리워드 유효기간, 상태(ACTIVE)
+- **보관함/초안 영역**: StampCard를 상태별로 구분
+  - **DRAFT (초안)**: 편집 가능, 미노출
+  - **ARCHIVED (보관)**: 통계용 보존, ACTIVE로 재활성화 가능
+- Active가 없는 경우:
+  - 안내 문구: "현재 운영 중인 스탬프 카드가 없습니다."
+  - CTA: [초안에서 활성화] 또는 [새 StampCard 만들기]
+
+#### StampCard CRUD
+
+- **생성**: 항상 DRAFT 상태로 생성
+- **수정**: WalletStampCard가 발급된 적 있으면 수정 불가 (편집 잠금)
+- **삭제**: DRAFT 상태의 카드만 삭제 가능
+- **매장당 ACTIVE 1개 제한**: ACTIVE 활성화 시 기존 ACTIVE가 있으면 충돌 (409)
+
+#### StampCard 상태 머신
+
+```
+DRAFT ──(활성화)──> ACTIVE
+DRAFT ──(보관)──> ARCHIVED
+ACTIVE ──(보관)──> ARCHIVED
+ARCHIVED ──(재활성화)──> ACTIVE
+```
+
+> ACTIVE → DRAFT 전환 불가. ARCHIVED는 ACTIVE로만 복귀 가능.
+
+---
+
+### 6.2.3 StampCard 디자인 (템플릿)
+
+StampCard 디자인은 템플릿 기반으로 생성하며, 아래 **4가지 디자인 타입**을 제공한다:
+
+| 타입 | 설명 | 특징 |
+|------|------|------|
+| **COLOR (기본형)** | 5가지 색상 중 1개를 선택 | 가장 빠른 "원클릭 생성" 경험 |
+| **IMAGE (이미지형)** | 이미지를 업로드하여 배경 구성 | 권장 비율/해상도 안내, 미리보기 |
+| **PUZZLE (퍼즐형)** | 적립 시 퍼즐 조각이 완성되는 UX | 게임화 요소 |
+| **CUSTOM (커스텀)** | 자유 디자인 JSON | 확장용 |
+
+- 디자인 타입은 StampCard 생성 시 선택하며, `designJson` 필드에 타입별 설정 저장
+
+---
 
 ### 6.2.4 리워드 규칙/정책
 
-- N회 적립 → 리워드
-- 유효기간/적립 제한
-- 수동 적립/차감(사유 필수 + 로그)
-
-### 6.2.5 로그/감사(운영/분쟁)
-
-- 적립/리딤 검색(기간/지갑/StampCard)
-- 이상 징후(요청 폭주, 실패 폭주 등)
-- 사장님은 **모든 StampCard에 대한 통계 기능**을 조회할 수 있어야 한다.
-  - 통계는 최소 다음 지표를 제공한다(기간 필터 포함: 오늘/7일/30일/직접 선택):
-    - 누적 적립수
-    - 쿠폰 발급 수
-    - 쿠폰 사용 수
-    - 활성 이용자 수
-    - 주간 적립 추이 (월 ~ 일)
-      지난주 평균, 이번주
-    - 주요 방문 시간대 (시간대 별 통계)
-  - 통계 접근 위치(권장):
-    - (A) 매장 관리 화면의 Active StampCard 메인 카드 내 “통계 보기”
-    - (B) StampCard 목록 row마다 “통계” 버튼 제공
-
-### 6.2.6 기존 종이 스탬프 “이전 요청” 처리
-
-- 이전 요청 목록/상세(이미지 뷰어)
-- 승인: 인정 스탬프 수 입력 → 반영
-- 반려: 사유 입력 → 고객에 표시
-- 처리 로그 남김(감사/분쟁 대응)
+- **N회 적립 → 리워드**: `goalStampCount` 도달 시 `WalletReward` 자동 발급
+- **유효기간**: `expireDays` 설정 시 발급일로부터 N일 후 만료 (null이면 무제한)
+- **리워드 자동 발급**: 적립 승인 또는 마이그레이션 승인으로 목표 도달 시 자동 처리
+- **카드 사이클링**: 목표 도달 시 WalletStampCard → COMPLETED, 새 ACTIVE 카드 자동 생성
 
 ---
 
-## 6.3 매장 사장님 Web — “승인 화면(사장님 계정 공용)”
+### 6.2.5 적립 승인
 
-### 6.3.1 적립 승인
+- 사장님 백오피스에 **적립 승인 화면** 제공
+- 대기 중인 IssuanceRequest 목록 표시 (PENDING 상태, 매장별)
+- 각 요청에 대해 **승인/거절** 처리
+- 승인 시: stampCount +1, StampEvent 기록, 목표 도달 체크
+- 거절 시: 상태를 REJECTED로 변경
 
-- 승인 대기 목록 표시
-- 승인/거절
+---
 
-### 6.3.2 리딤 확인
+### 6.2.6 통계
 
-- 리딤은 고객 폰에서 사장님이 직접 확인 버튼을 누르는 방식으로 처리
-- 터미널에서 별도 리딤 세션 폴링 불필요
+- 매장별 통계를 기간 필터와 함께 조회 (`GET /api/owner/stores/{storeId}/statistics`)
+- 기본 기간: 최근 30일 (startDate~endDate 지정 가능)
 
-### 6.3.3 실시간/인프라
+#### 제공 지표
 
-- (MVP) **Polling 기반** 운영(단말에서도 일정 주기로 목록 갱신 가능)
-- Redis: TTL/대기열/레이트리밋/멱등성 (확장)
+| 지표 | 설명 | 데이터 소스 |
+|------|------|-----------|
+| `totalStamps` | 누적 적립 수 | StampEvent (양수 delta 합계) |
+| `totalRewardsIssued` | 리워드 발급 수 | WalletReward (issuedAt 기준) |
+| `totalRewardsRedeemed` | 리워드 사용 수 | RedeemEvent (result=SUCCESS) |
+| `activeUsers` | 활성 이용자 수 | StampEvent (DISTINCT walletId) |
+| `dailyTrend` | 일별 적립 추이 | [{date, count}] sparse array |
+
+- dailyTrend은 **sparse array**: 활동이 있는 날짜만 포함, 프론트엔드에서 빈 날짜를 0으로 채움
+
+---
+
+### 6.2.7 이벤트 로그 / 감사
+
+- **스탬프 이벤트 이력**: 매장별 StampEvent 조회 (페이지네이션)
+  - 타입: ISSUED(적립), MIGRATED(이전 반영), MANUAL_ADJUST(수동 조정)
+- **리딤 이벤트 이력**: 매장별 RedeemEvent 조회 (페이지네이션)
+- **마이그레이션 요청 관리**: SUBMITTED 상태 요청의 승인/반려
+
+---
+
+### 6.2.8 종이 스탬프 "이전 요청" 처리
+
+- 이전 요청 목록/상세 (이미지 뷰어)
+- 승인: 인정 스탬프 수 입력 → stampCount 반영 + StampEvent(MIGRATED) 기록
+- 반려: 사유 입력 → 고객에게 표시
+- 처리 로그 남김 (감사/분쟁 대응)
+
+---
+
+## 6.3 관리자(Admin) Web
+
+### 6.3.1 매장 심사/관리
+
+- 전체 매장 목록 조회 (status 필터 가능: DRAFT, LIVE, SUSPENDED, DELETED)
+- 매장 상세 조회 (Owner 정보 포함)
+- **매장 상태 변경**:
+  - DRAFT → LIVE (승인)
+  - LIVE → SUSPENDED (정지)
+  - SUSPENDED → LIVE (해제)
+- 상태 변경 시 StoreAuditLog 자동 기록 (performerType=ADMIN)
+
+### 6.3.2 감사 로그
+
+- 매장별 Audit Log 조회 (상태 변경 이력, 수행자, 시각)
 
 ---
 
@@ -419,82 +442,143 @@ A3. 툴바 탭 진입
 
 ### 7.1 핵심 엔티티
 
-- OwnerAccount, Store
-- StampCard, RewardRule
-- CustomerWallet(phone, name, nickname)
-- WalletStampCard(진행률)
-- IssuanceRequest
-- StampEvent(원장)
-- RedeemEvent
-- **StampMigrationRequest(신규)**
+| 엔티티 | 설명 | 주요 필드 |
+|--------|------|----------|
+| **OAuthAccount** | OAuth Provider 연결 (dual-link) | provider, providerId, email, customerWalletId(nullable), ownerAccountId(nullable) |
+| **OwnerAccount** | 사장님 계정 | name, nickname, phone, admin(boolean) |
+| **Store** | 매장 | name, address, phone, placeRef(unique), status, iconImageBase64, category, description |
+| **StoreAuditLog** | 매장 감사 로그 | storeId, action, previousStatus, newStatus, performerType, performerId |
+| **StampCard** | 스탬프카드 디자인/규칙 | title, goalStampCount, rewardName, rewardQuantity, expireDays, designType, designJson, status |
+| **CustomerWallet** | 고객 지갑 | name, nickname, phone, status(ACTIVE/BLOCKED) |
+| **WalletStampCard** | 고객별 스탬프 진행 | walletId, storeId, stampCardId, stampCount, goalStampCount, status(ACTIVE/COMPLETED), version |
+| **WalletReward** | 자동 발급된 리워드 | walletId, storeId, stampCardId, walletStampCardId, status(AVAILABLE/REDEEMED/EXPIRED), issuedAt, expiresAt, redeemedAt |
+| **IssuanceRequest** | 적립 요청 | walletId, walletStampCardId, storeId, stampCardId, idempotencyKey, status, expiresAt |
+| **StampEvent** | 스탬프 이벤트 원장 | walletStampCardId, type(ISSUED/MIGRATED/MANUAL_ADJUST), delta, currentCount, issuanceRequestId |
+| **RedeemEvent** | 리딤 이벤트 원장 | walletRewardId, walletId, storeId, result(SUCCESS/FAILED/EXPIRED) |
+| **StampMigrationRequest** | 종이 스탬프 이전 | walletId, storeId, walletStampCardId, imageBase64, claimedStampCount, approvedStampCount, status, rejectReason |
 
-### 7.2 원칙
+### 7.2 주요 상태 Enum
 
-- 진행률은 캐시/집계 가능
-- 분쟁/정산은 이벤트 원장으로 복구 가능해야 함
-- “기존 이전 반영”도 StampEvent에 `MIGRATED`로 남겨야 함
+| Enum | 값 | 전이 |
+|------|---|------|
+| StoreStatus | DRAFT, LIVE, SUSPENDED, DELETED | DRAFT→LIVE(Admin), LIVE↔SUSPENDED(Admin), →DELETED(Owner, 소프트삭제) |
+| StampCardStatus | DRAFT, ACTIVE, ARCHIVED | DRAFT→ACTIVE/ARCHIVED, ACTIVE→ARCHIVED, ARCHIVED→ACTIVE |
+| IssuanceRequestStatus | PENDING, APPROVED, REJECTED, EXPIRED, CANCELLED | PENDING → {APPROVED, REJECTED, EXPIRED, CANCELLED} |
+| StampMigrationStatus | SUBMITTED, APPROVED, REJECTED, CANCELED | SUBMITTED → {APPROVED, REJECTED, CANCELED} |
+| WalletRewardStatus | AVAILABLE, REDEEMED, EXPIRED | AVAILABLE → REDEEMED(사용) / EXPIRED(만료) |
+| WalletStampCardStatus | ACTIVE, COMPLETED | ACTIVE → COMPLETED(목표 도달) |
+| CustomerWalletStatus | ACTIVE, BLOCKED | BLOCKED 시 모든 기능 차단 (403) |
 
----
+### 7.3 원칙
 
-## 8. 보안/부정 방지(필수)
-
-### 8.1 요청/세션 보안
-
-- QR은 정적 storeId 진입용
-- IssuanceRequest는 TTL + 1회성 + 멱등성
-- 리딤은 OTP 스텝업 + 2차 확인 모달로 보호
-
-### 8.2 지갑 접근 공격 방어
-
-- “전화번호+이름 조회”는 추측 위험 → 레이트리밋/쿨다운/의심 시 스텝업
-- 리딤은 무조건 OTP 완료 상태에서만 가능
-  **툴바(내역/마이그레이션/리딤 보관함) 접근은 StepUp Token 기반으로 잠금(OTP 스텝업 후 발급/TTL 만료)**
-
-### 8.3 감사로그
-
-- 적립/리딤/이전 반영은 최소 기록:
-  - walletId, storeId, stampCardId, time, requestId/sessionId, result
+- 진행률은 캐시/집계 가능하나 원장(StampEvent)으로 복원 가능해야 함
+- 분쟁/정산은 이벤트 원장(StampEvent, RedeemEvent)으로 복구 가능
+- 기존 이전 반영도 StampEvent에 `MIGRATED`로 남겨야 함
+- 모든 엔티티는 `BaseTimeEntity` 상속 (id, createdAt, updatedAt 자동 관리)
 
 ---
 
-## 9. 비기능 요구사항(NFR)
+## 8. 보안/부정 방지
 
-- 승인 반영 P95 < 1s (MVP는 폴링이므로 “승인 후 2~3초 내 반영” 기준으로 측정)
-- 가용성 99.5%(MVP) → 99.9%
-- 관측성: 트레이싱/알림
-- 보안: 세션 만료/CSRF/관리자 액션 로그
+### 8.1 인증/세션 보안
+
+| 항목 | 구현 |
+|------|------|
+| 인증 방식 | OAuth 2.0 (Google, Kakao, Naver) |
+| 세션 토큰 | JWT (1시간) + Refresh Token (7일) |
+| 권한 분리 | ROLE_CUSTOMER, ROLE_OWNER, ROLE_ADMIN |
+| URL 패턴 | `/api/public/**` 개방, 나머지 역할별 잠금 |
+| 크로스 접근 | Owner API에서 타인 매장 접근 시 404 (403이 아닌 404로 정보 노출 방지) |
+
+### 8.2 적립 부정 방지
+
+- IssuanceRequest TTL: 120초 (Lazy Expiration)
+- idempotencyKey 기반 멱등성 (Unique Constraint)
+- 동일 WalletStampCard에 PENDING 요청 중복 불가
+- Pessimistic Lock으로 동시성 제어 (IssuanceRequest + WalletStampCard)
+- Store가 LIVE(Operational) 상태여야 적립 가능
+
+### 8.3 리딤 부정 방지
+
+- 2차 확인 모달 (비가역적 행위 고지)
+- WalletReward 상태 검증 (AVAILABLE만 사용 가능)
+- 유효기간 만료 체크 (410 GONE)
+- 매장 LIVE 상태 체크
+
+### 8.4 마이그레이션 부정 방지
+
+- 동일 고객+매장에 SUBMITTED 요청 중복 불가
+- BLOCKED 지갑 차단
+- 이미지 크기 제한 (5MB)
+- 사장님의 수동 심사 (자동 승인 없음)
+
+### 8.5 감사 로그
+
+- 적립/리딤/마이그레이션 반영은 최소 기록:
+  - walletId, storeId, stampCardId, time, result
+- 매장 상태 변경: StoreAuditLog (수행자, 변경 전/후 상태)
+
+---
+
+## 9. 비기능 요구사항 (NFR)
+
+| 항목 | 요구사항 |
+|------|---------|
+| 응답 시간 | 승인 반영 후 폴링 2~3초 내 감지 |
+| 가용성 | 99.5% (MVP) |
+| 관측성 | 에러 로깅, ErrorCode 기반 표준 에러 응답 |
+| 보안 | JWT 서명 검증, Refresh Token 만료, 역할 기반 접근 제어 |
+| 캐싱 | Store Summary 캐시 (Caffeine, 10분 TTL) |
+| 페이지네이션 | 무한 스크롤 (1~100 items/page, 기본 20) |
+| 이미지 | Base64 인코딩, 최대 5MB (MEDIUMTEXT) |
 
 ---
 
 ## 10. 엣지 케이스/정책
 
-- StampCard 여러 개일 때: Active 1개 기본 / 확장 시 선택 UI
-  StampCard가 많은 경우 캐러셀 탐색 한계 → ‘전체 카드 보기(목록 UI)’ 제공(검색/정렬 포함)
-- 승인 대기 중 이탈: TTL 내 복원
-- 리딤 오작동: **OTP + 2차 확인 모달(필수)**
-- 이름 오타로 접근 실패: 의심 시 OTP 재요구 옵션
-- 기존 종이 스탬프 이전:
-  - 1회 제한/재신청 제한 정책
-  - 사진 처리 SLA 안내(24~48시간 등)
+| 케이스 | 정책 |
+|--------|------|
+| StampCard 없는 매장 | 안내 문구 + [새 StampCard 만들기] CTA |
+| 매장당 Active 카드 중복 | 409 Conflict (1개 제한) |
+| 승인 대기 중 이탈 | TTL(120s) 내 폴링 재개로 복원, 만료 시 재요청 |
+| 리딤 오작동 | 2차 확인 모달 필수 |
+| BLOCKED 지갑 | 모든 API에서 403 응답 |
+| 마이그레이션 중복 신청 | 동일 매장에 SUBMITTED 상태 요청 있으면 차단 |
+| 카드 수정 후 발급된 카드 | WalletStampCard 존재 시 StampCard 수정 불가 |
+| 목표 도달 후 카드 사이클링 | COMPLETED → 새 ACTIVE WalletStampCard 자동 생성 |
+| 매장 DRAFT 상태에서 고객 접근 | LIVE 매장만 Public API에 노출 |
+| placeRef 중복 등록 | 409 Conflict |
 
 ---
 
 ## 11. MVP 범위
 
-### MVP-1
+### MVP-1 (구현 완료)
 
-- QR 진입
-- 최초 OTP + 이름/닉네임 등록
-- 조회 접근(전화+이름)
-- 적립 요청 + 승인 대기(**Polling**) + 매장 승인 + 적립 완료
-- 리딤: 사용하기 + **OTP 필수(스텝업)** + **2차 확인 모달** + 사용 완료
-- 기존 종이 스탬프 “사진 등록” + 운영 수동 반영(간단 승인 UI)
-- 매장: StampCard 생성 + QR 출력 + 승인 화면 + 로그 조회
-- 방어: TTL/멱등성/레이트리밋/감사로그
+- **인증**: OAuth 로그인/가입 (Google, Kakao, Naver), JWT + Refresh Token
+- **매장**: CRUD, 카카오 장소 검색 연동, Admin 승인제 (DRAFT→LIVE), 소프트 삭제
+- **StampCard**: CRUD, 4종 디자인 타입, 상태 관리 (DRAFT/ACTIVE/ARCHIVED), 매장당 1개 ACTIVE 제한
+- **적립**: 요청 생성 + 승인 대기(Polling) + 매장 승인/거절, TTL/멱등성/동시성 제어
+- **리딤**: 확인 모달 + 즉시 사용, RedeemEvent 원장 기록
+- **마이그레이션**: 사진 등록 + 사장님 수동 승인/반려
+- **지갑**: StampCard 목록 (정렬), 히스토리 (페이지네이션), 리워드 보관함
+- **통계**: 5개 핵심 지표 + 일별 추이 (기간 필터)
+- **보안**: JWT 인증, 역할 분리, 크로스 접근 차단, 감사 로그
+- **Admin**: 매장 승인/정지, Audit Log 조회
+- **QR**: 매장별 QR 코드 생성
+- **랜딩 페이지**: Hero, 문제/해결 섹션, FAQ, StampCard 캐러셀
 
-### MVP-2
+### MVP-2 (향후 확장)
 
-- 마케팅, AI 디자인, 위치 기반/랭킹(정책 검토 후)
-- 자동 OCR/AI 판독(사진 자동 계산)
+- **알림 시스템**: SMS/이메일/푸시 알림 (적립 승인, 리워드 발급 등)
+- **고급 통계**: 주간 추이, 시간대별 방문 분석, 트렌드 예측
+- **AI 디자인**: StampCard 시안 AI 생성/편집
+- **자동 OCR**: 종이 스탬프 사진 자동 판독
+- **파일 스토리지**: Base64 → S3/클라우드 스토리지 전환
+- **Rate Limiting**: IP/사용자별 요청 제한
+- **Scheduled Jobs**: TTL 만료 자동 정리 (현재 Lazy Expiration)
+- **다국어 지원**: 한국어 외 언어 확장
+- **CSV/PDF 내보내기**: 통계/이벤트 로그 다운로드
+- **지갑 복구**: 전화번호 변경 시 계정 복구 플로우
 
 ---
