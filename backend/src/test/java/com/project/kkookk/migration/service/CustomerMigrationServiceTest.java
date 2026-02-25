@@ -76,7 +76,7 @@ class CustomerMigrationServiceTest {
                         .requestedAt(LocalDateTime.now())
                         .build();
 
-        given(customerWalletRepository.findById(CUSTOMER_WALLET_ID))
+        given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
                 .willReturn(Optional.of(customerWallet));
         given(storeRepository.existsById(STORE_ID)).willReturn(true);
         given(
@@ -114,7 +114,7 @@ class CustomerMigrationServiceTest {
                                         CUSTOMER_WALLET_ID, request))
                 .isInstanceOf(MigrationImageTooLargeException.class);
 
-        verify(customerWalletRepository, never()).findById(any());
+        verify(customerWalletRepository, never()).findByIdWithLock(any());
         verify(migrationRequestRepository, never()).save(any());
     }
 
@@ -125,7 +125,8 @@ class CustomerMigrationServiceTest {
         CreateMigrationRequest request =
                 new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
 
-        given(customerWalletRepository.findById(CUSTOMER_WALLET_ID)).willReturn(Optional.empty());
+        given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
+                .willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(
@@ -152,7 +153,7 @@ class CustomerMigrationServiceTest {
                         .status(CustomerWalletStatus.BLOCKED)
                         .build();
 
-        given(customerWalletRepository.findById(CUSTOMER_WALLET_ID))
+        given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
                 .willReturn(Optional.of(blockedWallet));
 
         // when & then
@@ -180,7 +181,7 @@ class CustomerMigrationServiceTest {
                         .status(CustomerWalletStatus.ACTIVE)
                         .build();
 
-        given(customerWalletRepository.findById(CUSTOMER_WALLET_ID))
+        given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
                 .willReturn(Optional.of(customerWallet));
         given(storeRepository.existsById(STORE_ID)).willReturn(false);
 
@@ -209,7 +210,7 @@ class CustomerMigrationServiceTest {
                         .status(CustomerWalletStatus.ACTIVE)
                         .build();
 
-        given(customerWalletRepository.findById(CUSTOMER_WALLET_ID))
+        given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
                 .willReturn(Optional.of(customerWallet));
         given(storeRepository.existsById(STORE_ID)).willReturn(true);
         given(

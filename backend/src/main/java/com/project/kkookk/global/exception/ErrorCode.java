@@ -14,6 +14,8 @@ public enum ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR, "FILE_STORAGE_ERROR", "파일 저장 중 오류가 발생했습니다"),
     QR_GENERATION_FAILED(
             HttpStatus.INTERNAL_SERVER_ERROR, "QR_GENERATION_FAILED", "QR 코드 생성 중 오류가 발생했습니다"),
+    CONCURRENT_UPDATE_CONFLICT(
+            HttpStatus.CONFLICT, "CONCURRENT_UPDATE_CONFLICT", "다른 요청과 충돌이 발생했습니다. 다시 시도해주세요"),
 
     // Auth
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "인증이 필요합니다"),
