@@ -14,8 +14,12 @@ import com.project.kkookk.issuance.service.exception.IssuanceRequestAlreadyPendi
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
+import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
+import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
+import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -35,6 +39,7 @@ public class CustomerIssuanceService {
 
     private final IssuanceRequestRepository issuanceRequestRepository;
     private final WalletStampCardRepository walletStampCardRepository;
+    private final CustomerWalletRepository customerWalletRepository;
     private final StoreRepository storeRepository;
 
     /**
@@ -47,6 +52,15 @@ public class CustomerIssuanceService {
     @Transactional
     public IssuanceRequestResult createIssuanceRequest(
             Long walletId, CreateIssuanceRequest request) {
+        // 0. 지갑 상태 확인 (차단된 지갑은 적립 요청 불가)
+        CustomerWallet wallet =
+                customerWalletRepository
+                        .findById(walletId)
+                        .orElseThrow(CustomerWalletNotFoundException::new);
+        if (wallet.isBlocked()) {
+            throw new CustomerWalletBlockedException();
+        }
+
         // 1. 매장 조회 및 상태 확인
         Store store =
                 storeRepository

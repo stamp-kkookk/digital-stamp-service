@@ -11,8 +11,12 @@ import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
+import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletReward;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletRewardRepository;
+import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
+import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -25,11 +29,21 @@ public class CustomerRedeemService {
 
     private final RedeemEventRepository redeemEventRepository;
     private final WalletRewardRepository walletRewardRepository;
+    private final CustomerWalletRepository customerWalletRepository;
     private final StoreRepository storeRepository;
     private final StampCardRepository stampCardRepository;
 
     @Transactional
     public RedeemRewardResponse redeemReward(Long walletId, RedeemRewardRequest request) {
+        // 0. 지갑 상태 확인 (차단된 지갑은 리딤 불가)
+        CustomerWallet wallet =
+                customerWalletRepository
+                        .findById(walletId)
+                        .orElseThrow(CustomerWalletNotFoundException::new);
+        if (wallet.isBlocked()) {
+            throw new CustomerWalletBlockedException();
+        }
+
         // 1. 리워드 조회 + 본인 소유 검증
         WalletReward reward =
                 walletRewardRepository
