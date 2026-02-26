@@ -64,8 +64,10 @@ jobs:
   claude-review:
     if: |
       github.event_name == 'pull_request' ||
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -80,10 +82,10 @@ jobs:
         if: github.event.action == 'synchronize'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
           set +e
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
           echo "이전 Claude 리뷰 검색 중..."
 
           # 1. PR 코멘트(요약) 삭제 - github-actions[bot]이 작성한 코멘트
@@ -122,7 +124,7 @@ jobs:
             }' \
             --jq '.data.repository.pullRequest.reviewThreads.nodes[]
               | select(.isResolved == false)
-              | select([.comments.nodes[].author.login] | all(. == "github-actions"))
+              | select([.comments.nodes[].author.login] | all(. == "github-actions[bot]"))
               | .comments.nodes[].databaseId' \
             | while read comment_id; do
                 if [ -n "$comment_id" ]; then
@@ -146,7 +148,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
             이 PR을 리뷰하고 코멘트로 작성해주세요.
           claude_args: |
             --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"
@@ -159,7 +161,7 @@ jobs:
 
 PR에 커밋을 추가할 때마다 이전 리뷰와 새 리뷰가 뒤섞이는 문제를 해결한다.
 
-```
+```text
 커밋 추가 (synchronize)
     ↓
 GraphQL로 리뷰 스레드 조회
@@ -196,7 +198,7 @@ prompt: |
 
 ### 동작 흐름
 
-```
+```text
 PR 생성 (opened)
     ↓
 Claude가 CLAUDE.md + diff 분석 → 인라인 리뷰 작성
@@ -212,7 +214,7 @@ PR 업데이트 (synchronize)
 
 ## 5. 기존 CI와의 역할 분리
 
-```
+```text
 PR 생성/업데이트
     ├── Backend CI (기존 유지)
     │   ├── Gradle 빌드
@@ -260,18 +262,18 @@ Claude Code Action 도입 후 CodeRabbit을 제거한다.
 ## 8. 활용 예시
 
 ### PR에서 코드 수정 요청
-```
+```text
 @claude 이 서비스 메서드에 트랜잭션 처리가 빠져 있는 것 같아. 수정해줘.
 ```
 
 ### 테스트 코드 생성 요청
-```
+```text
 @claude 이 PR에서 변경된 서비스 메서드에 대한 단위 테스트를 작성해줘.
 @MockitoBean을 사용하고, 프로젝트 테스트 패턴을 따라줘.
 ```
 
 ### 리뷰 재요청
-```
+```text
 @claude 수정한 부분 다시 리뷰해줘.
 ```
 
