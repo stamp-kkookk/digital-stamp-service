@@ -56,7 +56,7 @@ on:
     types: [created]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
 
@@ -149,7 +149,7 @@ jobs:
             PR NUMBER: ${{ github.event.pull_request.number }}
             이 PR을 리뷰하고 코멘트로 작성해주세요.
           claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"
           trigger_phrase: "@claude"
 ```
 
