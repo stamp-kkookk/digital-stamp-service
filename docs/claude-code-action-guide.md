@@ -174,5 +174,3 @@ Claude Code Action 도입 후 CodeRabbit을 제거한다.
 ```text
 @claude 수정한 부분 다시 리뷰해줘.
 ```
-
-

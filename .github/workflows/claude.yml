@@ -116,14 +116,13 @@ jobs:
         github.event.issue.pull_request != null &&
         contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association)) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
-        contains(fromJSON('["OWNER","MEMBER"]'), github.event.comment.author_association))
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
-        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+
       # prompt는 시스템 컨텍스트 역할, 사용자의 실제 코멘트가 주 지시사항
       - name: Run Claude Interactive
         uses: anthropics/claude-code-action@v1  # 운영 안정화 후 SHA 핀 고정 권장
