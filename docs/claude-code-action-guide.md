@@ -41,135 +41,17 @@ Repository → Settings → Secrets and variables → Actions → New repository
 
 ## 3. Workflow 파일
 
-### `.github/workflows/claude.yml`
+전체 워크플로우 구현은 [`.github/workflows/claude.yml`](../.github/workflows/claude.yml)을 참고한다.
 
-```yaml
-name: Claude Code Review
+### 핵심 구성 요소
 
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-  issue_comment:
-    types: [created]
-  pull_request_review_comment:
-    types: [created]
-
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-
-jobs:
-  claude-review:
-    concurrency:
-      group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
-      cancel-in-progress: true
-    if: |
-      github.event_name == 'pull_request' ||
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
-        github.event.issue.pull_request != null &&
-        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
-        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      # 전략 1: 이전 봇 리뷰 스마트 클린업
-      # - PR에 커밋 추가(synchronize) 시에만 동작
-      # - Resolved 스레드: 보존 (수정 완료된 유의미한 기록)
-      # - 사람 답글이 있는 스레드: 보존 (진행 중인 토론)
-      # - 봇만 단독으로 남긴 미해결 코멘트: 삭제 (노이즈)
-      - name: Delete Previous Claude Reviews
-        if: github.event.action == 'synchronize'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          set +e
-          echo "이전 Claude 리뷰 검색 중..."
-
-          # 1. PR 코멘트(요약) 삭제 - Claude 코멘트만 필터링
-          gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
-            --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | test("Claude")) | .id' \
-            | while read comment_id; do
-                if [ -n "$comment_id" ]; then
-                  echo "PR 코멘트 삭제: $comment_id"
-                  gh api -X DELETE "repos/$REPO/issues/comments/$comment_id" 2>/dev/null || true
-                  sleep 0.3
-                fi
-              done
-
-          # 2. 인라인 리뷰 코멘트 삭제
-          # - 미해결(Unresolved) + 봇만 있는 스레드만 삭제
-          # - 사용자 답글이 있는 스레드는 보존
-          OWNER=${REPO%/*}
-          NAME=${REPO#*/}
-          gh api graphql -F owner="$OWNER" -F name="$NAME" -F number=$PR_NUMBER -f query='
-            query($owner: String!, $name: String!, $number: Int!) {
-              repository(owner: $owner, name: $name) {
-                pullRequest(number: $number) {
-                  reviewThreads(last: 100) {
-                    nodes {
-                      isResolved
-                      comments(first: 50) {
-                        nodes {
-                          databaseId
-                          author { login }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }' \
-            --jq '.data.repository.pullRequest.reviewThreads.nodes[]
-              | select(.isResolved == false)
-              | select((.comments.nodes | length) > 0)
-              | select([.comments.nodes[].author.login] | all(. == "github-actions[bot]"))
-              | .comments.nodes[].databaseId' \
-            | while read comment_id; do
-                if [ -n "$comment_id" ]; then
-                  echo "인라인 코멘트 삭제: $comment_id"
-                  gh api -X DELETE "repos/$REPO/pulls/comments/$comment_id" 2>/dev/null || true
-                  sleep 0.3
-                fi
-              done
-
-          echo "이전 리뷰 삭제 완료"
-
-      # 자동 리뷰 (PR events) - 읽기 + 코멘트만
-      - name: Run Claude Code Review
-        if: github.event_name == 'pull_request'
-        uses: anthropics/claude-code-action@v1
-        with:
-          show_full_output: true
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
-            이 PR을 리뷰하고 코멘트로 작성해주세요.
-          claude_args: '--allowedTools "Read,Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"'
-
-      # 대화형 (@claude mentions) - 코드 수정 가능
-      - name: Run Claude Interactive
-        if: github.event_name != 'pull_request'
-        uses: anthropics/claude-code-action@v1
-        with:
-          show_full_output: true
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
-            이 PR을 리뷰하고 코멘트로 작성해주세요.
-          claude_args: '--allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"'
-          trigger_phrase: "@claude"
-```
+| 구성 | 설명 |
+|------|------|
+| **자동 리뷰** | `pull_request` 이벤트 → 읽기전용 도구로 코드 리뷰 |
+| **대화형** | `@claude` 멘션 → 코드 수정/커밋/푸시 가능 |
+| **스마트 클린업** | `synchronize` 시 이전 봇 리뷰 자동 삭제 |
+| **보안** | Fork PR 차단, OWNER/MEMBER/COLLABORATOR만 `@claude` 허용 |
+| **운영** | `timeout-minutes: 15`, `concurrency` 중복 실행 방지 |
 
 ## 4. 핵심 전략
 
