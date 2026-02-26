@@ -127,6 +127,7 @@ export function StoreListPage() {
                     <img
                       src={store.iconThumbnailUrl ?? store.iconImageUrl!}
                       alt={store.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   ) : (

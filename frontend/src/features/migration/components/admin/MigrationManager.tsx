@@ -194,6 +194,7 @@ export function MigrationManager({
               <img
                 src={imageDetail.imageUrl}
                 alt="마이그레이션 증빙 사진"
+                loading="lazy"
                 className="aspect-[3/4] w-full object-contain rounded-xl bg-slate-100"
               />
             ) : (

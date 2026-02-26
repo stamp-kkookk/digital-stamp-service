@@ -110,6 +110,7 @@ export function ProblemSection() {
                 <div className="flex items-center justify-center mb-6 h-40">
                   <img
                     src={problem.icon}
+                    loading="lazy"
                     className={`max-h-full w-auto object-contain ${problem.iconClass ?? ""}`}
                     alt={problem.title}
                   />

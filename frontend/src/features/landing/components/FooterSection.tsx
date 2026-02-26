@@ -11,7 +11,7 @@ export function FooterSection() {
           {/* Logo Placeholder */}
           <div className="flex flex-col">
             <div className="shrink-0">
-              <img src="./logo/logo-footer.png" alt="꾸욱 로고" width={400} />
+              <img src="./logo/logo-footer.png" alt="꾸욱 로고" loading="lazy" width={400} />
             </div>
             <p className="mt-4 ml-6 text-xl font-semibold text-white">
               사장님은 가볍게, 고객은 선명하게 디지털 스탬프 "꾸욱"

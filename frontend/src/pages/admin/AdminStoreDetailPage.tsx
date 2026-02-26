@@ -100,6 +100,7 @@ export function AdminStoreDetailPage() {
                 <img
                   src={store.iconImageUrl}
                   alt={store.name}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               ) : (

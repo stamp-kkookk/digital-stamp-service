@@ -121,6 +121,7 @@ export function ReviewSection() {
                 <img
                   src={review.image}
                   alt={review.name}
+                  loading="lazy"
                   className="object-cover w-12 h-12 rounded-full bg-kkookk-indigo-100"
                 />
                 <div className="flex-1">

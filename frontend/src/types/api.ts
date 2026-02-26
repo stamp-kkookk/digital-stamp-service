@@ -189,19 +189,18 @@ export interface RedeemRewardResponse {
 
 export interface CreateMigrationRequest {
   storeId: number;
-  imageData: string;
   claimedStampCount: number;
 }
 
 export type StampMigrationStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'CANCELED';
 
-// Customer: full migration detail (with base64 imageData)
+// Customer: full migration detail (with imageUrl)
 export interface MigrationRequestResponse {
   id: number;
   customerWalletId: number;
   storeId: number;
   status: StampMigrationStatus;
-  imageData: string;
+  imageUrl: string;
   claimedStampCount: number;
   approvedStampCount: number | null;
   rejectReason: string | null;
@@ -210,7 +209,7 @@ export interface MigrationRequestResponse {
   slaMessage: string;
 }
 
-// Customer: list item (no imageData)
+// Customer: list item (no image)
 export interface MigrationListItemResponse {
   id: number;
   storeId: number;

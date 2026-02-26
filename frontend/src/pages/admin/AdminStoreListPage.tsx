@@ -128,6 +128,7 @@ export function AdminStoreListPage() {
                     <img
                       src={store.iconThumbnailUrl ?? store.iconImageUrl!}
                       alt={store.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   ) : (
