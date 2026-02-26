@@ -49,7 +49,6 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-
   issue_comment:
     types: [created]
   pull_request_review_comment:
@@ -62,13 +61,18 @@ permissions:
 
 jobs:
   claude-review:
+    concurrency:
+      group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        github.event.issue.pull_request != null &&
         contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
         contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -88,9 +92,9 @@ jobs:
           set +e
           echo "이전 Claude 리뷰 검색 중..."
 
-          # 1. PR 코멘트(요약) 삭제 - github-actions[bot]이 작성한 코멘트
-          gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
-            --jq '.[] | select(.user.login == "github-actions[bot]") | .id' \
+          # 1. PR 코멘트(요약) 삭제 - Claude 코멘트만 필터링
+          gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | select(.body | test("Claude")) | .id' \
             | while read comment_id; do
                 if [ -n "$comment_id" ]; then
                   echo "PR 코멘트 삭제: $comment_id"
@@ -124,6 +128,7 @@ jobs:
             }' \
             --jq '.data.repository.pullRequest.reviewThreads.nodes[]
               | select(.isResolved == false)
+              | select((.comments.nodes | length) > 0)
               | select([.comments.nodes[].author.login] | all(. == "github-actions[bot]"))
               | .comments.nodes[].databaseId' \
             | while read comment_id; do
@@ -136,11 +141,23 @@ jobs:
 
           echo "이전 리뷰 삭제 완료"
 
-      # 전략 2: Minimalist Prompting
-      # - 핵심 목표만 전달하고 나머지는 모델의 추론 능력에 위임
-      # - CLAUDE.md가 프로젝트 컨텍스트를 제공하므로 프롬프트에서 중복 불필요
-      # - 반복적으로 발생하는 이슈만 점진적으로 프롬프트에 추가
+      # 자동 리뷰 (PR events) - 읽기 + 코멘트만
       - name: Run Claude Code Review
+        if: github.event_name == 'pull_request'
+        uses: anthropics/claude-code-action@v1
+        with:
+          show_full_output: true
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            이 PR을 리뷰하고 코멘트로 작성해주세요.
+          claude_args: '--allowedTools "Read,Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"'
+
+      # 대화형 (@claude mentions) - 코드 수정 가능
+      - name: Run Claude Interactive
+        if: github.event_name != 'pull_request'
         uses: anthropics/claude-code-action@v1
         with:
           show_full_output: true
@@ -150,8 +167,7 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
             이 PR을 리뷰하고 코멘트로 작성해주세요.
-          claude_args: |
-            --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"
+          claude_args: '--allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"'
           trigger_phrase: "@claude"
 ```
 
