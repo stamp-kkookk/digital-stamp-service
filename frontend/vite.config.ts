@@ -8,6 +8,10 @@ export default defineConfig({
     plugins: [react(), tailwindcss()],
     server: {
         proxy: {
+            '/storage': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+            },
             '/api': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,

@@ -11,10 +11,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@Profile("!prod")
 @RequiredArgsConstructor
 public class LocalFileStorageService implements ImageStorageService {
 

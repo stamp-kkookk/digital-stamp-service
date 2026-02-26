@@ -22,7 +22,8 @@ class LocalFileStorageServiceTest {
 
     @BeforeEach
     void setUp() {
-        ImageStorageProperties properties = new ImageStorageProperties(tempDir.toString());
+        ImageStorageProperties properties =
+                new ImageStorageProperties(tempDir.toString(), null, null, null);
         storageService = new LocalFileStorageService(properties);
         storageService.init();
     }

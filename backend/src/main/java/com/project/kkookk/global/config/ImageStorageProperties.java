@@ -10,4 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ImageStorageProperties {
 
     private final String localPath;
+    private final String s3Bucket;
+    private final String s3Region;
+    private final String cloudFrontDomain;
 }
