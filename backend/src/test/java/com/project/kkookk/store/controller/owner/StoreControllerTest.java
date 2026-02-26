@@ -8,8 +8,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,7 +31,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -81,21 +82,24 @@ class StoreControllerTest {
                 ownerAccountId);
     }
 
+    private MockPart jsonPart(String name, Object value) throws Exception {
+        MockPart part = new MockPart(name, objectMapper.writeValueAsBytes(value));
+        part.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return part;
+    }
+
     @Test
     @DisplayName("매장 생성 성공 - 201 Created")
     void createStore_Success() throws Exception {
         // given
         StoreCreateRequest request =
-                new StoreCreateRequest("새 매장", "주소", "02-1234-5678", null, null, null);
+                new StoreCreateRequest("새 매장", "주소", "02-1234-5678", null, null);
         StoreResponse response = createStoreResponse("새 매장", StoreStatus.DRAFT, OWNER_ID);
-        given(storeService.createStore(anyLong(), any(StoreCreateRequest.class)))
+        given(storeService.createStore(anyLong(), any(StoreCreateRequest.class), any()))
                 .willReturn(response);
 
         // when & then
-        mockMvc.perform(
-                        post("/api/owner/stores")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(multipart("/api/owner/stores").part(jsonPart("data", request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(STORE_ID))
                 .andExpect(jsonPath("$.name").value("새 매장"));
@@ -105,14 +109,10 @@ class StoreControllerTest {
     @DisplayName("매장 생성 실패 - 이름 누락 - 400 Bad Request")
     void createStore_Fail_InvalidRequest() throws Exception {
         // given
-        StoreCreateRequest request =
-                new StoreCreateRequest("", "주소", "02-1234-5678", null, null, null);
+        StoreCreateRequest request = new StoreCreateRequest("", "주소", "02-1234-5678", null, null);
 
         // when & then
-        mockMvc.perform(
-                        post("/api/owner/stores")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(multipart("/api/owner/stores").part(jsonPart("data", request)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -159,16 +159,15 @@ class StoreControllerTest {
     void updateStore_Success() throws Exception {
         // given
         StoreUpdateRequest request =
-                new StoreUpdateRequest("수정된 매장", "새 주소", "02-4567-8901", "카페 설명", null, null);
+                new StoreUpdateRequest("수정된 매장", "새 주소", "02-4567-8901", "카페 설명", null);
         StoreResponse response = createStoreResponse("수정된 매장", StoreStatus.DRAFT, OWNER_ID);
-        given(storeService.updateStore(anyLong(), anyLong(), any(StoreUpdateRequest.class)))
+        given(storeService.updateStore(anyLong(), anyLong(), any(StoreUpdateRequest.class), any()))
                 .willReturn(response);
 
         // when & then
         mockMvc.perform(
-                        put("/api/owner/stores/{storeId}", STORE_ID)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart(HttpMethod.PUT, "/api/owner/stores/{storeId}", STORE_ID)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("수정된 매장"));
     }
@@ -177,14 +176,12 @@ class StoreControllerTest {
     @DisplayName("매장 수정 실패 - 유효성 검증 실패 - 400 Bad Request")
     void updateStore_Fail_InvalidRequest() throws Exception {
         // given
-        StoreUpdateRequest request =
-                new StoreUpdateRequest("", "새 주소", "02-4567-8901", null, null, null);
+        StoreUpdateRequest request = new StoreUpdateRequest("", "새 주소", "02-4567-8901", null, null);
 
         // when & then
         mockMvc.perform(
-                        put("/api/owner/stores/{storeId}", STORE_ID)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart(HttpMethod.PUT, "/api/owner/stores/{storeId}", STORE_ID)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isBadRequest());
     }
 

@@ -2,6 +2,7 @@ package com.project.kkookk.store.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageStorageService;
 import com.project.kkookk.global.util.PhoneValidator;
 import com.project.kkookk.store.controller.owner.dto.StoreCreateRequest;
 import com.project.kkookk.store.controller.owner.dto.StoreResponse;
@@ -13,34 +14,42 @@ import com.project.kkookk.store.domain.StoreAuditLog;
 import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreAuditLogRepository;
 import com.project.kkookk.store.repository.StoreRepository;
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 public class StoreService {
 
-    private static final int MAX_ICON_BASE64_LENGTH = 5 * 1024 * 1024 * 4 / 3;
+    private static final long MAX_ICON_SIZE_BYTES = 5 * 1024 * 1024;
 
     private final StoreRepository storeRepository;
     private final StoreAuditLogRepository storeAuditLogRepository;
+    private final ImageStorageService imageStorageService;
 
     public StoreService(
             final StoreRepository storeRepository,
-            final StoreAuditLogRepository storeAuditLogRepository) {
+            final StoreAuditLogRepository storeAuditLogRepository,
+            final ImageStorageService imageStorageService) {
         this.storeRepository = storeRepository;
         this.storeAuditLogRepository = storeAuditLogRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional
-    public StoreResponse createStore(final Long ownerId, final StoreCreateRequest request) {
+    public StoreResponse createStore(
+            final Long ownerId, final StoreCreateRequest request, final MultipartFile iconImage) {
         validatePhone(request.phone());
-        validateIconSize(request.iconImageBase64());
         validatePlaceRefUnique(request.placeRef());
+
+        String iconImageKey = uploadIcon(iconImage);
 
         final Store store =
                 new Store(
@@ -48,7 +57,7 @@ public class StoreService {
                         request.address(),
                         request.phone(),
                         request.placeRef(),
-                        request.iconImageBase64(),
+                        iconImageKey,
                         request.description(),
                         ownerId);
 
@@ -68,25 +77,28 @@ public class StoreService {
                 savedStore.getId(),
                 ownerId,
                 request.name());
-        return StoreResponse.from(savedStore);
+        return toResponse(savedStore);
     }
 
     public List<StoreResponse> getStores(final Long ownerId) {
         return storeRepository
                 .findByOwnerAccountIdAndStatusNot(ownerId, StoreStatus.DELETED)
                 .stream()
-                .map(StoreResponse::from)
+                .map(this::toResponse)
                 .toList();
     }
 
     public StoreResponse getStore(final Long ownerId, final Long storeId) {
         final Store store = findStoreByIdAndOwnerId(storeId, ownerId);
-        return StoreResponse.from(store);
+        return toResponse(store);
     }
 
     @Transactional
     public StoreResponse updateStore(
-            final Long ownerId, final Long storeId, final StoreUpdateRequest request) {
+            final Long ownerId,
+            final Long storeId,
+            final StoreUpdateRequest request,
+            final MultipartFile iconImage) {
         final Store store = findStoreByIdAndOwnerId(storeId, ownerId);
 
         if (store.getStatus() == StoreStatus.SUSPENDED
@@ -94,11 +106,12 @@ public class StoreService {
             throw new BusinessException(ErrorCode.STORE_NOT_OPERATIONAL);
         }
 
-        validateIconSize(request.iconImageBase64());
+        String newIconKey = uploadIcon(iconImage);
+        String iconKeyToSet = newIconKey != null ? newIconKey : store.getIconImageKey();
 
         if (store.isLive()) {
             validateLiveStoreRestrictedFields(store, request);
-            store.updatePartial(request.description(), request.iconImageBase64());
+            store.updatePartial(request.description(), iconKeyToSet);
         } else {
             validatePhone(request.phone());
             validatePlaceRefUniqueForUpdate(request.placeRef(), storeId);
@@ -107,8 +120,15 @@ public class StoreService {
                     request.address(),
                     request.phone(),
                     request.description(),
-                    request.iconImageBase64(),
+                    iconKeyToSet,
                     request.placeRef());
+        }
+
+        // 기존 이미지 삭제 (새 이미지가 업로드된 경우)
+        if (newIconKey != null
+                && store.getIconImageKey() != null
+                && !newIconKey.equals(store.getIconImageKey())) {
+            deleteIconSilently(store.getIconImageKey());
         }
 
         storeAuditLogRepository.save(
@@ -122,7 +142,7 @@ public class StoreService {
                         .build());
 
         log.info("[Store] Updated id={}", storeId);
-        return StoreResponse.from(store);
+        return toResponse(store);
     }
 
     @Transactional
@@ -144,6 +164,40 @@ public class StoreService {
         log.info("[Store] Soft-deleted id={}", storeId);
     }
 
+    public String getIconUrl(Store store) {
+        if (store.getIconImageKey() == null) {
+            return null;
+        }
+        return imageStorageService.getUrl(store.getIconImageKey());
+    }
+
+    private StoreResponse toResponse(Store store) {
+        return StoreResponse.from(store, getIconUrl(store));
+    }
+
+    private String uploadIcon(MultipartFile iconImage) {
+        if (iconImage == null || iconImage.isEmpty()) {
+            return null;
+        }
+        validateIconSize(iconImage);
+        try {
+            String extension = extractExtension(iconImage.getOriginalFilename());
+            String key = "stores/icons/" + UUID.randomUUID() + extension;
+            return imageStorageService.upload(
+                    key, iconImage.getInputStream(), iconImage.getContentType());
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.FILE_STORAGE_ERROR);
+        }
+    }
+
+    private void deleteIconSilently(String key) {
+        try {
+            imageStorageService.delete(key);
+        } catch (Exception e) {
+            log.warn("[Store] 이미지 삭제 실패 key={}", key, e);
+        }
+    }
+
     private Store findStoreByIdAndOwnerId(final Long storeId, final Long ownerId) {
         return storeRepository
                 .findByIdAndOwnerAccountId(storeId, ownerId)
@@ -156,8 +210,8 @@ public class StoreService {
         }
     }
 
-    private void validateIconSize(String iconImageBase64) {
-        if (iconImageBase64 != null && iconImageBase64.length() > MAX_ICON_BASE64_LENGTH) {
+    private void validateIconSize(MultipartFile iconImage) {
+        if (iconImage.getSize() > MAX_ICON_SIZE_BYTES) {
             throw new BusinessException(ErrorCode.STORE_ICON_TOO_LARGE);
         }
     }
@@ -185,5 +239,12 @@ public class StoreService {
                 && storeRepository.existsByPlaceRefAndIdNot(placeRef, storeId)) {
             throw new BusinessException(ErrorCode.STORE_PLACE_REF_DUPLICATED);
         }
+    }
+
+    private String extractExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return ".bin";
+        }
+        return filename.substring(filename.lastIndexOf('.'));
     }
 }

@@ -2,7 +2,7 @@
  * Store Management API Service for KKOOKK Owner
  */
 
-import { getRaw, postRaw, putRaw, delRaw } from '@/lib/api/client';
+import { apiClient, getRaw, delRaw } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
   StoreCreateRequest,
@@ -14,6 +14,19 @@ import type {
   RedeemEventResponse,
   PageResponse,
 } from '@/types/api';
+
+// =============================================================================
+// Multipart Helper
+// =============================================================================
+
+function buildStoreFormData(data: StoreCreateRequest | StoreUpdateRequest, iconFile?: File): FormData {
+  const formData = new FormData();
+  formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  if (iconFile) {
+    formData.append('icon', iconFile);
+  }
+  return formData;
+}
 
 // =============================================================================
 // Store CRUD Operations
@@ -28,22 +41,22 @@ export async function getStore(storeId: number): Promise<StoreResponse> {
 }
 
 export async function createStore(
-  data: StoreCreateRequest
+  data: StoreCreateRequest,
+  iconFile?: File
 ): Promise<StoreResponse> {
-  return postRaw<StoreResponse, StoreCreateRequest>(
-    API_ENDPOINTS.OWNER.STORES,
-    data
-  );
+  const formData = buildStoreFormData(data, iconFile);
+  const response = await apiClient.post<StoreResponse>(API_ENDPOINTS.OWNER.STORES, formData);
+  return response.data;
 }
 
 export async function updateStore(
   storeId: number,
-  data: StoreUpdateRequest
+  data: StoreUpdateRequest,
+  iconFile?: File
 ): Promise<StoreResponse> {
-  return putRaw<StoreResponse, StoreUpdateRequest>(
-    API_ENDPOINTS.OWNER.STORE(storeId),
-    data
-  );
+  const formData = buildStoreFormData(data, iconFile);
+  const response = await apiClient.put<StoreResponse>(API_ENDPOINTS.OWNER.STORE(storeId), formData);
+  return response.data;
 }
 
 export async function deleteStore(storeId: number): Promise<void> {

@@ -78,5 +78,6 @@ jacoco.exec
 # Custom / Project-specific
 ################################
 /queries/
+/storage/
 
 .claude

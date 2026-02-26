@@ -14,7 +14,7 @@ public record AdminStoreResponse(
         @Schema(description = "매장 주소") String address,
         @Schema(description = "매장 전화번호") String phone,
         @Schema(description = "카카오 장소 참조 ID") String placeRef,
-        @Schema(description = "매장 아이콘 이미지 (Base64)") String iconImageBase64,
+        @Schema(description = "매장 아이콘 이미지 URL") String iconImageUrl,
         @Schema(description = "매장 설명") String description,
         @Schema(description = "매장 상태") StoreStatus status,
         @JsonProperty("hasActiveStampCard") @Schema(description = "활성 스탬프카드 보유 여부")
@@ -27,21 +27,21 @@ public record AdminStoreResponse(
         @Schema(description = "수정 시각") LocalDateTime updatedAt) {
 
     public static AdminStoreResponse of(
-            Store store, OwnerAccount owner, boolean hasActiveStampCard) {
+            Store store, OwnerAccount owner, boolean hasActiveStampCard, String iconImageUrl) {
         return new AdminStoreResponse(
                 store.getId(),
                 store.getName(),
                 store.getAddress(),
                 store.getPhone(),
                 store.getPlaceRef(),
-                store.getIconImageBase64(),
+                iconImageUrl,
                 store.getDescription(),
                 store.getStatus(),
                 hasActiveStampCard,
                 store.getOwnerAccountId(),
-                owner.getName(),
-                owner.getEmail(),
-                owner.getPhoneNumber(),
+                owner != null ? owner.getName() : null,
+                owner != null ? owner.getEmail() : null,
+                owner != null ? owner.getPhoneNumber() : null,
                 store.getCreatedAt(),
                 store.getUpdatedAt());
     }

@@ -16,7 +16,8 @@ interface StoreEditFormData {
   address: string;
   phone: string;
   description: string;
-  iconImageBase64: string | null;
+  iconFile: File | null;
+  existingIconUrl: string | null;
   placeRef: string | null;
 }
 
@@ -52,7 +53,8 @@ export function StoreEditPage() {
       address: store.address ?? '',
       phone: store.phone ?? '',
       description: store.description ?? '',
-      iconImageBase64: store.iconImageBase64,
+      iconFile: null,
+      existingIconUrl: store.iconImageUrl,
       placeRef: store.placeRef,
     });
   }
@@ -94,12 +96,11 @@ export function StoreEditPage() {
       address: formData.address || undefined,
       phone: formData.phone || undefined,
       description: formData.description || undefined,
-      iconImageBase64: formData.iconImageBase64 || undefined,
       placeRef: formData.placeRef || undefined,
     };
 
     updateStore.mutate(
-      { storeId: storeIdNum, data },
+      { storeId: storeIdNum, data, iconFile: formData.iconFile || undefined },
       {
         onSuccess: () => {
           navigate(`/owner/stores/${storeId}`, {
@@ -201,9 +202,10 @@ export function StoreEditPage() {
               매장 아이콘
             </span>
             <IconUpload
-              value={formData.iconImageBase64}
-              onChange={(base64) =>
-                setFormData((prev) => prev ? { ...prev, iconImageBase64: base64 } : prev)
+              file={formData.iconFile}
+              existingUrl={formData.existingIconUrl}
+              onChange={(file) =>
+                setFormData((prev) => prev ? { ...prev, iconFile: file } : prev)
               }
             />
           </div>

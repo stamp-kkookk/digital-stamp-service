@@ -5,6 +5,7 @@ import com.project.kkookk.admin.controller.dto.AdminStoreStatusChangeRequest;
 import com.project.kkookk.admin.controller.dto.StoreAuditLogResponse;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageStorageService;
 import com.project.kkookk.owner.domain.OwnerAccount;
 import com.project.kkookk.owner.repository.OwnerAccountRepository;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
@@ -32,6 +33,7 @@ public class AdminStoreService {
     private final OwnerAccountRepository ownerAccountRepository;
     private final StoreAuditLogRepository storeAuditLogRepository;
     private final StampCardRepository stampCardRepository;
+    private final ImageStorageService imageStorageService;
 
     public List<AdminStoreResponse> getAllStores(StoreStatus statusFilter) {
         List<Store> stores;
@@ -51,7 +53,8 @@ public class AdminStoreService {
                             boolean hasActiveStampCard =
                                     stampCardRepository.existsByStoreIdAndStatus(
                                             store.getId(), StampCardStatus.ACTIVE);
-                            return AdminStoreResponse.of(store, owner, hasActiveStampCard);
+                            return AdminStoreResponse.of(
+                                    store, owner, hasActiveStampCard, getIconUrl(store));
                         })
                 .toList();
     }
@@ -67,7 +70,7 @@ public class AdminStoreService {
         boolean hasActiveStampCard =
                 stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
 
-        return AdminStoreResponse.of(store, owner, hasActiveStampCard);
+        return AdminStoreResponse.of(store, owner, hasActiveStampCard, getIconUrl(store));
     }
 
     @Transactional
@@ -106,7 +109,7 @@ public class AdminStoreService {
         boolean hasActiveStampCard =
                 stampCardRepository.existsByStoreIdAndStatus(storeId, StampCardStatus.ACTIVE);
 
-        return AdminStoreResponse.of(store, owner, hasActiveStampCard);
+        return AdminStoreResponse.of(store, owner, hasActiveStampCard, getIconUrl(store));
     }
 
     public List<StoreAuditLogResponse> getAuditLogs(Long storeId) {
@@ -117,6 +120,13 @@ public class AdminStoreService {
         return storeAuditLogRepository.findByStoreIdOrderByCreatedAtDesc(storeId).stream()
                 .map(StoreAuditLogResponse::from)
                 .toList();
+    }
+
+    private String getIconUrl(Store store) {
+        if (store.getIconImageKey() == null) {
+            return null;
+        }
+        return imageStorageService.getUrl(store.getIconImageKey());
     }
 
     private StoreAuditAction resolveAuditAction(StoreStatus previousStatus, StoreStatus newStatus) {

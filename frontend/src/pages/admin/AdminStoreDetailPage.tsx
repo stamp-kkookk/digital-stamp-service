@@ -96,9 +96,9 @@ export function AdminStoreDetailPage() {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-16 h-16 bg-slate-100 rounded-xl overflow-hidden">
-              {store.iconImageBase64 ? (
+              {store.iconImageUrl ? (
                 <img
-                  src={`data:image/png;base64,${store.iconImageBase64}`}
+                  src={store.iconImageUrl}
                   alt={store.name}
                   className="w-full h-full object-cover"
                 />

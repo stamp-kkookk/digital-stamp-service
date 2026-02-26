@@ -281,7 +281,6 @@ export interface StoreCreateRequest {
   address?: string;
   phone?: string;
   placeRef?: string;
-  iconImageBase64?: string;
   description?: string;
 }
 
@@ -290,7 +289,6 @@ export interface StoreUpdateRequest {
   address?: string;
   phone?: string;
   description?: string;
-  iconImageBase64?: string;
   placeRef?: string;
 }
 
@@ -300,7 +298,7 @@ export interface StoreResponse {
   address: string | null;
   phone: string | null;
   placeRef: string | null;
-  iconImageBase64: string | null;
+  iconImageUrl: string | null;
   description: string | null;
   status: StoreStatus;
   createdAt: string;
@@ -334,7 +332,7 @@ export interface AdminStoreResponse {
   address: string | null;
   phone: string | null;
   placeRef: string | null;
-  iconImageBase64: string | null;
+  iconImageUrl: string | null;
   description: string | null;
   status: StoreStatus;
   hasActiveStampCard: boolean;
