@@ -25,7 +25,7 @@ import { StampCardDesigner } from "./designer/StampCardDesigner";
 
 interface StampCardCreateFormProps {
   storeName: string;
-  onSubmit: (data: CreateStampCardRequest) => void;
+  onSubmit: (data: CreateStampCardRequest, backgroundImage?: File, stampImage?: File) => void;
   onCancel: () => void;
 }
 
@@ -118,14 +118,12 @@ export function StampCardCreateForm({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setDesign((prev) => ({
-        ...prev,
-        [key]: event.target?.result as string,
-      }));
-    };
-    reader.readAsDataURL(file);
+    const previewUrl = URL.createObjectURL(file);
+    const fileKey = key === "backgroundImage" ? "backgroundImageFile" : "stampImageFile";
+    setDesign((prev) => {
+      if (prev[key]) URL.revokeObjectURL(prev[key]!);
+      return { ...prev, [key]: previewUrl, [fileKey]: file };
+    });
   };
 
   const handleSelectV2Template = (templateId: V2TemplateId) => {
@@ -163,12 +161,9 @@ export function StampCardCreateForm({
     const designType: StampCardDesignType =
       design.template === "custom" ? "IMAGE" : "COLOR";
     const designJson =
-      designType === "IMAGE"
-        ? JSON.stringify({
-            backgroundImage: design.backgroundImage,
-            stampImage: design.stampImage,
-          })
-        : JSON.stringify({ color: design.color });
+      designType === "COLOR"
+        ? JSON.stringify({ color: design.color })
+        : undefined;
 
     const request: CreateStampCardRequest = {
       title: design.cardName,
@@ -179,7 +174,7 @@ export function StampCardCreateForm({
       designType,
       designJson,
     };
-    onSubmit(request);
+    onSubmit(request, design.backgroundImageFile, design.stampImageFile);
   };
 
   const getColorClass = (color: string, type: "bg" | "shadow" = "bg") => {

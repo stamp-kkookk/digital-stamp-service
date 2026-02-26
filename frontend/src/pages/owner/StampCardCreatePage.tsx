@@ -60,9 +60,9 @@ export function StampCardCreatePage() {
     );
   }
 
-  const handleSubmit = (data: CreateStampCardRequest) => {
+  const handleSubmit = (data: CreateStampCardRequest, backgroundImage?: File, stampImage?: File) => {
     createStampCard.mutate(
-      { storeId: storeIdNum, data },
+      { storeId: storeIdNum, data, backgroundImage, stampImage },
       {
         onSuccess: (newCard) => {
           if (isInitialSetup) {

@@ -50,6 +50,12 @@ public class StampCard extends BaseTimeEntity {
     @Column(name = "design_json", columnDefinition = "MEDIUMTEXT")
     private String designJson;
 
+    @Column(name = "background_image_key", length = 255)
+    private String backgroundImageKey;
+
+    @Column(name = "stamp_image_key", length = 255)
+    private String stampImageKey;
+
     protected StampCard() {}
 
     private StampCard(Builder builder) {
@@ -64,6 +70,8 @@ public class StampCard extends BaseTimeEntity {
         this.designType =
                 builder.designType != null ? builder.designType : StampCardDesignType.COLOR;
         this.designJson = builder.designJson;
+        this.backgroundImageKey = builder.backgroundImageKey;
+        this.stampImageKey = builder.stampImageKey;
     }
 
     public static Builder builder() {
@@ -114,6 +122,14 @@ public class StampCard extends BaseTimeEntity {
         return designJson;
     }
 
+    public String getBackgroundImageKey() {
+        return backgroundImageKey;
+    }
+
+    public String getStampImageKey() {
+        return stampImageKey;
+    }
+
     public boolean isDraft() {
         return this.status == StampCardStatus.DRAFT;
     }
@@ -134,7 +150,9 @@ public class StampCard extends BaseTimeEntity {
             Integer rewardQuantity,
             Integer expireDays,
             StampCardDesignType designType,
-            String designJson) {
+            String designJson,
+            String backgroundImageKey,
+            String stampImageKey) {
         this.title = title;
         this.goalStampCount = goalStampCount;
         this.requiredStamps = requiredStamps;
@@ -143,6 +161,8 @@ public class StampCard extends BaseTimeEntity {
         this.expireDays = expireDays;
         this.designType = designType != null ? designType : this.designType;
         this.designJson = designJson;
+        this.backgroundImageKey = backgroundImageKey;
+        this.stampImageKey = stampImageKey;
     }
 
     public static class Builder {
@@ -156,6 +176,8 @@ public class StampCard extends BaseTimeEntity {
         private Integer expireDays;
         private StampCardDesignType designType;
         private String designJson;
+        private String backgroundImageKey;
+        private String stampImageKey;
 
         public Builder storeId(Long storeId) {
             this.storeId = storeId;
@@ -199,6 +221,16 @@ public class StampCard extends BaseTimeEntity {
 
         public Builder designJson(String designJson) {
             this.designJson = designJson;
+            return this;
+        }
+
+        public Builder backgroundImageKey(String backgroundImageKey) {
+            this.backgroundImageKey = backgroundImageKey;
+            return this;
+        }
+
+        public Builder stampImageKey(String stampImageKey) {
+            this.stampImageKey = stampImageKey;
             return this;
         }
 

@@ -181,4 +181,6 @@ export interface StampCardDesign {
   stampImage: string | null;
   textColor: TextColorOption;
   designV2?: DesignJsonV2;
+  backgroundImageFile?: File;
+  stampImageFile?: File;
 }

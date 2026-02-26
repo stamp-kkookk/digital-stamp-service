@@ -23,7 +23,8 @@ public record StampCardResponse(
         @Schema(description = "생성 시각") LocalDateTime createdAt,
         @Schema(description = "수정 시각") LocalDateTime updatedAt) {
 
-    public static StampCardResponse from(StampCard entity, boolean issued) {
+    public static StampCardResponse from(
+            StampCard entity, boolean issued, String resolvedDesignJson) {
         return new StampCardResponse(
                 entity.getId(),
                 entity.getTitle(),
@@ -34,7 +35,7 @@ public record StampCardResponse(
                 entity.getRewardQuantity(),
                 entity.getExpireDays(),
                 entity.getDesignType(),
-                entity.getDesignJson(),
+                resolvedDesignJson,
                 entity.getStoreId(),
                 issued,
                 entity.getCreatedAt(),

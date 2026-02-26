@@ -90,10 +90,14 @@ export function useCreateStampCard() {
     mutationFn: ({
       storeId,
       data,
+      backgroundImage,
+      stampImage,
     }: {
       storeId: number;
       data: CreateStampCardRequest;
-    }) => createStampCard(storeId, data),
+      backgroundImage?: File;
+      stampImage?: File;
+    }) => createStampCard(storeId, data, backgroundImage, stampImage),
     onSuccess: (_, { storeId }) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.stampCards(storeId, undefined),
@@ -114,11 +118,15 @@ export function useUpdateStampCard() {
       storeId,
       stampCardId,
       data,
+      backgroundImage,
+      stampImage,
     }: {
       storeId: number;
       stampCardId: number;
       data: UpdateStampCardRequest;
-    }) => updateStampCard(storeId, stampCardId, data),
+      backgroundImage?: File;
+      stampImage?: File;
+    }) => updateStampCard(storeId, stampCardId, data, backgroundImage, stampImage),
     onSuccess: (_, { storeId, stampCardId }) => {
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.stampCards(storeId, undefined),

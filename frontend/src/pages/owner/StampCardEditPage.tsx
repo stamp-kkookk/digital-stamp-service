@@ -244,26 +244,23 @@ export function StampCardEditPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      updateDesign({ [key]: event.target?.result as string });
-    };
-    reader.readAsDataURL(file);
+    const previewUrl = URL.createObjectURL(file);
+    const fileKey = key === 'backgroundImage' ? 'backgroundImageFile' : 'stampImageFile';
+    const prev = design ?? initialDesign;
+    if (prev?.[key]) URL.revokeObjectURL(prev[key]!);
+    updateDesign({ [key]: previewUrl, [fileKey]: file });
   };
 
   const handleSubmit = () => {
     let designType: StampCardDesignType;
-    let designJson: string;
+    let designJson: string | undefined;
 
     if (d.template.startsWith('v2-') && d.designV2) {
       designType = 'CUSTOM';
       designJson = JSON.stringify(d.designV2);
     } else if (d.template === 'custom') {
       designType = 'IMAGE';
-      designJson = JSON.stringify({
-        backgroundImage: d.backgroundImage,
-        stampImage: d.stampImage,
-      });
+      designJson = undefined;
     } else {
       designType = 'COLOR';
       designJson = JSON.stringify({ color: d.color });
@@ -280,7 +277,13 @@ export function StampCardEditPage() {
     };
 
     updateStampCard.mutate(
-      { storeId: storeIdNum, stampCardId: cardIdNum, data },
+      {
+        storeId: storeIdNum,
+        stampCardId: cardIdNum,
+        data,
+        backgroundImage: d.backgroundImageFile,
+        stampImage: d.stampImageFile,
+      },
       {
         onSuccess: () => {
           kkookkToast.success('스탬프 카드가 수정되었습니다');
