@@ -12,15 +12,20 @@ public record StoreResponse(
         @Schema(description = "매장 주소", example = "서울시 강남구 테헤란로 123") String address,
         @Schema(description = "매장 전화번호", example = "02-1234-5678") String phone,
         @Schema(description = "카카오 장소 참조 ID", example = "12345678") String placeRef,
-        @Schema(description = "매장 아이콘 이미지 URL", example = "/storage/stores/1/icon.webp")
+        @Schema(description = "매장 아이콘 이미지 URL", example = "/storage/stores/icons/uuid.jpg")
                 String iconImageUrl,
+        @Schema(
+                        description = "매장 아이콘 썸네일 URL (목록용)",
+                        example = "/storage/stores/icons/uuid_thumb.jpg")
+                String iconThumbnailUrl,
         @Schema(description = "매장 설명", example = "강남역 3번 출구 근처 아늑한 카페") String description,
         @Schema(description = "매장 상태", example = "DRAFT") StoreStatus status,
         @Schema(description = "생성 시각", example = "2025-01-23T10:00:00") LocalDateTime createdAt,
         @Schema(description = "수정 시각", example = "2025-01-23T10:00:00") LocalDateTime updatedAt,
         @Schema(description = "점주 ID", example = "1") Long ownerAccountId) {
 
-    public static StoreResponse from(final Store store, final String iconImageUrl) {
+    public static StoreResponse from(
+            final Store store, final String iconImageUrl, final String iconThumbnailUrl) {
         return new StoreResponse(
                 store.getId(),
                 store.getName(),
@@ -28,6 +33,7 @@ public record StoreResponse(
                 store.getPhone(),
                 store.getPlaceRef(),
                 iconImageUrl,
+                iconThumbnailUrl,
                 store.getDescription(),
                 store.getStatus(),
                 store.getCreatedAt(),

@@ -2,7 +2,7 @@ package com.project.kkookk.store.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
-import com.project.kkookk.global.image.ImageStorageService;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.global.util.PhoneValidator;
 import com.project.kkookk.store.controller.owner.dto.StoreCreateRequest;
 import com.project.kkookk.store.controller.owner.dto.StoreResponse;
@@ -17,7 +17,6 @@ import com.project.kkookk.store.repository.StoreRepository;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,15 +31,15 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreAuditLogRepository storeAuditLogRepository;
-    private final ImageStorageService imageStorageService;
+    private final ImageProcessingService imageProcessingService;
 
     public StoreService(
             final StoreRepository storeRepository,
             final StoreAuditLogRepository storeAuditLogRepository,
-            final ImageStorageService imageStorageService) {
+            final ImageProcessingService imageProcessingService) {
         this.storeRepository = storeRepository;
         this.storeAuditLogRepository = storeAuditLogRepository;
-        this.imageStorageService = imageStorageService;
+        this.imageProcessingService = imageProcessingService;
     }
 
     @Transactional
@@ -168,11 +167,18 @@ public class StoreService {
         if (store.getIconImageKey() == null) {
             return null;
         }
-        return imageStorageService.getUrl(store.getIconImageKey());
+        return imageProcessingService.getUrl(store.getIconImageKey());
+    }
+
+    public String getIconThumbnailUrl(Store store) {
+        if (store.getIconImageKey() == null) {
+            return null;
+        }
+        return imageProcessingService.getThumbnailUrl(store.getIconImageKey());
     }
 
     private StoreResponse toResponse(Store store) {
-        return StoreResponse.from(store, getIconUrl(store));
+        return StoreResponse.from(store, getIconUrl(store), getIconThumbnailUrl(store));
     }
 
     private String uploadIcon(MultipartFile iconImage) {
@@ -181,10 +187,8 @@ public class StoreService {
         }
         validateIconSize(iconImage);
         try {
-            String extension = extractExtension(iconImage.getOriginalFilename());
-            String key = "stores/icons/" + UUID.randomUUID() + extension;
-            return imageStorageService.upload(
-                    key, iconImage.getInputStream(), iconImage.getContentType());
+            return imageProcessingService.processAndStore(
+                    "stores/icons", iconImage.getInputStream());
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.FILE_STORAGE_ERROR);
         }
@@ -192,7 +196,7 @@ public class StoreService {
 
     private void deleteIconSilently(String key) {
         try {
-            imageStorageService.delete(key);
+            imageProcessingService.deleteWithThumbnail(key);
         } catch (Exception e) {
             log.warn("[Store] 이미지 삭제 실패 key={}", key, e);
         }
@@ -239,12 +243,5 @@ public class StoreService {
                 && storeRepository.existsByPlaceRefAndIdNot(placeRef, storeId)) {
             throw new BusinessException(ErrorCode.STORE_PLACE_REF_DUPLICATED);
         }
-    }
-
-    private String extractExtension(String filename) {
-        if (filename == null || !filename.contains(".")) {
-            return ".bin";
-        }
-        return filename.substring(filename.lastIndexOf('.'));
     }
 }

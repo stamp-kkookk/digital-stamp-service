@@ -4,14 +4,6 @@ import java.io.InputStream;
 
 public interface ImageStorageService {
 
-    /**
-     * 이미지를 저장하고, 저장된 경로(key)를 반환한다.
-     *
-     * @param key 저장 경로 (예: "stores/123/icon.webp")
-     * @param inputStream 이미지 바이너리 스트림
-     * @param contentType MIME 타입 (예: "image/webp")
-     * @return 저장된 key
-     */
     String upload(String key, InputStream inputStream, String contentType);
 
     /** 저장된 이미지를 바이너리 스트림으로 반환한다. */

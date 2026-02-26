@@ -4,5 +4,5 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(ImageStorageProperties.class)
+@EnableConfigurationProperties({ImageStorageProperties.class, ImageProcessingProperties.class})
 public class ImageStorageConfig {}

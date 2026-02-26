@@ -8,7 +8,7 @@ import static org.mockito.BDDMockito.then;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
-import com.project.kkookk.global.image.ImageStorageService;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.store.controller.owner.dto.StoreCreateRequest;
 import com.project.kkookk.store.controller.owner.dto.StoreResponse;
 import com.project.kkookk.store.controller.owner.dto.StoreUpdateRequest;
@@ -36,7 +36,7 @@ class StoreServiceTest {
 
     @Mock private StoreAuditLogRepository storeAuditLogRepository;
 
-    @Mock private ImageStorageService imageStorageService;
+    @Mock private ImageProcessingService imageProcessingService;
 
     private static final Long OWNER_ID = 1L;
     private static final Long STORE_ID = 1L;

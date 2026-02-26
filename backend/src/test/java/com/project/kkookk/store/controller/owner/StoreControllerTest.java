@@ -76,6 +76,7 @@ class StoreControllerTest {
                 null,
                 null,
                 null,
+                null,
                 status,
                 LocalDateTime.now(),
                 LocalDateTime.now(),

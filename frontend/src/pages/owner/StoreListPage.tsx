@@ -123,9 +123,9 @@ export function StoreListPage() {
             >
               <div className="flex items-center gap-6">
                 <div className="flex items-center justify-center w-16 h-16 bg-slate-100 rounded-xl text-slate-400 overflow-hidden">
-                  {store.iconImageUrl ? (
+                  {(store.iconThumbnailUrl || store.iconImageUrl) ? (
                     <img
-                      src={store.iconImageUrl}
+                      src={store.iconThumbnailUrl ?? store.iconImageUrl!}
                       alt={store.name}
                       className="w-full h-full object-cover"
                     />

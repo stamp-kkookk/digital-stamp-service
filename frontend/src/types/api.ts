@@ -299,6 +299,7 @@ export interface StoreResponse {
   phone: string | null;
   placeRef: string | null;
   iconImageUrl: string | null;
+  iconThumbnailUrl: string | null;
   description: string | null;
   status: StoreStatus;
   createdAt: string;
@@ -333,6 +334,7 @@ export interface AdminStoreResponse {
   phone: string | null;
   placeRef: string | null;
   iconImageUrl: string | null;
+  iconThumbnailUrl: string | null;
   description: string | null;
   status: StoreStatus;
   hasActiveStampCard: boolean;
