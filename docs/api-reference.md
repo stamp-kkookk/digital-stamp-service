@@ -95,7 +95,7 @@
 
 | Method | Path | Handler | Description |
 |--------|------|---------|-------------|
-| POST | `/api/customer/migrations` | `CustomerMigrationController.createMigrationRequest()` | 종이 스탬프 이전 요청 (Base64 이미지, 최대 5MB) |
+| POST | `/api/customer/migrations` | `CustomerMigrationController.createMigrationRequest()` | 종이 스탬프 이전 요청 (Multipart 이미지, 최대 5MB) |
 | GET | `/api/customer/migrations/{id}` | `CustomerMigrationController.getMigrationRequest()` | 마이그레이션 요청 상세 조회 |
 | GET | `/api/customer/migrations` | `CustomerMigrationController.getMyMigrationRequests()` | 내 마이그레이션 요청 목록 |
 
