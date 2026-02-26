@@ -130,7 +130,7 @@ public class OwnerMigrationService {
     public MigrationApproveResponse approve(
             Long storeId, Long migrationId, MigrationApproveRequest request, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
-        StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
+        StampMigrationRequest migration = findMigrationByIdAndStoreIdWithLock(migrationId, storeId);
 
         FlowMdc.setMigrationFlow(migrationId);
 
@@ -205,7 +205,7 @@ public class OwnerMigrationService {
     public MigrationRejectResponse reject(
             Long storeId, Long migrationId, MigrationRejectRequest request, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
-        StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
+        StampMigrationRequest migration = findMigrationByIdAndStoreIdWithLock(migrationId, storeId);
 
         if (!migration.isSubmitted()) {
             throw new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED);
@@ -226,6 +226,13 @@ public class OwnerMigrationService {
     private StampMigrationRequest findMigrationByIdAndStoreId(Long migrationId, Long storeId) {
         return migrationRepository
                 .findByIdAndStoreId(migrationId, storeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
+    }
+
+    private StampMigrationRequest findMigrationByIdAndStoreIdWithLock(
+            Long migrationId, Long storeId) {
+        return migrationRepository
+                .findByIdAndStoreIdWithLock(migrationId, storeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
     }
 

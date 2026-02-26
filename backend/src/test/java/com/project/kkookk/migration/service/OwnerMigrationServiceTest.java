@@ -200,7 +200,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(
                             walletStampCardRepository
@@ -248,7 +248,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(
                             walletStampCardRepository
@@ -284,7 +284,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
 
             MigrationApproveRequest request = new MigrationApproveRequest(3);
@@ -317,7 +317,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(
                             walletStampCardRepository
@@ -358,7 +358,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.empty());
 
             MigrationApproveRequest request = new MigrationApproveRequest(3);
@@ -394,7 +394,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
 
             MigrationRejectRequest request = new MigrationRejectRequest(rejectReason);
@@ -424,7 +424,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.of(migration));
 
             MigrationRejectRequest request = new MigrationRejectRequest("새 반려 사유");
@@ -451,7 +451,7 @@ class OwnerMigrationServiceTest {
 
             given(storeRepository.findByIdAndOwnerAccountId(storeId, OWNER_ID))
                     .willReturn(Optional.of(store));
-            given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
+            given(migrationRepository.findByIdAndStoreIdWithLock(migrationId, storeId))
                     .willReturn(Optional.empty());
 
             MigrationRejectRequest request = new MigrationRejectRequest("반려 사유");

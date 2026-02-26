@@ -54,10 +54,10 @@ public class CustomerMigrationService {
             throw new MigrationImageTooLargeException();
         }
 
-        // 2. 고객 지갑 조회 및 검증
+        // 2. 고객 지갑 조회 및 검증 (비관적 락으로 동일 고객의 동시 요청 직렬화)
         CustomerWallet customerWallet =
                 customerWalletRepository
-                        .findById(customerWalletId)
+                        .findByIdWithLock(customerWalletId)
                         .orElseThrow(CustomerWalletNotFoundException::new);
 
         if (customerWallet.isBlocked()) {
