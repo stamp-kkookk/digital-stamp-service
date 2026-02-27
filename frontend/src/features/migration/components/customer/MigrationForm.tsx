@@ -1,7 +1,7 @@
 /**
  * MigrationForm 컴포넌트
  * 고객이 종이 스탬프 전환 요청을 제출하기 위한 폼
- * API 연동: createMigration({ storeId, imageData, claimedStampCount })
+ * API 연동: createMigration({ storeId, claimedStampCount }, imageFile)
  */
 
 import { Button } from "@/components/ui/Button";
@@ -24,16 +24,6 @@ import {
   Store,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-
-/** File → Base64 data URI */
-function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
 export function MigrationForm() {
   const { storeId: urlStoreId, customerNavigate } = useCustomerNavigate();
@@ -100,41 +90,37 @@ export function MigrationForm() {
     setIsDropdownOpen(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStoreId || !file || !count) return;
 
     setSubmitError(null);
 
-    try {
-      const imageData = await fileToBase64(file);
-
-      createMigration.mutate(
-        {
+    createMigration.mutate(
+      {
+        data: {
           storeId: selectedStoreId,
-          imageData,
           claimedStampCount: parseInt(count, 10),
         },
-        {
-          onSuccess: () => {
-            kkookkToast.success("전환 신청이 접수되었습니다");
-            customerNavigate("/migrations");
-          },
-          onError: (error) => {
-            const err = error as { response?: { status?: number } };
-            if (err.response?.status === 409) {
-              setSubmitError("이미 심사 중인 전환 신청이 있습니다.");
-            } else if (err.response?.status === 413) {
-              setSubmitError("이미지 크기가 너무 큽니다. (최대 5MB)");
-            } else {
-              setSubmitError("전환 신청에 실패했습니다. 다시 시도해주세요.");
-            }
-          },
+        imageFile: file,
+      },
+      {
+        onSuccess: () => {
+          kkookkToast.success("전환 신청이 접수되었습니다");
+          customerNavigate("/migrations");
         },
-      );
-    } catch {
-      setSubmitError("이미지 처리 중 오류가 발생했습니다.");
-    }
+        onError: (error) => {
+          const err = error as { response?: { status?: number } };
+          if (err.response?.status === 409) {
+            setSubmitError("이미 심사 중인 전환 신청이 있습니다.");
+          } else if (err.response?.status === 413) {
+            setSubmitError("이미지 크기가 너무 큽니다. (최대 5MB)");
+          } else {
+            setSubmitError("전환 신청에 실패했습니다. 다시 시도해주세요.");
+          }
+        },
+      },
+    );
   };
 
   return (

@@ -11,10 +11,8 @@ public record MigrationRequestResponse(
         @Schema(description = "고객 지갑 ID", example = "10") Long customerWalletId,
         @Schema(description = "매장 ID", example = "1") Long storeId,
         @Schema(description = "요청 상태", example = "SUBMITTED") StampMigrationStatus status,
-        @Schema(
-                        description = "종이 스탬프 판 이미지 (Base64 인코딩)",
-                        example = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
-                String imageData,
+        @Schema(description = "종이 스탬프 판 이미지 URL", example = "/storage/migrations/abc123.jpg")
+                String imageUrl,
         @Schema(description = "고객이 주장한 스탬프 개수", example = "8") Integer claimedStampCount,
         @Schema(description = "승인된 스탬프 개수 (승인 시에만 존재)", example = "7") Integer approvedStampCount,
         @Schema(description = "반려 사유 (반려 시에만 존재)", example = "이미지가 불명확합니다") String rejectReason,
@@ -26,13 +24,13 @@ public record MigrationRequestResponse(
 
     private static final String SLA_MESSAGE = "24~48시간 이내 처리됩니다";
 
-    public static MigrationRequestResponse from(StampMigrationRequest entity) {
+    public static MigrationRequestResponse from(StampMigrationRequest entity, String imageUrl) {
         return new MigrationRequestResponse(
                 entity.getId(),
                 entity.getCustomerWalletId(),
                 entity.getStoreId(),
                 entity.getStatus(),
-                entity.getImageData(),
+                imageUrl,
                 entity.getClaimedStampCount(),
                 entity.getApprovedStampCount(),
                 entity.getRejectReason(),

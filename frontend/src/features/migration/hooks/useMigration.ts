@@ -20,9 +20,9 @@ export function useCreateMigration() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateMigrationRequest) => createMigration(data),
+    mutationFn: ({ data, imageFile }: { data: CreateMigrationRequest; imageFile: File }) =>
+      createMigration(data, imageFile),
     onSuccess: () => {
-      // Invalidate migration list
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.migrations() });
     },
   });

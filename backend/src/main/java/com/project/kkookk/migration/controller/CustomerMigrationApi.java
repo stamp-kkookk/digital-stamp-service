@@ -15,12 +15,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Customer Migration", description = "고객 스탬프 마이그레이션 API")
 @SecurityRequirement(name = "bearerAuth")
@@ -30,10 +32,10 @@ public interface CustomerMigrationApi {
             summary = "스탬프 마이그레이션 요청 생성",
             description =
                     """
-                종이 스탬프 판 이미지(Base64)와 개수를 제출하여 디지털 전환 요청.
+                종이 스탬프 판 이미지와 개수를 제출하여 디지털 전환 요청.
                 - Wallet당 매장별 1회 제한 (SUBMITTED 상태 중복 불가)
                 - 승인/반려된 요청은 재신청 가능
-                - 이미지는 Base64 인코딩, 최대 5MB
+                - 이미지는 Multipart 파일 업로드, 최대 5MB
                 - claimedStampCount는 백오피스에서 참고용(자동 완성)으로 사용되며, 사장님이 수정 가능
                 """)
     @ApiResponses({
@@ -65,12 +67,14 @@ public interface CustomerMigrationApi {
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
                 responseCode = "413",
-                description = "이미지 데이터가 너무 큼 (최대 5MB)",
+                description = "이미지 파일이 너무 큼 (최대 5MB)",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/api/customer/migrations")
+    @PostMapping(value = "/api/customer/migrations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<MigrationRequestResponse> createMigrationRequest(
-            @Valid @RequestBody CreateMigrationRequest request,
+            @Valid @RequestPart("data") CreateMigrationRequest request,
+            @Parameter(description = "종이 스탬프 판 이미지 (최대 5MB)") @RequestPart("image")
+                    MultipartFile image,
             @Parameter(hidden = true) @AuthenticationPrincipal CustomerPrincipal principal);
 
     @Operation(

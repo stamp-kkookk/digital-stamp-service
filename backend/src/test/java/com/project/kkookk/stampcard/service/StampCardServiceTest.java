@@ -6,8 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.stampcard.controller.dto.CreateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.StampCardListResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,6 +51,10 @@ class StampCardServiceTest {
     @Mock private WalletStampCardRepository walletStampCardRepository;
 
     @Mock private StoreRepository storeRepository;
+
+    @Spy private ObjectMapper objectMapper = new ObjectMapper();
+
+    @Mock private ImageProcessingService imageProcessingService;
 
     private static final Long OWNER_ID = 100L;
     private static final Long STORE_ID = 1L;
@@ -83,7 +90,8 @@ class StampCardServiceTest {
         given(stampCardRepository.save(any(StampCard.class))).willReturn(stampCard);
 
         // when
-        StampCardResponse response = stampCardService.create(OWNER_ID, STORE_ID, request);
+        StampCardResponse response =
+                stampCardService.create(OWNER_ID, STORE_ID, request, null, null);
 
         // then
         assertThat(response.title()).isEqualTo("커피 스탬프 카드");
@@ -105,7 +113,8 @@ class StampCardServiceTest {
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> stampCardService.create(otherOwnerId, STORE_ID, request))
+        assertThatThrownBy(
+                        () -> stampCardService.create(otherOwnerId, STORE_ID, request, null, null))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(
                         e ->
@@ -220,7 +229,8 @@ class StampCardServiceTest {
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
-        StampCardResponse response = stampCardService.update(OWNER_ID, STORE_ID, cardId, request);
+        StampCardResponse response =
+                stampCardService.update(OWNER_ID, STORE_ID, cardId, request, null, null);
 
         // then
         assertThat(response.title()).isEqualTo("수정된 카드");
@@ -253,7 +263,8 @@ class StampCardServiceTest {
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
-        StampCardResponse response = stampCardService.update(OWNER_ID, STORE_ID, cardId, request);
+        StampCardResponse response =
+                stampCardService.update(OWNER_ID, STORE_ID, cardId, request, null, null);
 
         // then
         assertThat(response.title()).isEqualTo("수정된 카드");
@@ -279,7 +290,10 @@ class StampCardServiceTest {
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> stampCardService.update(OWNER_ID, STORE_ID, cardId, request))
+        assertThatThrownBy(
+                        () ->
+                                stampCardService.update(
+                                        OWNER_ID, STORE_ID, cardId, request, null, null))
                 .isInstanceOf(StampCardUpdateNotAllowedException.class);
     }
 
@@ -302,7 +316,8 @@ class StampCardServiceTest {
         given(walletStampCardRepository.existsByStampCardId(stampCard.getId())).willReturn(false);
 
         // when
-        StampCardResponse response = stampCardService.update(OWNER_ID, STORE_ID, cardId, request);
+        StampCardResponse response =
+                stampCardService.update(OWNER_ID, STORE_ID, cardId, request, null, null);
 
         // then
         assertThat(response.title()).isEqualTo("수정된 카드");

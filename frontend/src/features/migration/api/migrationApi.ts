@@ -3,7 +3,7 @@
  * Handles both Customer and Owner migration operations
  */
 
-import { postRaw, getRaw } from '@/lib/api/client';
+import { apiClient, postRaw, getRaw } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
   CreateMigrationRequest,
@@ -18,16 +18,30 @@ import type {
 } from '@/types/api';
 
 // =============================================================================
+// Multipart Helper
+// =============================================================================
+
+function buildMigrationFormData(data: CreateMigrationRequest, imageFile: File): FormData {
+  const formData = new FormData();
+  formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  formData.append('image', imageFile);
+  return formData;
+}
+
+// =============================================================================
 // Customer Migration API
 // =============================================================================
 
 export async function createMigration(
-  data: CreateMigrationRequest
+  data: CreateMigrationRequest,
+  imageFile: File
 ): Promise<MigrationRequestResponse> {
-  return postRaw<MigrationRequestResponse, CreateMigrationRequest>(
+  const formData = buildMigrationFormData(data, imageFile);
+  const response = await apiClient.post<MigrationRequestResponse>(
     API_ENDPOINTS.CUSTOMER.MIGRATIONS,
-    data
+    formData
   );
+  return response.data;
 }
 
 export async function getMigration(

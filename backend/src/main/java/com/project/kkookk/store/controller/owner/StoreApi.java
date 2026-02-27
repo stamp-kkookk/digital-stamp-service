@@ -19,13 +19,14 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Store", description = "매장 관리 API")
 @SecurityRequirement(name = "bearerAuth")
 public interface StoreApi {
 
-    @Operation(summary = "매장 생성", description = "새로운 매장을 생성합니다.")
+    @Operation(summary = "매장 생성", description = "새로운 매장을 생성합니다. (multipart/form-data)")
     @ApiResponses(
             value = {
                 @ApiResponse(
@@ -42,7 +43,10 @@ public interface StoreApi {
                         content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     ResponseEntity<StoreResponse> createStore(
-            @Valid @RequestBody StoreCreateRequest request,
+            @Valid @RequestPart("data") StoreCreateRequest request,
+            @Parameter(description = "매장 아이콘 이미지 (최대 5MB)")
+                    @RequestPart(value = "icon", required = false)
+                    MultipartFile iconImage,
             @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "매장 목록 조회", description = "내가 소유한 모든 매장 목록을 조회합니다.")
@@ -88,7 +92,7 @@ public interface StoreApi {
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
-    @Operation(summary = "매장 수정", description = "매장 정보를 수정합니다.")
+    @Operation(summary = "매장 수정", description = "매장 정보를 수정합니다. (multipart/form-data)")
     @ApiResponses(
             value = {
                 @ApiResponse(
@@ -110,7 +114,10 @@ public interface StoreApi {
             })
     ResponseEntity<StoreResponse> updateStore(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Valid @RequestBody StoreUpdateRequest request,
+            @Valid @RequestPart("data") StoreUpdateRequest request,
+            @Parameter(description = "매장 아이콘 이미지 (최대 5MB)")
+                    @RequestPart(value = "icon", required = false)
+                    MultipartFile iconImage,
             @Parameter(hidden = true) @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "매장 삭제", description = "매장을 삭제합니다.")

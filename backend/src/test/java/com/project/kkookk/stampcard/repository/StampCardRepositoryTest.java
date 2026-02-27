@@ -207,7 +207,9 @@ class StampCardRepositoryTest {
                 2,
                 60,
                 StampCardDesignType.IMAGE,
-                "{\"theme\": \"new\"}");
+                "{\"theme\": \"new\"}",
+                null,
+                null);
         stampCardRepository.flush();
 
         // then

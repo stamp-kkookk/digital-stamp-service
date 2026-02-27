@@ -10,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.util.Map;
@@ -43,9 +42,8 @@ public class Store extends BaseTimeEntity {
     @Column(length = 100, unique = true)
     private String placeRef;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
-    private String iconImageBase64;
+    @Column(length = 255)
+    private String iconImageKey;
 
     @Column(length = 500)
     private String description;
@@ -66,14 +64,14 @@ public class Store extends BaseTimeEntity {
             final String address,
             final String phone,
             final String placeRef,
-            final String iconImageBase64,
+            final String iconImageKey,
             final String description,
             final Long ownerAccountId) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.placeRef = placeRef;
-        this.iconImageBase64 = iconImageBase64;
+        this.iconImageKey = iconImageKey;
         this.description = description;
         this.status = StoreStatus.DRAFT;
         this.ownerAccountId = ownerAccountId;
@@ -84,19 +82,19 @@ public class Store extends BaseTimeEntity {
             final String address,
             final String phone,
             final String description,
-            final String iconImageBase64,
+            final String iconImageKey,
             final String placeRef) {
         this.name = name;
         this.address = address;
         this.phone = phone;
         this.description = description;
-        this.iconImageBase64 = iconImageBase64;
+        this.iconImageKey = iconImageKey;
         this.placeRef = placeRef;
     }
 
-    public void updatePartial(final String description, final String iconImageBase64) {
+    public void updatePartial(final String description, final String iconImageKey) {
         this.description = description;
-        this.iconImageBase64 = iconImageBase64;
+        this.iconImageKey = iconImageKey;
     }
 
     public boolean isDraft() {
@@ -135,8 +133,8 @@ public class Store extends BaseTimeEntity {
         return placeRef;
     }
 
-    public String getIconImageBase64() {
-        return iconImageBase64;
+    public String getIconImageKey() {
+        return iconImageKey;
     }
 
     public String getDescription() {

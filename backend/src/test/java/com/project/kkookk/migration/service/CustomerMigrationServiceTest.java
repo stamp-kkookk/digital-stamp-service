@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
 import com.project.kkookk.migration.dto.CreateMigrationRequest;
@@ -27,6 +29,8 @@ import com.project.kkookk.wallet.domain.CustomerWalletStatus;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerMigrationServiceTest {
@@ -48,16 +53,31 @@ class CustomerMigrationServiceTest {
 
     @Mock private StoreRepository storeRepository;
 
+    @Mock private ImageProcessingService imageProcessingService;
+
     private static final Long CUSTOMER_WALLET_ID = 1L;
     private static final Long STORE_ID = 100L;
-    private static final String VALID_BASE64_IMAGE = "data:image/jpeg;base64,/9j/4AAQSkZJRg";
+    private static final String IMAGE_KEY = "migrations/test-uuid.jpg";
+
+    private MultipartFile createMockImage(long size) {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        given(mockFile.getSize()).willReturn(size);
+        return mockFile;
+    }
+
+    private MultipartFile createMockImageWithStream(long size) throws IOException {
+        MultipartFile mockFile = mock(MultipartFile.class);
+        given(mockFile.getSize()).willReturn(size);
+        given(mockFile.getInputStream()).willReturn(new ByteArrayInputStream(new byte[0]));
+        return mockFile;
+    }
 
     @Test
     @DisplayName("마이그레이션 요청 생성 성공")
-    void createMigrationRequest_Success() {
+    void createMigrationRequest_Success() throws IOException {
         // given
-        CreateMigrationRequest request =
-                new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = createMockImageWithStream(1024L); // 1KB
 
         CustomerWallet customerWallet =
                 CustomerWallet.builder()
@@ -71,7 +91,7 @@ class CustomerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(CUSTOMER_WALLET_ID)
                         .storeId(STORE_ID)
-                        .imageData(VALID_BASE64_IMAGE)
+                        .imageKey(IMAGE_KEY)
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -83,35 +103,41 @@ class CustomerMigrationServiceTest {
                         migrationRequestRepository.existsByCustomerWalletIdAndStoreIdAndStatus(
                                 CUSTOMER_WALLET_ID, STORE_ID, StampMigrationStatus.SUBMITTED))
                 .willReturn(false);
+        given(imageProcessingService.processAndStore(eq("migrations"), any()))
+                .willReturn(IMAGE_KEY);
+        given(imageProcessingService.getUrl(IMAGE_KEY)).willReturn("/storage/" + IMAGE_KEY);
         given(migrationRequestRepository.save(any())).willReturn(savedRequest);
 
         // when
         MigrationRequestResponse response =
-                customerMigrationService.createMigrationRequest(CUSTOMER_WALLET_ID, request);
+                customerMigrationService.createMigrationRequest(CUSTOMER_WALLET_ID, request, image);
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.customerWalletId()).isEqualTo(CUSTOMER_WALLET_ID);
         assertThat(response.storeId()).isEqualTo(STORE_ID);
         assertThat(response.status()).isEqualTo(StampMigrationStatus.SUBMITTED);
+        assertThat(response.imageUrl()).isEqualTo("/storage/" + IMAGE_KEY);
         assertThat(response.claimedStampCount()).isEqualTo(5);
         assertThat(response.slaMessage()).isEqualTo("24~48시간 이내 처리됩니다");
 
         verify(migrationRequestRepository).save(any(StampMigrationRequest.class));
+        verify(imageProcessingService).processAndStore(eq("migrations"), any());
     }
 
     @Test
     @DisplayName("마이그레이션 요청 생성 실패 - 이미지 크기 초과")
-    void createMigrationRequest_Fail_ImageTooLarge() {
-        // given - 5MB 이상의 이미지 (약 7MB)
-        String largeBase64 = "data:image/jpeg;base64," + "A".repeat(10_000_000);
-        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, largeBase64, 5);
+    void createMigrationRequest_Fail_ImageTooLarge() throws IOException {
+        // given - 5MB 초과 파일
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = mock(MultipartFile.class);
+        given(image.getSize()).willReturn(6L * 1024 * 1024); // 6MB
 
         // when & then
         assertThatThrownBy(
                         () ->
                                 customerMigrationService.createMigrationRequest(
-                                        CUSTOMER_WALLET_ID, request))
+                                        CUSTOMER_WALLET_ID, request, image))
                 .isInstanceOf(MigrationImageTooLargeException.class);
 
         verify(customerWalletRepository, never()).findByIdWithLock(any());
@@ -120,10 +146,10 @@ class CustomerMigrationServiceTest {
 
     @Test
     @DisplayName("마이그레이션 요청 생성 실패 - 고객 지갑 없음")
-    void createMigrationRequest_Fail_WalletNotFound() {
+    void createMigrationRequest_Fail_WalletNotFound() throws IOException {
         // given
-        CreateMigrationRequest request =
-                new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = createMockImage(1024L);
 
         given(customerWalletRepository.findByIdWithLock(CUSTOMER_WALLET_ID))
                 .willReturn(Optional.empty());
@@ -132,7 +158,7 @@ class CustomerMigrationServiceTest {
         assertThatThrownBy(
                         () ->
                                 customerMigrationService.createMigrationRequest(
-                                        CUSTOMER_WALLET_ID, request))
+                                        CUSTOMER_WALLET_ID, request, image))
                 .isInstanceOf(CustomerWalletNotFoundException.class);
 
         verify(migrationRequestRepository, never()).save(any());
@@ -140,10 +166,10 @@ class CustomerMigrationServiceTest {
 
     @Test
     @DisplayName("마이그레이션 요청 생성 실패 - 지갑 차단됨")
-    void createMigrationRequest_Fail_WalletBlocked() {
+    void createMigrationRequest_Fail_WalletBlocked() throws IOException {
         // given
-        CreateMigrationRequest request =
-                new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = createMockImage(1024L);
 
         CustomerWallet blockedWallet =
                 CustomerWallet.builder()
@@ -160,7 +186,7 @@ class CustomerMigrationServiceTest {
         assertThatThrownBy(
                         () ->
                                 customerMigrationService.createMigrationRequest(
-                                        CUSTOMER_WALLET_ID, request))
+                                        CUSTOMER_WALLET_ID, request, image))
                 .isInstanceOf(CustomerWalletBlockedException.class);
 
         verify(migrationRequestRepository, never()).save(any());
@@ -168,10 +194,10 @@ class CustomerMigrationServiceTest {
 
     @Test
     @DisplayName("마이그레이션 요청 생성 실패 - 매장 없음")
-    void createMigrationRequest_Fail_StoreNotFound() {
+    void createMigrationRequest_Fail_StoreNotFound() throws IOException {
         // given
-        CreateMigrationRequest request =
-                new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = createMockImage(1024L);
 
         CustomerWallet customerWallet =
                 CustomerWallet.builder()
@@ -189,7 +215,7 @@ class CustomerMigrationServiceTest {
         assertThatThrownBy(
                         () ->
                                 customerMigrationService.createMigrationRequest(
-                                        CUSTOMER_WALLET_ID, request))
+                                        CUSTOMER_WALLET_ID, request, image))
                 .isInstanceOf(StoreNotFoundException.class);
 
         verify(migrationRequestRepository, never()).save(any());
@@ -197,10 +223,10 @@ class CustomerMigrationServiceTest {
 
     @Test
     @DisplayName("마이그레이션 요청 생성 실패 - 이미 처리 중인 요청 존재")
-    void createMigrationRequest_Fail_AlreadyPending() {
+    void createMigrationRequest_Fail_AlreadyPending() throws IOException {
         // given
-        CreateMigrationRequest request =
-                new CreateMigrationRequest(STORE_ID, VALID_BASE64_IMAGE, 5);
+        CreateMigrationRequest request = new CreateMigrationRequest(STORE_ID, 5);
+        MultipartFile image = createMockImage(1024L);
 
         CustomerWallet customerWallet =
                 CustomerWallet.builder()
@@ -222,7 +248,7 @@ class CustomerMigrationServiceTest {
         assertThatThrownBy(
                         () ->
                                 customerMigrationService.createMigrationRequest(
-                                        CUSTOMER_WALLET_ID, request))
+                                        CUSTOMER_WALLET_ID, request, image))
                 .isInstanceOf(MigrationAlreadyPendingException.class);
 
         verify(migrationRequestRepository, never()).save(any());
@@ -238,7 +264,7 @@ class CustomerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(CUSTOMER_WALLET_ID)
                         .storeId(STORE_ID)
-                        .imageData(VALID_BASE64_IMAGE)
+                        .imageKey(IMAGE_KEY)
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -247,6 +273,7 @@ class CustomerMigrationServiceTest {
                         migrationRequestRepository.findByIdAndCustomerWalletId(
                                 migrationId, CUSTOMER_WALLET_ID))
                 .willReturn(Optional.of(migrationRequest));
+        given(imageProcessingService.getUrl(IMAGE_KEY)).willReturn("/storage/" + IMAGE_KEY);
 
         // when
         MigrationRequestResponse response =
@@ -257,6 +284,7 @@ class CustomerMigrationServiceTest {
         assertThat(response.customerWalletId()).isEqualTo(CUSTOMER_WALLET_ID);
         assertThat(response.storeId()).isEqualTo(STORE_ID);
         assertThat(response.status()).isEqualTo(StampMigrationStatus.SUBMITTED);
+        assertThat(response.imageUrl()).isEqualTo("/storage/" + IMAGE_KEY);
         assertThat(response.claimedStampCount()).isEqualTo(5);
     }
 
@@ -307,7 +335,7 @@ class CustomerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(CUSTOMER_WALLET_ID)
                         .storeId(STORE_ID)
-                        .imageData(VALID_BASE64_IMAGE)
+                        .imageKey(IMAGE_KEY)
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now().minusDays(1))
                         .build();
@@ -316,7 +344,7 @@ class CustomerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(CUSTOMER_WALLET_ID)
                         .storeId(200L)
-                        .imageData(VALID_BASE64_IMAGE)
+                        .imageKey("migrations/other-uuid.jpg")
                         .claimedStampCount(3)
                         .requestedAt(LocalDateTime.now())
                         .build();

@@ -2,15 +2,15 @@ package com.project.kkookk.stampcard.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,7 +40,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -68,6 +70,12 @@ class StampCardControllerTest {
     @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+    }
+
+    private MockPart jsonPart(String name, Object value) throws Exception {
+        MockPart part = new MockPart(name, objectMapper.writeValueAsBytes(value));
+        part.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return part;
     }
 
     @Test
@@ -103,14 +111,19 @@ class StampCardControllerTest {
                         LocalDateTime.now(),
                         LocalDateTime.now());
 
-        given(stampCardService.create(eq(1L), eq(storeId), any(CreateStampCardRequest.class)))
+        given(
+                        stampCardService.create(
+                                eq(1L),
+                                eq(storeId),
+                                any(CreateStampCardRequest.class),
+                                isNull(),
+                                isNull()))
                 .willReturn(response);
 
         // when & then
         mockMvc.perform(
-                        post("/api/owner/stores/{storeId}/stamp-cards", storeId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart("/api/owner/stores/{storeId}/stamp-cards", storeId)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.title").value("커피 스탬프 카드"))
@@ -128,9 +141,8 @@ class StampCardControllerTest {
 
         // when & then
         mockMvc.perform(
-                        post("/api/owner/stores/{storeId}/stamp-cards", storeId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart("/api/owner/stores/{storeId}/stamp-cards", storeId)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }
@@ -146,9 +158,8 @@ class StampCardControllerTest {
 
         // when & then
         mockMvc.perform(
-                        post("/api/owner/stores/{storeId}/stamp-cards", storeId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart("/api/owner/stores/{storeId}/stamp-cards", storeId)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT_VALUE"));
     }
@@ -294,14 +305,22 @@ class StampCardControllerTest {
 
         given(
                         stampCardService.update(
-                                eq(1L), eq(storeId), eq(cardId), any(UpdateStampCardRequest.class)))
+                                eq(1L),
+                                eq(storeId),
+                                eq(cardId),
+                                any(UpdateStampCardRequest.class),
+                                isNull(),
+                                isNull()))
                 .willReturn(response);
 
         // when & then
         mockMvc.perform(
-                        put("/api/owner/stores/{storeId}/stamp-cards/{id}", storeId, cardId)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                        multipart(
+                                        HttpMethod.PUT,
+                                        "/api/owner/stores/{storeId}/stamp-cards/{id}",
+                                        storeId,
+                                        cardId)
+                                .part(jsonPart("data", request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("수정된 카드 이름"))
                 .andExpect(jsonPath("$.goalStampCount").value(15));

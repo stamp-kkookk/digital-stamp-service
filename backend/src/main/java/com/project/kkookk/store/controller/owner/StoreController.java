@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,9 +17,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,11 +30,13 @@ public class StoreController implements StoreApi {
     private final StoreService storeService;
 
     @Override
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StoreResponse> createStore(
-            @Valid @RequestBody StoreCreateRequest request,
+            @Valid @RequestPart("data") StoreCreateRequest request,
+            @RequestPart(value = "icon", required = false) MultipartFile iconImage,
             @AuthenticationPrincipal OwnerPrincipal principal) {
-        StoreResponse response = storeService.createStore(principal.getOwnerId(), request);
+        StoreResponse response =
+                storeService.createStore(principal.getOwnerId(), request, iconImage);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -53,12 +57,14 @@ public class StoreController implements StoreApi {
     }
 
     @Override
-    @PutMapping("/{storeId}")
+    @PutMapping(value = "/{storeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StoreResponse> updateStore(
             @PathVariable Long storeId,
-            @Valid @RequestBody StoreUpdateRequest request,
+            @Valid @RequestPart("data") StoreUpdateRequest request,
+            @RequestPart(value = "icon", required = false) MultipartFile iconImage,
             @AuthenticationPrincipal OwnerPrincipal principal) {
-        StoreResponse response = storeService.updateStore(principal.getOwnerId(), storeId, request);
+        StoreResponse response =
+                storeService.updateStore(principal.getOwnerId(), storeId, request, iconImage);
         return ResponseEntity.ok(response);
     }
 

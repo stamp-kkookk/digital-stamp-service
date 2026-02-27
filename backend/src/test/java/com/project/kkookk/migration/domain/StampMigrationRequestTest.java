@@ -17,7 +17,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -35,7 +35,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -58,7 +58,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -81,7 +81,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -103,7 +103,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -123,7 +123,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
@@ -143,7 +143,7 @@ class StampMigrationRequestTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(1L)
                         .storeId(1L)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAA...")
+                        .imageKey("migrations/test-uuid.jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();

@@ -23,6 +23,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "StampCard", description = "스탬프 카드 관리 API (Owner 전용)")
 @SecurityRequirement(name = "bearerAuth")
@@ -46,7 +48,13 @@ public interface StampCardApi {
     })
     ResponseEntity<StampCardResponse> create(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Valid @RequestBody CreateStampCardRequest request,
+            @Valid @RequestPart("data") CreateStampCardRequest request,
+            @Parameter(description = "카드 배경 이미지 (IMAGE 타입, 최대 3MB)")
+                    @RequestPart(value = "backgroundImage", required = false)
+                    MultipartFile backgroundImage,
+            @Parameter(description = "도장 이미지 (IMAGE 타입, 최대 500KB)")
+                    @RequestPart(value = "stampImage", required = false)
+                    MultipartFile stampImage,
             @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "스탬프 카드 목록 조회", description = "매장의 스탬프 카드 목록을 조회합니다.")
@@ -114,7 +122,13 @@ public interface StampCardApi {
     ResponseEntity<StampCardResponse> update(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardRequest request,
+            @Valid @RequestPart("data") UpdateStampCardRequest request,
+            @Parameter(description = "카드 배경 이미지 (IMAGE 타입, 최대 3MB)")
+                    @RequestPart(value = "backgroundImage", required = false)
+                    MultipartFile backgroundImage,
+            @Parameter(description = "도장 이미지 (IMAGE 타입, 최대 500KB)")
+                    @RequestPart(value = "stampImage", required = false)
+                    MultipartFile stampImage,
             @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(

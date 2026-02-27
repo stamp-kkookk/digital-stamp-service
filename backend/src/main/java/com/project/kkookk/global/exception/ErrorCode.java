@@ -35,6 +35,8 @@ public enum ErrorCode {
             HttpStatus.FORBIDDEN, "STAMP_CARD_ACCESS_DENIED", "해당 스탬프 카드에 대한 접근 권한이 없습니다"),
     STAMP_CARD_UPDATE_NOT_ALLOWED(
             HttpStatus.BAD_REQUEST, "STAMP_CARD_UPDATE_NOT_ALLOWED", "발급된 카드는 수정할 수 없습니다"),
+    STAMP_CARD_IMAGE_TOO_LARGE(
+            HttpStatus.PAYLOAD_TOO_LARGE, "STAMP_CARD_IMAGE_TOO_LARGE", "스탬프카드 이미지 크기가 너무 큽니다"),
 
     // Store
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_NOT_FOUND", "매장을 찾을 수 없습니다"),

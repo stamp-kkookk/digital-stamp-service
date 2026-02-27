@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +25,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/owner/stores/{storeId}/stamp-cards")
@@ -37,13 +40,16 @@ public class StampCardController implements StampCardApi {
     }
 
     @Override
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StampCardResponse> create(
             @PathVariable Long storeId,
-            @Valid @RequestBody CreateStampCardRequest request,
+            @Valid @RequestPart("data") CreateStampCardRequest request,
+            @RequestPart(value = "backgroundImage", required = false) MultipartFile backgroundImage,
+            @RequestPart(value = "stampImage", required = false) MultipartFile stampImage,
             @AuthenticationPrincipal OwnerPrincipal principal) {
         StampCardResponse response =
-                stampCardService.create(principal.getOwnerId(), storeId, request);
+                stampCardService.create(
+                        principal.getOwnerId(), storeId, request, backgroundImage, stampImage);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -71,14 +77,17 @@ public class StampCardController implements StampCardApi {
     }
 
     @Override
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StampCardResponse> update(
             @PathVariable Long storeId,
             @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardRequest request,
+            @Valid @RequestPart("data") UpdateStampCardRequest request,
+            @RequestPart(value = "backgroundImage", required = false) MultipartFile backgroundImage,
+            @RequestPart(value = "stampImage", required = false) MultipartFile stampImage,
             @AuthenticationPrincipal OwnerPrincipal principal) {
         StampCardResponse response =
-                stampCardService.update(principal.getOwnerId(), storeId, id, request);
+                stampCardService.update(
+                        principal.getOwnerId(), storeId, id, request, backgroundImage, stampImage);
         return ResponseEntity.ok(response);
     }
 

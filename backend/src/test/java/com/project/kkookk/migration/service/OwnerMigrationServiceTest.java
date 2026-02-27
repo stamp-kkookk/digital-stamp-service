@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
 import com.project.kkookk.migration.controller.dto.MigrationApproveResponse;
 import com.project.kkookk.migration.controller.dto.MigrationDetailResponse;
@@ -59,6 +60,7 @@ class OwnerMigrationServiceTest {
     @Mock private StampEventRepository stampEventRepository;
     @Mock private StoreRepository storeRepository;
     @Mock private StampRewardService stampRewardService;
+    @Mock private ImageProcessingService imageProcessingService;
 
     @Nested
     @DisplayName("목록 조회")
@@ -138,6 +140,8 @@ class OwnerMigrationServiceTest {
             given(migrationRepository.findByIdAndStoreId(migrationId, storeId))
                     .willReturn(Optional.of(migration));
             given(customerWalletRepository.findById(walletId)).willReturn(Optional.of(wallet));
+            given(imageProcessingService.getUrl(migration.getImageKey()))
+                    .willReturn("/storage/" + migration.getImageKey());
 
             // when
             MigrationDetailResponse response =
@@ -147,6 +151,7 @@ class OwnerMigrationServiceTest {
             assertThat(response.id()).isEqualTo(migrationId);
             assertThat(response.customerPhone()).isEqualTo("010-1234-5678");
             assertThat(response.customerName()).isEqualTo("홍길동");
+            assertThat(response.imageUrl()).startsWith("/storage/migrations/");
             assertThat(response.claimedStampCount()).isEqualTo(5);
             assertThat(response.status()).isEqualTo("SUBMITTED");
         }
@@ -470,7 +475,7 @@ class OwnerMigrationServiceTest {
                 StampMigrationRequest.builder()
                         .customerWalletId(walletId)
                         .storeId(storeId)
-                        .imageData("data:image/jpeg;base64,/9j/4AAQSkZJRg" + id)
+                        .imageKey("migrations/test-uuid-" + id + ".jpg")
                         .claimedStampCount(5)
                         .requestedAt(LocalDateTime.now())
                         .build();
