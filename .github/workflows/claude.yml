@@ -142,7 +142,8 @@ jobs:
         if: steps.pr.outputs.is_cross_repo == 'true'
         run: |
           echo "Fork PR에서는 보안상 수정/푸시 작업을 수행하지 않습니다."
-          exit 0
+          echo "Fork PR에서는 보안상 수정/푸시 작업을 수행하지 않습니다."
+          exit 1
 
       - name: Checkout PR head branch
         uses: actions/checkout@v4
