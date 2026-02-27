@@ -168,6 +168,13 @@ jobs:
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ steps.pr.outputs.number }}
-            사용자의 코멘트 요청에 따라 작업하세요.
+            HEAD BRANCH: ${{ steps.pr.outputs.head_ref }}
+
+            사용자가 @claude 멘션으로 코드 수정을 요청했습니다.
+            반드시 다음 순서로 작업하세요:
+            1. `gh pr diff` 또는 `Read`로 관련 파일을 파악하세요.
+            2. `Edit`로 파일을 직접 수정하세요. 리뷰 코멘트만 남기지 마세요.
+            3. `git add` → `git commit` → `git push origin HEAD:${{ steps.pr.outputs.head_ref }}`로 push하세요.
+            4. `gh pr comment`로 무엇을 수정했는지 한국어로 요약하세요.
           claude_args: >-
             --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push origin HEAD:*),Bash(git fetch:*),Bash(git show:*),Bash(git log:*),Bash(git diff:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*),mcp__github_inline_comment__create_inline_comment"
