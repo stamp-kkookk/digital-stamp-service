@@ -59,6 +59,58 @@ resource "aws_iam_instance_profile" "backend" {
   role = aws_iam_role.backend.name
 }
 
+# SSM Parameter Store read access (for secrets at runtime)
+resource "aws_iam_policy" "backend_ssm_params" {
+  name        = "${var.project_name}-backend-ssm-params"
+  description = "Allow backend to read SSM Parameter Store secrets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = "arn:aws:ssm:ap-northeast-2:471112770205:parameter/kkookk.prod.*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "backend_ssm_params" {
+  role       = aws_iam_role.backend.name
+  policy_arn = aws_iam_policy.backend_ssm_params.arn
+}
+
+# Image storage bucket access (PutObject / GetObject / DeleteObject)
+resource "aws_iam_policy" "backend_image_s3" {
+  name        = "${var.project_name}-backend-image-s3"
+  description = "Allow backend to upload, read, and delete images in S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+        Resource = "${aws_s3_bucket.images.arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.images.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "backend_image_s3" {
+  role       = aws_iam_role.backend.name
+  policy_arn = aws_iam_policy.backend_image_s3.arn
+}
+
 # --- Gateway EC2 Role ---
 
 resource "aws_iam_role" "gateway" {

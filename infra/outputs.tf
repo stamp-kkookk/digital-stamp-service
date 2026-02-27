@@ -48,6 +48,11 @@ output "s3_artifacts_bucket" {
   value       = aws_s3_bucket.artifacts.id
 }
 
+output "s3_images_bucket" {
+  description = "S3 bucket for image storage (store icons, stampcard images, migration photos)"
+  value       = aws_s3_bucket.images.id
+}
+
 output "ssh_config" {
   description = "SSH config snippet for easy access"
   value       = <<-EOT
