@@ -105,8 +105,9 @@ public class StoreService {
             throw new BusinessException(ErrorCode.STORE_NOT_OPERATIONAL);
         }
 
+        String oldIconKey = store.getIconImageKey();
         String newIconKey = uploadIcon(iconImage);
-        String iconKeyToSet = newIconKey != null ? newIconKey : store.getIconImageKey();
+        String iconKeyToSet = newIconKey != null ? newIconKey : oldIconKey;
 
         if (store.isLive()) {
             validateLiveStoreRestrictedFields(store, request);
@@ -124,10 +125,8 @@ public class StoreService {
         }
 
         // 기존 이미지 삭제 (새 이미지가 업로드된 경우)
-        if (newIconKey != null
-                && store.getIconImageKey() != null
-                && !newIconKey.equals(store.getIconImageKey())) {
-            deleteIconSilently(store.getIconImageKey());
+        if (newIconKey != null && oldIconKey != null && !newIconKey.equals(oldIconKey)) {
+            deleteIconSilently(oldIconKey);
         }
 
         storeAuditLogRepository.save(
