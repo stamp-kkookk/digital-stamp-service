@@ -29,3 +29,24 @@ resource "aws_instance" "backend" {
     ignore_changes = [ami, user_data]
   }
 }
+
+# Auto Recovery: restart on system status check failure (~5 min recovery)
+resource "aws_cloudwatch_metric_alarm" "backend_recovery" {
+  alarm_name          = "${var.project_name}-backend-auto-recovery"
+  alarm_description   = "Auto-recover Backend EC2 on status check failure"
+  namespace           = "AWS/EC2"
+  metric_name         = "StatusCheckFailed_System"
+  statistic           = "Maximum"
+  period              = 60
+  evaluation_periods  = 2
+  threshold           = 1
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+
+  dimensions = {
+    InstanceId = aws_instance.backend.id
+  }
+
+  alarm_actions = [
+    "arn:aws:automate:${var.aws_region}:ec2:recover"
+  ]
+}

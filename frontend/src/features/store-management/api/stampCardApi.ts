@@ -2,7 +2,7 @@
  * StampCard API Service for KKOOKK Owner
  */
 
-import { getRaw, postRaw, putRaw, patchRaw, delRaw } from '@/lib/api/client';
+import { apiClient, getRaw, patchRaw, delRaw } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/lib/api/endpoints';
 import type {
   CreateStampCardRequest,
@@ -12,6 +12,26 @@ import type {
   StampCardStatusUpdateRequest,
   StampCardStatus,
 } from '@/types/api';
+
+// =============================================================================
+// Multipart Helper
+// =============================================================================
+
+function buildStampCardFormData(
+  data: CreateStampCardRequest | UpdateStampCardRequest,
+  backgroundImage?: File,
+  stampImage?: File
+): FormData {
+  const formData = new FormData();
+  formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+  if (backgroundImage) {
+    formData.append('backgroundImage', backgroundImage);
+  }
+  if (stampImage) {
+    formData.append('stampImage', stampImage);
+  }
+  return formData;
+}
 
 // =============================================================================
 // StampCard CRUD Operations
@@ -50,23 +70,31 @@ export async function getStampCard(
 
 export async function createStampCard(
   storeId: number,
-  data: CreateStampCardRequest
+  data: CreateStampCardRequest,
+  backgroundImage?: File,
+  stampImage?: File
 ): Promise<StampCardResponse> {
-  return postRaw<StampCardResponse, CreateStampCardRequest>(
+  const formData = buildStampCardFormData(data, backgroundImage, stampImage);
+  const response = await apiClient.post<StampCardResponse>(
     API_ENDPOINTS.OWNER.STAMP_CARDS(storeId),
-    data
+    formData
   );
+  return response.data;
 }
 
 export async function updateStampCard(
   storeId: number,
   stampCardId: number,
-  data: UpdateStampCardRequest
+  data: UpdateStampCardRequest,
+  backgroundImage?: File,
+  stampImage?: File
 ): Promise<StampCardResponse> {
-  return putRaw<StampCardResponse, UpdateStampCardRequest>(
+  const formData = buildStampCardFormData(data, backgroundImage, stampImage);
+  const response = await apiClient.put<StampCardResponse>(
     API_ENDPOINTS.OWNER.STAMP_CARD(storeId, stampCardId),
-    data
+    formData
   );
+  return response.data;
 }
 
 export async function updateStampCardStatus(

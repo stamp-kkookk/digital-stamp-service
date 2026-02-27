@@ -64,6 +64,16 @@ app:
   qr-base-url: ${QR_BASE_URL}
   storage:
     local-path: ${STORAGE_PATH:/data/storage}
+    s3-bucket: ${S3_BUCKET:}
+    s3-region: ${S3_REGION:ap-northeast-2}
+    cloud-front-domain: ${CLOUDFRONT_DOMAIN:}
+  image:
+    max-width: 800
+    max-height: 800
+    quality: 0.8
+    thumbnail-width: 200
+    thumbnail-height: 200
+    thumbnail-quality: 0.7
 
 jwt:
   secret: ${JWT_SECRET}

@@ -18,7 +18,7 @@ interface StoreFormData {
   phone: string;
   description: string;
   placeRef: string | null;
-  iconImageBase64: string | null;
+  iconFile: File | null;
 }
 
 function formatPhone(value: string): string {
@@ -47,7 +47,7 @@ export function StoreCreatePage() {
     phone: '',
     description: '',
     placeRef: null,
-    iconImageBase64: null,
+    iconFile: null,
   });
 
   const handleChange = (
@@ -82,12 +82,14 @@ export function StoreCreatePage() {
     setErrorBanner(null);
     createStore.mutate(
       {
-        name: formData.name,
-        address: formData.address || undefined,
-        phone: formData.phone || undefined,
-        placeRef: formData.placeRef || undefined,
-        iconImageBase64: formData.iconImageBase64 || undefined,
-        description: formData.description || undefined,
+        data: {
+          name: formData.name,
+          address: formData.address || undefined,
+          phone: formData.phone || undefined,
+          placeRef: formData.placeRef || undefined,
+          description: formData.description || undefined,
+        },
+        iconFile: formData.iconFile || undefined,
       },
       {
         onSuccess: (newStore) => {
@@ -133,9 +135,10 @@ export function StoreCreatePage() {
               매장 아이콘
             </span>
             <IconUpload
-              value={formData.iconImageBase64}
-              onChange={(base64) =>
-                setFormData((prev) => ({ ...prev, iconImageBase64: base64 }))
+              file={formData.iconFile}
+              existingUrl={null}
+              onChange={(file) =>
+                setFormData((prev) => ({ ...prev, iconFile: file }))
               }
             />
           </div>

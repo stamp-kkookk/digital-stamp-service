@@ -64,6 +64,16 @@ app:
   frontend-url: http://localhost:5173
   storage:
     local-path: ${java.io.tmpdir}/kkookk-test-storage
+    s3-bucket: ""
+    s3-region: ap-northeast-2
+    cloud-front-domain: ""
+  image:
+    max-width: 800
+    max-height: 800
+    quality: 0.8
+    thumbnail-width: 200
+    thumbnail-height: 200
+    thumbnail-quality: 0.7
   qr-base-url: "http://localhost:5176"
 
 logging:

@@ -21,8 +21,11 @@ import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundExce
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.domain.StoreStatus;
 import com.project.kkookk.store.repository.StoreRepository;
+import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.domain.WalletStampCard;
+import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
+import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.WalletStampCardNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -44,6 +47,8 @@ class CustomerIssuanceServiceTest {
     @Mock private IssuanceRequestRepository issuanceRequestRepository;
 
     @Mock private WalletStampCardRepository walletStampCardRepository;
+
+    @Mock private CustomerWalletRepository customerWalletRepository;
 
     @Mock private StoreRepository storeRepository;
 
@@ -67,6 +72,7 @@ class CustomerIssuanceServiceTest {
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -118,6 +124,7 @@ class CustomerIssuanceServiceTest {
                     createIssuanceRequest(1L, storeId, walletId, walletStampCardId);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -137,6 +144,22 @@ class CustomerIssuanceServiceTest {
         }
 
         @Test
+        @DisplayName("적립 요청 생성 실패 - 차단된 지갑")
+        void createIssuanceRequest_Fail_WalletBlocked() {
+            // given
+            Long walletId = 1L;
+            Long storeId = 1L;
+
+            CreateIssuanceRequest request = new CreateIssuanceRequest(storeId, 10L, "test-key");
+            mockBlockedWallet(walletId);
+
+            // when & then
+            assertThatThrownBy(
+                            () -> customerIssuanceService.createIssuanceRequest(walletId, request))
+                    .isInstanceOf(CustomerWalletBlockedException.class);
+        }
+
+        @Test
         @DisplayName("적립 요청 생성 실패 - 매장 없음")
         void createIssuanceRequest_Fail_StoreNotFound() {
             // given
@@ -145,6 +168,7 @@ class CustomerIssuanceServiceTest {
 
             CreateIssuanceRequest request = new CreateIssuanceRequest(storeId, 10L, "test-key");
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.empty());
 
             // when & then
@@ -167,6 +191,7 @@ class CustomerIssuanceServiceTest {
             CreateIssuanceRequest request = new CreateIssuanceRequest(storeId, 10L, "test-key");
             Store inactiveStore = createStore(storeId, StoreStatus.DRAFT);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(inactiveStore));
 
             // when & then
@@ -191,6 +216,7 @@ class CustomerIssuanceServiceTest {
                     new CreateIssuanceRequest(storeId, walletStampCardId, "test-key");
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.empty());
@@ -217,6 +243,7 @@ class CustomerIssuanceServiceTest {
                     createWalletStampCard(walletStampCardId, otherWalletId, storeId, 3);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -248,6 +275,7 @@ class CustomerIssuanceServiceTest {
             IssuanceRequest activePending =
                     createIssuanceRequest(99L, storeId, walletId, walletStampCardId);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -279,6 +307,7 @@ class CustomerIssuanceServiceTest {
                     createWalletStampCard(walletStampCardId, walletId, storeId, 3);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -315,6 +344,7 @@ class CustomerIssuanceServiceTest {
                     createExpiredIssuanceRequest(1L, storeId, walletId, walletStampCardId);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -586,6 +616,7 @@ class CustomerIssuanceServiceTest {
                     createCancelledIssuanceRequest(1L, storeId, walletId, walletStampCardId);
             Store store = createStore(storeId, StoreStatus.LIVE);
 
+            mockActiveWallet(walletId);
             given(storeRepository.findById(storeId)).willReturn(Optional.of(store));
             given(walletStampCardRepository.findById(walletStampCardId))
                     .willReturn(Optional.of(walletStampCard));
@@ -699,5 +730,28 @@ class CustomerIssuanceServiceTest {
         ReflectionTestUtils.setField(store, "id", id);
         ReflectionTestUtils.setField(store, "status", status);
         return store;
+    }
+
+    private void mockActiveWallet(Long walletId) {
+        CustomerWallet wallet =
+                CustomerWallet.builder()
+                        .phone("010-0000-0000")
+                        .name("테스트")
+                        .nickname("test")
+                        .build();
+        ReflectionTestUtils.setField(wallet, "id", walletId);
+        given(customerWalletRepository.findById(walletId)).willReturn(Optional.of(wallet));
+    }
+
+    private void mockBlockedWallet(Long walletId) {
+        CustomerWallet wallet =
+                CustomerWallet.builder()
+                        .phone("010-0000-0000")
+                        .name("테스트")
+                        .nickname("test")
+                        .build();
+        ReflectionTestUtils.setField(wallet, "id", walletId);
+        wallet.block();
+        given(customerWalletRepository.findById(walletId)).willReturn(Optional.of(wallet));
     }
 }

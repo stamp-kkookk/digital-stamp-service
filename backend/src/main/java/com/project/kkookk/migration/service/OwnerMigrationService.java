@@ -2,6 +2,7 @@ package com.project.kkookk.migration.service;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
 import com.project.kkookk.migration.controller.dto.MigrationApproveResponse;
@@ -47,6 +48,7 @@ public class OwnerMigrationService {
     private final StampEventRepository stampEventRepository;
     private final StoreRepository storeRepository;
     private final StampRewardService stampRewardService;
+    private final ImageProcessingService imageProcessingService;
 
     public OwnerMigrationService(
             StampMigrationRequestRepository migrationRepository,
@@ -55,7 +57,8 @@ public class OwnerMigrationService {
             StampCardRepository stampCardRepository,
             StampEventRepository stampEventRepository,
             StoreRepository storeRepository,
-            StampRewardService stampRewardService) {
+            StampRewardService stampRewardService,
+            ImageProcessingService imageProcessingService) {
         this.migrationRepository = migrationRepository;
         this.customerWalletRepository = customerWalletRepository;
         this.walletStampCardRepository = walletStampCardRepository;
@@ -63,6 +66,7 @@ public class OwnerMigrationService {
         this.stampEventRepository = stampEventRepository;
         this.storeRepository = storeRepository;
         this.stampRewardService = stampRewardService;
+        this.imageProcessingService = imageProcessingService;
     }
 
     public MigrationListResponse getList(Long storeId, Long ownerId) {
@@ -106,12 +110,14 @@ public class OwnerMigrationService {
         CustomerWallet wallet =
                 customerWalletRepository.findById(migration.getCustomerWalletId()).orElse(null);
 
+        String imageUrl = imageProcessingService.getUrl(migration.getImageKey());
+
         return new MigrationDetailResponse(
                 migration.getId(),
                 migration.getCustomerWalletId(),
                 wallet != null ? wallet.getPhone() : null,
                 wallet != null ? wallet.getName() : null,
-                migration.getImageData(),
+                imageUrl,
                 migration.getClaimedStampCount(),
                 migration.getStatus().name(),
                 migration.getApprovedStampCount(),
@@ -124,7 +130,7 @@ public class OwnerMigrationService {
     public MigrationApproveResponse approve(
             Long storeId, Long migrationId, MigrationApproveRequest request, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
-        StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
+        StampMigrationRequest migration = findMigrationByIdAndStoreIdWithLock(migrationId, storeId);
 
         FlowMdc.setMigrationFlow(migrationId);
 
@@ -199,7 +205,7 @@ public class OwnerMigrationService {
     public MigrationRejectResponse reject(
             Long storeId, Long migrationId, MigrationRejectRequest request, Long ownerId) {
         validateStoreOwnership(storeId, ownerId);
-        StampMigrationRequest migration = findMigrationByIdAndStoreId(migrationId, storeId);
+        StampMigrationRequest migration = findMigrationByIdAndStoreIdWithLock(migrationId, storeId);
 
         if (!migration.isSubmitted()) {
             throw new BusinessException(ErrorCode.MIGRATION_ALREADY_PROCESSED);
@@ -220,6 +226,13 @@ public class OwnerMigrationService {
     private StampMigrationRequest findMigrationByIdAndStoreId(Long migrationId, Long storeId) {
         return migrationRepository
                 .findByIdAndStoreId(migrationId, storeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
+    }
+
+    private StampMigrationRequest findMigrationByIdAndStoreIdWithLock(
+            Long migrationId, Long storeId) {
+        return migrationRepository
+                .findByIdAndStoreIdWithLock(migrationId, storeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MIGRATION_NOT_FOUND));
     }
 

@@ -1,33 +1,41 @@
 import { Camera, X } from 'lucide-react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-const MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3MB
+const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB (백엔드와 동일)
 
 interface IconUploadProps {
-  value: string | null;
-  onChange: (base64: string | null) => void;
+  file: File | null;
+  existingUrl: string | null;
+  onChange: (file: File | null) => void;
 }
 
-export function IconUpload({ value, onChange }: IconUploadProps) {
+export function IconUpload({ file, existingUrl, onChange }: IconUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setPreviewUrl(null);
+  }, [file]);
+
+  const displayUrl = previewUrl ?? existingUrl;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selected = e.target.files?.[0];
+    if (!selected) return;
 
-    if (file.size > MAX_SIZE_BYTES) {
-      alert('아이콘 이미지 크기는 3MB 이하여야 합니다.');
+    if (selected.size > MAX_SIZE_BYTES) {
+      alert('아이콘 이미지 크기는 5MB 이하여야 합니다.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Remove the "data:image/...;base64," prefix for storage
-      const base64 = result.split(',')[1] ?? result;
-      onChange(base64);
-    };
-    reader.readAsDataURL(file);
+    onChange(selected);
+    // input 초기화 (같은 파일 재선택 허용)
+    e.target.value = '';
   };
 
   return (
@@ -44,9 +52,9 @@ export function IconUpload({ value, onChange }: IconUploadProps) {
         }}
         className="flex items-center justify-center w-20 h-20 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-kkookk-indigo transition-colors overflow-hidden"
       >
-        {value ? (
+        {displayUrl ? (
           <img
-            src={`data:image/png;base64,${value}`}
+            src={displayUrl}
             alt="매장 아이콘"
             className="w-full h-full object-cover"
           />
@@ -55,7 +63,7 @@ export function IconUpload({ value, onChange }: IconUploadProps) {
         )}
       </div>
       <div className="flex flex-col gap-1">
-        {value && (
+        {displayUrl && (
           <button
             type="button"
             onClick={() => onChange(null)}
@@ -64,7 +72,7 @@ export function IconUpload({ value, onChange }: IconUploadProps) {
             <X size={14} /> 삭제
           </button>
         )}
-        <p className="text-xs text-kkookk-steel">최대 3MB · 권장 200×200px</p>
+        <p className="text-xs text-kkookk-steel">최대 5MB · 권장 200×200px</p>
       </div>
       <input
         ref={inputRef}

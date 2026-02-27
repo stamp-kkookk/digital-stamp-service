@@ -123,10 +123,11 @@ export function StoreListPage() {
             >
               <div className="flex items-center gap-6">
                 <div className="flex items-center justify-center w-16 h-16 bg-slate-100 rounded-xl text-slate-400 overflow-hidden">
-                  {store.iconImageBase64 ? (
+                  {(store.iconThumbnailUrl || store.iconImageUrl) ? (
                     <img
-                      src={`data:image/png;base64,${store.iconImageBase64}`}
+                      src={store.iconThumbnailUrl ?? store.iconImageUrl!}
                       alt={store.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   ) : (

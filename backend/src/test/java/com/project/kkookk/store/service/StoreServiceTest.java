@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.then;
 
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.store.controller.owner.dto.StoreCreateRequest;
 import com.project.kkookk.store.controller.owner.dto.StoreResponse;
 import com.project.kkookk.store.controller.owner.dto.StoreUpdateRequest;
@@ -34,6 +35,8 @@ class StoreServiceTest {
     @Mock private StoreRepository storeRepository;
 
     @Mock private StoreAuditLogRepository storeAuditLogRepository;
+
+    @Mock private ImageProcessingService imageProcessingService;
 
     private static final Long OWNER_ID = 1L;
     private static final Long STORE_ID = 1L;
@@ -68,13 +71,13 @@ class StoreServiceTest {
     void createStore_Success() {
         // given
         StoreCreateRequest request =
-                new StoreCreateRequest("테스트 매장", "서울시 강남구", "010-1234-5678", null, null, null);
+                new StoreCreateRequest("테스트 매장", "서울시 강남구", "010-1234-5678", null, null);
         Store store = createStoreWithId();
         given(storeRepository.save(any(Store.class))).willReturn(store);
         given(storeAuditLogRepository.save(any(StoreAuditLog.class))).willReturn(null);
 
         // when
-        StoreResponse response = storeService.createStore(OWNER_ID, request);
+        StoreResponse response = storeService.createStore(OWNER_ID, request, null);
 
         // then
         assertThat(response).isNotNull();
@@ -154,13 +157,13 @@ class StoreServiceTest {
         // given
         Store store = createStore();
         StoreUpdateRequest request =
-                new StoreUpdateRequest("수정된 매장", "서울시 서초구", "010-8765-4321", "카페 설명", null, null);
+                new StoreUpdateRequest("수정된 매장", "서울시 서초구", "010-8765-4321", "카페 설명", null);
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
         given(storeAuditLogRepository.save(any(StoreAuditLog.class))).willReturn(null);
 
         // when
-        StoreResponse response = storeService.updateStore(OWNER_ID, STORE_ID, request);
+        StoreResponse response = storeService.updateStore(OWNER_ID, STORE_ID, request, null);
 
         // then
         assertThat(response.name()).isEqualTo("수정된 매장");
@@ -168,28 +171,22 @@ class StoreServiceTest {
     }
 
     @Test
-    @DisplayName("LIVE 매장 description/icon 수정 성공")
+    @DisplayName("LIVE 매장 description 수정 성공")
     void updateStore_Live_PartialUpdate_Success() {
         // given
         Store store = createLiveStoreWithId();
         StoreUpdateRequest request =
                 new StoreUpdateRequest(
-                        "라이브 매장",
-                        "서울시 서초구",
-                        "010-1111-2222",
-                        "새로운 설명",
-                        "newIconBase64",
-                        "place-ref-1");
+                        "라이브 매장", "서울시 서초구", "010-1111-2222", "새로운 설명", "place-ref-1");
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
         given(storeAuditLogRepository.save(any(StoreAuditLog.class))).willReturn(null);
 
         // when
-        StoreResponse response = storeService.updateStore(OWNER_ID, STORE_ID, request);
+        StoreResponse response = storeService.updateStore(OWNER_ID, STORE_ID, request, null);
 
         // then
         assertThat(response.description()).isEqualTo("새로운 설명");
-        assertThat(response.iconImageBase64()).isEqualTo("newIconBase64");
         assertThat(response.name()).isEqualTo("라이브 매장");
     }
 
@@ -200,12 +197,12 @@ class StoreServiceTest {
         Store store = createLiveStoreWithId();
         StoreUpdateRequest request =
                 new StoreUpdateRequest(
-                        "변경된 이름", "서울시 서초구", "010-1111-2222", "매장 설명", null, "place-ref-1");
+                        "변경된 이름", "서울시 서초구", "010-1111-2222", "매장 설명", "place-ref-1");
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
 
         // when & then
-        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request, null))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
     }
@@ -217,12 +214,12 @@ class StoreServiceTest {
         Store store = createLiveStoreWithId();
         StoreUpdateRequest request =
                 new StoreUpdateRequest(
-                        "라이브 매장", "서울시 강남구 변경", "010-1111-2222", "매장 설명", null, "place-ref-1");
+                        "라이브 매장", "서울시 강남구 변경", "010-1111-2222", "매장 설명", "place-ref-1");
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
 
         // when & then
-        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request, null))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
     }
@@ -234,12 +231,12 @@ class StoreServiceTest {
         Store store = createLiveStoreWithId();
         StoreUpdateRequest request =
                 new StoreUpdateRequest(
-                        "라이브 매장", "서울시 서초구", "010-9999-8888", "매장 설명", null, "place-ref-1");
+                        "라이브 매장", "서울시 서초구", "010-9999-8888", "매장 설명", "place-ref-1");
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
 
         // when & then
-        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request, null))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
     }
@@ -251,12 +248,12 @@ class StoreServiceTest {
         Store store = createLiveStoreWithId();
         StoreUpdateRequest request =
                 new StoreUpdateRequest(
-                        "라이브 매장", "서울시 서초구", "010-1111-2222", "매장 설명", null, "new-place-ref");
+                        "라이브 매장", "서울시 서초구", "010-1111-2222", "매장 설명", "new-place-ref");
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.of(store));
 
         // when & then
-        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request, null))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_UPDATE_NOT_ALLOWED);
     }
@@ -266,12 +263,12 @@ class StoreServiceTest {
     void updateStore_Fail_NotFound() {
         // given
         StoreUpdateRequest request =
-                new StoreUpdateRequest("수정된 매장", "서울시 서초구", "010-8765-4321", null, null, null);
+                new StoreUpdateRequest("수정된 매장", "서울시 서초구", "010-8765-4321", null, null);
         given(storeRepository.findByIdAndOwnerAccountId(STORE_ID, OWNER_ID))
                 .willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request))
+        assertThatThrownBy(() -> storeService.updateStore(OWNER_ID, STORE_ID, request, null))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.STORE_NOT_FOUND);
     }

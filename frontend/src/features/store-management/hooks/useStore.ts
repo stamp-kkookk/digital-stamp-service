@@ -56,7 +56,8 @@ export function useCreateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: StoreCreateRequest) => createStore(data),
+    mutationFn: ({ data, iconFile }: { data: StoreCreateRequest; iconFile?: File }) =>
+      createStore(data, iconFile),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.stores() });
     },
@@ -71,8 +72,8 @@ export function useUpdateStore() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ storeId, data }: { storeId: number; data: StoreUpdateRequest }) =>
-      updateStore(storeId, data),
+    mutationFn: ({ storeId, data, iconFile }: { storeId: number; data: StoreUpdateRequest; iconFile?: File }) =>
+      updateStore(storeId, data, iconFile),
     onSuccess: (_, { storeId }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.stores() });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.store(storeId) });

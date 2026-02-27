@@ -189,19 +189,18 @@ export interface RedeemRewardResponse {
 
 export interface CreateMigrationRequest {
   storeId: number;
-  imageData: string;
   claimedStampCount: number;
 }
 
 export type StampMigrationStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'CANCELED';
 
-// Customer: full migration detail (with base64 imageData)
+// Customer: full migration detail (with imageUrl)
 export interface MigrationRequestResponse {
   id: number;
   customerWalletId: number;
   storeId: number;
   status: StampMigrationStatus;
-  imageData: string;
+  imageUrl: string;
   claimedStampCount: number;
   approvedStampCount: number | null;
   rejectReason: string | null;
@@ -210,7 +209,7 @@ export interface MigrationRequestResponse {
   slaMessage: string;
 }
 
-// Customer: list item (no imageData)
+// Customer: list item (no image)
 export interface MigrationListItemResponse {
   id: number;
   storeId: number;
@@ -281,7 +280,6 @@ export interface StoreCreateRequest {
   address?: string;
   phone?: string;
   placeRef?: string;
-  iconImageBase64?: string;
   description?: string;
 }
 
@@ -290,7 +288,6 @@ export interface StoreUpdateRequest {
   address?: string;
   phone?: string;
   description?: string;
-  iconImageBase64?: string;
   placeRef?: string;
 }
 
@@ -300,7 +297,8 @@ export interface StoreResponse {
   address: string | null;
   phone: string | null;
   placeRef: string | null;
-  iconImageBase64: string | null;
+  iconImageUrl: string | null;
+  iconThumbnailUrl: string | null;
   description: string | null;
   status: StoreStatus;
   createdAt: string;
@@ -334,7 +332,8 @@ export interface AdminStoreResponse {
   address: string | null;
   phone: string | null;
   placeRef: string | null;
-  iconImageBase64: string | null;
+  iconImageUrl: string | null;
+  iconThumbnailUrl: string | null;
   description: string | null;
   status: StoreStatus;
   hasActiveStampCard: boolean;

@@ -1,5 +1,8 @@
 package com.project.kkookk.migration.service;
 
+import com.project.kkookk.global.exception.BusinessException;
+import com.project.kkookk.global.exception.ErrorCode;
+import com.project.kkookk.global.image.ImageProcessingService;
 import com.project.kkookk.global.logging.FlowMdc;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
@@ -9,8 +12,8 @@ import com.project.kkookk.migration.dto.MigrationRequestResponse;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
 import com.project.kkookk.migration.service.exception.MigrationAccessDeniedException;
 import com.project.kkookk.migration.service.exception.MigrationAlreadyPendingException;
+import com.project.kkookk.migration.service.exception.MigrationImageTooLargeException;
 import com.project.kkookk.migration.service.exception.MigrationRequestNotFoundException;
-import com.project.kkookk.migration.util.Base64ImageValidator;
 import com.project.kkookk.store.domain.Store;
 import com.project.kkookk.store.repository.StoreRepository;
 import com.project.kkookk.store.service.exception.StoreNotFoundException;
@@ -18,6 +21,7 @@ import com.project.kkookk.wallet.domain.CustomerWallet;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.service.exception.CustomerWalletBlockedException;
 import com.project.kkookk.wallet.service.exception.CustomerWalletNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -33,21 +38,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CustomerMigrationService {
 
+    private static final long MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
     private final StampMigrationRequestRepository migrationRequestRepository;
     private final CustomerWalletRepository customerWalletRepository;
     private final StoreRepository storeRepository;
+    private final ImageProcessingService imageProcessingService;
 
     @Transactional
     public MigrationRequestResponse createMigrationRequest(
-            Long customerWalletId, CreateMigrationRequest request) {
+            Long customerWalletId, CreateMigrationRequest request, MultipartFile image) {
 
-        // 1. Base64 이미지 크기 검증 (5MB 제한)
-        Base64ImageValidator.validate(request.imageData());
+        // 1. 이미지 크기 검증 (5MB 제한)
+        if (image.getSize() > MAX_IMAGE_SIZE_BYTES) {
+            throw new MigrationImageTooLargeException();
+        }
 
-        // 2. 고객 지갑 조회 및 검증
+        // 2. 고객 지갑 조회 및 검증 (비관적 락으로 동일 고객의 동시 요청 직렬화)
         CustomerWallet customerWallet =
                 customerWalletRepository
-                        .findById(customerWalletId)
+                        .findByIdWithLock(customerWalletId)
                         .orElseThrow(CustomerWalletNotFoundException::new);
 
         if (customerWallet.isBlocked()) {
@@ -68,12 +78,20 @@ public class CustomerMigrationService {
             throw new MigrationAlreadyPendingException();
         }
 
-        // 5. 마이그레이션 요청 생성
+        // 5. 이미지 처리 및 저장 (리사이즈 + 썸네일 생성)
+        String imageKey;
+        try {
+            imageKey = imageProcessingService.processAndStore("migrations", image.getInputStream());
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.FILE_STORAGE_ERROR);
+        }
+
+        // 6. 마이그레이션 요청 생성
         StampMigrationRequest migrationRequest =
                 StampMigrationRequest.builder()
                         .customerWalletId(customerWalletId)
                         .storeId(request.storeId())
-                        .imageData(request.imageData())
+                        .imageKey(imageKey)
                         .claimedStampCount(request.claimedStampCount())
                         .build();
 
@@ -86,7 +104,8 @@ public class CustomerMigrationService {
                 customerWalletId,
                 request.storeId());
 
-        return MigrationRequestResponse.from(savedRequest);
+        String imageUrl = imageProcessingService.getUrl(imageKey);
+        return MigrationRequestResponse.from(savedRequest, imageUrl);
     }
 
     public MigrationRequestResponse getMigrationRequest(Long customerWalletId, Long migrationId) {
@@ -106,7 +125,8 @@ public class CustomerMigrationService {
                                     throw new MigrationRequestNotFoundException();
                                 });
 
-        return MigrationRequestResponse.from(migrationRequest);
+        String imageUrl = imageProcessingService.getUrl(migrationRequest.getImageKey());
+        return MigrationRequestResponse.from(migrationRequest, imageUrl);
     }
 
     public List<MigrationListItemResponse> getMyMigrationRequests(Long customerWalletId) {

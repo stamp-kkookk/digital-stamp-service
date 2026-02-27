@@ -4,10 +4,19 @@
 #   /api/* → Gateway EC2 (backend proxy)
 # =============================================================================
 
-# Origin Access Control for S3
+# Origin Access Control for S3 Frontend
 resource "aws_cloudfront_origin_access_control" "s3" {
   name                              = "${var.project_name}-s3-oac"
   description                       = "OAC for S3 frontend bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+# Origin Access Control for Image Storage
+resource "aws_cloudfront_origin_access_control" "images" {
+  name                              = "${var.project_name}-images-oac"
+  description                       = "OAC for S3 image storage bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -29,7 +38,14 @@ resource "aws_cloudfront_distribution" "main" {
     origin_access_control_id = aws_cloudfront_origin_access_control.s3.id
   }
 
-  # --- Origin 2: Gateway EC2 (API proxy) ---
+  # --- Origin 2: S3 Image Storage ---
+  origin {
+    domain_name              = aws_s3_bucket.images.bucket_regional_domain_name
+    origin_id                = "s3-images"
+    origin_access_control_id = aws_cloudfront_origin_access_control.images.id
+  }
+
+  # --- Origin 3: Gateway EC2 (API proxy) ---
   # CloudFront requires domain name, not IP. Use gw.domain or EC2 public DNS.
   origin {
     domain_name = var.domain_name != "" && var.route53_zone_id != "" ? "gw.${var.domain_name}" : aws_instance.gateway.public_dns
@@ -61,6 +77,27 @@ resource "aws_cloudfront_distribution" "main" {
     min_ttl     = 0
     default_ttl = 86400  # 1 day
     max_ttl     = 604800 # 7 days
+  }
+
+  # --- /images/* behavior: S3 Image Storage (long-lived cache) ---
+  ordered_cache_behavior {
+    path_pattern           = "/images/*"
+    target_origin_id       = "s3-images"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    min_ttl     = 0
+    default_ttl = 86400   # 1일
+    max_ttl     = 2592000 # 30일
   }
 
   # --- /api/* behavior: Forward to Gateway ---

@@ -1,6 +1,7 @@
 package com.project.kkookk.stampcard.controller;
 
 import com.project.kkookk.global.exception.ErrorResponse;
+import com.project.kkookk.global.security.OwnerPrincipal;
 import com.project.kkookk.stampcard.controller.dto.CreateStampCardRequest;
 import com.project.kkookk.stampcard.controller.dto.StampCardListResponse;
 import com.project.kkookk.stampcard.controller.dto.StampCardResponse;
@@ -18,9 +19,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "StampCard", description = "스탬프 카드 관리 API (Owner 전용)")
 @SecurityRequirement(name = "bearerAuth")
@@ -36,11 +40,22 @@ public interface StampCardApi {
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<StampCardResponse> create(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Valid @RequestBody CreateStampCardRequest request);
+            @Valid @RequestPart("data") CreateStampCardRequest request,
+            @Parameter(description = "카드 배경 이미지 (IMAGE 타입, 최대 3MB)")
+                    @RequestPart(value = "backgroundImage", required = false)
+                    MultipartFile backgroundImage,
+            @Parameter(description = "도장 이미지 (IMAGE 타입, 최대 500KB)")
+                    @RequestPart(value = "stampImage", required = false)
+                    MultipartFile stampImage,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "스탬프 카드 목록 조회", description = "매장의 스탬프 카드 목록을 조회합니다.")
     @ApiResponses({
@@ -48,13 +63,18 @@ public interface StampCardApi {
         @ApiResponse(
                 responseCode = "401",
                 description = "인증 필요",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<StampCardListResponse> getList(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "상태 필터") @RequestParam(required = false)
                     StampCardStatus status,
-            @Parameter(hidden = true) Pageable pageable);
+            @Parameter(hidden = true) Pageable pageable,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "스탬프 카드 상세 조회", description = "스탬프 카드의 상세 정보를 조회합니다.")
     @ApiResponses({
@@ -64,13 +84,18 @@ public interface StampCardApi {
                 description = "인증 필요",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
                 responseCode = "404",
                 description = "스탬프 카드 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<StampCardResponse> getById(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id);
+            @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(
             summary = "스탬프 카드 수정",
@@ -86,6 +111,10 @@ public interface StampCardApi {
                 description = "인증 필요",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
                 responseCode = "404",
                 description = "스탬프 카드 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
@@ -93,7 +122,14 @@ public interface StampCardApi {
     ResponseEntity<StampCardResponse> update(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardRequest request);
+            @Valid @RequestPart("data") UpdateStampCardRequest request,
+            @Parameter(description = "카드 배경 이미지 (IMAGE 타입, 최대 3MB)")
+                    @RequestPart(value = "backgroundImage", required = false)
+                    MultipartFile backgroundImage,
+            @Parameter(description = "도장 이미지 (IMAGE 타입, 최대 500KB)")
+                    @RequestPart(value = "stampImage", required = false)
+                    MultipartFile stampImage,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(
             summary = "스탬프 카드 상태 변경",
@@ -109,6 +145,10 @@ public interface StampCardApi {
                 description = "인증 필요",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
                 responseCode = "404",
                 description = "스탬프 카드 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -120,7 +160,8 @@ public interface StampCardApi {
     ResponseEntity<StampCardResponse> updateStatus(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
             @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody UpdateStampCardStatusRequest request);
+            @Valid @RequestBody UpdateStampCardStatusRequest request,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 
     @Operation(summary = "스탬프 카드 삭제", description = "DRAFT 상태의 스탬프 카드만 삭제할 수 있습니다.")
     @ApiResponses({
@@ -134,11 +175,16 @@ public interface StampCardApi {
                 description = "인증 필요",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
         @ApiResponse(
+                responseCode = "403",
+                description = "매장 접근 권한 없음",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(
                 responseCode = "404",
                 description = "스탬프 카드 없음",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<Void> delete(
             @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id);
+            @Parameter(description = "스탬프 카드 ID", required = true) @PathVariable Long id,
+            @AuthenticationPrincipal OwnerPrincipal principal);
 }
