@@ -7,12 +7,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.redeem.controller.dto.RedeemRewardRequest;
 import com.project.kkookk.redeem.controller.dto.RedeemRewardResponse;
-import com.project.kkookk.redeem.domain.RedeemEvent;
-import com.project.kkookk.redeem.repository.RedeemEventRepository;
+import com.project.kkookk.redeem.event.RewardRedeemedEvent;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
@@ -39,11 +39,11 @@ class CustomerRedeemServiceTest {
 
     @InjectMocks private CustomerRedeemService customerRedeemService;
 
-    @Mock private RedeemEventRepository redeemEventRepository;
     @Mock private WalletRewardRepository walletRewardRepository;
     @Mock private CustomerWalletRepository customerWalletRepository;
     @Mock private StoreRepository storeRepository;
     @Mock private StampCardRepository stampCardRepository;
+    @Mock private DomainEventPublisher domainEventPublisher;
 
     private static final Long WALLET_ID = 1L;
     private static final Long REWARD_ID = 10L;
@@ -62,14 +62,12 @@ class CustomerRedeemServiceTest {
             WalletReward reward = createAvailableReward();
             Store store = createLiveStore();
             StampCard stampCard = createStampCard("아메리카노 1잔");
-            RedeemEvent savedEvent = createRedeemEvent();
 
             mockActiveWallet();
             given(walletRewardRepository.findByIdAndWalletId(REWARD_ID, WALLET_ID))
                     .willReturn(Optional.of(reward));
             given(storeRepository.findById(STORE_ID)).willReturn(Optional.of(store));
             given(walletRewardRepository.saveAndFlush(reward)).willReturn(reward);
-            given(redeemEventRepository.save(any(RedeemEvent.class))).willReturn(savedEvent);
             given(stampCardRepository.findById(STAMP_CARD_ID)).willReturn(Optional.of(stampCard));
 
             // when
@@ -79,7 +77,7 @@ class CustomerRedeemServiceTest {
             assertThat(response.walletRewardId()).isEqualTo(REWARD_ID);
             assertThat(response.rewardName()).isEqualTo("아메리카노 1잔");
             verify(walletRewardRepository).saveAndFlush(reward);
-            verify(redeemEventRepository).save(any(RedeemEvent.class));
+            verify(domainEventPublisher).publish(any(RewardRedeemedEvent.class));
         }
 
         @Test
@@ -173,7 +171,7 @@ class CustomerRedeemServiceTest {
                     .extracting(e -> ((BusinessException) e).getErrorCode())
                     .isEqualTo(ErrorCode.REWARD_NOT_AVAILABLE);
 
-            verify(redeemEventRepository, never()).save(any(RedeemEvent.class));
+            verify(domainEventPublisher, never()).publish(any(RewardRedeemedEvent.class));
         }
     }
 
@@ -215,18 +213,6 @@ class CustomerRedeemServiceTest {
                         .build();
         ReflectionTestUtils.setField(stampCard, "id", STAMP_CARD_ID);
         return stampCard;
-    }
-
-    private RedeemEvent createRedeemEvent() {
-        RedeemEvent event =
-                RedeemEvent.builder()
-                        .walletRewardId(REWARD_ID)
-                        .walletId(WALLET_ID)
-                        .storeId(STORE_ID)
-                        .result(com.project.kkookk.redeem.domain.RedeemEventResult.SUCCESS)
-                        .build();
-        ReflectionTestUtils.setField(event, "id", 1L);
-        return event;
     }
 
     private void mockActiveWallet() {

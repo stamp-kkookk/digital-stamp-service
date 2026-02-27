@@ -1,12 +1,12 @@
 package com.project.kkookk.redeem.service;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.redeem.controller.dto.RedeemRewardRequest;
 import com.project.kkookk.redeem.controller.dto.RedeemRewardResponse;
-import com.project.kkookk.redeem.domain.RedeemEvent;
 import com.project.kkookk.redeem.domain.RedeemEventResult;
-import com.project.kkookk.redeem.repository.RedeemEventRepository;
+import com.project.kkookk.redeem.event.RewardRedeemedEvent;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.repository.StampCardRepository;
 import com.project.kkookk.store.domain.Store;
@@ -27,11 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class CustomerRedeemService {
 
-    private final RedeemEventRepository redeemEventRepository;
     private final WalletRewardRepository walletRewardRepository;
     private final CustomerWalletRepository customerWalletRepository;
     private final StoreRepository storeRepository;
     private final StampCardRepository stampCardRepository;
+    private final DomainEventPublisher domainEventPublisher;
 
     @Transactional
     public RedeemRewardResponse redeemReward(Long walletId, RedeemRewardRequest request) {
@@ -78,15 +78,10 @@ public class CustomerRedeemService {
             throw new BusinessException(ErrorCode.REWARD_NOT_AVAILABLE);
         }
 
-        // 6. 원장 적재
-        RedeemEvent event =
-                RedeemEvent.builder()
-                        .walletRewardId(reward.getId())
-                        .walletId(walletId)
-                        .storeId(reward.getStoreId())
-                        .result(RedeemEventResult.SUCCESS)
-                        .build();
-        redeemEventRepository.save(event);
+        // 6. 이벤트 발행 → RedeemAuditEventListener가 원장 기록
+        domainEventPublisher.publish(
+                new RewardRedeemedEvent(
+                        reward.getId(), walletId, reward.getStoreId(), RedeemEventResult.SUCCESS));
 
         // 7. 리워드 이름 조회
         String rewardName =
@@ -95,7 +90,6 @@ public class CustomerRedeemService {
                         .map(StampCard::getRewardName)
                         .orElse("");
 
-        return new RedeemRewardResponse(
-                reward.getId(), event.getId(), rewardName, reward.getRedeemedAt());
+        return new RedeemRewardResponse(reward.getId(), null, rewardName, reward.getRedeemedAt());
     }
 }

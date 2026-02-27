@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.migration.controller.dto.MigrationApproveRequest;
@@ -16,9 +17,8 @@ import com.project.kkookk.migration.controller.dto.MigrationRejectRequest;
 import com.project.kkookk.migration.controller.dto.MigrationRejectResponse;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
+import com.project.kkookk.migration.event.StampMigratedEvent;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
-import com.project.kkookk.stamp.domain.StampEvent;
-import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stamp.service.StampRewardService;
 import com.project.kkookk.stamp.service.StampRewardService.StampAccumulationResult;
 import com.project.kkookk.stampcard.domain.StampCard;
@@ -56,9 +56,9 @@ class OwnerMigrationServiceTest {
     @Mock private CustomerWalletRepository customerWalletRepository;
     @Mock private WalletStampCardRepository walletStampCardRepository;
     @Mock private StampCardRepository stampCardRepository;
-    @Mock private StampEventRepository stampEventRepository;
     @Mock private StoreRepository storeRepository;
     @Mock private StampRewardService stampRewardService;
+    @Mock private DomainEventPublisher domainEventPublisher;
 
     @Nested
     @DisplayName("목록 조회")
@@ -212,8 +212,6 @@ class OwnerMigrationServiceTest {
                             stampRewardService.processStampAccumulation(
                                     any(), any(), any(), any(Integer.class)))
                     .willReturn(new StampAccumulationResult(List.of(), walletStampCard));
-            given(stampEventRepository.save(any(StampEvent.class)))
-                    .willAnswer(i -> i.getArgument(0));
 
             MigrationApproveRequest request = new MigrationApproveRequest(approvedCount);
 
@@ -227,7 +225,7 @@ class OwnerMigrationServiceTest {
             assertThat(response.approvedStampCount()).isEqualTo(approvedCount);
             assertThat(response.processedAt()).isNotNull();
 
-            verify(stampEventRepository).save(any(StampEvent.class));
+            verify(domainEventPublisher).publish(any(StampMigratedEvent.class));
         }
 
         @Test
@@ -329,8 +327,6 @@ class OwnerMigrationServiceTest {
                             stampRewardService.processStampAccumulation(
                                     any(), any(), any(), any(Integer.class)))
                     .willReturn(new StampAccumulationResult(List.of(), walletStampCard));
-            given(stampEventRepository.save(any(StampEvent.class)))
-                    .willAnswer(i -> i.getArgument(0));
 
             MigrationApproveRequest request = new MigrationApproveRequest(approvedCount);
 

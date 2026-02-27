@@ -1,5 +1,6 @@
 package com.project.kkookk.migration.service;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.logging.FlowMdc;
@@ -12,10 +13,8 @@ import com.project.kkookk.migration.controller.dto.MigrationRejectRequest;
 import com.project.kkookk.migration.controller.dto.MigrationRejectResponse;
 import com.project.kkookk.migration.domain.StampMigrationRequest;
 import com.project.kkookk.migration.domain.StampMigrationStatus;
+import com.project.kkookk.migration.event.StampMigratedEvent;
 import com.project.kkookk.migration.repository.StampMigrationRequestRepository;
-import com.project.kkookk.stamp.domain.StampEvent;
-import com.project.kkookk.stamp.domain.StampEventType;
-import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stamp.service.StampRewardService;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
@@ -26,7 +25,6 @@ import com.project.kkookk.wallet.domain.WalletStampCard;
 import com.project.kkookk.wallet.domain.WalletStampCardStatus;
 import com.project.kkookk.wallet.repository.CustomerWalletRepository;
 import com.project.kkookk.wallet.repository.WalletStampCardRepository;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,25 +42,25 @@ public class OwnerMigrationService {
     private final CustomerWalletRepository customerWalletRepository;
     private final WalletStampCardRepository walletStampCardRepository;
     private final StampCardRepository stampCardRepository;
-    private final StampEventRepository stampEventRepository;
     private final StoreRepository storeRepository;
     private final StampRewardService stampRewardService;
+    private final DomainEventPublisher domainEventPublisher;
 
     public OwnerMigrationService(
             StampMigrationRequestRepository migrationRepository,
             CustomerWalletRepository customerWalletRepository,
             WalletStampCardRepository walletStampCardRepository,
             StampCardRepository stampCardRepository,
-            StampEventRepository stampEventRepository,
             StoreRepository storeRepository,
-            StampRewardService stampRewardService) {
+            StampRewardService stampRewardService,
+            DomainEventPublisher domainEventPublisher) {
         this.migrationRepository = migrationRepository;
         this.customerWalletRepository = customerWalletRepository;
         this.walletStampCardRepository = walletStampCardRepository;
         this.stampCardRepository = stampCardRepository;
-        this.stampEventRepository = stampEventRepository;
         this.storeRepository = storeRepository;
         this.stampRewardService = stampRewardService;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     public MigrationListResponse getList(Long storeId, Long ownerId) {
@@ -165,19 +163,15 @@ public class OwnerMigrationService {
         // Migration 승인 처리
         migration.approve(stampCount);
 
-        // StampEvent 원장 기록
-        StampEvent stampEvent =
-                StampEvent.builder()
-                        .storeId(storeId)
-                        .stampCardId(linkedStampCard.getId())
-                        .walletStampCardId(result.currentWalletStampCard().getId())
-                        .type(StampEventType.MIGRATED)
-                        .delta(stampCount)
-                        .reason("종이 스탬프 전환 승인")
-                        .occurredAt(LocalDateTime.now())
-                        .stampMigrationRequestId(migration.getId())
-                        .build();
-        stampEventRepository.save(stampEvent);
+        // 이벤트 발행 → StampAuditEventListener가 원장 기록
+        domainEventPublisher.publish(
+                new StampMigratedEvent(
+                        migration.getId(),
+                        storeId,
+                        linkedStampCard.getId(),
+                        result.currentWalletStampCard().getId(),
+                        stampCount,
+                        "종이 스탬프 전환 승인"));
 
         log.info(
                 "Migration approved: migrationId={}, storeId={}, stampCount={}, "

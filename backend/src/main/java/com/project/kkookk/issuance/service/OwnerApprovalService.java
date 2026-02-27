@@ -1,5 +1,6 @@
 package com.project.kkookk.issuance.service;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.global.logging.FlowMdc;
@@ -9,13 +10,11 @@ import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestItem;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestListResponse;
 import com.project.kkookk.issuance.domain.IssuanceRequest;
 import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
+import com.project.kkookk.issuance.event.StampIssuedEvent;
 import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
 import com.project.kkookk.issuance.service.exception.IssuanceAlreadyProcessedException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestExpiredException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
-import com.project.kkookk.stamp.domain.StampEvent;
-import com.project.kkookk.stamp.domain.StampEventType;
-import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stamp.service.StampRewardService;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
@@ -51,9 +50,9 @@ public class OwnerApprovalService {
     private final StoreRepository storeRepository;
     private final CustomerWalletRepository customerWalletRepository;
     private final WalletStampCardRepository walletStampCardRepository;
-    private final StampEventRepository stampEventRepository;
     private final StampCardRepository stampCardRepository;
     private final StampRewardService stampRewardService;
+    private final DomainEventPublisher domainEventPublisher;
 
     /** 승인 대기 목록 조회 (Owner Polling용) */
     public PendingIssuanceRequestListResponse getPendingRequests(Long storeId, Long ownerId) {
@@ -131,20 +130,15 @@ public class OwnerApprovalService {
         // 상태 변경 (발급된 리워드 개수 포함)
         request.approve(result.rewardCount());
 
-        // 원장 기록
-        StampEvent stampEvent =
-                StampEvent.builder()
-                        .storeId(storeId)
-                        .stampCardId(linkedStampCard.getId())
-                        .walletStampCardId(result.currentWalletStampCard().getId())
-                        .type(StampEventType.ISSUED)
-                        .delta(STAMP_DELTA)
-                        .reason("현장 승인")
-                        .occurredAt(LocalDateTime.now())
-                        .issuanceRequestId(requestId)
-                        .build();
-
-        stampEventRepository.save(stampEvent);
+        // 이벤트 발행 → StampAuditEventListener가 원장 기록
+        domainEventPublisher.publish(
+                new StampIssuedEvent(
+                        requestId,
+                        storeId,
+                        linkedStampCard.getId(),
+                        result.currentWalletStampCard().getId(),
+                        STAMP_DELTA,
+                        "현장 승인"));
 
         log.info(
                 "Issuance approved: requestId={}, storeId={}, walletId={}, newStampCount={}, "

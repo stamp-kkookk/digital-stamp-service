@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.project.kkookk.global.event.DomainEventPublisher;
 import com.project.kkookk.global.exception.BusinessException;
 import com.project.kkookk.global.exception.ErrorCode;
 import com.project.kkookk.issuance.controller.dto.IssuanceApprovalResponse;
@@ -13,11 +14,11 @@ import com.project.kkookk.issuance.controller.dto.IssuanceRejectionResponse;
 import com.project.kkookk.issuance.controller.dto.PendingIssuanceRequestListResponse;
 import com.project.kkookk.issuance.domain.IssuanceRequest;
 import com.project.kkookk.issuance.domain.IssuanceRequestStatus;
+import com.project.kkookk.issuance.event.StampIssuedEvent;
 import com.project.kkookk.issuance.repository.IssuanceRequestRepository;
 import com.project.kkookk.issuance.service.exception.IssuanceAlreadyProcessedException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestExpiredException;
 import com.project.kkookk.issuance.service.exception.IssuanceRequestNotFoundException;
-import com.project.kkookk.stamp.repository.StampEventRepository;
 import com.project.kkookk.stamp.service.StampRewardService;
 import com.project.kkookk.stampcard.domain.StampCard;
 import com.project.kkookk.stampcard.domain.StampCardStatus;
@@ -52,9 +53,9 @@ class OwnerApprovalServiceTest {
     @Mock private StoreRepository storeRepository;
     @Mock private CustomerWalletRepository customerWalletRepository;
     @Mock private WalletStampCardRepository walletStampCardRepository;
-    @Mock private StampEventRepository stampEventRepository;
     @Mock private StampCardRepository stampCardRepository;
     @Mock private StampRewardService stampRewardService;
+    @Mock private DomainEventPublisher domainEventPublisher;
 
     private static final Long STORE_ID = 1L;
     private static final Long OWNER_ID = 10L;
@@ -213,7 +214,7 @@ class OwnerApprovalServiceTest {
             // then
             assertThat(response.id()).isEqualTo(REQUEST_ID);
             assertThat(response.status()).isEqualTo(IssuanceRequestStatus.APPROVED);
-            verify(stampEventRepository).save(any());
+            verify(domainEventPublisher).publish(any(StampIssuedEvent.class));
         }
 
         @Test
