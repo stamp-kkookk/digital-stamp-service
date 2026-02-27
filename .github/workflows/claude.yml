@@ -170,4 +170,4 @@ jobs:
             PR NUMBER: ${{ steps.pr.outputs.number }}
             사용자의 코멘트 요청에 따라 작업하세요.
           claude_args: >-
-            --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push origin HEAD:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__github_inline_comment__create_inline_comment"
+            --allowedTools "Edit,Read,Write,Bash(git add:*),Bash(git commit:*),Bash(git push origin HEAD:*),Bash(git fetch:*),Bash(git show:*),Bash(git log:*),Bash(git diff:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*),mcp__github_inline_comment__create_inline_comment"
