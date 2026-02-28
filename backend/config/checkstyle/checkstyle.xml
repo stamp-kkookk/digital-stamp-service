@@ -141,6 +141,17 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
 
+        <!--
+            jakarta.transaction.Transactional 사용 금지.
+            Spring의 @Transactional 옵션(readOnly, rollbackFor, propagation)을 사용하려면
+            org.springframework.transaction.annotation.Transactional 을 import해야 한다.
+        -->
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="jakarta.transaction"/>
+            <message key="import.illegal"
+                     value="jakarta.transaction.Transactional 대신 org.springframework.transaction.annotation.Transactional을 사용하세요."/>
+        </module>
+
         <module name="CustomImportOrder">
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="separateLineBetweenGroups" value="true"/>

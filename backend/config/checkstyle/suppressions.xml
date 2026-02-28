@@ -17,4 +17,8 @@
     <!-- Suppress VariableDeclarationUsageDistance for test files (given-when-then pattern) -->
     <suppress checks="VariableDeclarationUsageDistance"
               files=".*Test\.java$"/>
+
+    <!-- ArchUnit 테스트 파일: Spotless 포맷과 Checkstyle 들여쓰기/라인길이 충돌 예외 -->
+    <suppress checks="LineLength|JavadocVariable|MissingJavadocMethod|Indentation|JavadocTagContinuationIndentation"
+              files=".*architecture.*Test\.java$"/>
 </suppressions>
